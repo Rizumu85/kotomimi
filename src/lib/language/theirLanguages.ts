@@ -11,6 +11,10 @@
  *   the first left in the row.
  *
  * "Any language" (`AUTO`) can be lit beside the main one, never be it.
+ *
+ * The user's own language (`own`) can be in the row. Lit alone it is their main one — the pair is of one language,
+ * and what is heard is shown as said (`shownAsSaid`). Beside another, the other is the main one, which the user's
+ * speech is translated into; "any language" is not lit beside it alone, since nothing would be translated into.
  */
 import { AUTO } from '../provider/languages';
 
@@ -23,18 +27,45 @@ export interface TheirLanguages {
   lit: string;
   /** What hears them can be told two at once. */
   two: boolean;
+  /** The user's own language, the pair's source. */
+  own?: string;
 }
 
-export type TheirNext = Omit<TheirLanguages, 'two'>;
+export type TheirNext = Omit<TheirLanguages, 'two' | 'own'>;
 
 const base = (code: string) => code.trim().toLowerCase().split(/[-_]/)[0];
 const same = (a: string, b: string) => a !== '' && b !== '' && base(a) === base(b);
+
+/**
+ * The user's own language is the main one only while nothing is lit beside it. In the form it is theirs, as
+ * `shownAsSaid` reads it: another script of it (zh-TW beside zh-CN) is a language to translate into.
+ */
+function settled(next: TheirNext, own: string | undefined): TheirNext {
+  if (!own || next.main.trim().toLowerCase() !== own.trim().toLowerCase() || !next.lit) return next;
+  return next.lit === AUTO ? { main: next.main, row: next.row, lit: '' } : { main: next.lit, row: next.row, lit: next.main };
+}
+
+/**
+ * Their row once the user's own language has changed to `own` (a press in "我说"): put right where it is now their
+ * main one with another lit beside it; null where it stands.
+ */
+export function settleTheirs(t: TheirNext, own: string): TheirNext | null {
+  const next = settled(t, own);
+  return next === t ? null : next;
+}
 
 /** Whether `code` is lit. */
 export const isLit = (t: TheirLanguages, code: string): boolean => same(code, t.main) || same(code, t.lit);
 
 /** The row after `code` is pressed; null where nothing changes. */
 export function pressTheirs(t: TheirLanguages, code: string): TheirNext | null {
+  const pressed = press(t, code);
+  if (!pressed) return null;
+  const next = settled(pressed, t.own);
+  return next.main === t.main && next.lit === t.lit ? null : next;
+}
+
+function press(t: TheirLanguages, code: string): TheirNext | null {
   const { main, row, lit } = t;
   if (same(code, main)) return lit && lit !== AUTO ? { main: lit, row, lit: '' } : null;
   if (same(code, lit)) return { main, row, lit: '' };
@@ -57,7 +88,7 @@ export function removeTheirs(t: TheirLanguages, code: string): TheirNext | null 
   if (!same(code, t.main)) return { main: t.main, row, lit: t.lit };
   const next = t.lit && t.lit !== AUTO ? t.lit : row.find((one) => one !== AUTO);
   if (!next) return null;
-  return { main: next, row, lit: same(next, t.lit) ? '' : t.lit };
+  return settled({ main: next, row, lit: same(next, t.lit) ? '' : t.lit }, t.own);
 }
 
 /**

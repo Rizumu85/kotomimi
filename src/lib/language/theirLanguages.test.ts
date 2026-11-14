@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addMine, addTheirs, isLit, pressMine, pressTheirs, removeMine, removeTheirs, type TheirLanguages } from './theirLanguages';
+import { addMine, addTheirs, isLit, pressMine, pressTheirs, removeMine, removeTheirs, settleTheirs, type TheirLanguages } from './theirLanguages';
 
 const row = ['en', 'ko', 'ja'];
 const one: TheirLanguages = { main: 'en', row, lit: '', two: true };
@@ -38,6 +38,50 @@ describe('the other side’s languages switched by hand (fork)', () => {
     expect(removeTheirs(two, 'en')).toEqual({ main: 'ko', row: ['ko', 'ja'], lit: '' });
     expect(removeTheirs(one, 'en')).toEqual({ main: 'ko', row: ['ko', 'ja'], lit: '' });
     expect(removeTheirs({ main: 'en', row: ['en'], lit: '', two: true }, 'en')).toBeNull();
+  });
+});
+
+describe('the user’s own language in the other side’s row (fork)', () => {
+  const zhRow = ['ja', 'zh-CN', 'ko'];
+  const mine = (t: Omit<TheirLanguages, 'two' | 'own'>): TheirLanguages => ({ ...t, two: true, own: 'zh-CN' });
+
+  it('is their main one lit alone: the pair is of one language', () => {
+    expect(pressTheirs({ ...mine({ main: 'ja', row: zhRow, lit: '' }), two: false }, 'zh-CN')).toEqual({ main: 'zh-CN', row: zhRow, lit: '' });
+    // Beside theirs, then theirs put out.
+    expect(pressTheirs(mine({ main: 'ja', row: zhRow, lit: '' }), 'zh-CN')).toEqual({ main: 'ja', row: zhRow, lit: 'zh-CN' });
+    expect(pressTheirs(mine({ main: 'ja', row: zhRow, lit: 'zh-CN' }), 'ja')).toEqual({ main: 'zh-CN', row: zhRow, lit: '' });
+    expect(pressTheirs(mine({ main: 'zh-CN', row: zhRow, lit: '' }), 'zh-CN')).toBeNull();
+  });
+
+  it('gives the main to another lit beside it: the user’s speech is translated into that one', () => {
+    expect(pressTheirs(mine({ main: 'zh-CN', row: zhRow, lit: '' }), 'ja')).toEqual({ main: 'ja', row: zhRow, lit: 'zh-CN' });
+    // Two lit and a third pressed: the one lit first goes dark, and the user’s own is still not the main.
+    expect(pressTheirs(mine({ main: 'ja', row: zhRow, lit: 'zh-CN' }), 'ko')).toEqual({ main: 'ko', row: zhRow, lit: 'zh-CN' });
+    expect(addTheirs(mine({ main: 'zh-CN', row: ['zh-CN'], lit: '' }), 'fr')).toEqual({ main: 'fr', row: ['zh-CN', 'fr'], lit: 'zh-CN' });
+  });
+
+  it('has no "any language" lit beside it alone: nothing would be translated into', () => {
+    const any = [...zhRow, 'auto'];
+    expect(pressTheirs(mine({ main: 'zh-CN', row: any, lit: '' }), 'auto')).toBeNull();
+    // Left the first in the row when their main one is taken out.
+    expect(removeTheirs(mine({ main: 'ja', row: ['ja', 'auto', 'zh-CN'], lit: 'auto' }), 'ja')).toEqual({ main: 'zh-CN', row: ['auto', 'zh-CN'], lit: '' });
+    // Lit beside another, it takes the place of "any language".
+    expect(pressTheirs(mine({ main: 'ja', row: any, lit: 'auto' }), 'zh-CN')).toEqual({ main: 'ja', row: any, lit: 'zh-CN' });
+  });
+
+  it('is put right when the user’s own language changes to their main one', () => {
+    expect(settleTheirs({ main: 'ja', row: zhRow, lit: 'ko' }, 'ja')).toEqual({ main: 'ko', row: zhRow, lit: 'ja' });
+    expect(settleTheirs({ main: 'ja', row: [...zhRow, 'auto'], lit: 'auto' }, 'ja')).toEqual({ main: 'ja', row: [...zhRow, 'auto'], lit: '' });
+    // Lit alone, or not their main one: it stands.
+    expect(settleTheirs({ main: 'ja', row: zhRow, lit: '' }, 'ja')).toBeNull();
+    // Another script of the user's own is still translated into: it keeps the main.
+    expect(settleTheirs({ main: 'zh-TW', row: ['zh-TW', 'ja'], lit: 'ja' }, 'zh-CN')).toBeNull();
+    expect(pressTheirs({ main: 'zh-TW', row: ['zh-TW', 'ja'], lit: '', two: true, own: 'zh-CN' }, 'ja')).toEqual({ main: 'zh-TW', row: ['zh-TW', 'ja'], lit: 'ja' });
+    expect(settleTheirs({ main: 'ko', row: zhRow, lit: 'ja' }, 'ja')).toBeNull();
+  });
+
+  it('changes nothing of a row that is not told the user’s own', () => {
+    expect(pressTheirs({ main: 'zh-CN', row: zhRow, lit: '', two: true }, 'ja')).toEqual({ main: 'zh-CN', row: zhRow, lit: 'ja' });
   });
 });
 

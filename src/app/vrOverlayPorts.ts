@@ -58,7 +58,7 @@ export function vrSettingsPort(): VrSettingsPort {
     theirs: () => {
       const side = theirSide();
       if (!side) return null;
-      return { main: side.s.entry.pair.target, row: side.theirs.chosen, lit: side.theirs.lit ?? '', two: side.theirs.most !== 0 };
+      return { main: side.s.entry.pair.target, row: side.theirs.chosen, lit: side.theirs.lit ?? '', two: side.theirs.most !== 0, own: side.s.entry.pair.source };
     },
     applyTheirs: (next) => {
       const side = theirSide();

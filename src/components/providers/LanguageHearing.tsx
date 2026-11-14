@@ -261,10 +261,11 @@ interface TheirRowProps {
  */
 function TheirRow({ side, own, ordered, suggested, name, showHearer, onOpenHearing, disabled }: TheirRowProps) {
   const { t } = useTranslation();
-  const now = { main: side.main, row: side.row, lit: side.lit, two: side.two };
+  const now = { main: side.main, row: side.row, lit: side.lit, two: side.two, own };
   const inRow = (code: string) => side.row.some((one) => baseOf(one) === baseOf(code));
-  // Every language but the user's own; of one in the row, only the form it is there in.
-  const theirs = (o: LanguageOption) => baseOf(o.value) !== baseOf(own) && o.value !== ANY_LANGUAGE && (!inRow(o.value) || side.row.includes(o.value));
+  // Every language, the user's own in the form it is theirs: lit alone, they are heard in it and shown as said
+  // (`theirLanguages.ts`). Of one in the row, only the form it is there in.
+  const theirs = (o: LanguageOption) => (baseOf(o.value) !== baseOf(own) || o.value === own) && o.value !== ANY_LANGUAGE && (!inRow(o.value) || side.row.includes(o.value));
   const menu = useLanguageMenu({
     ordered: ordered.filter(theirs),
     suggested: suggested.filter(theirs),

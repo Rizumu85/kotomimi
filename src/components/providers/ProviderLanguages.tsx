@@ -7,6 +7,7 @@ import { languageContext } from '../../lib/session/shape';
 import type { AudioMode } from '../../stores/audioStore';
 import { useNativeEngineStore } from '../../stores/nativeEngineStore';
 import { useProviderStore } from '../../stores/providerStore';
+import { settleTheirs } from '../../lib/language/theirLanguages';
 import { LanguagePairSection } from './LanguagePairSection';
 import { useSelectedProvider } from './useSelectedProvider';
 import { useSettingsStore } from '../../stores/settingsStore';
@@ -72,7 +73,8 @@ export function ProviderLanguages({ providers, disabled, sentence }: ProviderLan
     },
   } : undefined;
   // Fork: the user's own row ("我说") beside theirs: a press writes their own language — the pair's source — and the
-  // provider's row of what they speak together.
+  // provider's row of what they speak together. Their row is put right where the user's new own language is their
+  // main one with another lit beside it (`settleTheirs`).
   const own = more?.mine;
   const myRow = theirs ? {
     ...(own?.hearer ? { hearer: own.hearer } : {}),
@@ -82,11 +84,15 @@ export function ProviderLanguages({ providers, disabled, sentence }: ProviderLan
     using: legs.includes('speaker') ? own?.using ?? [] : [],
     more: !!own && own.most !== 0,
     apply: (next: { main: string; row: readonly string[] }) => {
+      const their = side?.light ? settleTheirs({ main: entry.pair.target, row: side.chosen, lit: side.lit ?? '' }, next.main) : null;
       if (next.main !== entry.pair.source) {
         trackEvent('language_changed', { to_language: next.main, language_type: 'source' });
-        setPair(provider, { source: next.main, target: entry.pair.target });
+        if (their && their.main !== entry.pair.target) trackEvent('language_changed', { to_language: their.main, language_type: 'target' });
+        setPair(provider, { source: next.main, target: their?.main ?? entry.pair.target });
       }
-      if (own) updateSettings(provider, own.set([...next.row]));
+      const mineSet = own ? own.set([...next.row]) : {};
+      const theirSet = their && side?.light && next.main !== entry.pair.source ? { ...side.set([...their.row]), ...side.light(their.lit) } : {};
+      if (own || Object.keys(theirSet).length) updateSettings(provider, { ...mineSet, ...theirSet });
     },
   } : undefined;
 

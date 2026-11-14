@@ -148,6 +148,14 @@ describe('ProviderLanguages — the Kotomimi provider: my language, theirs, and 
     expect(saved()).toMatchObject({ theyAlso: ['ja', 'en', 'ko'], theyLit: '', asrDetectOther: false });
   });
 
+  it('puts their row right when the user’s own language becomes their main one: the other lit takes the main', () => {
+    const pair = () => (useProviderStore.getState().entries as unknown as Record<string, { pair: { source: string; target: string } }>).localai.pair;
+    show({ speakAlso: ['ja'], theyAlso: ['ja', 'en'], theyLit: 'en', asrDetectOther: true }, ['speaker', 'participant']);
+    fireEvent.click(row('fork.languageMenu.iSay')!.querySelectorAll<HTMLButtonElement>('.language-chip--switch')[1]);
+    expect(pair()).toEqual({ source: 'ja', target: 'en' });
+    expect(saved()).toMatchObject({ theyAlso: ['ja', 'en'], theyLit: 'ja', asrDetectOther: true });
+  });
+
   it('names "+" in the user’s row while their own language is all it holds', () => {
     show({ speakAlso: [], theyAlso: ['ja'] }, ['speaker', 'participant']);
     expect(row('fork.languageMenu.iSay')!.querySelector('.language-chip__add--named')?.textContent).toBe('fork.languageMenu.alsoSpeak');

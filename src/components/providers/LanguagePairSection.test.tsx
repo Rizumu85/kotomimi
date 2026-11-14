@@ -268,6 +268,26 @@ describe('LanguagePairSection — the languages beside the main ones (fork)', ()
     expect(theirs!.apply).toHaveBeenLastCalledWith({ main: 'ja', row: ['ja'], lit: '' });
   });
 
+  it('offers the user’s own language for their row where the provider takes it as a target', () => {
+    // The fake never offers a source as its own target: their row does not either.
+    show({ theirs: { row: ['ja'] } });
+    open(row('fork.languageMenu.theySay')!);
+    expect(screen.getAllByRole('option').some((o) => o.textContent?.startsWith(languageLabel('en', 'en')))).toBe(false);
+    // One that does (Chinese to Chinese, to hear someone more clearly): beside another it is lit, not their main.
+    const oneLanguage = { ...fakeProvider, languages: { ...fakeProvider.languages, targets: () => fakeProvider.languages.sources(FAKE_DEFAULTS).filter((l) => l.value !== 'auto') } };
+    const draw = (two: boolean) => {
+      cleanup();
+      const theirs = their({ row: ['ja'], two });
+      render(<LanguagePairSection provider={oneLanguage} settings={FAKE_DEFAULTS} pair={{ source: 'en', target: 'ja' }} onChange={vi.fn()} theirs={theirs} owners />);
+      open(row('fork.languageMenu.theySay')!);
+      fireEvent.click(option(languageLabel('en', 'en')));
+      return theirs.apply;
+    };
+    expect(draw(true)).toHaveBeenLastCalledWith({ main: 'ja', row: ['ja', 'en'], lit: 'en' });
+    // Where what hears them takes one language, the light moves to it: a pair of one language.
+    expect(draw(false)).toHaveBeenLastCalledWith({ main: 'en', row: ['ja', 'en'], lit: '' });
+  });
+
   it('names what hears once in the heading where both sides have the same, and each side its own where not', () => {
     const openHearing = vi.fn();
     const same = { name: 'Qwen3-ASR 0.6B', languages: null };
