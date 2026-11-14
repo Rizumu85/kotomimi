@@ -18,7 +18,7 @@ export interface NativeTranslator {
   /** Estimated video memory while loaded, in MB; absent for unmeasured retired models. */
   vramMB?: number;
   /** Whose form of request it takes. */
-  prompt: 'index' | 'hunyuan' | 'plamo';
+  prompt: 'index' | 'hunyuan' | 'plamo' | 'revise';
   /** What it translates between, in the app's base codes; `'any'` for a model of well over a hundred languages. */
   languages: readonly string[] | 'any';
   /** No longer offered for download: shown only where it is already on the computer. */
@@ -57,6 +57,7 @@ export const NATIVE_TRANSLATORS: readonly NativeTranslator[] = [
   { id: 'index-translate-2b', vramMB: 1536, name: 'Index-Translate 2B', bytes: 1312164352, prompt: 'index', languages: 'any' },
   { id: 'plamo-3-translate-2b', vramMB: 1946, name: 'PLaMo 3 Translate 2B', bytes: 1807201888, prompt: 'plamo', languages: PLAMO },
   { id: 'hy-mt2-1.8b', vramMB: 1434, name: 'Hunyuan MT 2 1.8B', bytes: 1133080448, prompt: 'hunyuan', languages: HUNYUAN },
+  { id: 'hy-mt2-streamrevise-v4', vramMB: 1390, name: 'Hunyuan MT 2 StreamRevise', bytes: 1069288640, prompt: 'revise', languages: ['zh', 'en', 'ja'] },
   { id: 'plamo-3-translate-0.8b', vramMB: 614, name: 'PLaMo 3 Translate 0.8B', bytes: 573125696, prompt: 'plamo', languages: PLAMO },
   { id: 'hy-mt1.5-1.8b', name: 'Hunyuan MT 1.5 1.8B', bytes: 1133080512, prompt: 'hunyuan', languages: HUNYUAN, retired: true },
 ];
@@ -101,6 +102,20 @@ export interface TranslatorRequest {
    */
   wrapAfter?: string;
   extra: Record<string, unknown>;
+  /**
+   * Fork: the model also translates a sentence while it is still being said (`reviseRequest`): the two languages as
+   * it is told them. Absent: a sentence is translated once, when it is closed.
+   */
+  revise?: { source?: string; target: string };
+}
+
+/** The languages a model that revises was taught, by the names it is told them. */
+const REVISE_LANGUAGES: Readonly<Record<string, string>> = { zh: 'Chinese', en: 'English', ja: 'Japanese' };
+
+/** The name such a model is told a sentence's language by, where the leg's is left to be detected; null for one it was not taught, or none known. */
+export function reviseLanguage(code: string | undefined): string | null {
+  if (!code || isAuto(code)) return null;
+  return REVISE_LANGUAGES[baseOf(code)] ?? null;
 }
 
 /**
@@ -136,6 +151,16 @@ export function translatorRequest(model: NativeTranslator, source: string, targe
       },
     };
   }
+  if (model.prompt === 'revise') {
+    // Its card's request for a sentence asked the first time, the languages by their English names; greedy, as it
+    // was trained and measured. A source left to be detected is asked as a closed sentence only.
+    const names = { source: nameIn(source, 'en'), target: nameIn(target, 'en') };
+    return {
+      wrap: `Translate the following text ${isAuto(source) ? '' : `from ${names.source} `}into ${names.target}. Note that you should only output the translated result without any additional explanation:\n\n${TEXT_SLOT}`,
+      extra: { temperature: 0, max_tokens: 512 },
+      revise: { target: names.target, ...(isAuto(source) ? {} : { source: names.source }) },
+    };
+  }
   if (model.prompt === 'index') {
     return {
       wrap: `请将以下${isAuto(source) ? '' : nameIn(source, 'zh')}文本翻译为${nameIn(target, 'zh')}，直接输出翻译结果，不要进行任何解释。\n\n${TEXT_SLOT}`,
@@ -151,4 +176,23 @@ export function translatorRequest(model: NativeTranslator, source: string, targe
     ...(chinese ? { wrapAfter: `${BEFORE_SLOT}\n参考上面的信息，把下面的文本翻译成${nameIn(target, 'zh')}，注意不需要翻译上文，也不要额外解释：\n${TEXT_SLOT}` } : {}),
     extra: { temperature: 0.7, top_p: 0.6, top_k: 20, repeat_penalty: 1.05, max_tokens: 512 },
   };
+}
+
+/** What a model that revises is told beside its last answer (its card's words, as it was trained). */
+const REVISE_RULE = 'When the source meaning has not changed, preserve the still-correct prefix of the previous translation whenever possible. When content is added or corrected, accuracy and completeness take priority.';
+
+/**
+ * Fork: the request for a sentence still being said, of a model trained to revise (Hy-MT2 StreamRevise): the text
+ * so far, with the text it was given last time and what it answered then — it keeps what still stands of that and
+ * writes on. The first time, with nothing before, it is its plain request (`translatorRequest`'s `wrap`).
+ */
+export function reviseRequest(languages: { source: string; target: string }, text: string, before?: { source: string; translation: string }): string {
+  const pair = `from ${languages.source} into ${languages.target}`;
+  if (!before || (!before.source && !before.translation)) return `Translate the following text ${pair}. Note that you should only output the translated result without any additional explanation:\n\n${text}`;
+  const blocks = [
+    ...(before.source ? [`Previous version of the current source:\n${before.source}`] : []),
+    ...(before.translation ? [`Previous translation of the current source:\n${before.translation}`] : []),
+    REVISE_RULE,
+  ];
+  return `[Background Information]\n${blocks.join('\n\n')}\n\nPlease translate the following text ${pair}, taking the provided background information into consideration.\n\n[Source Text]\n${text}`;
 }

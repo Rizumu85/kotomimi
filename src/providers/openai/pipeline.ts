@@ -29,9 +29,9 @@ import type { LocalEngines } from '../localInference/engines';
 import { createApiAsr } from './apiAsr';
 import { createNativeAsr, type NativeLimits } from './nativeAsr';
 import { oneOfTwo, saidInOwn, sameSpeech, writtenInCantonese } from '../../lib/language/script';
-import { identifyLanguage } from '../../lib/language/identify';
+import { identifyLanguage, writtenOutside } from '../../lib/language/identify';
 import { AUTO } from '../../lib/provider/languages';
-import { BEFORE_SLOT, TEXT_SLOT } from './nativeTranslators';
+import { BEFORE_SLOT, TEXT_SLOT, reviseLanguage, reviseRequest } from './nativeTranslators';
 import { normalizeRecognitionText } from '../../lib/glossary/glossary';
 import type { GlossarySnapshot } from '../../lib/glossary/types';
 import { cutAt, letters, restFrom, SETTLE_MS } from './sentenceCut';
@@ -94,6 +94,12 @@ export interface TextStage {
   /** The same, of a model that takes the sentence said before with it: that sentence where `BEFORE_SLOT` stands. */
   wrapAfter?: string;
   extra?: Readonly<Record<string, unknown>>;
+  /**
+   * Fork: the model also translates a sentence while it is still being said (`reviseRequest`): the languages as it is
+   * told them, the source's absent where the leg's is left to be detected (each sentence's own is then told). What
+   * it writes meanwhile shows in the sentence's translation, and the sentence closed is translated once more, whole.
+   */
+  revise?: { source?: string; target: string };
 }
 
 export type AnswerStage = TextStage;
@@ -166,6 +172,8 @@ export interface DeviceHearing {
   native?: { model: string; limits?: Partial<NativeLimits>; either?: { first: string; also: readonly string[] }; hints?: readonly string[] };
   /** The extra languages chosen once for the leg; the iPad takes only the first. */
   pairedWith?: readonly string[];
+  /** Fork: the languages the leg may be in, every one named (`namedAmong`): a stretch named outside them is read again. */
+  among?: readonly string[];
 }
 
 export interface PipelineConfig extends RealtimeConfig {
@@ -290,6 +298,29 @@ const HEARD_LEAK_ASKS = 4;
 const HEARD_ASK_TIMES_CLOSED = 2;
 
 /** A stretch whose finished sentences are closed as they come: see `PipelineLeg.cuts`. */
+/**
+ * Fork: the translation of a sentence still being said (`TextStage.revise`): its segment, what it shows, and the text
+ * and answer of the last request, which the next is told. `next`: the text that came while a request was under way —
+ * only the newest waits. `taken`: the sentence closed, and its whole translation has the segment from here on.
+ */
+interface Draft {
+  ref: Ref;
+  opened: boolean;
+  shown: string;
+  source: string;
+  translation: string;
+  controller: AbortController | null;
+  /** The text of the request under way. */
+  asking: string | null;
+  next: { text: string; from: string } | null;
+  taken: boolean;
+}
+
+/** A sentence this short is not asked about yet: a word or two has no translation worth showing. */
+const DRAFT_LEAST = 3;
+/** A text this much shorter than the last one asked about is another sentence's (the stretch was cut): asked afresh. */
+const DRAFT_CUT = 0.8;
+
 interface Cut {
   done: string;
   rest: { ref: Ref; origin?: string } | null;
@@ -322,6 +353,8 @@ class PipelineLeg implements AdapterSession {
   private said: { text: string; at: number } | null = null;
   private readonly queue: Job[] = [];
   private readonly running = new Map<AnswerStage['kind'], { controller: AbortController; stage: AnswerStage }>();
+  /** Fork: the open sentences' translations while they are said, by what each answers to (`Draft`). */
+  private readonly drafts = new Map<string, Draft>();
   private innerBusy = false;
   private saidBusy = false;
   /** The phones this leg uses, asked now and then whether they are still there (`phoneWatch.ts`). */
@@ -462,6 +495,8 @@ class PipelineLeg implements AdapterSession {
     this.queue.length = 0;
     for (const { controller } of this.running.values()) controller.abort(new Error('the session ended'));
     this.running.clear();
+    for (const draft of this.drafts.values()) draft.controller?.abort(new Error('the session ended'));
+    this.drafts.clear();
   }
 
   private onInner(e: AdapterEvent): void {
@@ -499,6 +534,8 @@ class PipelineLeg implements AdapterSession {
           return;
         }
         this.events.segmentText(heard ? { ...e.payload, language: heard } : e.payload);
+        // Fork: a stretch answered whole, when it closes, is translated meanwhile too, as far as it goes (`draft`).
+        if (source && !this.requiresLanguage) this.draft(source.origin, e.payload.text, heard);
         return;
       }
       case 'segmentClosed': {
@@ -521,6 +558,7 @@ class PipelineLeg implements AdapterSession {
           // was seen 2026-10-06.)
           if (letters(rest) === 0) {
             if (cut.rest) {
+              this.dropDraft(cut.rest.origin);
               this.events.segmentText({ ref: cut.rest.ref, text: '' });
               this.events.segmentClosed({ ref: cut.rest.ref });
             }
@@ -579,6 +617,7 @@ class PipelineLeg implements AdapterSession {
     const there = this.heardElsewhere(heard);
     if (there === 'same') {
       this.frame('in', 'speech.dropped', { reason: 'heard by the other leg', chars: text.length });
+      this.dropDraft(closed.origin ?? origin);
       this.events.segmentText({ ref: closed.ref, text: '' });
       this.events.segmentClosed(closed);
       return;
@@ -602,6 +641,7 @@ class PipelineLeg implements AdapterSession {
     const there = this.heardElsewhere(mine, text);
     if (there === 'same') {
       this.frame('in', 'speech.dropped', { reason: 'the other side, through the loudspeakers', chars: text.length });
+      this.dropDraft(closed.origin ?? source?.origin);
       this.events.segmentText({ ref: closed.ref, text: '' });
       this.events.segmentClosed(closed);
       return;
@@ -657,7 +697,8 @@ class PipelineLeg implements AdapterSession {
     cut.said = source.language;
     const rest = source.text.slice(restFrom(source.text, cut.done));
     const end = cutAt(rest);
-    if (end >= 0) {
+    // Fork: a sentence the recognizer will read again when the stretch ends (`misheard`) is not closed before that.
+    if (end >= 0 && !this.misheard(rest.slice(0, end))) {
       const sentence = rest.slice(0, end).trim();
       if (cut.waiting?.text !== sentence) cut.waiting = { text: sentence, since: clock.now() };
       else if (clock.now() - cut.waiting.since >= SETTLE_MS) {
@@ -708,7 +749,113 @@ class PipelineLeg implements AdapterSession {
     // A mark or two is not yet something to open a segment for.
     if (!cut.rest && letters(text) === 0) return;
     const language = cut.done ? this.pieceLanguage(cut, text) : cut.language;
-    this.events.segmentText({ ref: this.restOf(cut).ref, text, ...(language ? { language } : {}) });
+    const shown = this.restOf(cut);
+    this.events.segmentText({ ref: shown.ref, text, ...(language ? { language } : {}) });
+    this.draft(shown.origin, text, language);
+  }
+
+  /**
+   * Fork: a sentence still being said, translated as far as it goes (`TextStage.revise`): asked each time it reads
+   * otherwise, one request at a time and only the newest text after it, each told the last one's text and answer.
+   * Nothing is said of a request that fails: the sentence is translated when it closes, as every sentence is.
+   */
+  private draft(origin: string | undefined, text: string, language: string | undefined): void {
+    const stage = this.stages.speech;
+    const revise = stage?.revise;
+    if (!stage || !revise || origin === undefined || this.ended) return;
+    // Its language: the leg's, or — left to be detected — this sentence's own, where the model was taught it.
+    const from = revise.source ?? reviseLanguage(language);
+    if (!from) return;
+    // Already in the reader's language: nothing translates it (`closed`).
+    if (language && language !== AUTO && baseOf(language) === baseOf(this.request.context.direction.target)) return;
+    let draft = this.drafts.get(origin);
+    // Taken back to nothing, or to a word: what was asked and shown of it goes, and it is asked afresh when it grows.
+    if (letters(text) < DRAFT_LEAST) {
+      if (draft) this.blankDraft(draft);
+      return;
+    }
+    // Fork: in another language of the speaker's than the leg's: another stage answers it when it closes (`backFor`).
+    if (this.backFor(text, language === AUTO ? undefined : language)) {
+      if (draft) this.blankDraft(draft);
+      return;
+    }
+    if (!draft) {
+      draft = { ref: ++this.refs, opened: false, shown: '', source: '', translation: '', controller: null, asking: null, next: null, taken: false };
+      this.drafts.set(origin, draft);
+    }
+    // Compared with the newest text there is — waiting, under way, or answered — not with the last one answered: a
+    // recognizer that takes a word back to what it read before is asked about that again.
+    const now = text.trim();
+    if (now === (draft.next?.text ?? draft.asking ?? draft.source)) return;
+    draft.next = { text: now, from };
+    this.askDraft(origin, draft, stage, revise.target);
+  }
+
+  private askDraft(origin: string, draft: Draft, stage: TextStage, into: string): void {
+    if (draft.controller || draft.taken || !draft.next || this.ended) return;
+    const { text, from } = draft.next;
+    draft.next = null;
+    const controller = new AbortController();
+    draft.controller = controller;
+    draft.asking = text;
+    const before = draft.source && text.length >= DRAFT_CUT * draft.source.length ? { source: draft.source, translation: draft.translation } : undefined;
+    const { glossary } = this.request.config;
+    const told = glossary ? normalizeRecognitionText(text, glossary) : text;
+    void this.whereOf(stage)
+      .then(({ base, key }) => completeText(
+        { url: chatUrl(base), model: stage.model, ...(key ? { key } : {}), system: '', ...(stage.extra ? { extra: stage.extra } : {}), user: reviseRequest({ source: from, target: into }, told, before) },
+        { fetch: this.doFetch, clock: this.request.clock, signal: controller.signal },
+      ))
+      .then((answer) => {
+        if (this.ended || draft.taken || controller.signal.aborted) return;
+        draft.source = text;
+        // An empty answer is the model waiting for more of the sentence: what shows stays.
+        const translation = tidyAnswer('translate', answer.text);
+        if (!translation) return;
+        draft.translation = translation;
+        if (!draft.opened) {
+          this.events.segmentOpened({ ref: draft.ref, side: 'translation', purpose: 'translation', origin });
+          draft.opened = true;
+        }
+        if (translation === draft.shown) return;
+        draft.shown = translation;
+        this.events.segmentText({ ref: draft.ref, text: translation, ...(stage.language ? { language: stage.language } : {}) });
+      }, () => undefined)
+      .finally(() => {
+        if (draft.controller === controller) { draft.controller = null; draft.asking = null; }
+        this.askDraft(origin, draft, stage, into);
+      });
+  }
+
+  /** What was asked and shown of a sentence so far is put away; the sentence stays open, and may be asked about again. */
+  private blankDraft(draft: Draft): void {
+    draft.controller?.abort(new Error('the text was taken back'));
+    draft.controller = null;
+    draft.asking = null;
+    draft.next = null;
+    draft.source = '';
+    draft.translation = '';
+    if (!draft.shown) return;
+    draft.shown = '';
+    this.events.segmentText({ ref: draft.ref, text: '' });
+  }
+
+  /** The sentence closed and is translated whole: its segment, where one was opened, is that translation's from here on. */
+  private takeDraft(origin: string | undefined): Draft | undefined {
+    const draft = origin === undefined ? undefined : this.drafts.get(origin);
+    if (!draft || origin === undefined) return undefined;
+    this.drafts.delete(origin);
+    draft.taken = true;
+    draft.controller?.abort(new Error('the sentence closed'));
+    return draft.opened ? draft : undefined;
+  }
+
+  /** The sentence is not translated after all (dropped, in the reader's own language, another stage's): what was shown of it goes. */
+  private dropDraft(origin: string | undefined): void {
+    const draft = this.takeDraft(origin);
+    if (!draft) return;
+    this.events.segmentText({ ref: draft.ref, text: '' });
+    this.events.segmentClosed({ ref: draft.ref });
   }
 
   /** A source sentence, closed: said so, and handed to what answers it. `language`: what the recognizer said it heard it in. */
@@ -722,6 +869,7 @@ class PipelineLeg implements AdapterSession {
     const coached = this.stages.speech?.kind === 'coach';
     // Failed paired recognition must not seal a provisional guess as final text that the chatbox could send.
     if (this.requiresLanguage && !language) {
+      this.dropDraft(payload.origin ?? source?.origin);
       this.events.segmentText({ ref: payload.ref, text: '' });
       this.events.segmentClosed(payload);
       return;
@@ -736,6 +884,8 @@ class PipelineLeg implements AdapterSession {
     // A coached speaker who says a sentence in their own language is not practising with it: it is translated, as what
     // they type is, and not sent for feedback. No translation in this run: it is shown as said.
     const stage = backward ?? (coached && other !== undefined ? this.stages.typed : this.stages.speech);
+    // Fork: what was written of it while it was said (`draft`) is the speech stage's: any other outcome takes it away.
+    if (!(source && text && stage && !already && stage === this.stages.speech)) this.dropDraft(payload.origin ?? source?.origin);
     if (source && text && stage && !already) {
       // A translation is told the sentence before, where its model takes one: what this side said last, not long ago.
       const now = this.request.clock.now();
@@ -824,6 +974,17 @@ class PipelineLeg implements AdapterSession {
     return among.length === 0 || among.some((one) => one === AUTO || baseOf(one) === baseOf(language));
   }
 
+  /**
+   * Fork: written in a script of none of the languages the leg is named among (`namedAmong`, `hearingPlan.ts`): a
+   * mishearing, which the recognizer reads again when the stretch ends.
+   */
+  private misheard(text: string): boolean {
+    const back = this.stages.back;
+    if (!back || this.stages.heard !== AUTO) return false;
+    const among = [back.own, ...(back.languages?.length ? back.languages : [back.language])];
+    return !among.includes(AUTO) && writtenOutside(text, among);
+  }
+
   private otherThanHeard(text: string, language?: string): string | undefined {
     const speech = this.stages.speech;
     if (!speech || this.stages.heard === AUTO) return undefined;
@@ -866,9 +1027,12 @@ class PipelineLeg implements AdapterSession {
 
   private async answer(job: Job, signal: AbortSignal): Promise<void> {
     const { stage } = job;
-    const ref = ++this.refs;
-    let opened = false;
-    let shown = '';
+    // Fork: written while it was said (`draft`): the whole translation takes that segment, and shows when it is whole —
+    // written a word at a time over it, the sentence shown would shrink to its first word and grow again.
+    const draft = stage === this.stages.speech && !job.typed ? this.takeDraft(job.origin) : undefined;
+    const ref = draft?.ref ?? ++this.refs;
+    let opened = draft !== undefined;
+    let shown = draft?.shown ?? '';
     const show = (text: string) => {
       if (this.ended || !text || text === shown) return;
       if (!opened) {
@@ -885,15 +1049,16 @@ class PipelineLeg implements AdapterSession {
     const where = stage.phone ? { phone: true } : {};
     this.frame('out', 'text.request', { stage: stage.kind, model: stage.model, chars: job.text.length, ...where });
     try {
-      const answer: { text: string; firstMs?: number; totalMs: number; model?: string } = await this.complete(stage, job.text, signal, show, job.before);
+      const answer: { text: string; firstMs?: number; totalMs: number; model?: string } = await this.complete(stage, job.text, signal, draft ? () => undefined : show, job.before);
       if (this.ended) return;
       const final = tidyAnswer(stage.kind, answer.text);
       show(final);
       // `served`: the model that answered, where the server says (another Kotomimi chooses a blank one itself).
       this.frame('in', 'text.done', { stage: stage.kind, model: stage.model, served: answer.model ?? stage.model, firstMs: answer.firstMs ?? null, totalMs: answer.totalMs, chars: final.length, ...where });
       if (opened) this.events.segmentClosed({ ref });
-      // A model that said nothing: feedback with nothing to say is no fault; a translation with none is.
-      else if (stage.kind === 'translate') this.unanswered(job, 'the model answered with no text');
+      // A model that said nothing: feedback with nothing to say is no fault; a translation with none is — also where
+      // what was written while the sentence was said stays in its place.
+      if (stage.kind === 'translate' && (!opened || !final)) this.unanswered(job, 'the model answered with no text');
     } catch (error) {
       if (this.ended) return;
       if (opened) this.events.segmentClosed({ ref });
@@ -902,9 +1067,9 @@ class PipelineLeg implements AdapterSession {
     }
   }
 
-  /** A text model's answer, shown as it is written. */
-  private async complete(stage: TextStage, heard: string, signal: AbortSignal, show: (text: string) => void, before?: string): Promise<{ text: string; firstMs?: number; totalMs: number; model?: string }> {
-    const { credentials, clock } = this.request;
+  /** Where a stage is asked now, and with what key. */
+  private async whereOf(stage: TextStage): Promise<{ base: string; key?: string }> {
+    const { credentials } = this.request;
     let key = stage.key ? credentials[stage.key] : undefined;
     let base = stage.baseUrl || httpBaseOf(credentials.endpoint);
     if (stage.engine) {
@@ -916,6 +1081,13 @@ class PipelineLeg implements AdapterSession {
         // Not to be asked (a test, a build with no main process), or not up: the address it was built with.
       }
     }
+    return { base, ...(key ? { key } : {}) };
+  }
+
+  /** A text model's answer, shown as it is written. */
+  private async complete(stage: TextStage, heard: string, signal: AbortSignal, show: (text: string) => void, before?: string): Promise<{ text: string; firstMs?: number; totalMs: number; model?: string }> {
+    const { clock } = this.request;
+    const { base, key } = await this.whereOf(stage);
     // A term written right is kept by the model unprompted; written wrong, it is translated as what it sounds like.
     // Feedback is given on the sentence as it is shown, its names put right too: it judged a misheard name as the
     // user's mistake.
@@ -1003,12 +1175,12 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
     const { api, native } = device;
     if (native) {
       const start = deps.native?.start ?? ((model: string) => askNativeEngine('start', model));
-      return createLocalInferenceAdapter({ ...engines, asr: () => createNativeAsr({ bridge: deps.native?.bridge ?? ipcNativeBridge, start: () => start(native.model), model: native.model, clock: request.clock, ...(native.hints?.length ? { hints: native.hints } : {}), ...(native.limits ? { limits: native.limits } : {}), ...(native.either ? { also: native.either.also } : {}) }) });
+      return createLocalInferenceAdapter({ ...engines, asr: () => createNativeAsr({ bridge: deps.native?.bridge ?? ipcNativeBridge, start: () => start(native.model), model: native.model, clock: request.clock, ...(native.hints?.length ? { hints: native.hints } : {}), ...(native.limits ? { limits: native.limits } : {}), ...(native.either ? { also: native.either.also } : {}), ...(device.among?.length ? { among: device.among } : {}) }) });
     }
     if (!api) throw new Error('Recognition requires a native engine or an API.');
     const key = api.key ? request.credentials[api.key] : undefined;
     const asked = deps.fetch ?? fetchNow;
-    const byApi = () => createApiAsr({ baseUrl: api.baseUrl, model: api.model, ...(key ? { key } : {}), fetch: asked, clock: request.clock });
+    const byApi = () => createApiAsr({ baseUrl: api.baseUrl, model: api.model, ...(key ? { key } : {}), fetch: asked, clock: request.clock, ...(device.among?.length ? { among: device.among } : {}) });
     // The address may be a Kotomimi phone lending its engine: that is read as this computer's own engine is, while
     // the voice is heard, not a sentence at a time. Asked as the run begins, up to three times — a device just woken,
     // or a busy Wi-Fi, may not answer the first in time, and the plain API it otherwise falls to for the whole run
@@ -1043,7 +1215,7 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
         const also = live && heard === AUTO && requested && live.languages.some((language) => baseOf(language) === primary) && live.languages.some((language) => baseOf(language) === baseOf(requested)) ? requested : undefined;
         if (also) onPaired();
         const limits = recognitionLimits(model, live ? told : undefined);
-        return createNativeAsr({ bridge: remote.bridge(api.baseUrl, live ? { streamed: true } : {}), start: async () => lent, model, clock: request.clock, named: 'The recognition engine of the other device', limits: { ...(limits ?? api.limits), lastWordsMs: REMOTE_LAST_WORDS_MS }, ...(api.hints?.length ? { hints: api.hints } : {}), ...(also ? { also: [also] } : {}) });
+        return createNativeAsr({ bridge: remote.bridge(api.baseUrl, live ? { streamed: true } : {}), start: async () => lent, model, clock: request.clock, named: 'The recognition engine of the other device', limits: { ...(limits ?? api.limits), lastWordsMs: REMOTE_LAST_WORDS_MS }, ...(api.hints?.length ? { hints: api.hints } : {}), ...(also ? { also: [also] } : {}), ...(device.among?.length ? { among: device.among } : {}) });
       }),
     });
   };

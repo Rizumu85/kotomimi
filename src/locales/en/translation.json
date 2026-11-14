@@ -747,6 +747,7 @@
       "translatorFailed": "The translation engine of this computer could not start. In the Translation card, press \"Try again\" — or choose another model.",
       "noteIndexTranslate": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
       "noteHyMt2": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences; about 0.1 s a sentence.",
+      "noteStreamRevise": "Translates while the other side is still speaking, then once more when the sentence ends. Chinese, English and Japanese only.",
       "notePlamo3": "Reads the most natural; now and then the meaning drifts. About 2 GB of video memory. Non-commercial use only.",
       "notePlamo3Small": "The lightest: about 0.6 GB of video memory and quick, a little less accurate. Non-commercial use only.",
       "noteHyMt15": "Japanese into Chinese, measured: serious mistakes in about 8 of 30 sentences, and it tends to add words of its own.",

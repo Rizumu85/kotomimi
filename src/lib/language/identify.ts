@@ -13,7 +13,7 @@
  * to refuse a sentence.
  */
 import { detectAll } from 'tinyld';
-import { languageByScript, oneOfTwo } from './script';
+import { languageByScript, lettersByScript, oneOfTwo } from './script';
 
 /** How a language was named: the writing itself, or statistics over the text. */
 export type GuessSource = 'script' | 'text';
@@ -74,6 +74,39 @@ export function textLanguage(text: string, candidates: readonly string[] = []): 
   if (second && first.score - second.score < TEXT_MIN_MARGIN) return null;
   return { language: first.language, source: 'text', confidence: first.score };
 }
+
+/**
+ * Whether a sentence is written in a script that none of `candidates` is written in: Hindi's, of a speaker of Chinese
+ * and Korean. Latin letters never say so — a name, "OK" and "VRC" are said in every language — and Han characters
+ * are Chinese's, Cantonese's and Japanese's alike. By the most of its letters: a Chinese sentence that names a song
+ * in kana is still Chinese.
+ */
+export function writtenOutside(text: string, candidates: readonly string[]): boolean {
+  const bases = candidates.map(baseOf);
+  let inside = 0;
+  let outside = 0;
+  for (const [language, letters] of lettersByScript(text)) {
+    const written = SHARED_SCRIPTS[language] ?? (language === 'zh' ? ['zh', 'yue', 'ja'] : [language]);
+    if (bases.some((base) => written.includes(base))) inside += letters;
+    else outside += letters;
+  }
+  return outside > 0 && outside >= inside;
+}
+
+const sinitic = (code: string): boolean => code === 'zh' || code === 'yue';
+
+/**
+ * Whether the language a recognizer named is outside `among`, the base codes a leg may be in (`namedAmong`,
+ * `hearingPlan.ts`). Chinese and Cantonese are one here. Never, where none are named or the recognizer named none.
+ */
+export function namedOutside(language: string | undefined, among: readonly string[]): boolean {
+  const said = language ? baseOf(language) : '';
+  if (!said || said === 'auto' || among.length === 0) return false;
+  return !among.some((one) => one === said || (sinitic(one) && sinitic(said)));
+}
+
+/** The languages a stretch named outside `among` is read again in, in turn: the others, two at most, not the leg's own. */
+export const readAgainIn = (among: readonly string[]): string[] => among.slice(1, 3);
 
 /** A sentence's language: its writing first, then the small text detector. */
 export function identifyLanguage(text: string, candidates: readonly string[] = []): LanguageGuess | null {

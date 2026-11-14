@@ -1931,6 +1931,10 @@
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
     "text": "Japonca VRChat sohbeti testinde kana karakterleri yazmaz; Japonca metin neredeyse okunamaz hâle gelir."
   },
+  "providers.localai.noteStreamRevise": {
+    "en": "Translates while the other side is still speaking, then once more when the sentence ends. Chinese, English and Japanese only.",
+    "text": "Karşı taraf konuşurken çeviri başlar, cümle bitince tamamı yeniden çevrilir. Yalnızca Çince, İngilizce ve Japonca desteklenir."
+  },
   "providers.localai.noteVoxtral4b": {
     "en": "Measured on Japanese VRChat talk: quick — the text is about 2.6 s behind the voice — but about 27% of the characters wrong. For when speed matters more than accuracy.",
     "text": "Japonca VRChat sohbeti testinde hızlıdır (metin sesi yaklaşık 2.6 saniye geriden izler), ancak karakter hata oranı yaklaşık %27. Hız doğruluktan daha önemliyse ve hataları kabul edebiliyorsanız seçin."

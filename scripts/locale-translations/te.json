@@ -1931,6 +1931,10 @@
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
     "text": "జపనీస్ VRChat సంభాషణ పరీక్షల్లో: కన అక్షరాలు రాయదు, అందుకే జపనీస్ దాదాపు చదవలేని విధంగా వస్తుంది."
   },
+  "providers.localai.noteStreamRevise": {
+    "en": "Translates while the other side is still speaking, then once more when the sentence ends. Chinese, English and Japanese only.",
+    "text": "అవతలి వ్యక్తి మాట్లాడుతుండగానే అనువాదం మొదలవుతుంది. వాక్యం పూర్తయ్యాక మొత్తం వాక్యాన్ని మళ్లీ అనువదిస్తుంది. చైనీస్, ఇంగ్లీష్, జపనీస్ భాషలకు మాత్రమే మద్దతు ఉంది."
+  },
   "providers.localai.noteVoxtral4b": {
     "en": "Measured on Japanese VRChat talk: quick — the text is about 2.6 s behind the voice — but about 27% of the characters wrong. For when speed matters more than accuracy.",
     "text": "జపనీస్ VRChat సంభాషణ పరీక్షల్లో: అక్షరాలు వేగంగా వస్తాయి (మాటల కంటే సుమారు 2.6 సెకన్ల ఆలస్యం), కానీ తప్పులు ఎక్కువ (సుమారు 27%). ఖచ్చితత్వం కంటే వేగం ముఖ్యమైతే ఎంచుకోండి."

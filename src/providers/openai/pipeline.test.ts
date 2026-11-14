@@ -851,6 +851,22 @@ describe('a stretch in two languages, of a speaker who speaks both (fork)', () =
     await h.session.stop();
   });
 
+  it('does not close a sentence written in a script of neither: the recognizer reads the stretch again at its end', async () => {
+    const h = await live(SPEAKER, VIA_MODEL, [sse('今日はどこで食べるのがいいかな？')], K, both);
+    h.receive(SERVER.committed('item_1'), delta('क्यों हो आप कहाँ जा रहे हैं？आज हम कहाँ खाना खाएँगे यह सोच रहा'));
+    h.clock.advance(400);
+    h.receive(delta(' हूँ'));
+    h.clock.advance(400);
+    h.receive(delta('।'));
+    expect(h.calls).toHaveLength(0);
+    expect(h.of('segmentOpened').map((e) => e.payload).filter((p) => p.side === 'source')).toHaveLength(1);
+    h.receive(SERVER.inputDone('item_1', CHINESE));
+    await h.settled();
+    expect(h.calls.map((c) => c.body.messages[1].content)).toEqual([CHINESE]);
+    expect(h.lastText(1)).toMatchObject({ text: CHINESE, language: 'zh' });
+    await h.session.stop();
+  });
+
   it('still answers a stretch in one language as before, where two languages share their letters', async () => {
     const context = { ...SPEAKER, direction: { source: 'en', target: 'fr' } };
     const latin = (config: LocalAIConfig) => {
@@ -1032,5 +1048,118 @@ describe('a sentence in one of two lit languages of theirs, which the user speak
     h.receive(...heard('second', '我们走吧大家一起去'));
     await vi.waitFor(() => expect(h.calls).toHaveLength(2));
     expect(h.calls[1].body.model).toBe('hy-mt2-1.8b');
+  });
+});
+
+describe('a sentence translated while it is still being said (fork)', () => {
+  const delta = (text: string) => SERVER.inputDelta('item_1', text);
+  const revising = (config: LocalAIConfig) => {
+    config.stages = { ...config.stages!, speech: { ...config.stages!.speech!, revise: { source: 'Japanese', target: 'Chinese' } } };
+    delete config.stages.leakCheck;
+  };
+  const user = (call: { body: { messages: Array<{ role: string; content: string }> } }) => call.body.messages.filter((m) => m.role === 'user').pop()!.content;
+  const translations = (h: Awaited<ReturnType<typeof live>>) => h.of('segmentOpened').map((e) => e.payload).filter((p) => p.side === 'translation');
+
+  it('shows what the model writes meanwhile, tells it its last answer, and translates the closed sentence whole in the same place', async () => {
+    const h = await live(PARTICIPANT, VIA_MODEL, [sse('药。'), sse('药。先吃一点比较好'), sse('药。先吃一点可能比较好。')], K, revising);
+    h.receive(SERVER.committed('item_1'), delta('薬を。一応'));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(1));
+    // The first time: its plain request, with nothing before.
+    expect(user(h.calls[0])).toBe('Translate the following text from Japanese into Chinese. Note that you should only output the translated result without any additional explanation:\n\n薬を。一応');
+    await vi.waitFor(() => expect(translations(h)).toHaveLength(1));
+    const shown = translations(h)[0];
+    expect(shown.origin).toBe(h.of('segmentOpened')[0].payload.origin);
+    expect(h.lastText(shown.ref)?.text).toBe('药。');
+    // More of it: told what it was given and what it answered.
+    h.receive(delta('飲んどいた方がいい'));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(2));
+    expect(user(h.calls[1])).toContain('Previous version of the current source:\n薬を。一応\n\nPrevious translation of the current source:\n药。\n\n');
+    expect(user(h.calls[1]).endsWith('[Source Text]\n薬を。一応飲んどいた方がいい')).toBe(true);
+    await vi.waitFor(() => expect(h.lastText(shown.ref)?.text).toBe('药。先吃一点比较好'));
+    expect(h.of('segmentClosed').some((e) => e.payload.ref === shown.ref)).toBe(false);
+    // Closed: asked once more, whole, as any sentence is — and its answer takes the place of what was shown.
+    h.receive(SERVER.inputDone('item_1', '薬を。一応飲んどいた方がいいかもしれない。'));
+    await h.settled();
+    expect(h.calls).toHaveLength(3);
+    expect(JSON.stringify(h.calls[2].body)).not.toContain('Previous translation');
+    expect(translations(h)).toHaveLength(1);
+    expect(h.lastText(shown.ref)?.text).toBe('药。先吃一点可能比较好。');
+    expect(h.of('segmentClosed').some((e) => e.payload.ref === shown.ref)).toBe(true);
+    await h.session.stop();
+  });
+
+  it('asks only about the newest text while a request is under way, and nothing once the sentence has closed', async () => {
+    const h = await live(PARTICIPANT, VIA_MODEL, ['hang', sse('整句的翻译。')], K, revising);
+    h.receive(SERVER.committed('item_1'), delta('今日は'), delta('いい天気'), delta('ですね'));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(1));
+    expect(user(h.calls[0]).endsWith('今日は')).toBe(true);
+    h.receive(SERVER.inputDone('item_1', '今日はいい天気ですね。'));
+    await h.settled();
+    // The request under way was dropped with the sentence's closing; what waited behind it was never sent.
+    expect(h.calls[0].signal?.aborted).toBe(true);
+    expect(h.calls).toHaveLength(2);
+    expect(translations(h)).toHaveLength(1);
+    expect(h.lastText(translations(h)[0].ref)?.text).toBe('整句的翻译。');
+    await h.session.stop();
+  });
+
+  it('keeps what shows when the model says nothing yet, and takes away what it showed of a sentence nothing translates', async () => {
+    // Detected, and it turns out to be in the reader's own language: shown as said, its early translation gone.
+    const detecting = (config: LocalAIConfig) => {
+      config.stages = { ...config.stages!, heard: 'auto', speech: { ...config.stages!.speech!, revise: { target: 'Chinese' } } };
+      delete config.stages.leakCheck;
+    };
+    const h = await live(PARTICIPANT, VIA_MODEL, [sse('拉面'), sse('')], K, detecting);
+    h.receive(SERVER.committed('item_1'), delta('ラーメンがたべ'));
+    await vi.waitFor(() => expect(translations(h)).toHaveLength(1));
+    const shown = translations(h)[0];
+    // The sentence's own language is told, where the leg's is left to be detected.
+    expect(user(h.calls[0])).toContain('from Japanese into Chinese');
+    h.receive(delta('たいんです'));
+    await vi.waitFor(() => expect(h.calls).toHaveLength(2));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(h.lastText(shown.ref)?.text).toBe('拉面');
+    h.receive(SERVER.inputDone('item_1', '今天我们去哪里吃饭比较好呢？'));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(h.calls).toHaveLength(2);
+    expect(h.lastText(shown.ref)?.text).toBe('');
+    expect(h.of('segmentClosed').some((e) => e.payload.ref === shown.ref)).toBe(true);
+    await h.session.stop();
+  });
+
+  it('does the same of a stretch answered whole, when it closes', async () => {
+    const whole = (config: LocalAIConfig) => { revising(config); config.stages = { ...config.stages!, whole: true }; };
+    const h = await live(PARTICIPANT, VIA_MODEL, [sse('今天'), sse('今天天气很好。')], K, whole);
+    h.receive(SERVER.committed('item_1'), delta('今日はいい'));
+    await vi.waitFor(() => expect(translations(h)).toHaveLength(1));
+    expect(h.lastText(translations(h)[0].ref)?.text).toBe('今天');
+    h.receive(SERVER.inputDone('item_1', '今日はいい天気ですね。'));
+    await h.settled();
+    expect(h.calls).toHaveLength(2);
+    expect(translations(h)).toHaveLength(1);
+    expect(h.lastText(translations(h)[0].ref)?.text).toBe('今天天气很好。');
+    await h.session.stop();
+  });
+
+  it('says so when the whole translation says nothing, though what was written meanwhile stays (fork)', async () => {
+    const h = await live(PARTICIPANT, VIA_MODEL, [sse('今天'), sse('')], K, revising);
+    h.receive(SERVER.committed('item_1'), delta('今日はいい'));
+    await vi.waitFor(() => expect(translations(h)).toHaveLength(1));
+    h.receive(SERVER.inputDone('item_1', '今日はいい天気ですね。'));
+    await h.settled();
+    expect(h.lastText(translations(h)[0].ref)?.text).toBe('今天');
+    expect(h.of('degraded').map((e) => e.payload.code)).toEqual(['translation_failed']);
+    await h.session.stop();
+  });
+
+  it('asks nothing meanwhile of a model that does not revise', async () => {
+    const h = await live(PARTICIPANT, VIA_MODEL, [sse('今天天气很好。')], K, (config) => { delete config.stages!.leakCheck; });
+    h.receive(SERVER.committed('item_1'), delta('今日はいい天気'));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(h.calls).toHaveLength(0);
+    h.receive(SERVER.inputDone('item_1', '今日はいい天気ですね。'));
+    await h.settled();
+    expect(h.calls).toHaveLength(1);
+    await h.session.stop();
   });
 });

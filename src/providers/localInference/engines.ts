@@ -31,7 +31,8 @@ export interface AsrLike {
   /** The cumulative hypothesis for the utterance so far, never a delta. */
   onPartialResult: ((text: string) => void) | null;
   /** Fork: `language`, where the recognizer hears in either of two languages and says which (the Mac's, `nativeAsr.ts`). */
-  onResult: ((result: { text: string; durationMs: number; recognitionTimeMs: number; language?: string }) => void) | null;
+  /** Fork: `unsaid`, with an empty text: the stretch was a mishearing, and what its partials showed is taken back (`nativeAsr.ts`). */
+  onResult: ((result: { text: string; durationMs: number; recognitionTimeMs: number; language?: string; unsaid?: true }) => void) | null;
   onSpeechStart: (() => void) | null;
   /** An error message from the ready worker: one utterance failed, the engine goes on. */
   onError: ((error: string) => void) | null;

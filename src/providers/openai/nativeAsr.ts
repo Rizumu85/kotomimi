@@ -45,13 +45,17 @@
  * Should the speaker go on (`resume`), what follows is a recognition of its
  * own. The detector is left as it is: begun again, its model took the
  * silence after for a voice, and the engine wrote 「はい。」 for it
- * (2026-10-28).
+ * (2026-10-28). It ends there too where the voice sounds finished, whatever
+ * is written (`turn`, Smart Turn in the detector's worker): a recognizer
+ * that writes only at the end has no words to end on, and speech often
+ * closes on none that `endsTurn` knows.
  */
 import { realClock, type Clock } from '../../lib/contract/clock';
 import type { NativeBridge, NativeEngineStatus, NativeStreamEvent } from '../../lib/native/nativeEngine';
 import { createResampler, TARGET_RATE, type Resampler } from '../../lib/native/resample';
 import type { AsrInit, AsrLike } from '../localInference/engines';
 import { apiLanguage, appVad, type VadWorker } from './apiAsr';
+import { namedOutside, readAgainIn, writtenOutside } from '../../lib/language/identify';
 import { endsTurn } from './turnEnd';
 
 export interface NativeAsrOptions {
@@ -74,6 +78,12 @@ export interface NativeAsrOptions {
   also?: readonly string[];
   /** Fork: words to expect (the glossary's), for an engine that takes them. */
   hints?: readonly string[];
+  /**
+   * Fork: the languages the speech may be in, every one named (`namedAmong`), for a recognizer that names the language
+   * itself: a stretch it names outside them is read again, told the others in turn, and not written where no reading
+   * comes out in a script of theirs.
+   */
+  among?: readonly string[];
 }
 
 /**
@@ -162,7 +172,16 @@ interface Stream {
   /** Over: by its last words, an error, or the wait running out. */
   over: boolean;
   cancelWait: (() => void) | null;
+  /** The sound as the engine was given it, kept where the stretch may be read again (`among`). */
+  sound: Int16Array[] | null;
+  /** Read again: the languages still to tell the engine, should this reading be outside them too. Null on the first reading. */
+  again: string[] | null;
 }
+
+/** A tester's switch, to hear the difference: DevTools → `localStorage.setItem('debug:smart-turn-off', '1')`, then start again. */
+const smartTurnOff = (): boolean => {
+  try { return window.localStorage.getItem('debug:smart-turn-off') === '1'; } catch { return false; }
+};
 
 export function createNativeAsr(options: NativeAsrOptions): AsrLike {
   const { bridge } = options;
@@ -179,6 +198,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
   /** Only this recognizer's last successful language: another audio source must not influence its ties. */
   let preferred: string | undefined;
   const paired = () => also.some((candidate) => candidate !== language);
+  const among = options.among ?? [];
   let rate = 24000;
   let padSeconds = 0;
   /** The last moments heard while nobody speaks. */
@@ -215,6 +235,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     s.pieceSamples += pcm.length;
     const sound = s.resampler ? s.resampler.process(pcm) : pcm;
     if (sound.length === 0) return;
+    s.sound?.push(sound);
     if (s.id !== null) bridge.write(s.id, sound);
     else s.backlog.push(sound);
   }
@@ -222,7 +243,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
   /** A new recognition, taking sound from now on; the engine opens it when it is its turn. */
   function begin(): Stream {
     const resampler = createResampler(rate);
-    const s: Stream = { id: null, resampler, opening: false, backlog: [], text: '', emitted: 0, tentative: false, heard: '', samples: 0, pieceSamples: 0, closed: false, closedAt: 0, misfire: false, over: false, cancelWait: null };
+    const s: Stream = { id: null, resampler, opening: false, backlog: [], text: '', emitted: 0, tentative: false, heard: '', samples: 0, pieceSamples: 0, closed: false, closedAt: 0, misfire: false, over: false, cancelWait: null, sound: among.length > 1 && !paired() ? [] : null, again: null };
     queue.push(s);
     live = s;
     quiet = 0;
@@ -232,6 +253,14 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     idle = 0;
     advance();
     return s;
+  }
+
+  /** The engine is gone: nothing more will be written, by this recognition or the next. */
+  function gone() {
+    for (const s of queue) { s.over = true; s.cancelWait?.(); }
+    queue.length = 0;
+    live = null;
+    asr.onFatal?.(`${options.named ?? 'The recognition engine of this computer'} is not running.`);
   }
 
   /** The engine takes the oldest recognition, when it has none open. */
@@ -246,11 +275,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
         return;
       }
       if (id === null) {
-        // The engine is gone: nothing more will be written, by this recognition or the next.
-        for (const s of queue) { s.over = true; s.cancelWait?.(); }
-        queue.length = 0;
-        live = null;
-        asr.onFatal?.(`${options.named ?? 'The recognition engine of this computer'} is not running.`);
+        gone();
         return;
       }
       head.id = id;
@@ -267,12 +292,22 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     s.cancelWait = clock.setTimeout(() => {
       if (s.over) return;
       if (s.id !== null) bridge.abort(s.id);
+      // A second reading that never came: the first, outside the speaker's languages, is not what stands.
+      if (s.again) {
+        s.text = '';
+        finish(s, '', undefined, true);
+        return;
+      }
       if (paired()) {
         fail(s, 'The speech recognizer did not finish identifying the spoken language in time.');
         return;
       }
-      // What was last heard of it, where nothing was settled: better than nothing.
-      finish(s, s.text || s.heard);
+      // What was last heard of it, where nothing was settled: better than nothing — but not a mishearing.
+      const last = s.text || s.heard;
+      if (s.sound && s.emitted === 0 && writtenOutside(last, among)) {
+        s.text = '';
+        finish(s, '', undefined, true);
+      } else finish(s, last);
     }, limits.lastWordsMs);
   }
 
@@ -297,8 +332,8 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     s.pieceSamples = 0;
   }
 
-  /** A recognition is over: the rest of its text is its last result, and the engine takes the next. `heardIn`: the language the engine says it was in. */
-  function finish(s: Stream, whole: string, heardIn?: string) {
+  /** A recognition is over: the rest of its text is its last result, and the engine takes the next. `heardIn`: the language the engine says it was in; `unsaid`: a mishearing, taken back. */
+  function finish(s: Stream, whole: string, heardIn?: string, unsaid = false) {
     if (s.over) return;
     s.over = true;
     s.cancelWait?.();
@@ -311,8 +346,36 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     const text = paired() || whole.length >= s.text.length ? whole : s.text;
     if (paired() && heardIn && !s.misfire && tidyHeard(text)) preferred = heardIn;
     // An empty result too: it closes what the partials opened.
-    asr.onResult?.({ text: s.misfire ? '' : tidyHeard(text.slice(s.emitted).trim()), durationMs: Math.round(secondsOf(s.pieceSamples) * 1000), recognitionTimeMs: s.closed ? Math.max(0, now() - s.closedAt) : 0, ...(heardIn ? { language: heardIn } : {}) });
+    asr.onResult?.({ text: s.misfire ? '' : tidyHeard(text.slice(s.emitted).trim()), durationMs: Math.round(secondsOf(s.pieceSamples) * 1000), recognitionTimeMs: s.closed ? Math.max(0, now() - s.closedAt) : 0, ...(heardIn ? { language: heardIn } : {}), ...(unsaid ? { unsaid: true as const } : {}) });
     advance();
+  }
+
+  /**
+   * Fork: a stretch the engine named outside the speaker's languages is read once more from its kept sound, told the
+   * next of their others. Still the oldest recognition: the engine takes no other until this one is over.
+   */
+  function readAgain(s: Stream) {
+    const told = s.again?.shift();
+    if (!told || !s.sound) return;
+    s.cancelWait?.();
+    s.cancelWait = null;
+    s.id = null;
+    s.text = '';
+    s.opening = true;
+    void bridge.open({ language: told, ...(options.hints?.length ? { hints: options.hints } : {}), sampleRate: s.resampler ? TARGET_RATE : rate, ...(options.model ? { model: options.model } : {}) }).then((id) => {
+      s.opening = false;
+      if (s.over || disposed) {
+        if (id !== null) bridge.abort(id);
+        return;
+      }
+      if (id === null) {
+        gone();
+        return;
+      }
+      s.id = id;
+      for (const pcm of s.sound ?? []) bridge.write(id, pcm);
+      end(s);
+    });
   }
 
   /** One utterance failed; later speech can still be recognized. */
@@ -327,10 +390,10 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     advance();
   }
 
-  /** Fork: the live recognition ends at a short pause where what is written so far closes a sentence. */
-  function endEarly() {
+  /** Fork: the live recognition ends at a short pause where what is written so far closes a sentence, or the voice `sounded` finished. */
+  function endEarly(sounded = false) {
     const s = live;
-    if (!paused || !s || s.misfire || !endsTurn(s.tentative ? s.heard : s.text)) return;
+    if (!paused || !s || s.misfire || !(sounded || endsTurn(s.tentative ? s.heard : s.text))) return;
     paused = false;
     awaiting = 'resume';
     close(s, Math.max(0, TRAILING_SILENCE_SECONDS - SHORT_PAUSE_SECONDS - secondsOf(pausedFor)));
@@ -359,6 +422,11 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
   function onEvent(event: NativeStreamEvent) {
     const s = queue.find((candidate) => candidate.id === event.id);
     if (!s || s.over) return;
+    if (s.again && event.type !== 'done' && event.type !== 'error') {
+      // A second reading shows when it is whole: what it writes on the way is only kept for its end.
+      if (event.type === 'delta') s.text += event.text;
+      return;
+    }
     if (event.type === 'partial') {
       s.tentative = true;
       s.heard = event.text;
@@ -377,7 +445,26 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
         fail(s, 'The speech recognizer did not identify one of the requested languages.');
         return;
       }
+      if (s.again) {
+        const text = event.text || s.text;
+        s.text = '';
+        // Told a language, the engine only says it back: the writing says what this reading is in.
+        if (tidyHeard(text) && !writtenOutside(text, among)) finish(s, text);
+        else if (s.again.length > 0) readAgain(s);
+        else finish(s, '', undefined, true);
+        return;
+      }
+      // Outside by the language the engine named, or — where it named none it knows — by the writing.
+      if (s.sound && !s.misfire && s.emitted === 0 && tidyHeard(event.text || s.text) && (namedOutside(heardIn, among) || writtenOutside(event.text || s.text, among))) {
+        s.again = readAgainIn(among);
+        readAgain(s);
+        return;
+      }
       finish(s, both ? event.text : event.text || s.text, both ? heardIn : event.language);
+    } else if (s.again) {
+      // A second reading that failed: the first, outside the speaker's languages, is not what stands.
+      s.text = '';
+      finish(s, '', undefined, true);
     } else {
       fail(s, event.message);
     }
@@ -409,6 +496,8 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
           } else if (data.type === 'pause') {
             paused = true;
             pausedFor = 0;
+          } else if (data.type === 'turn') {
+            endEarly(true);
           } else if (data.type === 'resume') {
             paused = false;
             if (!awaiting || live) return;
@@ -463,6 +552,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
           type: 'init',
           ortWasmBaseUrl: new URL('./wasm/ort/', window.location.href).href,
           vadModelUrl: new URL('./wasm/vad/silero_vad_v5.onnx', window.location.href).href,
+          ...(smartTurnOff() ? {} : { turnModelUrl: new URL('./wasm/vad/smart-turn-v3.2-cpu.onnx', window.location.href).href }),
           vadConfig: init.vadConfig,
         });
       });

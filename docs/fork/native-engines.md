@@ -113,7 +113,7 @@ Apple Speech can compare two installed candidates per audio source: a selected p
 
 ## Native translation
 
-`llama-server` speaks the OpenAI chat wire, so translation streams like an API model. `NATIVE_TRANSLATORS` in `src/providers/openai/nativeTranslators.ts` is the order: Index-Translate 2B (any language, fewest serious errors), PLaMo 3 Translate 2B (most natural; 52 languages, no Cantonese; non-commercial only), Hunyuan MT 2 1.8B (36 languages), PLaMo 3 Translate 0.8B (lightest). PLaMo is asked by its chat template's own options and needs llama.cpp b12182 or later.
+`llama-server` speaks the OpenAI chat wire. `NATIVE_TRANSLATORS` (`nativeTranslators.ts`) is the order: Index-Translate 2B (any language, fewest serious errors), PLaMo 3 Translate 2B (most natural; 52 languages, no Cantonese; non-commercial), Hunyuan MT 2 1.8B (36), its StreamRevise tuning (zh/en/ja; also translates a sentence while it is said, `draft` in `pipeline.ts`), PLaMo 0.8B (lightest). PLaMo is asked by its chat template's own options and needs llama.cpp b12182 or later.
 
 - These are not chat models. A request is one user message in the model card's form, no system prompt (`translatorRequest`).
 - Hunyuan MT 1.5 is `retired`: nothing over MT 2, and it adds words.

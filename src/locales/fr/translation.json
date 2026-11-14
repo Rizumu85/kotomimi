@@ -772,7 +772,8 @@
       },
       "tag_cpu": "CPU uniquement",
       "tagHint_cpu": "Fonctionne sur le processeur et laisse la carte graphique au jeu. Se charge au début de la session.",
-      "noteNativeXAsr": "Transcrit au fil de la parole, sur le processeur, sans utiliser de mémoire vidéo : environ un cinquième d’un cœur. Chinois et anglais uniquement. Les mots du dictionnaire personnalisé ne lui sont pas fournis à l’avance ; ils sont corrigés après la reconnaissance selon leur prononciation."
+      "noteNativeXAsr": "Transcrit au fil de la parole, sur le processeur, sans utiliser de mémoire vidéo : environ un cinquième d’un cœur. Chinois et anglais uniquement. Les mots du dictionnaire personnalisé ne lui sont pas fournis à l’avance ; ils sont corrigés après la reconnaissance selon leur prononciation.",
+      "noteStreamRevise": "Traduit pendant que l’autre personne parle, puis retraduit toute la phrase une fois terminée. Uniquement en chinois, anglais et japonais."
     }
   },
   "logsPanel": {

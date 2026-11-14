@@ -97,6 +97,7 @@ ONNX conversions by [onnx-community](https://huggingface.co/onnx-community).
 | Model | License | Source |
 |-------|---------|--------|
 | Silero VAD | MIT | [snakers4/silero-vad](https://github.com/snakers4/silero-vad) |
+| Smart Turn v3.2 | BSD-2-Clause | [pipecat-ai/smart-turn](https://github.com/pipecat-ai/smart-turn) |
 
 Used via [@ricky0123/vad-web](https://github.com/ricky0123/vad-web).
 

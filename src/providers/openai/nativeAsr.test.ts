@@ -49,17 +49,17 @@ function fakeEngine(options: { down?: boolean } = {}) {
   return { bridge, streams, state, say: (event: NativeStreamEvent) => { for (const listener of listeners) listener(event); } };
 }
 
-async function started(engine = fakeEngine(), options: { status?: NativeEngineStatus; vad?: typeof VAD; limits?: { rollAfter?: number; rollAt?: number; rollHard?: number; lastWordsMs?: number }; model?: string; also?: readonly string[] } = {}) {
+async function started(engine = fakeEngine(), options: { status?: NativeEngineStatus; vad?: typeof VAD; limits?: { rollAfter?: number; rollAt?: number; rollHard?: number; lastWordsMs?: number }; model?: string; also?: readonly string[]; among?: readonly string[]; language?: string } = {}) {
   const vad = fakeVad();
   const clock = createVirtualClock();
-  const asr = createNativeAsr({ bridge: engine.bridge, start: async () => options.status ?? READY, vad: () => vad.worker, now: () => clock.now(), clock, ...(options.limits ? { limits: options.limits } : {}), ...(options.model ? { model: options.model } : {}), ...(options.also ? { also: options.also } : {}) });
-  const seen = { partials: [] as string[], results: [] as string[], languages: [] as Array<string | undefined>, starts: 0, errors: [] as string[], fatal: [] as string[] };
+  const asr = createNativeAsr({ bridge: engine.bridge, start: async () => options.status ?? READY, vad: () => vad.worker, now: () => clock.now(), clock, ...(options.limits ? { limits: options.limits } : {}), ...(options.model ? { model: options.model } : {}), ...(options.also ? { also: options.also } : {}), ...(options.among ? { among: options.among } : {}) });
+  const seen = { partials: [] as string[], results: [] as string[], languages: [] as Array<string | undefined>, unsaid: [] as boolean[], starts: 0, errors: [] as string[], fatal: [] as string[] };
   asr.onPartialResult = (text) => seen.partials.push(text);
-  asr.onResult = (result) => { seen.results.push(result.text); seen.languages.push(result.language); };
+  asr.onResult = (result) => { seen.results.push(result.text); seen.languages.push(result.language); seen.unsaid.push(result.unsaid === true); };
   asr.onSpeechStart = () => { seen.starts += 1; };
   asr.onError = (error) => seen.errors.push(error);
   asr.onFatal = (error) => seen.fatal.push(error);
-  const ready = asr.init('r2t2-q8', { vadConfig: options.vad ?? VAD, language: 'ja-JP' });
+  const ready = asr.init('r2t2-q8', { vadConfig: options.vad ?? VAD, language: options.language ?? 'ja-JP' });
   vad.worker.say('ready');
   await ready;
   return { asr, vad, engine, seen, clock };
@@ -669,6 +669,31 @@ describe('the early end of a turn (fork)', () => {
     expect(engine.streams).toHaveLength(1);
   });
 
+  it('ends the stretch at a short pause where the voice sounded finished, whatever is written', async () => {
+    const { asr, vad, engine } = await started();
+    vad.worker.say('speech_start');
+    await settled();
+    asr.feedAudio(seconds(2), RATE);
+    asr.feedAudio(seconds(0.5, 0), RATE);
+    engine.say({ id: 1, type: 'partial', text: '信用できなくなったんで女性を。' });
+    vad.worker.say('pause');
+    expect(engine.streams[0].ended).toBe(false);
+    vad.worker.say('turn');
+    expect(engine.streams[0].ended).toBe(true);
+    expect(engine.streams[0].samples).toBe(3 * HEARD);
+  });
+
+  it('does not end on a finished sound once the voice is back', async () => {
+    const { asr, vad, engine } = await started();
+    vad.worker.say('speech_start');
+    await settled();
+    asr.feedAudio(seconds(2), RATE);
+    vad.worker.say('pause');
+    vad.worker.say('resume');
+    vad.worker.say('turn');
+    expect(engine.streams[0].ended).toBe(false);
+  });
+
   it('waits out the whole pause where the words heard do not close a sentence, or the voice comes back', async () => {
     const { asr, vad, engine } = await started();
     vad.worker.say('speech_start');
@@ -753,5 +778,117 @@ describe('whether what is written closes a sentence (fork)', () => {
     for (const text of ['撞倒摄影师的汽车司机，未必。', '昨日友達と。', 'I think that.', '然后呢', '그리고', '。', '']) expect(endsTurn(text), text).toBe(false);
     // Words that only look like an ending (아까, 나보다, 필요, 酒吧), and a mark that holds the sentence open.
     for (const text of ['아까，', '나보다…', '필요', '我们去酒吧', '今日はいい天気ですね、', 'そうですけど…']) expect(endsTurn(text), text).toBe(false);
+  });
+});
+
+describe("a stretch named outside the speaker's languages", () => {
+  const heard = async (among: readonly string[] = ['zh', 'ko']) => {
+    const all = await started(fakeEngine(), { among, language: 'auto' });
+    all.vad.worker.say('speech_start');
+    await settled();
+    all.asr.feedAudio(seconds(2), RATE);
+    all.vad.worker.say('speech_end');
+    return all;
+  };
+
+  it('is read again, told the other language, and that reading is the result', async () => {
+    const { engine, seen } = await heard();
+    const given = engine.streams[0].samples;
+    engine.say({ id: 1, type: 'done', text: '売りががし。', language: 'ja' });
+    await settled();
+    expect(seen.results).toEqual([]);
+    expect(engine.streams[1]).toMatchObject({ language: 'ko', samples: given, ended: true });
+    engine.say({ id: 2, type: 'delta', text: '우리' });
+    expect(seen.partials).toEqual([]);
+    engine.say({ id: 2, type: 'done', text: '우리 아가씨.', language: 'ko' });
+    expect(seen.results).toEqual(['우리 아가씨.']);
+    expect(seen.languages).toEqual([undefined]);
+  });
+
+  it('is not written where the second reading is outside them too', async () => {
+    const { engine, seen } = await heard();
+    engine.say({ id: 1, type: 'done', text: 'badan agak', language: 'id' });
+    await settled();
+    engine.say({ id: 2, type: 'done', text: 'बारी, आगे', language: 'ko' });
+    expect(seen.results).toEqual(['']);
+    expect(seen.unsaid).toEqual([true]);
+    expect(engine.streams).toHaveLength(2);
+  });
+
+  it('is read in each of the others in turn', async () => {
+    const { engine, seen } = await heard(['zh', 'ko', 'en']);
+    engine.say({ id: 1, type: 'done', text: 'こんにちは', language: 'ja' });
+    await settled();
+    engine.say({ id: 2, type: 'done', text: 'हम्म', language: 'ko' });
+    await settled();
+    expect(engine.streams[2]).toMatchObject({ language: 'en', ended: true });
+    engine.say({ id: 3, type: 'done', text: 'Good morning.', language: 'en' });
+    expect(seen.results).toEqual(['Good morning.']);
+  });
+
+  it('is not written where the second reading never comes', async () => {
+    const { engine, seen, clock } = await heard();
+    engine.say({ id: 1, type: 'done', text: 'Kir Kirhum.', language: 'en' });
+    await settled();
+    clock.advance(LAST_WORDS_TIMEOUT_MS);
+    expect(seen.results).toEqual(['']);
+    expect(engine.streams[1].aborted).toBe(true);
+  });
+
+  it('is not written where the second reading fails', async () => {
+    const { engine, seen } = await heard();
+    engine.say({ id: 1, type: 'done', text: 'क्यों हो', language: 'hi' });
+    await settled();
+    engine.say({ id: 2, type: 'error', message: 'HTTP 503' });
+    expect(seen.results).toEqual(['']);
+    expect(seen.unsaid).toEqual([true]);
+  });
+
+  it('is not written from what was heard on the way, where the first reading never ends', async () => {
+    const { engine, seen, clock } = await heard();
+    engine.say({ id: 1, type: 'partial', text: 'क्यों हो' });
+    clock.advance(LAST_WORDS_TIMEOUT_MS);
+    expect(seen.results).toEqual(['']);
+    expect(seen.unsaid).toEqual([true]);
+  });
+
+  it('holds the next stretch until it is settled', async () => {
+    const { asr, vad, engine, seen } = await heard();
+    vad.worker.say('speech_start');
+    asr.feedAudio(seconds(1), RATE);
+    vad.worker.say('speech_end');
+    engine.say({ id: 1, type: 'done', text: 'क्यों हो', language: 'hi' });
+    await settled();
+    expect(engine.streams[1].language).toBe('ko');
+    engine.say({ id: 2, type: 'done', text: '결혼.', language: 'ko' });
+    await settled();
+    expect(engine.streams[2].language).toBe('');
+    engine.say({ id: 3, type: 'done', text: '你好。', language: 'zh' });
+    expect(seen.results).toEqual(['결혼.', '你好。']);
+  });
+
+  it('is read again where the engine named no language and the writing is outside them', async () => {
+    const { engine, seen } = await heard();
+    engine.say({ id: 1, type: 'done', text: 'क्यों हो' });
+    await settled();
+    expect(engine.streams[1]).toMatchObject({ language: 'ko' });
+    engine.say({ id: 2, type: 'done', text: '결혼.' });
+    expect(seen.results).toEqual(['결혼.']);
+  });
+
+  it('leaves a stretch named among them as it is', async () => {
+    const { engine, seen } = await heard();
+    engine.say({ id: 1, type: 'done', text: '我要发财。', language: 'zh' });
+    await settled();
+    expect(seen.results).toEqual(['我要发财。']);
+    expect(engine.streams).toHaveLength(1);
+  });
+
+  it('reads nothing again where no languages are named', async () => {
+    const { engine, seen } = await heard([]);
+    engine.say({ id: 1, type: 'done', text: '売りががし。', language: 'ja' });
+    await settled();
+    expect(seen.results).toEqual(['売りががし。']);
+    expect(engine.streams).toHaveLength(1);
   });
 });

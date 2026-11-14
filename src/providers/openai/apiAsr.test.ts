@@ -32,10 +32,10 @@ function fakeApi(...answers: Array<{ status?: number; body: unknown } | Error>) 
 }
 
 /** A recognizer over the two, started, with what it reported. */
-async function started(api: ReturnType<typeof fakeApi>, options: { key?: string; language?: string } = {}) {
+async function started(api: ReturnType<typeof fakeApi>, options: { key?: string; language?: string; among?: readonly string[] } = {}) {
   const vad = fakeVad();
   let clock = 1000;
-  const asr = createApiAsr({ baseUrl: 'https://api.example.com/v1/', model: 'whisper-large-v3', key: options.key, fetch: api.fetch, vad: () => vad.worker, now: () => (clock += 250) });
+  const asr = createApiAsr({ baseUrl: 'https://api.example.com/v1/', model: 'whisper-large-v3', key: options.key, fetch: api.fetch, vad: () => vad.worker, now: () => (clock += 250), ...(options.among ? { among: options.among } : {}) });
   const seen = { results: [] as Array<{ text: string; durationMs: number; recognitionTimeMs: number }>, starts: 0, errors: [] as string[], fatal: [] as string[] };
   asr.onResult = (result) => seen.results.push(result);
   asr.onSpeechStart = () => { seen.starts += 1; };
@@ -295,5 +295,40 @@ describe('the quick pace, of what is sent', () => {
     expect(api.calls).toHaveLength(1);
     const file = api.calls[0].form.get('file') as File;
     expect(file.size).toBe(44 + 6 * RATE * 2);
+  });
+});
+
+describe("a stretch the API names outside the speaker's languages", () => {
+  const said = async (api: ReturnType<typeof fakeApi>) => {
+    const all = await started(api, { language: 'auto', among: ['zh', 'ko'] });
+    all.vad.worker.say('speech_start');
+    all.asr.feedAudio(seconds(1), RATE);
+    all.vad.worker.say('speech_end');
+    await settled();
+    await settled();
+    return all;
+  };
+
+  it('is sent again, told the other language, and that reading is the result', async () => {
+    const api = fakeApi({ body: { text: '売りががし。', language: 'ja' } }, { body: { text: '우리 아가씨.', language: 'ko' } });
+    const { seen } = await said(api);
+    expect(api.calls.map((call) => call.form.get('language'))).toEqual([null, 'ko']);
+    expect(seen.results).toEqual([expect.objectContaining({ text: '우리 아가씨.' })]);
+    expect(seen.results[0]).not.toHaveProperty('language');
+  });
+
+  it('is not written where the second reading is outside them too', async () => {
+    const api = fakeApi({ body: { text: 'badan agak', language: 'id' } }, { body: { text: 'बारी, आगे', language: 'ko' } });
+    const { seen } = await said(api);
+    expect(api.calls).toHaveLength(2);
+    expect(seen.results).toEqual([]);
+    expect(seen.errors).toEqual([]);
+  });
+
+  it('is left as it is where it is named among them', async () => {
+    const api = fakeApi({ body: { text: '我要发财。', language: 'zh' } });
+    const { seen } = await said(api);
+    expect(api.calls).toHaveLength(1);
+    expect(seen.results).toEqual([expect.objectContaining({ text: '我要发财。', language: 'zh' })]);
   });
 });

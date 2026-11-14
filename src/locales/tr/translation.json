@@ -772,7 +772,8 @@
       },
       "tag_cpu": "Yalnızca CPU",
       "tagHint_cpu": "İşlemcide çalışır, ekran kartını oyuna bırakır. Oturum başladığında yüklenir.",
-      "noteNativeXAsr": "Konuştukça yazıya döker. Yalnızca işlemciyi kullanır, ekran kartı belleğinde yer kaplamaz: tek bir çekirdeğin yaklaşık beşte birini kullanır. Yalnızca Çince ve İngilizce desteklenir. Kişisel sözlüğünüzdeki kelimeler önceden verilmez; tanıma sonrasında telaffuza göre düzeltilir."
+      "noteNativeXAsr": "Konuştukça yazıya döker. Yalnızca işlemciyi kullanır, ekran kartı belleğinde yer kaplamaz: tek bir çekirdeğin yaklaşık beşte birini kullanır. Yalnızca Çince ve İngilizce desteklenir. Kişisel sözlüğünüzdeki kelimeler önceden verilmez; tanıma sonrasında telaffuza göre düzeltilir.",
+      "noteStreamRevise": "Karşı taraf konuşurken çeviri başlar, cümle bitince tamamı yeniden çevrilir. Yalnızca Çince, İngilizce ve Japonca desteklenir."
     }
   },
   "logsPanel": {

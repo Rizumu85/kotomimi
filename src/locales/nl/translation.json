@@ -772,7 +772,8 @@
       },
       "tag_cpu": "Alleen CPU",
       "tagHint_cpu": "Draait op de processor en laat de grafische kaart vrij voor je game. Wordt geladen zodra een sessie begint.",
-      "noteNativeXAsr": "Zet spraak direct om in tekst, alleen op de processor en zonder videogeheugen te gebruiken: ongeveer een vijfde van één processorkern. Ondersteunt alleen Chinees en Engels. Woorden uit je persoonlijke woordenlijst worden niet vooraf doorgegeven; na de herkenning worden ze op basis van hun klank gecorrigeerd."
+      "noteNativeXAsr": "Zet spraak direct om in tekst, alleen op de processor en zonder videogeheugen te gebruiken: ongeveer een vijfde van één processorkern. Ondersteunt alleen Chinees en Engels. Woorden uit je persoonlijke woordenlijst worden niet vooraf doorgegeven; na de herkenning worden ze op basis van hun klank gecorrigeerd.",
+      "noteStreamRevise": "Vertaalt al terwijl de ander nog praat en vertaalt de hele zin opnieuw zodra die klaar is. Alleen voor Chinees, Engels en Japans."
     }
   },
   "logsPanel": {

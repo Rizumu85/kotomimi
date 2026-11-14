@@ -772,7 +772,8 @@
       },
       "tag_cpu": "Nur CPU",
       "tagHint_cpu": "Läuft auf dem Prozessor und lässt die Grafikkarte fürs Spiel frei. Wird beim Sitzungsstart geladen.",
-      "noteNativeXAsr": "Schreibt beim Sprechen mit und nutzt nur den Prozessor, keinen Grafikspeicher: etwa ein Fünftel eines Prozessorkerns. Unterstützt nur Chinesisch und Englisch. Wörter aus dem persönlichen Wörterbuch werden nicht vorab übergeben, aber nach der Erkennung anhand der Aussprache korrigiert."
+      "noteNativeXAsr": "Schreibt beim Sprechen mit und nutzt nur den Prozessor, keinen Grafikspeicher: etwa ein Fünftel eines Prozessorkerns. Unterstützt nur Chinesisch und Englisch. Wörter aus dem persönlichen Wörterbuch werden nicht vorab übergeben, aber nach der Erkennung anhand der Aussprache korrigiert.",
+      "noteStreamRevise": "Übersetzt schon, während die andere Person spricht, und übersetzt am Satzende den ganzen Satz noch einmal. Nur für Chinesisch, Englisch und Japanisch."
     }
   },
   "logsPanel": {

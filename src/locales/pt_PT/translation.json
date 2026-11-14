@@ -772,7 +772,8 @@
       },
       "tag_cpu": "Só CPU",
       "tagHint_cpu": "Funciona no processador e deixa a placa gráfica livre para o jogo. É carregado ao iniciar uma sessão.",
-      "noteNativeXAsr": "Transcreve à medida que fala, usando apenas o processador, sem ocupar memória gráfica: cerca de um quinto de um núcleo. Só suporta chinês e inglês. Não recebe previamente as palavras do dicionário personalizado, mas corrige-as pelo som após o reconhecimento."
+      "noteNativeXAsr": "Transcreve à medida que fala, usando apenas o processador, sem ocupar memória gráfica: cerca de um quinto de um núcleo. Só suporta chinês e inglês. Não recebe previamente as palavras do dicionário personalizado, mas corrige-as pelo som após o reconhecimento.",
+      "noteStreamRevise": "Começa a traduzir enquanto a outra pessoa ainda está a falar e volta a traduzir a frase completa quando esta termina. Apenas chinês, inglês e japonês."
     }
   },
   "logsPanel": {

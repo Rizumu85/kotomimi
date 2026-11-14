@@ -93,6 +93,10 @@ const hanAs = (found: string | undefined, ...pair: string[]): string | undefined
 
 /** The languages written in a script of their own: any other is taken to be written in Latin letters. */
 const OWN_SCRIPT = new Set([...SCRIPTS.map(([language]) => language), 'zh', 'yue', 'ja']);
+/** How many letters of each script a text has, by the language `languageByScript` names it for (kana `ja`, Han `zh`). Latin letters are not counted. */
+export function lettersByScript(text: string): Array<readonly [language: string, letters: number]> {
+  return [...SCRIPTS, ['ja', KANA] as const, ['zh', HAN] as const].map(([language, letters]) => [language, text.match(letters)?.length ?? 0] as const).filter(([, n]) => n > 0);
+}
 
 /**
  * Fork: which of two languages a sentence is in, as far as its writing says — for a speaker who speaks both

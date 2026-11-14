@@ -772,7 +772,8 @@
       },
       "tag_cpu": "Solo CPU",
       "tagHint_cpu": "Funziona sul processore e lascia la scheda grafica al gioco. Si carica all'avvio della sessione.",
-      "noteNativeXAsr": "Trascrive mentre parli, usando solo il processore e senza occupare memoria video: circa il 20% di un singolo core. Supporta solo cinese e inglese. Le parole del dizionario personale non vengono fornite in anticipo, ma vengono comunque corrette in base alla pronuncia dopo il riconoscimento."
+      "noteNativeXAsr": "Trascrive mentre parli, usando solo il processore e senza occupare memoria video: circa il 20% di un singolo core. Supporta solo cinese e inglese. Le parole del dizionario personale non vengono fornite in anticipo, ma vengono comunque corrette in base alla pronuncia dopo il riconoscimento.",
+      "noteStreamRevise": "Inizia a tradurre mentre l’altra persona parla, poi ritraduce l’intera frase quando ha finito. Solo cinese, inglese e giapponese."
     }
   },
   "logsPanel": {

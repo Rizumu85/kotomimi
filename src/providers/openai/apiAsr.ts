@@ -16,6 +16,7 @@ import type { AsrInit, AsrLike } from '../localInference/engines';
 import { NO_KEY } from './textModel';
 import { phoneKey } from '../../lib/lan/phoneKeys';
 import { parseCode } from '../../lib/language/code';
+import { namedOutside, readAgainIn, writtenOutside } from '../../lib/language/identify';
 
 /** The detector's worker, as far as it is used here (`native-vad.worker.ts`: it posts the edges of speech and nothing else). */
 export interface VadWorker {
@@ -37,6 +38,8 @@ export interface ApiAsrOptions {
   now?: () => number;
   /** What an upload's time limit is kept on: the session's clock. */
   clock?: Pick<Clock, 'setTimeout'>;
+  /** Fork: the languages the speech may be in, every one named (`namedAmong`): a stretch the API names outside them is sent again, told the others in turn. */
+  among?: readonly string[];
 }
 
 /** Audio kept from before the detector says speech began: it says so a moment after the first sound. */
@@ -215,11 +218,8 @@ export function createApiAsr(options: ApiAsrOptions): AsrLike {
     queue = queue.then(async () => {
       if (stop.signal.aborted) return;
       const started = now();
-      const form = new FormData();
-      form.append('file', new Blob([wavOf(trimmed, sampleRate).buffer as ArrayBuffer], { type: 'audio/wav' }), 'speech.wav');
-      form.append('model', options.model);
-      form.append('response_format', 'json');
-      if (language) form.append('language', language);
+      const wav = wavOf(trimmed, sampleRate).buffer as ArrayBuffer;
+      const among = options.among ?? [];
       // Stopped with the recognizer, or given up on once the time is up: the body's reading included.
       const attempt = new AbortController();
       const onStop = () => attempt.abort();
@@ -227,23 +227,43 @@ export function createApiAsr(options: ApiAsrOptions): AsrLike {
       let late = false;
       const cancelTimer = clock.setTimeout(() => { late = true; attempt.abort(); }, UPLOAD_TIMEOUT_MS);
       try {
-        const response = await options.fetch(transcriptionsUrl(options.baseUrl), {
-          method: 'POST',
-          // With no key, a phone's where its owner set one (`phoneKeys.ts`), else the placeholder: a LocalAI refuses a
-          // page's upload that carries no Authorization header (`NO_KEY`).
-          headers: { Authorization: `Bearer ${options.key || phoneKey(options.baseUrl) || NO_KEY}` },
-          body: form,
-          signal: attempt.signal,
-        });
+        const upload = (told: string | undefined) => {
+          const form = new FormData();
+          form.append('file', new Blob([wav], { type: 'audio/wav' }), 'speech.wav');
+          form.append('model', options.model);
+          form.append('response_format', 'json');
+          if (told) form.append('language', told);
+          return options.fetch(transcriptionsUrl(options.baseUrl), {
+            method: 'POST',
+            // With no key, a phone's where its owner set one (`phoneKeys.ts`), else the placeholder: a LocalAI refuses a
+            // page's upload that carries no Authorization header (`NO_KEY`).
+            headers: { Authorization: `Bearer ${options.key || phoneKey(options.baseUrl) || NO_KEY}` },
+            body: form,
+            signal: attempt.signal,
+          });
+        };
+        const response = await upload(language);
         if (!response.ok) {
           const said = (await response.text().catch(() => '')).replace(/\s+/g, ' ').slice(0, 200);
           asr.onError?.(`The speech recognition API answered HTTP ${response.status}${said ? `: ${said}` : ''}`);
           return;
         }
         const body = (await response.json()) as { text?: unknown; language?: unknown } | null;
-        const text = String(body?.text ?? '').trim();
+        let text = String(body?.text ?? '').trim();
         // A language supplied in the request may only be echoed back, as with the native engine's readWhole.
-        const heard = !language && typeof body?.language === 'string' && parseCode(body.language)?.kind === 'tag' ? body.language : undefined;
+        let heard = !language && typeof body?.language === 'string' && parseCode(body.language)?.kind === 'tag' ? body.language : undefined;
+        // Fork: named outside the speaker's languages: sent again, told their others in turn; nothing is written
+        // where no reading comes out in a script of theirs (`namedAmong`, `hearingPlan.ts`).
+        if (text && among.length > 1 && (namedOutside(heard, among) || writtenOutside(text, among))) {
+          text = '';
+          heard = undefined;
+          for (const told of readAgainIn(among)) {
+            const second = await upload(told);
+            if (!second.ok) break;
+            const read = String(((await second.json()) as { text?: unknown } | null)?.text ?? '').trim();
+            if (read && !writtenOutside(read, among)) { text = read; break; }
+          }
+        }
         if (text) asr.onResult?.({ text, durationMs: Math.round((trimmed.length / sampleRate) * 1000), recognitionTimeMs: now() - started, ...(heard ? { language: heard } : {}) });
       } catch (error) {
         if (stop.signal.aborted) return;

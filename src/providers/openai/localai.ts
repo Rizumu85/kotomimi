@@ -68,7 +68,7 @@ import { alsoFirst, alsoInto, alsoListed, alsoSpoken, backInto, crossings, myRow
 import { NATIVE_MODELS, isApple, preferNative, type NativePick } from './localaiNative';
 import { NATIVE_DEFAULT_MODEL, appleAlso, coachBaseUrl, coachGap, coachIdle, coachUp, hearingPick, hearsByDownloaded, holdNativeForRun, nativeEither, nativeGap, nativeUp, restNative, translatorUp, nativeIdle, nativeModelFor, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_COACH_EXTRA, NATIVE_COACHES, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
-import { pairedLanguages, recognitionLimits, speechDetection, toldLanguage } from './hearingPlan';
+import { namedAmong, pairedLanguages, recognitionLimits, speechDetection, toldLanguage } from './hearingPlan';
 import { NATIVE_DEFAULT_TRANSLATOR, NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator, translatorRequest } from './nativeTranslators';
 import { LocalAITurnDetectionControls, LocalAITurnDetectionHelp, LocalAITurnDetectionSummary } from './LocalAIEngine';
 import { KotomimiIcon } from './LocalAIIcon';
@@ -1289,6 +1289,8 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
     theirLit: theirLitLanguages(s, runPair),
     alsoFirst: alsoFirst(s, runPair),
   });
+  // A speaker who speaks more than one: a stretch named outside them is read again (`namedAmong`).
+  const among = namedAmong(heard, source, also);
   const remoteSecond = pairedWith[0];
   const remotePair = s.asrVia === 'server'
     ? serverBilingual(s.asrModel, soloCoach
@@ -1339,6 +1341,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
       pairedWith,
       // Only a soft leg needs the model told a language of its own; a detector is asked for "auto".
       ...(heard === AUTO && !detector ? { language: toldLanguage(heard, modelHeard, false) } : {}),
+      ...(detector && among.length ? { among } : {}),
       vad: speechDetection(s).vad,
     };
   }

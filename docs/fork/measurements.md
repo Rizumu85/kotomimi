@@ -87,6 +87,8 @@ Thirty sentences of Japanese VRChat talk into Chinese:
 
 105 sentences (57 app stretches of Japanese VRChat talk as Qwen3-ASR read them, 48 casual lines among zh/ja/ko/en), blind-judged by GPT, RTX 5070 Ti (2026-11-07): serious errors / best of four / time a sentence / VRAM: Index-Translate 2B 4 / 26 / 0.19 s / 1.5 GB; PLaMo 3 Translate 2B 9 / 39 / 0.16 s / 1.9 GB; Hunyuan MT 2 1.8B 8 / 15 / 0.20 s / 1.4 GB; PLaMo 3 Translate 0.8B 11 / 25 / 0.08 s / 0.6 GB.
 
+Hy-MT2 StreamRevise v4, the 87 zh/en/ja stretches of that set: whole 19 serious (Index 20, Hunyuan MT 2 22); what live updates left 30 of 67, so a closed sentence is translated again. Live: 95 % of what showed kept, 0.09 s an update.
+
 ## Native feedback
 
 28 sentences of Japanese from a Chinese speaker, 14 wrong and 14 correct casual, RTX 5070 Ti:

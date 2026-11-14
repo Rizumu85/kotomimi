@@ -772,7 +772,8 @@
       },
       "tag_cpu": "CPU sahaja",
       "tagHint_cpu": "Berjalan pada pemproses, jadi kad grafik boleh digunakan untuk permainan. Dimuatkan apabila sesi bermula.",
-      "noteNativeXAsr": "Memaparkan teks semasa anda bercakap, hanya menggunakan pemproses tanpa menggunakan memori grafik: kira-kira satu perlima daripada satu teras. Hanya menyokong bahasa Cina dan Inggeris. Perkataan dalam kamus peribadi tidak diberikan terlebih dahulu; selepas pengecaman, perkataan tetap dibetulkan mengikut sebutan."
+      "noteNativeXAsr": "Memaparkan teks semasa anda bercakap, hanya menggunakan pemproses tanpa menggunakan memori grafik: kira-kira satu perlima daripada satu teras. Hanya menyokong bahasa Cina dan Inggeris. Perkataan dalam kamus peribadi tidak diberikan terlebih dahulu; selepas pengecaman, perkataan tetap dibetulkan mengikut sebutan.",
+      "noteStreamRevise": "Terjemahan mula dipaparkan semasa orang lain masih bercakap, kemudian seluruh ayat diterjemahkan semula apabila selesai. Hanya menyokong bahasa Cina, Inggeris dan Jepun."
     }
   },
   "logsPanel": {

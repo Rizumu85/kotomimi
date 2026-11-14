@@ -56,6 +56,8 @@ export class FakeAsr implements AsrLike {
 
   partial(text: string): void { this.onPartialResult?.(text); }
   /** `language`: what a recognizer hearing either of two says it heard (fork). */
+  /** Fork: a mishearing taken back (`unsaid`). */
+  unsaid(): void { this.onResult?.({ text: '', durationMs: 1000, recognitionTimeMs: 100, unsaid: true }); }
   final(text: string, language?: string): void { this.onResult?.({ text, durationMs: 1000, recognitionTimeMs: 100, ...(language ? { language } : {}) }); }
   speechStart(): void { this.onSpeechStart?.(); }
   /** An error message from the ready worker (one utterance). */

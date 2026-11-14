@@ -772,7 +772,8 @@
       },
       "tag_cpu": "Endast CPU",
       "tagHint_cpu": "Körs på processorn och lämnar grafikkortet åt spelet. Laddas när en session startar.",
-      "noteNativeXAsr": "Skriver medan du pratar och använder bara processorn, inget grafikminne: ungefär en femtedel av en kärna. Stöder bara kinesiska och engelska. Orden i din personliga ordlista ges inte till modellen i förväg, men texten rättas ändå efteråt utifrån uttalet."
+      "noteNativeXAsr": "Skriver medan du pratar och använder bara processorn, inget grafikminne: ungefär en femtedel av en kärna. Stöder bara kinesiska och engelska. Orden i din personliga ordlista ges inte till modellen i förväg, men texten rättas ändå efteråt utifrån uttalet.",
+      "noteStreamRevise": "Översätter medan den andra personen pratar och översätter sedan hela meningen igen när den är klar. Stöder bara kinesiska, engelska och japanska."
     }
   },
   "logsPanel": {

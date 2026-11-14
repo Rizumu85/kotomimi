@@ -83,7 +83,7 @@ Each piece is a segment of its own (`kotomimi_piece_N`), so answers pair one to 
 
 ## Ending a turn early
 
-`src/providers/openai/nativeAsr.ts` ends a stretch at a 500 ms pause when text written during it closes a sentence (`endsTurn` in `src/providers/openai/turnEnd.ts`). Partials end on a full stop anywhere, so words decide: Japanese polite forms, Korean final endings, Chinese question and mood particles, any question mark. Others wait out the whole pause. If the speaker goes on (`resume`), a new recognition begins; the detector is not reset, since recognizing the silence after wrote phantom sentences.
+`src/providers/openai/nativeAsr.ts` ends a stretch at a 500 ms pause when its text closes a sentence (`endsTurn`, `turnEnd.ts`: words decide, since partials end on a full stop anywhere) or the voice sounds finished (Smart Turn, asked by the detector's worker of the stretch's last 8 s). Others wait out the whole pause. If the speaker goes on (`resume`), a new recognition begins; the detector is not reset, since recognizing the silence after wrote phantom sentences.
 
 ## Translation context
 

@@ -2,7 +2,7 @@
  * Fork: how a leg is heard, decided once for every place that hears it (`hearingPlan.ts`).
  */
 import { describe, expect, it } from 'vitest';
-import { otherOfPair, pairedLanguages, recognitionLimits, speechDetection, toldLanguage } from './hearingPlan';
+import { namedAmong, otherOfPair, pairedLanguages, recognitionLimits, speechDetection, toldLanguage } from './hearingPlan';
 
 const PAIR = { source: 'zh-CN', target: 'ja' };
 
@@ -47,5 +47,17 @@ describe('how a leg is heard', () => {
     expect(recognitionLimits('apple-speech', 'ja')).toEqual(recognitionLimits('apple-speech:ja'));
     expect(recognitionLimits('apple-speech')).toBeUndefined();
     expect(recognitionLimits('whisper-1')).toBeUndefined();
+  });
+});
+
+describe('the languages a detected leg is named among', () => {
+  it('are the speaker’s own and the others they speak, by base code', () => {
+    expect(namedAmong('auto', 'zh-CN', ['ko', 'en-US', 'ko'])).toEqual(['zh', 'ko', 'en']);
+  });
+
+  it('are none for a leg told its language, one with no others, or one that may be in any', () => {
+    expect(namedAmong('zh-CN', 'zh-CN', ['ko'])).toEqual([]);
+    expect(namedAmong('auto', 'zh-CN', [])).toEqual([]);
+    expect(namedAmong('auto', 'zh-CN', ['ko', 'auto'])).toEqual([]);
   });
 });

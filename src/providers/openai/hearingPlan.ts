@@ -94,6 +94,20 @@ export function pairedLanguages(input: {
 }
 
 /**
+ * The languages a leg left to be detected may be in, where every one of them is named: the speaker's own first, then
+ * the others they speak. Empty where the leg is told its language, or any language may come (the other side's).
+ *
+ * A recognizer that names a language outside them has misheard — an accent, mostly: a learner's Korean was written as
+ * Hindi, Arabic and Japanese (22 of some 250 lines, 2026-11-12). Such a stretch is read once more, told each of the
+ * others in turn (`readAgainIn`; the speaker's own is seldom what was misheard), and is not written at all where no
+ * reading comes out in a script of theirs (`writtenOutside`): what stood there was never something they said.
+ */
+export function namedAmong(heard: string, own: string, others: readonly string[]): string[] {
+  if (heard !== AUTO || others.length === 0 || others.some((other) => baseOf(other) === 'auto')) return [];
+  return [own, ...others].map(baseOf).filter((code, at, all) => code !== '' && all.indexOf(code) === at);
+}
+
+/**
  * How long one recognition may run on a model this app knows, wherever it runs: by its id, and — the system's own
  * recognition, which a computer names by language (`apple-speech:ja`) and a device by itself (`apple-speech`) — by
  * the language it hears. Undefined for a model this app does not know.

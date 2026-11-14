@@ -245,9 +245,9 @@ describe('the translation runtime', () => {
       expect(build.sha256).toMatch(/^[0-9a-f]{64}$/);
       expect(build.exe).toMatch(/llama-server(\.exe)?$/);
     }
-    expect(Object.keys(TRANSLATORS)).toEqual(['index-translate-2b', 'hy-mt2-1.8b', 'plamo-3-translate-2b', 'plamo-3-translate-0.8b', 'hy-mt1.5-1.8b']);
+    expect(Object.keys(TRANSLATORS)).toEqual(['index-translate-2b', 'hy-mt2-1.8b', 'hy-mt2-streamrevise-v4', 'plamo-3-translate-2b', 'plamo-3-translate-0.8b', 'hy-mt1.5-1.8b']);
     for (const model of Object.values(TRANSLATORS)) {
-      expect(model.url).toMatch(/^https:\/\/huggingface\.co\/(IndexTeam|tencent|pfnet)\/[^/]+\/resolve\/[0-9a-f]{40}\//);
+      expect(model.url).toMatch(/^https:\/\/huggingface\.co\/(IndexTeam|tencent|pfnet|febilly)\/[^/]+\/resolve\/[0-9a-f]{40}\//);
       expect(model.url.endsWith(`/${model.file}`)).toBe(true);
       expect(model.sha256).toMatch(/^[0-9a-f]{64}$/);
       expect(model.bytes).toBeGreaterThan(500_000_000);

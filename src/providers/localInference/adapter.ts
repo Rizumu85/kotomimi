@@ -454,11 +454,16 @@ class LocalSession implements AdapterSession {
    * closing a segment its partials opened with its last text. AST: the final
    * already is the translation — no source segment.
    */
-  private final(result: { text: string; durationMs: number; recognitionTimeMs: number; language?: string }): void {
+  private final(result: { text: string; durationMs: number; recognitionTimeMs: number; language?: string; unsaid?: true }): void {
     if (this.ended) return;
     const text = result.text.trim();
     if (!text) {
       this.cut?.reset();
+      // Fork: a mishearing the recognizer takes back: its segment closes empty, not with what the partials showed.
+      if (result.unsaid && this.utterance?.text) {
+        this.utterance.text = '';
+        this.emit('segmentText', { ref: this.utterance.ref, text: '' });
+      }
       this.abandonUtterance();
       return;
     }

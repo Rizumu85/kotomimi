@@ -772,7 +772,8 @@
       },
       "tag_cpu": "Chỉ dùng CPU",
       "tagHint_cpu": "Chạy trên bộ xử lý, nhường card đồ họa cho game. Được tải khi bắt đầu phiên.",
-      "noteNativeXAsr": "Hiện chữ ngay khi bạn nói, chỉ dùng bộ xử lý, không chiếm bộ nhớ đồ họa: dùng khoảng một phần năm của một lõi. Chỉ hỗ trợ tiếng Trung và tiếng Anh. Các từ trong từ điển cá nhân không được cung cấp trước cho bộ nhận dạng, nhưng vẫn được sửa theo cách phát âm sau khi nhận dạng."
+      "noteNativeXAsr": "Hiện chữ ngay khi bạn nói, chỉ dùng bộ xử lý, không chiếm bộ nhớ đồ họa: dùng khoảng một phần năm của một lõi. Chỉ hỗ trợ tiếng Trung và tiếng Anh. Các từ trong từ điển cá nhân không được cung cấp trước cho bộ nhận dạng, nhưng vẫn được sửa theo cách phát âm sau khi nhận dạng.",
+      "noteStreamRevise": "Bắt đầu dịch khi người bên kia vẫn đang nói, rồi dịch lại cả câu khi họ nói xong. Chỉ hỗ trợ tiếng Trung, tiếng Anh và tiếng Nhật."
     }
   },
   "logsPanel": {

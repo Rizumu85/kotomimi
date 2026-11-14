@@ -14,6 +14,7 @@ import type { VadWebConfig } from '../types';
 import { resolveVadThresholds } from './_shared/vad-thresholds';
 import { resolveMaxSpeechFrames } from './_shared/max-speech-frames';
 import { SileroInput, SILERO_INPUT_SAMPLES } from './_shared/silero-input';
+import { turnFeatures, TURN_BANDS, TURN_FRAMES, TURN_SAMPLES, TURN_THRESHOLD } from './_shared/smart-turn';
 
 const VAD_SAMPLE_RATE = 16000;
 const VAD_FRAME_SAMPLES = 512; // 32ms @ 16kHz
@@ -38,6 +39,23 @@ let paused = false;
 let realSpeech = false;
 let positiveThreshold = 0.3;
 let negativeThreshold = 0.15;
+/**
+ * Fork: whether the speaker has finished, heard in the voice (Smart Turn, `_shared/smart-turn.ts`): asked a fifth of
+ * a second into a silence, of the stretch's sound up to there, and said with the short pause when that comes
+ * (`turn`). On eight minutes of conversation it ended 23 of 41 finished turns half a second sooner, where the words
+ * alone ended 7 (2026-11-12). Not asked of a stretch with under a second of voice: of 「お。」 it said yes.
+ */
+const TURN_AFTER_FRAMES = 6;
+const TURN_LEAST_FRAMES = Math.ceil(1000 / VAD_FRAME_MS);
+/** Sound kept from before the detector said the stretch began: it says so a moment after the first sound. */
+const TURN_LEAD_SAMPLES = VAD_SAMPLE_RATE / 2;
+let turnSession: InferenceSession | null = null;
+/** The last eight seconds heard, in a ring. */
+const recent = new Float32Array(TURN_SAMPLES);
+let recentAt = 0;
+let stretchFrames = 0;
+let turnWanted = false;
+let turnSaid = false;
 
 // The longest speech one segment runs. Not the client's to raise on this
 // path: the sidecar never receives the cap and keeps backstops of its own —
@@ -58,7 +76,7 @@ let negativeThreshold = 0.15;
 const NATIVE_MAX_SPEECH_SECONDS = 19;
 
 type WorkerInbound =
-  | { type: 'init'; ortWasmBaseUrl?: string; vadModelUrl?: string; vadConfig?: VadWebConfig }
+  | { type: 'init'; ortWasmBaseUrl?: string; vadModelUrl?: string; turnModelUrl?: string; vadConfig?: VadWebConfig }
   | { type: 'audio'; pcm: Int16Array; sampleRate: number }
   | { type: 'flush' }
   | { type: 'dispose' };
@@ -70,6 +88,8 @@ type WorkerOutbound =
   | { type: 'speech_end'; forced?: true }
   | { type: 'speech_cancel' }
   | { type: 'pause' }
+  // Fork: after a `pause`, where the voice before it sounded finished.
+  | { type: 'turn' }
   | { type: 'resume' }
   | { type: 'error'; message: string };
 
@@ -151,6 +171,21 @@ async function initVad(vadConfig?: VadWebConfig, vadModelUrl?: string): Promise<
   post({ type: 'ready' });
 }
 
+/** Whether the stretch's sound so far, up to the frame just heard, is a finished turn. A model that fails says no. */
+async function soundsFinished(): Promise<boolean> {
+  if (!turnSession) return false;
+  const length = Math.min(TURN_SAMPLES, stretchFrames * VAD_FRAME_SAMPLES + TURN_LEAD_SAMPLES);
+  const sound = new Float32Array(length);
+  for (let i = 0; i < length; i += 1) sound[i] = recent[(recentAt - length + i + 2 * TURN_SAMPLES) % TURN_SAMPLES];
+  try {
+    const result = await turnSession.run({ input_features: new Tensor('float32', turnFeatures(sound), [1, TURN_BANDS, TURN_FRAMES]) });
+    return ((Object.values(result)[0] as Tensor).data[0] as number) >= TURN_THRESHOLD;
+  } catch {
+    turnSession = null;
+    return false;
+  }
+}
+
 async function feedAudio(samples: Int16Array, sampleRate: number): Promise<void> {
   if (!vadSession || !frameProcessor) return;
   const resampled = resampleInt16ToFloat32_16k(samples, sampleRate);
@@ -162,6 +197,8 @@ async function feedAudio(samples: Int16Array, sampleRate: number): Promise<void>
   while (audioBuffer.length >= VAD_FRAME_SAMPLES) {
     const frame = audioBuffer.slice(0, VAD_FRAME_SAMPLES);
     audioBuffer = audioBuffer.slice(VAD_FRAME_SAMPLES);
+    for (let i = 0; i < frame.length; i += 1) recent[(recentAt + i) % TURN_SAMPLES] = frame[i];
+    recentAt = (recentAt + frame.length) % TURN_SAMPLES;
     const events: FrameProcessorEvent[] = [];
     await frameProcessor.process(frame, (ev) => events.push(ev));
     for (const ev of events) {
@@ -174,6 +211,7 @@ async function feedAudio(samples: Int16Array, sampleRate: number): Promise<void>
           break;
         case Message.SpeechStart:
           speechFramesSinceStart = 0;
+          stretchFrames = 0;
           realSpeech = false;
           post({ type: 'speech_start' });
           break;
@@ -189,7 +227,13 @@ async function feedAudio(samples: Int16Array, sampleRate: number): Promise<void>
           break;
       }
     }
+    if (turnWanted) {
+      turnWanted = false;
+      turnSaid = await soundsFinished();
+      if (!frameProcessor) return;
+    }
     if (frameProcessor.speaking) {
+      stretchFrames++;
       speechFramesSinceStart++;
       if (speechFramesSinceStart >= maxSpeechFrames) {
         const endEvents: FrameProcessorEvent[] = [];
@@ -211,15 +255,23 @@ function heardFrame(probability: number): void {
   if (!frameProcessor?.speaking) {
     quietFrames = 0;
     paused = false;
+    turnSaid = false;
   } else if (probability >= positiveThreshold) {
     quietFrames = 0;
+    turnSaid = false;
     if (paused) {
       paused = false;
       post({ type: 'resume' });
     }
-  } else if (probability < negativeThreshold && !paused && ++quietFrames >= shortPauseFrames && realSpeech) {
-    paused = true;
-    post({ type: 'pause' });
+  } else if (probability < negativeThreshold && !paused) {
+    quietFrames += 1;
+    if (quietFrames === TURN_AFTER_FRAMES && turnSession && realSpeech && shortPauseFrames !== Infinity && stretchFrames - quietFrames >= TURN_LEAST_FRAMES) turnWanted = true;
+    if (quietFrames >= shortPauseFrames && realSpeech) {
+      paused = true;
+      post({ type: 'pause' });
+      if (turnSaid) post({ type: 'turn' });
+      turnSaid = false;
+    }
   }
 }
 
@@ -269,6 +321,10 @@ async function handleMessage(msg: WorkerInbound): Promise<void> {
       if (msg.ortWasmBaseUrl && ortEnv?.wasm) {
         ortEnv.wasm.wasmPaths = msg.ortWasmBaseUrl;
       }
+      // Without it the detector is what it was: a stretch then ends early by its words alone.
+      turnSession = msg.turnModelUrl ? await InferenceSession.create(msg.turnModelUrl, { executionProviders: ['wasm'] }).catch(() => null) : null;
+      // Run once on nothing: its first run is the slow one, and a check has a third of a second.
+      await turnSession?.run({ input_features: new Tensor('float32', new Float32Array(TURN_BANDS * TURN_FRAMES), [1, TURN_BANDS, TURN_FRAMES]) }).catch(() => { turnSession = null; });
       await initVad(msg.vadConfig, msg.vadModelUrl);
       break;
     case 'audio':
@@ -280,6 +336,8 @@ async function handleMessage(msg: WorkerInbound): Promise<void> {
     case 'dispose':
       vadSession?.session?.release?.();
       vadSession = null;
+      void turnSession?.release?.();
+      turnSession = null;
       frameProcessor = null;
       audioBuffer = new Float32Array(0);
       break;

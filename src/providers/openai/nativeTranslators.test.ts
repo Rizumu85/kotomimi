@@ -14,7 +14,7 @@ import { buildLocalAI, checkLocalAIWithNative, localaiProvider, LOCALAI_DEFAULTS
 import { translatesNatively } from './localaiDevice';
 import type { LocalAIModel } from './localaiModels';
 import { translatorBaseUrl, translatorGap } from './localaiNative';
-import { BEFORE_SLOT, NATIVE_DEFAULT_TRANSLATOR, NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator, TEXT_SLOT, translatorRequest } from './nativeTranslators';
+import { BEFORE_SLOT, NATIVE_DEFAULT_TRANSLATOR, NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator, TEXT_SLOT, translatorRequest, reviseLanguage, reviseRequest } from './nativeTranslators';
 import { SHARED } from './testing';
 import { completeText } from './textModel';
 
@@ -73,12 +73,50 @@ describe('the words each translation model is asked with', () => {
     expect(nativeTranslates(nativeTranslator('hy-mt2-1.8b'), 'auto', 'zh-CN')).toBe(true);
     expect(nativeTranslates(nativeTranslator('hy-mt2-1.8b'), 'ja', 'sw')).toBe(false);
     expect(nativeTranslator('gone').id).toBe(NATIVE_DEFAULT_TRANSLATOR);
-    expect(NATIVE_TRANSLATORS.map((m) => m.id)).toEqual(['index-translate-2b', 'plamo-3-translate-2b', 'hy-mt2-1.8b', 'plamo-3-translate-0.8b', 'hy-mt1.5-1.8b']);
+    expect(NATIVE_TRANSLATORS.map((m) => m.id)).toEqual(['index-translate-2b', 'plamo-3-translate-2b', 'hy-mt2-1.8b', 'hy-mt2-streamrevise-v4', 'plamo-3-translate-0.8b', 'hy-mt1.5-1.8b']);
     // PLaMo 3 Translate: its card's list, without Cantonese.
     expect(nativeTranslates(nativeTranslator('plamo-3-translate-2b'), 'ja', 'zh-TW')).toBe(true);
     expect(nativeTranslates(nativeTranslator('plamo-3-translate-2b'), 'ja', 'yue')).toBe(false);
     // The older Hunyuan model is no longer offered: its successor does all it does. It stays for a computer that has it.
     expect(NATIVE_TRANSLATORS.filter((m) => m.retired).map((m) => m.id)).toEqual(['hy-mt1.5-1.8b']);
+  });
+
+  it('asks the model that revises as its card does: plainly the first time, then with its last text and answer (fork)', () => {
+    const model = nativeTranslator('hy-mt2-streamrevise-v4');
+    expect(nativeTranslates(model, 'ja', 'zh-CN')).toBe(true);
+    expect(nativeTranslates(model, 'ko', 'zh-CN')).toBe(false);
+    const request = translatorRequest(model, 'ja', 'zh-CN');
+    expect(request.wrap).toBe(`Translate the following text from Japanese into Chinese. Note that you should only output the translated result without any additional explanation:\n\n${TEXT_SLOT}`);
+    expect(request.extra).toEqual({ temperature: 0, max_tokens: 512 });
+    expect(request.revise).toEqual({ source: 'Japanese', target: 'Chinese' });
+    // A source left to be detected: no language is named in the plain request, and each sentence's own is told later.
+    const detected = translatorRequest(model, 'auto', 'zh-CN');
+    expect(detected.wrap.startsWith('Translate the following text into Chinese.')).toBe(true);
+    expect(detected.revise).toEqual({ target: 'Chinese' });
+    expect(reviseLanguage('ja')).toBe('Japanese');
+    expect(reviseLanguage('zh-TW')).toBe('Chinese');
+    expect(reviseLanguage('ko')).toBeNull();
+    expect(reviseLanguage('auto')).toBeNull();
+    // Another model revises nothing.
+    expect(translatorRequest(nativeTranslator('hy-mt2-1.8b'), 'ja', 'zh-CN').revise).toBeUndefined();
+
+    const languages = { source: 'Japanese', target: 'Chinese' };
+    expect(reviseRequest(languages, '薬を')).toBe('Translate the following text from Japanese into Chinese. Note that you should only output the translated result without any additional explanation:\n\n薬を');
+    expect(reviseRequest(languages, '薬を飲んだ', { source: '薬を', translation: '药' })).toBe([
+      '[Background Information]',
+      'Previous version of the current source:',
+      '薬を',
+      '',
+      'Previous translation of the current source:',
+      '药',
+      '',
+      'When the source meaning has not changed, preserve the still-correct prefix of the previous translation whenever possible. When content is added or corrected, accuracy and completeness take priority.',
+      '',
+      'Please translate the following text from Japanese into Chinese, taking the provided background information into consideration.',
+      '',
+      '[Source Text]',
+      '薬を飲んだ',
+    ].join('\n'));
   });
 
   it('asks PLaMo 3 Translate in its own form: the sentence alone, the languages by its codes, the source left out where it is to be detected', () => {

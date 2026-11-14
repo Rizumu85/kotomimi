@@ -254,6 +254,16 @@ const TRANSLATORS = {
     sha256: 'dc5f44fcf1fa496ee7ad725982c0c8c553a4de00259b53af84c4b89fb0c06699',
     languages: HUNYUAN_LANGUAGES,
   },
+  // Hunyuan MT 2 1.8B tuned to translate a sentence while it is still being said (febilly, Apache 2.0): told its own
+  // last answer, it keeps what still stands and writes on. Chinese, English and Japanese only. The page asks it both
+  // ways (`reviseRequest` in src/providers/openai/nativeTranslators.ts).
+  'hy-mt2-streamrevise-v4': {
+    file: 'Hy-MT2-1.8B-StreamRevise-v4-Q4_K_M.gguf',
+    url: 'https://huggingface.co/febilly/Hy-MT2-1.8B-StreamRevise-v4-GGUF/resolve/e831109ad7153a2476d298f2cb14ab930b5e9b4f/Hy-MT2-1.8B-StreamRevise-v4-Q4_K_M.gguf',
+    bytes: 1069288640,
+    sha256: '3bc3d83a15e9770338eee58183571f10b6af0adcef1bb65544feae4056266620',
+    languages: ['zh', 'en', 'ja'],
+  },
   // PLaMo 3 Translate (Preferred Networks), free for non-commercial use only (the PLaMo Community License): it needs
   // llama.cpp b12182 or later, which reads its tokenizer.
   'plamo-3-translate-2b': {

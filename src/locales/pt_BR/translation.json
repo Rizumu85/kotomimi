@@ -772,7 +772,8 @@
       },
       "tag_cpu": "Só CPU",
       "tagHint_cpu": "Roda no processador e deixa a placa de vídeo livre para o jogo. É carregado ao iniciar uma sessão.",
-      "noteNativeXAsr": "Transcreve enquanto você fala, usando só o processador, sem ocupar memória de vídeo: cerca de um quinto de um núcleo. Só oferece suporte a chinês e inglês. As palavras do dicionário personalizado não são fornecidas antes do reconhecimento, mas o texto é corrigido depois com base na pronúncia."
+      "noteNativeXAsr": "Transcreve enquanto você fala, usando só o processador, sem ocupar memória de vídeo: cerca de um quinto de um núcleo. Só oferece suporte a chinês e inglês. As palavras do dicionário personalizado não são fornecidas antes do reconhecimento, mas o texto é corrigido depois com base na pronúncia.",
+      "noteStreamRevise": "Começa a traduzir enquanto a outra pessoa ainda fala e traduz a frase inteira de novo quando ela termina. Apenas chinês, inglês e japonês."
     }
   },
   "logsPanel": {

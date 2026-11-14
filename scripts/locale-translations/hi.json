@@ -1931,6 +1931,10 @@
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
     "text": "जापानी VRChat बातचीत के परीक्षण में काना अक्षर नहीं लिखता, इसलिए जापानी टेक्स्ट पढ़कर समझना मुश्किल है।"
   },
+  "providers.localai.noteStreamRevise": {
+    "en": "Translates while the other side is still speaking, then once more when the sentence ends. Chinese, English and Japanese only.",
+    "text": "सामने वाला बोल रहा हो तभी अनुवाद शुरू हो जाता है। वाक्य पूरा होने पर उसका फिर से अनुवाद होता है। सिर्फ़ चीनी, अंग्रेज़ी और जापानी के लिए।"
+  },
   "providers.localai.noteVoxtral4b": {
     "en": "Measured on Japanese VRChat talk: quick — the text is about 2.6 s behind the voice — but about 27% of the characters wrong. For when speed matters more than accuracy.",
     "text": "जापानी VRChat बातचीत के परीक्षण में टेक्स्ट जल्दी आया (आवाज़ से करीब 2.6 सेकंड पीछे), लेकिन करीब 27% अक्षर गलत मिले। इसे तब चुनें जब गति ज़्यादा ज़रूरी हो और कुछ गलतियाँ स्वीकार हों।"

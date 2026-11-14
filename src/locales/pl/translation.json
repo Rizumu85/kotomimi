@@ -772,7 +772,8 @@
       },
       "tag_cpu": "Tylko CPU",
       "tagHint_cpu": "Działa na procesorze, zostawiając kartę graficzną grze. Ładuje się przy rozpoczęciu sesji.",
-      "noteNativeXAsr": "Zapisuje tekst na bieżąco, gdy mówisz. Korzysta tylko z procesora, bez zajmowania pamięci karty graficznej: zużywa około jednej piątej mocy jednego rdzenia. Obsługuje tylko chiński i angielski. Nie otrzymuje wcześniej słów z osobistego słownika, ale po rozpoznaniu mowy poprawia je na podstawie brzmienia."
+      "noteNativeXAsr": "Zapisuje tekst na bieżąco, gdy mówisz. Korzysta tylko z procesora, bez zajmowania pamięci karty graficznej: zużywa około jednej piątej mocy jednego rdzenia. Obsługuje tylko chiński i angielski. Nie otrzymuje wcześniej słów z osobistego słownika, ale po rozpoznaniu mowy poprawia je na podstawie brzmienia.",
+      "noteStreamRevise": "Tłumaczy, gdy rozmówca jeszcze mówi, a po zakończeniu zdania tłumaczy je ponownie w całości. Obsługuje tylko chiński, angielski i japoński."
     }
   },
   "logsPanel": {

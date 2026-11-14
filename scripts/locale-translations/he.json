@@ -1931,6 +1931,10 @@
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
     "text": "בבדיקת שיחה ביפנית ב-VRChat: לא מפיק תווי קאנה, ולכן היפנית כמעט בלתי קריאה."
   },
+  "providers.localai.noteStreamRevise": {
+    "en": "Translates while the other side is still speaking, then once more when the sentence ends. Chinese, English and Japanese only.",
+    "text": "התרגום מתחיל כשהצד השני עדיין מדבר, ובסוף המשפט מתבצע תרגום מחדש של המשפט כולו. תמיכה בסינית, באנגלית וביפנית בלבד."
+  },
   "providers.localai.noteVoxtral4b": {
     "en": "Measured on Japanese VRChat talk: quick — the text is about 2.6 s behind the voice — but about 27% of the characters wrong. For when speed matters more than accuracy.",
     "text": "בבדיקת שיחה ביפנית ב-VRChat: הטקסט מופיע מהר (בעיכוב של כ-2.6 שניות אחרי הדיבור), אך עם לא מעט שגיאות בתווים (כ-27%). מתאים כשהמהירות חשובה יותר מהדיוק."

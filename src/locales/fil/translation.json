@@ -772,7 +772,8 @@
       },
       "tag_cpu": "CPU lang",
       "tagHint_cpu": "Sa processor tumatakbo para malaya ang graphics card para sa laro. Nilo-load kapag nagsimula ang sesyon.",
-      "noteNativeXAsr": "Lumalabas ang teksto habang nagsasalita ka. Processor lang ang gamit, walang kinakain na video memory: mga ikalimang bahagi ng isang core. Chinese at English lang ang suportado. Hindi nito natatanggap nang maaga ang mga salita sa personal na diksyunaryo; itinatama pa rin ang mga ito ayon sa tunog pagkatapos makilala ang sinabi."
+      "noteNativeXAsr": "Lumalabas ang teksto habang nagsasalita ka. Processor lang ang gamit, walang kinakain na video memory: mga ikalimang bahagi ng isang core. Chinese at English lang ang suportado. Hindi nito natatanggap nang maaga ang mga salita sa personal na diksyunaryo; itinatama pa rin ang mga ito ayon sa tunog pagkatapos makilala ang sinabi.",
+      "noteStreamRevise": "Nagsasalin habang nagsasalita pa ang kausap, at muling isinasalin ang buong pangungusap kapag tapos na. Chinese, English at Japanese lang ang suportado."
     }
   },
   "logsPanel": {

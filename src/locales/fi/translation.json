@@ -772,7 +772,8 @@
       },
       "tag_cpu": "Vain CPU",
       "tagHint_cpu": "Toimii suorittimella ja jättää näytönohjaimen pelin käyttöön. Ladataan istunnon alkaessa.",
-      "noteNativeXAsr": "Kirjoittaa puheesi tekstiksi reaaliajassa pelkällä suorittimella, ilman näyttömuistia: käyttää noin viidesosan yhden ytimen tehosta. Tukee vain kiinaa ja englantia. Oman sanaston sanoja ei anneta sille etukäteen, mutta tunnistettu teksti korjataan silti ääntämyksen perusteella."
+      "noteNativeXAsr": "Kirjoittaa puheesi tekstiksi reaaliajassa pelkällä suorittimella, ilman näyttömuistia: käyttää noin viidesosan yhden ytimen tehosta. Tukee vain kiinaa ja englantia. Oman sanaston sanoja ei anneta sille etukäteen, mutta tunnistettu teksti korjataan silti ääntämyksen perusteella.",
+      "noteStreamRevise": "Kääntää jo toisen puhuessa ja kääntää koko lauseen uudelleen sen päätyttyä. Tukee vain kiinaa, englantia ja japania."
     }
   },
   "logsPanel": {
