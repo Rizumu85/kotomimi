@@ -200,7 +200,8 @@ function KotomimiThere({ address, onPick, disabled }: { address: string; onPick(
 }
 
 /** One more stage's API, with the key that opens it. */
-interface OtherApi { baseUrl: string; key: string }
+/** Another stage's API, and the stage's name: where a key taken from it is said to come from. */
+interface OtherApi { baseUrl: string; key: string; name: string }
 
 interface ApiFieldsProps {
   /** Distinguishes the three groups' ids. */
@@ -261,6 +262,7 @@ function ApiFields({ id, kind, others, baseUrl, model, needsKey, apiKey, urlPlac
     const beside = others.find((o) => o.key.trim() && sameAddress(o.baseUrl, next.baseUrl));
     if (beside) {
       key.current(beside.key);
+      setReused(beside.name);
       return;
     }
     if (!next.keyOf) return;
@@ -1160,7 +1162,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
             <ApiFields
               id="localai-asr-api"
               kind="asr"
-              others={[{ baseUrl: settings.translateBaseUrl, key: values.translateKey ?? '' }, { baseUrl: settings.coachBaseUrl, key: values.coachKey ?? '' }]}
+              others={[{ baseUrl: settings.translateBaseUrl, key: values.translateKey ?? '', name: t('providers.localai.translateStage') }, { baseUrl: settings.coachBaseUrl, key: values.coachKey ?? '', name: t('providers.localai.coachStage') }]}
               baseUrl={settings.asrApiBaseUrl}
               model={settings.asrApiModel}
               needsKey={settings.asrApiNeedsKey}
@@ -1218,7 +1220,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
           <ApiFields
             id="localai-translate-api"
             kind="text"
-            others={[{ baseUrl: settings.coachBaseUrl, key: values.coachKey ?? '' }, { baseUrl: settings.asrApiBaseUrl, key: values.asrKey ?? '' }]}
+            others={[{ baseUrl: settings.coachBaseUrl, key: values.coachKey ?? '', name: t('providers.localai.coachStage') }, { baseUrl: settings.asrApiBaseUrl, key: values.asrKey ?? '', name: t('providers.localai.hearStage') }]}
             baseUrl={settings.translateBaseUrl}
             model={settings.translateModel}
             needsKey={settings.translateNeedsKey}
@@ -1278,7 +1280,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
               <ApiFields
                 id="localai-coach-api"
                 kind="text"
-                others={[{ baseUrl: settings.translateBaseUrl, key: values.translateKey ?? '' }, { baseUrl: settings.asrApiBaseUrl, key: values.asrKey ?? '' }]}
+                others={[{ baseUrl: settings.translateBaseUrl, key: values.translateKey ?? '', name: t('providers.localai.translateStage') }, { baseUrl: settings.asrApiBaseUrl, key: values.asrKey ?? '', name: t('providers.localai.hearStage') }]}
                 baseUrl={settings.coachBaseUrl}
                 model={settings.coachModel}
                 needsKey={settings.coachNeedsKey}

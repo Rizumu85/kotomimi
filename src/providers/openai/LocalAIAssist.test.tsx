@@ -363,10 +363,17 @@ describe('the stage cards: an API chosen by its service', () => {
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ translateModel: 'gpt-5.4-mini' }));
   });
 
-  it('takes the key from another stage that already uses the same service', () => {
-    const { card, set } = draw({ settings: { translateAt: 'api', translateBaseUrl: 'https://api.groq.com/openai/v1', translateNeedsKey: true, asrVia: 'api' }, values: { endpoint: '', translateKey: 'gsk-1', asrKey: '' } });
-    fireEvent.change(card(HEAR).getByRole('combobox', { name: SERVICE }), { target: { value: 'groq' } });
+  it('takes the key from another stage that already uses the same service, and says where it came from', () => {
+    const settings = { ...LOCALAI_DEFAULTS, translateAt: 'api' as const, translateBaseUrl: 'https://api.groq.com/openai/v1', translateNeedsKey: true, asrVia: 'api' as const };
+    const set = vi.fn();
+    const props = { set, fill: vi.fn(), update: vi.fn(), pair: { source: 'zh-CN', target: 'ja' }, legs: ['speaker' as const], models: [], readiness: { state: 'unknown' } as Readiness, check: vi.fn() };
+    const view = render(<LocalAIAssist settings={settings} values={{ endpoint: '', translateKey: 'gsk-1', asrKey: '' }} {...props} />);
+    const hear = () => within(screen.getByRole('region', { name: HEAR }));
+    expect(hear().queryByText('providers.localai.apiKeyReused')).toBeNull();
+    fireEvent.change(hear().getByRole('combobox', { name: SERVICE }), { target: { value: 'groq' } });
     expect(set).toHaveBeenLastCalledWith('asrKey', 'gsk-1');
+    view.rerender(<LocalAIAssist settings={{ ...settings, asrApiBaseUrl: 'https://api.groq.com/openai/v1', asrApiNeedsKey: true }} values={{ endpoint: '', translateKey: 'gsk-1', asrKey: 'gsk-1' }} {...props} />);
+    expect(hear().getByText('providers.localai.apiKeyReused')).toBeTruthy();
   });
 
   it('takes the key the built-in provider of that service keeps, and says where it came from', async () => {
