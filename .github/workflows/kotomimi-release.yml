@@ -139,6 +139,7 @@ jobs:
           electron/update-download.test.js
           electron/update-manager.beta.test.js
           electron/vr-overlay.test.js
+          electron/ocr-shots.test.js
           src/app/sessionLags.test.ts
           src/app/sessionRecording.test.ts
           src/app/subtitleCapture.test.ts
@@ -208,7 +209,7 @@ jobs:
 
       - name: Verify the overlay helper was produced
         shell: bash
-        run: test -f vr-overlay/kotomimi-vr/kotomimi-vr.exe && test -f vr-overlay/kotomimi-vr/openvr_api.dll
+        run: test -f vr-overlay/kotomimi-vr/kotomimi-vr.exe && test -f vr-overlay/kotomimi-vr/openvr_api.dll && test -f vr-overlay/kotomimi-vr/kotomimi-shot.exe
 
       - name: Make the installer
         run: npx electron-forge make --arch=x64

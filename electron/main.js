@@ -21,6 +21,7 @@ const { webUrl, folderPath } = require('./open-guards.js');
 const { setupCaptionShare } = require('./caption-share.js');
 const { setupVRChat } = require('./vrchat.js');
 const { setupVrOverlay } = require('./vr-overlay.js');
+const { setupOcrShots } = require('./ocr-shots.js');
 const { createCloseHandshake } = require('./close-handshake.js');
 const { createWsHeaderRules } = require('./ws-header-rules.js');
 const { startLanServer } = require('./lan-server');
@@ -265,9 +266,14 @@ ipcMain.handle('app:close-ready', (event) => {
 });
 // Only a running or tearing-down session holds a close: anything else (the
 // setup wizard, a loading page) has nothing to save and may never answer.
+// Fork: a developer's collection of VRChat pictures follows the session too (electron/ocr-shots.js); null unless
+// `KOTOMIMI_OCR_SHOTS` names a folder.
+const ocrShots = setupOcrShots({ app });
 ipcMain.handle('app:session-busy', (event, busy) => {
   if (event.sender !== mainWindow?.webContents) return;
   closeHandshake.setSessionBusy(busy === true);
+  if (busy === true) ocrShots?.start();
+  else ocrShots?.stop();
 });
 
 // Appearance (spec 2026-10-22 §1): the renderer resolves the setting and

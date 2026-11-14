@@ -199,7 +199,9 @@ export default defineConfig(({ command, mode }) => {
             // Fork: the Mac's own speech recognition, through the helper the app ships
             'apple-speech': 'electron/apple-speech.js',
             // Fork: the SteamVR overlay, through the helper in vr-overlay/
-            'vr-overlay': 'electron/vr-overlay.js'
+            'vr-overlay': 'electron/vr-overlay.js',
+            // Fork: a developer's collection of VRChat pictures
+            'ocr-shots': 'electron/ocr-shots.js'
           },
           onstart(args) {
             // SOKUJI_DEV_NO_ELECTRON=1 serves the renderer alone, for headless

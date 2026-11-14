@@ -16,10 +16,15 @@ add_executable(kotomimi-vr src/main.cpp src/geometry.cpp src/gpu_memory.cpp)
 target_include_directories(kotomimi-vr PRIVATE ${OPENVR_DIR} src)
 target_link_libraries(kotomimi-vr PRIVATE ${OPENVR_DIR}/openvr_api.lib d3d11 dxgi pdh)
 target_compile_definitions(kotomimi-vr PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
+# Fork: one picture of the VRChat window (src/shot.cpp), for a developer's collection; no OpenVR in it.
+add_executable(kotomimi-shot src/shot.cpp)
+target_link_libraries(kotomimi-shot PRIVATE windowscodecs ole32 oleaut32)
+target_compile_definitions(kotomimi-shot PRIVATE NOMINMAX UNICODE _UNICODE)
 add_executable(geometry-test tests/geometry_test.cpp src/geometry.cpp)
 target_include_directories(geometry-test PRIVATE ${OPENVR_DIR} src)
 if(MSVC)
   target_compile_options(kotomimi-vr PRIVATE /W4 /utf-8)
+  target_compile_options(kotomimi-shot PRIVATE /W4 /utf-8)
   target_compile_options(geometry-test PRIVATE /W4 /utf-8)
 endif()
 # Beside the helper, its one library; and all three in kotomimi-vr/, which the app's package takes (forge.config.js).
@@ -29,4 +34,7 @@ add_custom_command(TARGET kotomimi-vr POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E make_directory ${SHIPPED}
   COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:kotomimi-vr> ${OPENVR_DIR}/openvr_api.dll ${SHIPPED}
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${OPENVR_DIR}/LICENSE ${SHIPPED}/OPENVR-LICENSE.txt)
+add_custom_command(TARGET kotomimi-shot POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${SHIPPED}
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:kotomimi-shot> ${SHIPPED})
 
