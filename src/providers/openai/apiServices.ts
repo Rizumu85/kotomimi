@@ -35,6 +35,12 @@ export interface ApiService {
    * once: a model that thinks before it answers is told not to.
    */
   quick?: Readonly<Record<string, unknown>>;
+  /**
+   * Its recognizer, where it is not asked the way OpenAI's is (`POST /audio/transcriptions`, a model named and a
+   * language told): the one the service has, at a path of its own under the address, sent the file and nothing
+   * else. There is no model to pick, and no language it can be told.
+   */
+  hears?: { path: string };
 }
 
 export const API_SERVICES: readonly ApiService[] = [
@@ -70,7 +76,9 @@ export const API_SERVICES: readonly ApiService[] = [
     name: 'DeepSeek',
     baseUrl: 'https://api.deepseek.com/v1',
     needsKey: true,
-    prefer: { text: [/^deepseek-chat$/, /^deepseek-flash$/, /^deepseek-v[\d.]+-flash$/] },
+    prefer: { asr: [], text: [/^deepseek-chat$/, /^deepseek-flash$/, /^deepseek-v[\d.]+-flash$/] },
+    // `POST /v1/tools/asr`: a file of at most 120 s, its language detected (api-docs.deepseek.com/guides/asr).
+    hears: { path: '/tools/asr' },
     // Its models think first unless told not to. Measured 2026-10-05 on the grammar-feedback sentences: 1.7-2 s an
     // answer (5-7 s now and then) with about 700 characters of thought, 0.9 s without — and every answer the same.
     quick: { thinking: { type: 'disabled' } },
@@ -112,6 +120,15 @@ const plain = (url: string): string => url.trim().replace(/\/+$/, '').toLowerCas
 
 /** What goes with a request to an address, where the service there is one that is asked in a way of its own. */
 export const quickOf = (baseUrl: string): Readonly<Record<string, unknown>> | undefined => API_SERVICES.find((s) => plain(s.baseUrl) === plain(baseUrl))?.quick;
+
+/**
+ * The recognizer at an address, where the service there has one of its own (`ApiService.hears`): where it is asked,
+ * and the name it goes by where a model's would stand.
+ */
+export function hearsOf(baseUrl: string): { path: string; name: string } | undefined {
+  const service = API_SERVICES.find((s) => s.hears && plain(s.baseUrl) === plain(baseUrl));
+  return service?.hears ? { path: service.hears.path, name: service.name } : undefined;
+}
 
 /** The services that can serve a stage of this kind. */
 export const servicesFor = (kind: ApiKind): readonly ApiService[] => API_SERVICES.filter((s) => s.prefer[kind] !== undefined);

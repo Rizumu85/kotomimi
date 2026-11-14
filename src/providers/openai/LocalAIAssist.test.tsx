@@ -287,7 +287,7 @@ describe('the stage cards: an API chosen by its service', () => {
 
   it('offers each stage the services that serve it, and a custom address last', () => {
     const { card } = draw({ settings: { asrVia: 'api', translateAt: 'api' } });
-    expect(names(card(HEAR).getByRole('combobox', { name: SERVICE }))).toEqual(['OpenAI', 'Groq', 'providers.localai.apiServiceSiliconFlow', 'providers.localai.apiServiceCustom']);
+    expect(names(card(HEAR).getByRole('combobox', { name: SERVICE }))).toEqual(['OpenAI', 'DeepSeek', 'Groq', 'providers.localai.apiServiceSiliconFlow', 'providers.localai.apiServiceCustom']);
     expect(names(card(TRANSLATE).getByRole('combobox', { name: SERVICE }))).toEqual(['OpenAI', 'Google Gemini', 'providers.localai.apiServiceArk', 'DeepSeek', 'Groq', 'providers.localai.apiServiceSiliconFlow', 'OpenRouter', 'providers.localai.apiServiceOllama', 'providers.localai.apiServiceCustom']);
     // Nothing chosen yet is a custom address: the fields as they were.
     expect((card(TRANSLATE).getByRole('combobox', { name: SERVICE }) as HTMLSelectElement).value).toBe('custom');
@@ -313,6 +313,14 @@ describe('the stage cards: an API chosen by its service', () => {
     expect(translate.queryByRole('switch', { name: 'providers.localai.asrApiNeedsKey' })).toBeNull();
     expect(translate.queryByText('providers.localai.asrApiNeedsKey')).toBeNull();
     expect(translate.getByLabelText('providers.localai.apiKey', { selector: 'input' })).toBeTruthy();
+  });
+
+  it('asks for no model where the service has one recognizer of its own, and for one where it serves text', () => {
+    const { card } = draw({ settings: { asrVia: 'api', asrApiBaseUrl: 'https://api.deepseek.com/v1', translateAt: 'api', translateBaseUrl: 'https://api.deepseek.com/v1' } });
+    expect((card(HEAR).getByRole('combobox', { name: SERVICE }) as HTMLSelectElement).value).toBe('deepseek');
+    expect(card(HEAR).queryByRole('combobox', { name: 'providers.localai.model' })).toBeNull();
+    expect(card(HEAR).getByLabelText('providers.localai.apiKey', { selector: 'input' })).toBeTruthy();
+    expect(card(TRANSLATE).getByRole('combobox', { name: 'providers.localai.model' })).toBeTruthy();
   });
 
   it('goes back to an address typed by hand on "custom": the address and the model are emptied', () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createVirtualClock } from '../../lib/contract/clock';
-import { apiLanguage, createApiAsr, transcriptionsUrl, UPLOAD_TIMEOUT_MS, wavOf, type VadWorker } from './apiAsr';
+import { apiLanguage, BUSY_WAIT_MS, createApiAsr, transcriptionsUrl, UPLOAD_TIMEOUT_MS, wavOf, type VadWorker } from './apiAsr';
 
 const RATE = 24000;
 const VAD = { threshold: 0.5, minSilenceDuration: 1.4, minSpeechDuration: 0.4, maxSpeechDuration: 20 };
@@ -32,10 +32,10 @@ function fakeApi(...answers: Array<{ status?: number; body: unknown } | Error>) 
 }
 
 /** A recognizer over the two, started, with what it reported. */
-async function started(api: ReturnType<typeof fakeApi>, options: { key?: string; language?: string; among?: readonly string[] } = {}) {
+async function started(api: ReturnType<typeof fakeApi>, options: { key?: string; language?: string; among?: readonly string[]; baseUrl?: string; clock?: ReturnType<typeof createVirtualClock> } = {}) {
   const vad = fakeVad();
   let clock = 1000;
-  const asr = createApiAsr({ baseUrl: 'https://api.example.com/v1/', model: 'whisper-large-v3', key: options.key, fetch: api.fetch, vad: () => vad.worker, now: () => (clock += 250), ...(options.among ? { among: options.among } : {}) });
+  const asr = createApiAsr({ baseUrl: options.baseUrl ?? 'https://api.example.com/v1/', model: 'whisper-large-v3', key: options.key, fetch: api.fetch, vad: () => vad.worker, now: () => (clock += 250), ...(options.among ? { among: options.among } : {}), ...(options.clock ? { clock: options.clock } : {}) });
   const seen = { results: [] as Array<{ text: string; durationMs: number; recognitionTimeMs: number }>, starts: 0, errors: [] as string[], fatal: [] as string[] };
   asr.onResult = (result) => seen.results.push(result);
   asr.onSpeechStart = () => { seen.starts += 1; };
@@ -54,6 +54,10 @@ describe('the pieces of a transcription request', () => {
   it('goes to the base URL\'s own transcriptions path, however the base was typed', () => {
     expect(transcriptionsUrl('https://api.groq.com/openai/v1')).toBe('https://api.groq.com/openai/v1/audio/transcriptions');
     expect(transcriptionsUrl(' http://192.168.1.10:8080/v1/ ')).toBe('http://192.168.1.10:8080/v1/audio/transcriptions');
+  });
+
+  it("goes to a path of the service's own where it has a recognizer of its own", () => {
+    expect(transcriptionsUrl('https://api.deepseek.com/v1/')).toBe('https://api.deepseek.com/v1/tools/asr');
   });
 
   it('names the language by its two letters, and not at all when it is to be detected', () => {
@@ -295,6 +299,75 @@ describe('the quick pace, of what is sent', () => {
     expect(api.calls).toHaveLength(1);
     const file = api.calls[0].form.get('file') as File;
     expect(file.size).toBe(44 + 6 * RATE * 2);
+  });
+});
+
+describe('a service too busy to answer', () => {
+  const said = async (api: ReturnType<typeof fakeApi>) => {
+    const clock = createVirtualClock();
+    const all = await started(api, { clock });
+    all.vad.worker.say('speech_start');
+    all.asr.feedAudio(seconds(1), RATE);
+    all.vad.worker.say('speech_end');
+    await settled();
+    return { ...all, clock };
+  };
+
+  it('is asked once more after a moment, and that answer is the result', async () => {
+    const api = fakeApi({ status: 503, body: 'busy' }, { body: { text: 'こんにちは' } });
+    const { seen, clock } = await said(api);
+    expect(api.calls).toHaveLength(1);
+    clock.advance(BUSY_WAIT_MS);
+    await settled();
+    await settled();
+    expect(api.calls).toHaveLength(2);
+    expect(seen.results.map((r) => r.text)).toEqual(['こんにちは']);
+    expect(seen.errors).toEqual([]);
+  });
+
+  it('is reported when it is busy the second time too', async () => {
+    const api = fakeApi({ status: 429, body: 'too many' }, { status: 429, body: 'too many' });
+    const { seen, clock } = await said(api);
+    clock.advance(BUSY_WAIT_MS);
+    await settled();
+    await settled();
+    expect(api.calls).toHaveLength(2);
+    expect(seen.errors).toEqual(['The speech recognition API answered HTTP 429: too many']);
+  });
+});
+
+describe('a service with a recognizer of its own (DeepSeek)', () => {
+  const said = async (api: ReturnType<typeof fakeApi>, among?: readonly string[]) => {
+    const all = await started(api, { baseUrl: 'https://api.deepseek.com/v1', key: 'sk-1', language: 'ja', ...(among ? { among } : {}) });
+    all.vad.worker.say('speech_start');
+    all.asr.feedAudio(seconds(1), RATE);
+    all.vad.worker.say('speech_end');
+    await settled();
+    await settled();
+    return all;
+  };
+
+  it('is sent the file and nothing else, at its own path, and its text is the result', async () => {
+    const api = fakeApi({ body: { request_id: 'r-1', text: 'こんにちは', duration_ms: 1000 } });
+    const { seen } = await said(api);
+    expect(api.calls[0].url).toBe('https://api.deepseek.com/v1/tools/asr');
+    expect(api.calls[0].headers).toEqual({ Authorization: 'Bearer sk-1' });
+    expect([...api.calls[0].form.keys()]).toEqual(['file']);
+    expect(seen.results.map((r) => r.text)).toEqual(['こんにちは']);
+  });
+
+  it("is not asked again for a stretch written outside the speaker's languages — it can be told no other — and that is not written", async () => {
+    const api = fakeApi({ body: { text: 'बारी, आगे' } });
+    const { seen } = await said(api, ['zh', 'ko']);
+    expect(api.calls).toHaveLength(1);
+    expect(seen.results).toEqual([]);
+    expect(seen.errors).toEqual([]);
+  });
+
+  it('writes a stretch in a language of theirs as it is', async () => {
+    const api = fakeApi({ body: { text: '우리 아가씨.' } });
+    const { seen } = await said(api, ['zh', 'ko']);
+    expect(seen.results.map((r) => r.text)).toEqual(['우리 아가씨.']);
   });
 });
 

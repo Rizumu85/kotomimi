@@ -53,6 +53,15 @@ describe('recognition by an API: the run it builds', () => {
     expect(configFor(SPEAKER, { ...API, asrApiNeedsKey: false }).device?.api).toEqual({ baseUrl: 'https://api.example.com/v1/', model: 'whisper-large-v3' });
   });
 
+  it("names no model to a service with a recognizer of its own (DeepSeek): it goes by the service's name", () => {
+    const deepseek = { ...API, asrApiBaseUrl: 'https://api.deepseek.com/v1', asrApiModel: '' };
+    expect(configFor(SPEAKER, deepseek).device).toMatchObject({ modelId: 'DeepSeek', api: { baseUrl: 'https://api.deepseek.com/v1', model: 'DeepSeek', key: 'asrKey' } });
+    // It takes no language, so a speaker of several is not heard again: their languages go with it, for what it writes outside them.
+    expect(configFor(SPEAKER, { ...deepseek, speakAlso: ['ja'] }).device?.among).toEqual(['zh', 'ja']);
+    // An API that is told the language is told the leg's own, and nothing more.
+    expect(configFor(SPEAKER, { ...API, speakAlso: ['ja'] }).device).not.toHaveProperty('among');
+  });
+
   it('asks a lent model that names the language (Qwen3-ASR) to detect it, as this computer\'s engine is asked', () => {
     const detect = { ...SPEAKER, direction: { source: 'auto', target: 'ja' } };
     const phone = { ...API, asrApiBaseUrl: 'http://192.168.4.28:8792/v1', asrApiModel: 'qwen3-asr-1.7b-q8', asrApiNeedsKey: false };

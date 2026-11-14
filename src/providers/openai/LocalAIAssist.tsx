@@ -290,21 +290,24 @@ function ApiFields({ id, kind, others, baseUrl, model, needsKey, apiKey, urlPlac
           <input type="text" className="kt-input" aria-label={t('providers.localai.asrApiBaseUrl')} value={baseUrl} onChange={(e) => onChange({ baseUrl: e.target.value })} placeholder={urlPlaceholder} spellCheck={false} disabled={disabled} />
         </Field>
       )}
-      <ApiModelPicker
-        id={id}
-        label={t('providers.localai.model')}
-        model={model}
-        placeholder={service ? t(service.modelHintKey ?? 'providers.localai.apiServiceModel') : modelPlaceholder}
-        baseUrl={baseUrl}
-        needsKey={needsKey}
-        apiKey={apiKey}
-        known={options.map((m) => m.id)}
-        service={service}
-        kind={kind}
-        onModel={(next) => onChange({ model: next })}
-        onTyping={setTyping}
-        disabled={disabled}
-      />
+      {/* A service with one recognizer of its own (`ApiService.hears`) has no model to pick. */}
+      {!(kind === 'asr' && service?.hears) && (
+        <ApiModelPicker
+          id={id}
+          label={t('providers.localai.model')}
+          model={model}
+          placeholder={service ? t(service.modelHintKey ?? 'providers.localai.apiServiceModel') : modelPlaceholder}
+          baseUrl={baseUrl}
+          needsKey={needsKey}
+          apiKey={apiKey}
+          known={options.map((m) => m.id)}
+          service={service}
+          kind={kind}
+          onModel={(next) => onChange({ model: next })}
+          onTyping={setTyping}
+          disabled={disabled}
+        />
+      )}
       {/* Whether a service wants a key is known; of an address typed by hand it is asked. */}
       {!service && <ToggleSwitch checked={needsKey} onChange={() => onChange({ needsKey: !needsKey })} label={t('providers.localai.asrApiNeedsKey')} disabled={disabled} />}
       {needsKey && (

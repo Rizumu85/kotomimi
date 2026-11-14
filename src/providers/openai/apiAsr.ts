@@ -1,6 +1,7 @@
 /**
  * Fork: a recognizer that is an API — any server with OpenAI's
- * `POST /audio/transcriptions` (OpenAI itself, Groq, a LocalAI). It stands
+ * `POST /audio/transcriptions` (OpenAI itself, Groq, a LocalAI), or a
+ * service with a recognizer of its own (`hearsOf`: DeepSeek). It stands
  * where this computer's own recognizer stands (`AsrLike`), so the rest of a
  * run does not know the difference: this computer still decides where a
  * sentence ends, with the same voice-activity detector and the same knobs,
@@ -14,6 +15,7 @@
 import { realClock, type Clock } from '../../lib/contract/clock';
 import type { AsrInit, AsrLike } from '../localInference/engines';
 import { NO_KEY } from './textModel';
+import { hearsOf } from './apiServices';
 import { phoneKey } from '../../lib/lan/phoneKeys';
 import { parseCode } from '../../lib/language/code';
 import { namedOutside, readAgainIn, writtenOutside } from '../../lib/language/identify';
@@ -52,12 +54,15 @@ const TAIL_KEPT_SECONDS = 0.3;
  * sleep — would hold every sentence after it, with nothing said.
  */
 export const UPLOAD_TIMEOUT_MS = 60_000;
+/** A service too busy to answer (too many requests, overloaded, timed out at its end) is asked once more, after this. */
+export const BUSY_WAIT_MS = 1000;
+const BUSY = new Set([429, 503, 504]);
 
 export const appVad = (): VadWorker => new Worker(new URL('../../lib/local-inference/workers/native-vad.worker.ts', import.meta.url), { type: 'module' }) as unknown as VadWorker;
 
-/** Where the transcription request goes, for a base URL as typed. */
+/** Where the transcription request goes, for a base URL as typed: a service's own path where it has one. */
 export function transcriptionsUrl(baseUrl: string): string {
-  return `${baseUrl.trim().replace(/\/+$/, '')}/audio/transcriptions`;
+  return `${baseUrl.trim().replace(/\/+$/, '')}${hearsOf(baseUrl)?.path ?? '/audio/transcriptions'}`;
 }
 
 /** The language as the API takes it — the two-letter code — or nothing for "detect it". */
@@ -105,6 +110,8 @@ export function createApiAsr(options: ApiAsrOptions): AsrLike {
   const now = options.now ?? (() => Date.now());
   const clock = options.clock ?? realClock;
   const stop = new AbortController();
+  /** A service's own recognizer takes the file and nothing else: no model is named to it, no language told. */
+  const bare = hearsOf(options.baseUrl) !== undefined;
   let worker: VadWorker | null = null;
   let language: string | undefined;
   let rate = 24000;
@@ -230,9 +237,11 @@ export function createApiAsr(options: ApiAsrOptions): AsrLike {
         const upload = (told: string | undefined) => {
           const form = new FormData();
           form.append('file', new Blob([wav], { type: 'audio/wav' }), 'speech.wav');
-          form.append('model', options.model);
-          form.append('response_format', 'json');
-          if (told) form.append('language', told);
+          if (!bare) {
+            form.append('model', options.model);
+            form.append('response_format', 'json');
+            if (told) form.append('language', told);
+          }
           return options.fetch(transcriptionsUrl(options.baseUrl), {
             method: 'POST',
             // With no key, a phone's where its owner set one (`phoneKeys.ts`), else the placeholder: a LocalAI refuses a
@@ -242,7 +251,17 @@ export function createApiAsr(options: ApiAsrOptions): AsrLike {
             signal: attempt.signal,
           });
         };
-        const response = await upload(language);
+        let response = await upload(language);
+        if (BUSY.has(response.status)) {
+          // Its answer is let go of unread: nothing of it is used, and the connection is not held for it.
+          void response.body?.cancel().catch(() => undefined);
+          // The wait ends with the attempt: a recognizer stopped meanwhile leaves no timer behind.
+          await new Promise<void>((resolve) => {
+            const cancel = clock.setTimeout(resolve, BUSY_WAIT_MS);
+            attempt.signal.addEventListener('abort', () => { cancel(); resolve(); }, { once: true });
+          });
+          response = await upload(language);
+        }
         if (!response.ok) {
           const said = (await response.text().catch(() => '')).replace(/\s+/g, ' ').slice(0, 200);
           asr.onError?.(`The speech recognition API answered HTTP ${response.status}${said ? `: ${said}` : ''}`);
@@ -257,7 +276,8 @@ export function createApiAsr(options: ApiAsrOptions): AsrLike {
         if (text && among.length > 1 && (namedOutside(heard, among) || writtenOutside(text, among))) {
           text = '';
           heard = undefined;
-          for (const told of readAgainIn(among)) {
+          // A recognizer that is told no language would only say the same again.
+          for (const told of bare ? [] : readAgainIn(among)) {
             const second = await upload(told);
             if (!second.ok) break;
             const read = String(((await second.json()) as { text?: unknown } | null)?.text ?? '').trim();

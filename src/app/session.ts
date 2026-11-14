@@ -7,7 +7,7 @@
  */
 import { createSessionRecording } from './sessionRecording';
 import { driveSessionLags, type LagModels } from './sessionLags';
-import { runSideHearing, type LocalAISettings } from '../providers/openai/localai';
+import { asrApiModelOf, runSideHearing, type LocalAISettings } from '../providers/openai/localai';
 import { nativePicked } from '../providers/openai/localaiNative';
 import { heardBy } from '../providers/openai/localaiDevice';
 import { getAppAudio, type AppAudio } from '../lib/audio/appAudio';
@@ -143,7 +143,7 @@ export function createAppSession(options: AppSessionOptions = {}): AppSession {
         if (shape.provider.id === 'localai') {
           const hearing = (leg: 'speaker' | 'participant') => s.asrVia === 'device'
             ? nativePicked(runSideHearing(s, shape.pair, leg), heardBy(s, shape.pair, leg))?.id ?? null
-            : s.asrVia === 'api' ? s.asrApiModel : s.asrOther.trim() ? s.asrOtherModel : s.asrModel;
+            : s.asrVia === 'api' ? asrApiModelOf(s) : s.asrOther.trim() ? s.asrOtherModel : s.asrModel;
           lagModels = { speaker: hearing('speaker'), participant: hearing('participant'), translation: s.translateAt === 'device' ? s.translateNativeModel
             : s.translateAt === 'api' ? s.translateModel : s.translateOther.trim() ? s.translateOtherModel : s.translateServerModel };
         } else {

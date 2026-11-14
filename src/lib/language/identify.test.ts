@@ -66,6 +66,10 @@ describe('a reading outside the languages a speaker speaks', () => {
     // A few letters of another script in a sentence of theirs: a name, a title.
     expect(writtenOutside('我最喜欢的歌是さくら', ['zh', 'ko'])).toBe(false);
     expect(writtenOutside('私は学生です', ['zh', 'ko'])).toBe(true);
+    // Latin letters count for a speaker of a language written in them: a place named in Han characters is no other language.
+    expect(writtenOutside('I love 東京.', ['en', 'fr'])).toBe(false);
+    expect(writtenOutside('OK नमस्ते जी', ['en', 'fr'])).toBe(true);
+    expect(writtenOutside('OK 東京', ['ko', 'uk'])).toBe(true);
   });
 
   it('is read again in the others, two at most, never the speaker’s own', () => {

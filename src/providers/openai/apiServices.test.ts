@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { API_SERVICES, preferredModel, quickOf, serviceOf, servicesFor } from './apiServices';
+import { API_SERVICES, hearsOf, preferredModel, quickOf, serviceOf, servicesFor } from './apiServices';
 
 const service = (id: string) => API_SERVICES.find((s) => s.id === id)!;
 
 describe('the services an API model usually is', () => {
   it('offers a stage only the services that can serve it', () => {
-    expect(servicesFor('asr').map((s) => s.id)).toEqual(['openai', 'groq', 'siliconflow']);
+    expect(servicesFor('asr').map((s) => s.id)).toEqual(['openai', 'deepseek', 'groq', 'siliconflow']);
     expect(servicesFor('text').map((s) => s.id)).toEqual(['openai', 'gemini', 'ark', 'deepseek', 'groq', 'siliconflow', 'openrouter', 'ollama']);
   });
 
@@ -31,6 +31,19 @@ describe('a service whose models think before they answer', () => {
     expect(quickOf(' HTTPS://API.DeepSeek.com/v1/ ')).toEqual({ thinking: { type: 'disabled' } });
     expect(quickOf('https://api.openai.com/v1')).toBeUndefined();
     expect(quickOf('http://localhost:1234/v1')).toBeUndefined();
+  });
+});
+
+describe('a service with a recognizer of its own', () => {
+  it("is asked at its own path, by its address however that was typed, and goes by the service's name", () => {
+    expect(hearsOf('https://api.deepseek.com/v1')).toEqual({ path: '/tools/asr', name: 'DeepSeek' });
+    expect(hearsOf(' HTTPS://API.DeepSeek.com/v1/ ')).toEqual({ path: '/tools/asr', name: 'DeepSeek' });
+    expect(hearsOf('https://api.openai.com/v1')).toBeUndefined();
+    expect(hearsOf('')).toBeUndefined();
+  });
+
+  it('has no model to pick: nothing it lists is a recognizer', () => {
+    expect(preferredModel(service('deepseek'), 'asr', ['deepseek-chat', 'deepseek-flash'])).toBeUndefined();
   });
 });
 

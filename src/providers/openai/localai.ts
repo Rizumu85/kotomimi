@@ -54,7 +54,7 @@ import { getManifestEntry } from '../../lib/local-inference/modelManifest';
 import { boundedFetch } from '../../lib/provider/boundedFetch';
 import { CheckError } from '../../lib/provider/checkError';
 import { AUTO } from '../../lib/provider/languages';
-import { quickOf } from './apiServices';
+import { hearsOf, quickOf } from './apiServices';
 import type { CheckContext, CheckResult, CredentialField, CredentialsMissing, LanguageOption, MigrationInputs, Provider, ProviderRefusal, SharedSettings } from '../../lib/provider/types';
 import { LOCAL_INFERENCE_DEFAULTS } from '../localInference/settings';
 import { CHECK_TIMEOUT_MS } from './check';
@@ -353,6 +353,12 @@ const byLanguage = (stored: unknown): Record<string, string> => (stored && typeo
 /** A service that is asked in a way of its own (`apiServices.ts`): what goes with the request. */
 const quick = (baseUrl: string): { extra?: Readonly<Record<string, unknown>> } => { const extra = quickOf(baseUrl); return extra ? { extra } : {}; };
 
+/**
+ * The model the speech recognition API is asked for: the one named, or — at a service with one recognizer of its
+ * own (`hearsOf`), where there is none to name — what that goes by.
+ */
+export const asrApiModelOf = (s: Pick<LocalAISettings, 'asrApiBaseUrl' | 'asrApiModel'>): string => hearsOf(s.asrApiBaseUrl)?.name ?? s.asrApiModel.trim();
+
 export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>, inputs: MigrationInputs): LocalAISettings {
   const text = (k: 'asrModel' | 'asrApiBaseUrl' | 'asrApiModel' | 'asrOther' | 'asrOtherModel' | 'translateOther' | 'translateOtherModel' | 'coachOther' | 'coachOtherModel' | 'translateBaseUrl' | 'coachPrompt' | 'asrNativeModel' | 'translateNativeModel' | 'coachNativeModel') => (typeof stored[k] === 'string' ? (stored[k] as string) : LOCALAI_DEFAULTS[k]);
   const flag = (k: 'asrApiNeedsKey' | 'asrDetectOther' | 'speakBoth' | 'coach' | 'serverNeedsKey' | 'translateBySentence') => (typeof stored[k] === 'boolean' ? (stored[k] as boolean) : LOCALAI_DEFAULTS[k]);
@@ -499,7 +505,7 @@ function unnamedStage(s: LocalAISettings, models: readonly LocalAIModel[], coach
   const hearsHere = s.asrVia !== 'server';
   const pipeline = needsServer(s) ? effectiveLocalAIModel(s, models) : '';
   if (!hearsHere && !pipeline) return { refused: 'No model is named, and the server lists none.', code: 'asr_unnamed' };
-  if (s.asrVia === 'api' && (!s.asrApiBaseUrl.trim() || !s.asrApiModel.trim())) return { refused: 'No speech recognition API is named.', code: 'asr_unnamed' };
+  if (s.asrVia === 'api' && (!s.asrApiBaseUrl.trim() || !asrApiModelOf(s))) return { refused: 'No speech recognition API is named.', code: 'asr_unnamed' };
   // Fork: a leg shown as said (`shownAsSaid`) has nothing that answers it.
   if (asIs) return null;
   if (!coached || both) {
@@ -1002,7 +1008,7 @@ function hearerOf(s: LocalAISettings, models: readonly LocalAIModel[], pair: { s
     if (!model) return undefined;
     return { name: model.name.replace(/ GGUF$/, ''), languages: model.languages, ...(isApple(model.id) ? { apple: true as const } : {}), ...(model.detects ? { detects: true as const } : {}) };
   }
-  const named = (s.asrVia === 'api' ? s.asrApiModel : hearsAtOwnDevice(s) ? s.asrOtherModel : s.asrModel).trim();
+  const named = (s.asrVia === 'api' ? asrApiModelOf(s) : hearsAtOwnDevice(s) ? s.asrOtherModel : s.asrModel).trim();
   if (!named) return undefined;
   // Another Kotomimi lists a model's languages, and "auto" among them where it tells them apart (`nativeShared`); the
   // Mac's recognition there, as one that hears two at once (`bilingual`): the user's own and one other, as here.
@@ -1302,6 +1308,8 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   let device: DeviceHearing | undefined;
   /** A native model that names the language, where one is downloaded: the leg is asked for `auto` through it. */
   let detector: ReturnType<typeof nativePicked> = null;
+  /** A service's own recognizer (`hearsOf`): it detects the language, takes none, and names none. */
+  let untold = false;
   if (hearsHere) {
     let recognizer: Pick<DeviceHearing, 'modelId' | 'streaming' | 'api' | 'native'> | null;
     if (hearsNatively(s)) {
@@ -1324,13 +1332,14 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
       recognizer = { modelId: native.id, streaming: true, native: { model: native.id, ...(native.limits ? { limits: native.limits } : {}), ...(alsoHeard.length ? { either: { first, also: alsoHeard } } : {}), ...(native.takesHints !== false && hints.length ? { hints } : {}) } };
     } else if (s.asrVia === 'api') {
       const baseUrl = s.asrApiBaseUrl.trim();
-      const named = s.asrApiModel.trim();
+      const named = asrApiModelOf(s);
       // A model of this app's own names: what a Kotomimi phone lends is read by its engine the way it is read here.
       const known = NATIVE_MODELS.find((m) => m.id === named);
       const limits = recognitionLimits(named);
       // A model that names the language (Qwen3-ASR, on a lent device) is asked for "auto" as it is here: told the
       // leg's nominal language it heard everything as that.
       detector = known?.detects ? known : null;
+      untold = hearsOf(baseUrl) !== undefined;
       recognizer = { modelId: named, streaming: false, api: { baseUrl, model: named, ...(s.asrApiNeedsKey ? { key: 'asrKey' as const } : {}), ...(limits ? { limits } : {}), ...(hints.length ? { hints } : {}) } };
     } else {
       recognizer = null;
@@ -1341,7 +1350,8 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
       pairedWith,
       // Only a soft leg needs the model told a language of its own; a detector is asked for "auto".
       ...(heard === AUTO && !detector ? { language: toldLanguage(heard, modelHeard, false) } : {}),
-      ...(detector && among.length ? { among } : {}),
+      // One that cannot be told another language is not asked again: what it writes outside them is not written.
+      ...((detector || untold) && among.length ? { among } : {}),
       vad: speechDetection(s).vad,
     };
   }

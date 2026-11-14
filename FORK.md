@@ -58,7 +58,7 @@ With Kotomimi (`localai`) selected, controls that serve translated speech output
 
 ### API and remote services
 
-The API service selector supplies known endpoints; a custom endpoint is always possible. Recognition posts to `/audio/transcriptions` under the base URL; translation and feedback post to `/chat/completions`. Text requests originate in the renderer, so the service must permit CORS.
+The API service selector supplies known endpoints; a custom endpoint is always possible. Recognition posts to `/audio/transcriptions` under the base URL (DeepSeek: `/tools/asr`); translation and feedback post to `/chat/completions`. Text requests originate in the renderer, so the service must permit CORS.
 
 A shared device hears over the Realtime protocol. A sharing Kotomimi takes any of its recognizers in any session; an external LocalAI always hears with its default recognizer when translation or feedback uses a model chosen here. A phone provides the stages it advertises, at its own address rather than over that session.
 

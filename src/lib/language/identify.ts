@@ -13,7 +13,7 @@
  * to refuse a sentence.
  */
 import { detectAll } from 'tinyld';
-import { languageByScript, lettersByScript, oneOfTwo } from './script';
+import { hasOwnScript, languageByScript, latinLetters, lettersByScript, oneOfTwo } from './script';
 
 /** How a language was named: the writing itself, or statistics over the text. */
 export type GuessSource = 'script' | 'text';
@@ -79,11 +79,13 @@ export function textLanguage(text: string, candidates: readonly string[] = []): 
  * Whether a sentence is written in a script that none of `candidates` is written in: Hindi's, of a speaker of Chinese
  * and Korean. Latin letters never say so — a name, "OK" and "VRC" are said in every language — and Han characters
  * are Chinese's, Cantonese's and Japanese's alike. By the most of its letters: a Chinese sentence that names a song
- * in kana is still Chinese.
+ * in kana is still Chinese, and an English one that names a place in Han characters still English — Latin letters
+ * count for a candidate that is written in them.
  */
 export function writtenOutside(text: string, candidates: readonly string[]): boolean {
   const bases = candidates.map(baseOf);
-  let inside = 0;
+  const inLatin = (base: string) => !hasOwnScript(base) && !Object.values(SHARED_SCRIPTS).some((written) => written.includes(base));
+  let inside = bases.some(inLatin) ? latinLetters(text) : 0;
   let outside = 0;
   for (const [language, letters] of lettersByScript(text)) {
     const written = SHARED_SCRIPTS[language] ?? (language === 'zh' ? ['zh', 'yue', 'ja'] : [language]);
