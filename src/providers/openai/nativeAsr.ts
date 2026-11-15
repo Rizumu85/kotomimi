@@ -52,6 +52,7 @@
  */
 import { realClock, type Clock } from '../../lib/contract/clock';
 import type { NativeBridge, NativeEngineStatus, NativeStreamEvent } from '../../lib/native/nativeEngine';
+import { settleHinted } from '../../lib/glossary/hinted';
 import { createResampler, TARGET_RATE, type Resampler } from '../../lib/native/resample';
 import type { AsrInit, AsrLike } from '../localInference/engines';
 import { apiLanguage, appVad, type VadWorker } from './apiAsr';
@@ -445,6 +446,8 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
       // Where the engine also says what it has heard so far, that is what is shown: a delta does not renew it.
       if (s === live && !s.tentative) endEarly();
     } else if (event.type === 'done') {
+      // Fork: a dictionary word the engine wrote where the plain reading heard nothing like it gives way to that reading.
+      const heard = event.hinted ? settleHinted(event.text, event.hinted) : event.text;
       const heardIn = event.language ? apiLanguage(event.language) : undefined;
       const both = paired();
       if (both && heardIn !== language && !also.includes(heardIn ?? '')) {
@@ -452,7 +455,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
         return;
       }
       if (s.again) {
-        const text = event.text || s.text;
+        const text = heard || s.text;
         s.text = '';
         // Told a language, the engine only says it back: the writing says what this reading is in.
         if (tidyHeard(text) && !writtenOutside(text, among)) finish(s, text);
@@ -461,13 +464,13 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
         return;
       }
       // Outside by the language the engine named, or — where it named none it knows — by the writing.
-      if (s.sound && !s.misfire && s.emitted === 0 && tidyHeard(event.text || s.text) && (namedOutside(heardIn, among) || writtenOutside(event.text || s.text, among))) {
-        s.first = { text: event.text || s.text, ...(heardIn ? { language: heardIn } : {}) };
+      if (s.sound && !s.misfire && s.emitted === 0 && tidyHeard(heard || s.text) && (namedOutside(heardIn, among) || writtenOutside(heard || s.text, among))) {
+        s.first = { text: heard || s.text, ...(heardIn ? { language: heardIn } : {}) };
         s.again = readAgainIn(among);
         readAgain(s);
         return;
       }
-      finish(s, both ? event.text : event.text || s.text, both ? heardIn : event.language);
+      finish(s, both ? heard : heard || s.text, both ? heardIn : event.language);
     } else if (s.again) {
       // A second reading that failed: the first, outside the speaker's languages, is said to be a mishearing.
       s.text = '';

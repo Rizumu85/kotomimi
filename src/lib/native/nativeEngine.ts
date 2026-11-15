@@ -119,7 +119,7 @@ export function onNativeEngineStatus(listener: (status: NativeEngineStatus) => v
 export type NativeStreamEvent =
   | { id: number; type: 'delta'; text: string }
   | { id: number; type: 'partial'; text: string }
-  | { id: number; type: 'done'; text: string; language?: string }
+  | { id: number; type: 'done'; text: string; language?: string; /** Fork: the dictionary's words in `text` (a recognizer told them), each with what the same stretch read without them has in its place (`src/lib/glossary/hinted.ts`). */ hinted?: HintedPlace[] }
   | { id: number; type: 'error'; message: string };
 
 /** The live recognitions of the engine, as the recognizer uses them (`src/providers/openai/nativeAsr.ts`). */
@@ -134,14 +134,22 @@ export interface NativeBridge {
   listen(listener: (event: NativeStreamEvent) => void): () => void;
 }
 
+/** A hinted word's place in a reading, and what the plain reading has there. */
+export interface HintedPlace { start: number; end: number; plain: string }
+
 /** A stream event from the main process, held to its shape; null for anything else. */
 export function nativeStreamEvent(value: unknown): NativeStreamEvent | null {
-  const event = value as { id?: unknown; type?: unknown; text?: unknown; message?: unknown; language?: unknown } | null;
+  const event = value as { id?: unknown; type?: unknown; text?: unknown; message?: unknown; language?: unknown; hinted?: unknown } | null;
   if (!event || typeof event !== 'object' || !Number.isInteger(event.id)) return null;
   const id = event.id as number;
   if (event.type === 'delta' && typeof event.text === 'string') return { id, type: 'delta', text: event.text };
   if (event.type === 'partial' && typeof event.text === 'string') return { id, type: 'partial', text: event.text };
-  if (event.type === 'done') return { id, type: 'done', text: typeof event.text === 'string' ? event.text : '', ...(typeof event.language === 'string' && event.language ? { language: event.language } : {}) };
+  if (event.type === 'done') {
+    const text = typeof event.text === 'string' ? event.text : '';
+    const hinted = (Array.isArray(event.hinted) ? event.hinted : []).filter((one): one is HintedPlace =>
+      !!one && Number.isInteger(one.start) && Number.isInteger(one.end) && one.start >= 0 && one.start < one.end && one.end <= text.length && typeof one.plain === 'string');
+    return { id, type: 'done', text, ...(typeof event.language === 'string' && event.language ? { language: event.language } : {}), ...(hinted.length > 0 ? { hinted } : {}) };
+  }
   if (event.type === 'error') return { id, type: 'error', message: typeof event.message === 'string' ? event.message.slice(0, 300) : 'The engine failed.' };
   return null;
 }

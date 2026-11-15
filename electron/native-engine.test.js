@@ -16,7 +16,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { createNativeEngine, openLive, languageName, languageLocale, modelHears, translatorFits, unspaced, echoOf, endless, hintChecked, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME } = require('./native-engine.js');
+const { createNativeEngine, openLive, languageName, languageLocale, modelHears, translatorFits, unspaced, echoOf, endless, hintChecked, tidied, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME } = require('./native-engine.js');
 const { hfMirrorOf } = require('./fetch-file.js');
 
 const sha = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -386,6 +386,25 @@ describe('a reading with hinted words in it (fork)', () => {
     const plain = reader({ hinted: '我们去吧', plain: '我们去吧' });
     expect((await hintChecked(plain.read, hints)({ context: 'x', pcm: seconds(3), sampleRate: 16000 }).done).text).toBe('我们去吧');
     expect(plain.asked.length).toBe(1);
+  });
+
+  it('says, of each hinted word it keeps, what the plain reading has in its place, for the page to hear', async () => {
+    const over = reader({ hinted: 'Nanachiki非常非常恐怖，每天更新几千部。', plain: '那些短剧非常非常恐怖，每天更新几千部。' });
+    expect(await hintChecked(over.read, ['Nanachiki'])({ context: 'x', pcm: seconds(3), sampleRate: 16000 }).done)
+      .toMatchObject({ text: 'Nanachiki非常非常恐怖，每天更新几千部。', hinted: [{ start: 0, end: 9, plain: '那些短剧' }] });
+    // A reading of the word alone, about as long as what was heard: the whole of it.
+    const called = reader({ hinted: '糖豆！', plain: '唐豆！' });
+    expect((await hintChecked(called.read, hints)({ context: 'x', pcm: seconds(2), sampleRate: 16000 }).done).hinted).toEqual([{ start: 0, end: 3, plain: '唐豆！' }]);
+    // No hinted word, nothing said of any.
+    const none = reader({ hinted: '我们去吧', plain: '我们去吧' });
+    expect(await hintChecked(none.read, hints)({ context: 'x', pcm: seconds(3), sampleRate: 16000 }).done).not.toHaveProperty('hinted');
+  });
+
+  it('keeps each hinted word’s place where the text is put right afterwards, and none for a word that went', () => {
+    const answer = { ok: true, text: '今天 和 Rizum 去 VRC', hinted: [{ start: 5, end: 10, plain: '里祖姆' }, { start: 13, end: 16, plain: 'VR西' }] };
+    expect(tidied(answer, '今天和Rizum去VRC')).toEqual({ ok: true, text: '今天和Rizum去VRC', hinted: [{ start: 3, end: 8, plain: '里祖姆' }, { start: 9, end: 12, plain: 'VR西' }] });
+    expect(tidied(answer, '')).toEqual({ ok: true, text: '' });
+    expect(tidied(answer, answer.text)).toEqual(answer);
   });
 
   it('keeps a hinted word in a sentence where the plain reading heard something in its place', async () => {

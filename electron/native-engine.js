@@ -709,7 +709,12 @@ function hintChecked(read, hints) {
       second = read({ ...asked, context: undefined });
       return second.done.then((plain) => {
         if (!plain.ok) return answer;
-        if (!only) return { ...answer, text: withoutSlipped(answer.text, plain.text, among) };
+        if (!only) {
+          const text = withoutSlipped(answer.text, plain.text, among);
+          // What is left of them: each with what the plain reading has in its place, for the page to hear (`hinted`).
+          const hinted = hintedAt(text, hints).map(([start, end]) => ({ start, end, plain: inPlaceOf(text, String(plain.text), start, end).text }));
+          return { ...answer, text, ...(hinted.length > 0 ? { hinted } : {}) };
+        }
         const heard = String(plain.text).split(/[、，,。.!?！？;；:：\s]+/u).filter((part) => lettersOf(part) > 0 && !FILLER.has(part.toLowerCase()));
         if (heard.length === 0) return { ...plain, text: '' };
         const got = lettersOf(plain.text);
@@ -718,7 +723,9 @@ function hintChecked(read, hints) {
         // friend of the user's, 2026-11-06) — what was heard is kept, not the word. A name called reads about as long
         // either way (「糖豆」, 「唐豆」).
         if (got * 2 < hinted) return plain;
-        return got > hinted * 1.5 + 2 ? plain : answer;
+        if (got > hinted * 1.5 + 2) return plain;
+        // About as long: a name called, if the plain reading sounds like it — which the page says (`hinted`).
+        return { ...answer, hinted: [{ start: 0, end: String(answer.text).length, plain: String(plain.text) }] };
       });
     });
     return { done, abort: () => { first.abort(); second?.abort(); } };
@@ -751,38 +758,53 @@ const sayLength = (chars) => chars.reduce((n, c) => n + (/\p{Script=Latin}/u.tes
  * Fork: a reading with the hinted words in it, put beside the same stretch read without them. Told the words to expect,
  * Qwen3-ASR given voices over one another — a crowded room — writes one of the words into a sentence where nobody said
  * it: 「なんでもこうやってJackal。」 (the user, 2026-11-11). A word read without the hints as nothing, or as far too
- * little to be it, at its place in the sentence, was laid over noise and is taken out; one read as anything about its
- * length was a name said and misheard, and is kept as the list writes it.
+ * little to be it, at its place in the sentence, was laid over noise and is taken out. One read as anything about its
+ * length may be a name said and misheard — or other words the list was written over (「Nanachiki非常非常恐怖」 for a
+ * sentence with no name in it; the user, 2026-11-15): which, the page says by how the two sound (`hinted`,
+ * `src/lib/glossary/hinted.ts`).
  */
+/** The letters of a stretch of a text, lower case. */
+function lettersIn(text, from, to) {
+  const out = [];
+  for (let i = from; i < to; i++) if (isLetter(text[i])) out.push(text[i].toLowerCase());
+  return out;
+}
+
+/**
+ * What a plain reading has in the place of [start, end) of a hinted one: where the rest of the hinted sentence meets
+ * the plain reading, what the plain one has between. Its letters, and the text they are in; null where the two are
+ * too long to be laid side by side.
+ */
+function inPlaceOf(hinted, plain, start, end) {
+  const heard = [];
+  const at = [];
+  for (let i = 0; i < plain.length; i++) if (isLetter(plain[i])) { heard.push(plain[i].toLowerCase()); at.push(i); }
+  const before = lettersIn(hinted, 0, start);
+  const after = lettersIn(hinted, end, hinted.length);
+  const rest = [...before, ...after];
+  const n = rest.length;
+  const m = heard.length;
+  if (n * m > 250000) return { letters: null, text: '' };
+  const common = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) common[i][j] = rest[i] === heard[j] ? common[i + 1][j + 1] + 1 : Math.max(common[i + 1][j], common[i][j + 1]);
+  let lastBefore = -1;
+  let firstAfter = m;
+  for (let i = 0, j = 0; i < n && j < m;) {
+    if (rest[i] === heard[j]) {
+      if (i < before.length) lastBefore = j;
+      else if (firstAfter === m) firstAfter = j;
+      i++; j++;
+    } else if (common[i + 1][j] >= common[i][j + 1]) i++;
+    else j++;
+  }
+  const letters = heard.slice(lastBefore + 1, firstAfter);
+  return { letters, text: letters.length > 0 ? plain.slice(at[lastBefore + 1], at[firstAfter - 1] + 1) : '' };
+}
+
 function withoutSlipped(hinted, plain, among) {
-  const letters = (text, from, to) => {
-    const out = [];
-    for (let i = from; i < to; i++) if (isLetter(text[i])) out.push(text[i].toLowerCase());
-    return out;
-  };
-  const heard = letters(String(plain), 0, String(plain).length);
   const slipped = among.filter(([start, end]) => {
-    const before = letters(hinted, 0, start);
-    const after = letters(hinted, end, hinted.length);
-    const rest = [...before, ...after];
-    // Where the rest of the sentence meets the plain reading: what the plain reading has between is in the word's place.
-    const n = rest.length;
-    const m = heard.length;
-    if (n * m > 250000) return false;
-    const common = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1));
-    for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) common[i][j] = rest[i] === heard[j] ? common[i + 1][j + 1] + 1 : Math.max(common[i + 1][j], common[i][j + 1]);
-    let lastBefore = -1;
-    let firstAfter = m;
-    for (let i = 0, j = 0; i < n && j < m;) {
-      if (rest[i] === heard[j]) {
-        if (i < before.length) lastBefore = j;
-        else if (firstAfter === m) firstAfter = j;
-        i++; j++;
-      } else if (common[i + 1][j] >= common[i][j + 1]) i++;
-      else j++;
-    }
-    const between = heard.slice(lastBefore + 1, firstAfter);
-    return sayLength(between) * 2 < sayLength(letters(hinted, start, end));
+    const between = inPlaceOf(hinted, String(plain), start, end).letters;
+    return between !== null && sayLength(between) * 2 < sayLength(lettersIn(hinted, start, end));
   });
   if (slipped.length === 0) return hinted;
   let out = hinted;
@@ -891,10 +913,29 @@ const WINDOW_MOST_SECONDS = 120;
  * `tidy`: what every reading's text goes through before anything is made of
  * it, for a model whose writing needs it (`unspaced`).
  */
+/**
+ * An answer with its text put right (`tidy`): the places of its hinted words are where the words now stand — each
+ * looked for after the one before — and one no longer in the text has no place.
+ */
+function tidied(answer, text) {
+  if (!answer.hinted || text === answer.text) return { ...answer, text };
+  const { hinted: places, ...rest } = answer;
+  const hinted = [];
+  let from = 0;
+  for (const place of places) {
+    const word = String(answer.text).slice(place.start, place.end);
+    const at = text.indexOf(word, from);
+    if (at < 0) continue;
+    hinted.push({ start: at, end: at + word.length, plain: place.plain });
+    from = at + word.length;
+  }
+  return { ...rest, text, ...(hinted.length > 0 ? { hinted } : {}) };
+}
+
 function openWindow({ port, pathname, model, sampleRate, language, context, timeoutMs = WINDOW_READ_TIMEOUT_MS, read: readAsIs = readWhole, tidy = null, now = () => Date.now(), setTimer = setTimeout, clearTimer = clearTimeout, note = () => {} }, onEvent) {
   const read = tidy ? (asked) => {
     const one = readAsIs(asked);
-    return { done: one.done.then((answer) => (answer.ok ? { ...answer, text: tidy(answer.text) } : answer)), abort: () => one.abort() };
+    return { done: one.done.then((answer) => (answer.ok ? tidied(answer, tidy(answer.text)) : answer)), abort: () => one.abort() };
   } : readAsIs;
   const chunks = [];
   let bytes = 0;
@@ -907,7 +948,8 @@ function openWindow({ port, pathname, model, sampleRate, language, context, time
   /** The language the reading that wrote `lastText` says it heard. */
   let lastLanguage = null;
   /** A last reading, with the language it says it heard. */
-  const said = (text, answer) => ({ type: 'done', text, ...(answer?.language ? { language: answer.language } : {}) });
+  // `hinted`: the places of the hinted words in it, where it is the answer's own text.
+  const said = (text, answer) => ({ type: 'done', text, ...(answer?.language ? { language: answer.language } : {}), ...(answer?.hinted && text === answer.text ? { hinted: answer.hinted } : {}) });
   let lastTook = 0;
   let reading = null;
   let timer = null;
@@ -1535,4 +1577,4 @@ function createNativeEngine(deps = {}) {
   return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream, updateRuntime };
 }
 
-module.exports = { createNativeEngine, openLive, openWindow, readWhole, wavOf, loopAt, unloop, unspaced, echoOf, endless, hintChecked, CONTEXT_LEAD, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, translatorFits, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };
+module.exports = { createNativeEngine, openLive, openWindow, readWhole, wavOf, loopAt, unloop, unspaced, echoOf, endless, hintChecked, tidied, CONTEXT_LEAD, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, translatorFits, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };

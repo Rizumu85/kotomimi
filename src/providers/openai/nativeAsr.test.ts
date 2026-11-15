@@ -827,6 +827,19 @@ describe("a stretch named outside the speaker's languages", () => {
     expect(seen.results).toEqual(['Good morning.']);
   });
 
+  it('gives a dictionary word the engine wrote over other words back to what was heard there (fork)', async () => {
+    const { engine, seen } = await heard(['zh', 'ja']);
+    engine.say({ id: 1, type: 'done', text: 'Nanachiki非常非常恐怖。', language: 'zh', hinted: [{ start: 0, end: 9, plain: '那些短剧' }] });
+    expect(seen.results).toEqual(['那些短剧非常非常恐怖。']);
+    expect(seen.misheard).toEqual([false]);
+  });
+
+  it('keeps a dictionary word where what was heard sounds like it (fork)', async () => {
+    const { engine, seen } = await heard(['zh', 'ja']);
+    engine.say({ id: 1, type: 'done', text: '今天和糖豆一起去玩了。', language: 'zh', hinted: [{ start: 3, end: 5, plain: '唐豆' }] });
+    expect(seen.results).toEqual(['今天和糖豆一起去玩了。']);
+  });
+
   it('is a mishearing as first read where the second reading never comes', async () => {
     const { engine, seen, clock } = await heard();
     engine.say({ id: 1, type: 'done', text: 'Kir Kirhum.', language: 'en' });
