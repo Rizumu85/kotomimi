@@ -15,6 +15,16 @@ const LEGS: LegName[] = ['speaker', 'participant'];
 const words = (notice: { message: string }) => notice.message;
 const lanes = (entries: Entry[], legs = LEGS, filters = BOTH) => buildLanes(entries, legs, filters, words);
 
+describe('a sentence heard in none of the speaker’s languages (fork)', () => {
+  it('runs on in the small line after the last answered one, as anything heard since does, and is waited on for nothing', () => {
+    const answered = said('a', 'participant', 'こんにちは', '你好');
+    const heard = said('b', 'participant', 'Kir Kirhum.');
+    const misheard: Entry = heard.kind === 'exchange' ? { ...heard, source: heard.source.map((r) => ({ ...r, language: 'en', misheard: true as const })) } : heard;
+    expect(lanes([answered, heard], ['participant'])[0]).toMatchObject({ source: { text: 'こんにちはKir Kirhum.' }, answer: { text: '你好' }, pending: true });
+    expect(lanes([answered, misheard], ['participant'])[0]).toMatchObject({ source: { text: 'こんにちはKir Kirhum.' }, answer: { text: '你好' }, pending: false });
+  });
+});
+
 describe('independent feedback beside translated subtitle lanes', () => {
   it("shows what is said at an answer's size in a run in one language", () => {
     const [lane] = lanes([{ ...said('a', 'participant', 'こんにちは'), languages: { source: 'ja', target: 'ja' } } as Entry], ['participant']);

@@ -176,6 +176,8 @@ interface Stream {
   sound: Int16Array[] | null;
   /** Read again: the languages still to tell the engine, should this reading be outside them too. Null on the first reading. */
   again: string[] | null;
+  /** The first reading, outside the speaker's languages, and the language named for it: what is handed over where no other reading is one of theirs. */
+  first?: { text: string; language?: string };
 }
 
 /** A tester's switch, to hear the difference: DevTools → `localStorage.setItem('debug:smart-turn-off', '1')`, then start again. */
@@ -292,10 +294,10 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     s.cancelWait = clock.setTimeout(() => {
       if (s.over) return;
       if (s.id !== null) bridge.abort(s.id);
-      // A second reading that never came: the first, outside the speaker's languages, is not what stands.
+      // A second reading that never came: the first, outside the speaker's languages, is said to be a mishearing.
       if (s.again) {
         s.text = '';
-        finish(s, '', undefined, true);
+        finish(s, s.first?.text ?? '', s.first?.language, true);
         return;
       }
       if (paired()) {
@@ -306,7 +308,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
       const last = s.text || s.heard;
       if (s.sound && s.emitted === 0 && writtenOutside(last, among)) {
         s.text = '';
-        finish(s, '', undefined, true);
+        finish(s, last, undefined, true);
       } else finish(s, last);
     }, limits.lastWordsMs);
   }
@@ -332,8 +334,12 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     s.pieceSamples = 0;
   }
 
-  /** A recognition is over: the rest of its text is its last result, and the engine takes the next. `heardIn`: the language the engine says it was in; `unsaid`: a mishearing, taken back. */
-  function finish(s: Stream, whole: string, heardIn?: string, unsaid = false) {
+  /**
+   * A recognition is over: the rest of its text is its last result, and the engine takes the next. `heardIn`: the
+   * language the engine says it was in; `misheard`: read in none of the speaker's languages — handed over as it was
+   * first read, for whoever shows it to say so, and to leave it unanswered.
+   */
+  function finish(s: Stream, whole: string, heardIn?: string, misheard = false) {
     if (s.over) return;
     s.over = true;
     s.cancelWait?.();
@@ -346,7 +352,7 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
     const text = paired() || whole.length >= s.text.length ? whole : s.text;
     if (paired() && heardIn && !s.misfire && tidyHeard(text)) preferred = heardIn;
     // An empty result too: it closes what the partials opened.
-    asr.onResult?.({ text: s.misfire ? '' : tidyHeard(text.slice(s.emitted).trim()), durationMs: Math.round(secondsOf(s.pieceSamples) * 1000), recognitionTimeMs: s.closed ? Math.max(0, now() - s.closedAt) : 0, ...(heardIn ? { language: heardIn } : {}), ...(unsaid ? { unsaid: true as const } : {}) });
+    asr.onResult?.({ text: s.misfire ? '' : tidyHeard(text.slice(s.emitted).trim()), durationMs: Math.round(secondsOf(s.pieceSamples) * 1000), recognitionTimeMs: s.closed ? Math.max(0, now() - s.closedAt) : 0, ...(heardIn ? { language: heardIn } : {}), ...(misheard ? { misheard: true as const } : {}) });
     advance();
   }
 
@@ -451,20 +457,21 @@ export function createNativeAsr(options: NativeAsrOptions): AsrLike {
         // Told a language, the engine only says it back: the writing says what this reading is in.
         if (tidyHeard(text) && !writtenOutside(text, among)) finish(s, text);
         else if (s.again.length > 0) readAgain(s);
-        else finish(s, '', undefined, true);
+        else finish(s, s.first?.text ?? '', s.first?.language, true);
         return;
       }
       // Outside by the language the engine named, or — where it named none it knows — by the writing.
       if (s.sound && !s.misfire && s.emitted === 0 && tidyHeard(event.text || s.text) && (namedOutside(heardIn, among) || writtenOutside(event.text || s.text, among))) {
+        s.first = { text: event.text || s.text, ...(heardIn ? { language: heardIn } : {}) };
         s.again = readAgainIn(among);
         readAgain(s);
         return;
       }
       finish(s, both ? event.text : event.text || s.text, both ? heardIn : event.language);
     } else if (s.again) {
-      // A second reading that failed: the first, outside the speaker's languages, is not what stands.
+      // A second reading that failed: the first, outside the speaker's languages, is said to be a mishearing.
       s.text = '';
-      finish(s, '', undefined, true);
+      finish(s, s.first?.text ?? '', s.first?.language, true);
     } else {
       fail(s, event.message);
     }

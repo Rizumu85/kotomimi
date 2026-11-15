@@ -178,7 +178,10 @@ export function buildLanes(
     const waits = newest >= 0 && answered !== newest && showsAnswer && !notice;
     const at = shape === 'pair' && waits && answered >= 0 ? answered : newest;
     // Said only of a side that has been answered before: a run that answers nothing (it only transcribes) has nothing on its way.
-    lane.pending = waits && answered >= 0 && written(newest, 'source') !== '';
+    // Fork: nor of a mishearing, which nothing will answer: it shows as heard, and is waited on for nothing.
+    const newestSaid = mine[newest];
+    const misheard = newestSaid?.kind === 'exchange' && newestSaid.source.length > 0 && newestSaid.source.every((row) => row.misheard);
+    lane.pending = waits && answered >= 0 && written(newest, 'source') !== '' && !misheard;
     const said = at >= 0 ? mine[at] : undefined;
     if (said?.kind === 'exchange') {
       // Fork: a sentence in the language of the answers is its own, and what was said since runs on over it.

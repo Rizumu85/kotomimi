@@ -344,7 +344,7 @@ class PipelineLeg implements AdapterSession {
   private typedIds = 0;
   /** Open source segments of the inner session: what each says, and what it answers to. */
   /** Fork: `language`, where the recognizer said what it heard the stretch in (a speaker heard in either of two). */
-  private readonly sources = new Map<Ref, { origin?: string; text: string; language?: string }>();
+  private readonly sources = new Map<Ref, { origin?: string; text: string; language?: string; misheard?: true }>();
   /**
    * Of those, the ones of a leg that closes a stretch's finished sentences as they come (`sentenceCut.ts`): the
    * stretch's beginning as it read when it was closed (none yet: `''`), the segment that shows what is left of it
@@ -518,6 +518,29 @@ class PipelineLeg implements AdapterSession {
         return;
       case 'segmentText': {
         const source = this.sources.get(e.payload.ref);
+        // Fork: read in none of the speaker's languages (`misheard`): shown as it is, in the language named for it,
+        // and answered by nothing when it closes. Where sentences of the stretch were closed as they came, they
+        // stand; what is left after them is the mishearing, in the segment that shows it.
+        if (source && e.payload.misheard) {
+          source.text = e.payload.text;
+          source.misheard = true;
+          const heard = this.heardOf(e.payload.ref);
+          if (heard) heard.text = e.payload.text;
+          const cut = this.cuts.get(e.payload.ref);
+          if (!cut?.done) {
+            this.dropDraft(source.origin);
+            this.events.segmentText(e.payload);
+            return;
+          }
+          const rest = source.text.slice(restFrom(source.text, cut.done)).trim();
+          const some = letters(rest) > 0;
+          if (some || cut.rest) {
+            const shown = this.restOf(cut);
+            this.dropDraft(shown.origin);
+            this.events.segmentText({ ref: shown.ref, text: some ? rest : '', ...(some && e.payload.language ? { language: e.payload.language } : {}), ...(some ? { misheard: true as const } : {}) });
+          }
+          return;
+        }
         // Said by a recognizer left to detect it (Qwen3-ASR, SenseVoice): kept where it is one the leg may be in, and
         // one outside them read from the writing, as a sentence it said nothing of is. Fork: one the writing rules out
         // (Chinese, of a sentence in Latin letters alone) is first put right (`namedByWriting`).
@@ -547,6 +570,17 @@ class PipelineLeg implements AdapterSession {
       case 'segmentClosed': {
         const source = this.sources.get(e.payload.ref);
         this.sources.delete(e.payload.ref);
+        if (source?.misheard) {
+          const heard = this.heardOf(e.payload.ref);
+          if (heard) heard.until = this.request.clock.now();
+          const cut = this.cuts.get(e.payload.ref);
+          this.cuts.delete(e.payload.ref);
+          this.frame('in', 'speech.misheard', { chars: source.text.length });
+          // Its own segment closed with its first sentence: what is left has the one that showed it.
+          if (!cut?.done) this.events.segmentClosed(e.payload);
+          else if (cut.rest) this.events.segmentClosed({ ref: cut.rest.ref, origin: cut.rest.origin });
+          return;
+        }
         const text = source?.text.trim();
         const coached = this.stages.speech?.kind === 'coach' || !!this.stages.feedback;
         const heard = this.heardOf(e.payload.ref);

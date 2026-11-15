@@ -271,9 +271,11 @@ export function createApiAsr(options: ApiAsrOptions): AsrLike {
         let text = String(body?.text ?? '').trim();
         // A language supplied in the request may only be echoed back, as with the native engine's readWhole.
         let heard = !language && typeof body?.language === 'string' && parseCode(body.language)?.kind === 'tag' ? body.language : undefined;
-        // Fork: named outside the speaker's languages: sent again, told their others in turn; nothing is written
-        // where no reading comes out in a script of theirs (`namedAmong`, `hearingPlan.ts`).
+        // Fork: named outside the speaker's languages: sent again, told their others in turn; where no reading comes
+        // out in a script of theirs, the first is handed over as a mishearing (`namedAmong`, `hearingPlan.ts`).
+        let first: { text: string; language?: string } | null = null;
         if (text && among.length > 1 && (namedOutside(heard, among) || writtenOutside(text, among))) {
+          first = { text, ...(heard ? { language: heard } : {}) };
           text = '';
           heard = undefined;
           // A recognizer that is told no language would only say the same again.
@@ -281,10 +283,12 @@ export function createApiAsr(options: ApiAsrOptions): AsrLike {
             const second = await upload(told);
             if (!second.ok) break;
             const read = String(((await second.json()) as { text?: unknown } | null)?.text ?? '').trim();
-            if (read && !writtenOutside(read, among)) { text = read; break; }
+            if (read && !writtenOutside(read, among)) { text = read; first = null; break; }
           }
         }
-        if (text) asr.onResult?.({ text, durationMs: Math.round((trimmed.length / sampleRate) * 1000), recognitionTimeMs: now() - started, ...(heard ? { language: heard } : {}) });
+        const timed = { durationMs: Math.round((trimmed.length / sampleRate) * 1000), recognitionTimeMs: now() - started };
+        if (first) asr.onResult?.({ text: first.text, ...timed, ...(first.language ? { language: first.language } : {}), misheard: true });
+        else if (text) asr.onResult?.({ text, ...timed, ...(heard ? { language: heard } : {}) });
       } catch (error) {
         if (stop.signal.aborted) return;
         asr.onError?.(late

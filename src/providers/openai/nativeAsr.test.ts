@@ -53,9 +53,9 @@ async function started(engine = fakeEngine(), options: { status?: NativeEngineSt
   const vad = fakeVad();
   const clock = createVirtualClock();
   const asr = createNativeAsr({ bridge: engine.bridge, start: async () => options.status ?? READY, vad: () => vad.worker, now: () => clock.now(), clock, ...(options.limits ? { limits: options.limits } : {}), ...(options.model ? { model: options.model } : {}), ...(options.also ? { also: options.also } : {}), ...(options.among ? { among: options.among } : {}) });
-  const seen = { partials: [] as string[], results: [] as string[], languages: [] as Array<string | undefined>, unsaid: [] as boolean[], starts: 0, errors: [] as string[], fatal: [] as string[] };
+  const seen = { partials: [] as string[], results: [] as string[], languages: [] as Array<string | undefined>, misheard: [] as boolean[], starts: 0, errors: [] as string[], fatal: [] as string[] };
   asr.onPartialResult = (text) => seen.partials.push(text);
-  asr.onResult = (result) => { seen.results.push(result.text); seen.languages.push(result.language); seen.unsaid.push(result.unsaid === true); };
+  asr.onResult = (result) => { seen.results.push(result.text); seen.languages.push(result.language); seen.misheard.push(result.misheard === true); };
   asr.onSpeechStart = () => { seen.starts += 1; };
   asr.onError = (error) => seen.errors.push(error);
   asr.onFatal = (error) => seen.fatal.push(error);
@@ -805,13 +805,14 @@ describe("a stretch named outside the speaker's languages", () => {
     expect(seen.languages).toEqual([undefined]);
   });
 
-  it('is not written where the second reading is outside them too', async () => {
+  it('is handed over as it was first read, in the language named for it and said to be a mishearing, where the second reading is outside them too', async () => {
     const { engine, seen } = await heard();
     engine.say({ id: 1, type: 'done', text: 'badan agak', language: 'id' });
     await settled();
     engine.say({ id: 2, type: 'done', text: 'बारी, आगे', language: 'ko' });
-    expect(seen.results).toEqual(['']);
-    expect(seen.unsaid).toEqual([true]);
+    expect(seen.results).toEqual(['badan agak']);
+    expect(seen.languages).toEqual(['id']);
+    expect(seen.misheard).toEqual([true]);
     expect(engine.streams).toHaveLength(2);
   });
 
@@ -826,30 +827,32 @@ describe("a stretch named outside the speaker's languages", () => {
     expect(seen.results).toEqual(['Good morning.']);
   });
 
-  it('is not written where the second reading never comes', async () => {
+  it('is a mishearing as first read where the second reading never comes', async () => {
     const { engine, seen, clock } = await heard();
     engine.say({ id: 1, type: 'done', text: 'Kir Kirhum.', language: 'en' });
     await settled();
     clock.advance(LAST_WORDS_TIMEOUT_MS);
-    expect(seen.results).toEqual(['']);
+    expect(seen.results).toEqual(['Kir Kirhum.']);
+    expect(seen.languages).toEqual(['en']);
+    expect(seen.misheard).toEqual([true]);
     expect(engine.streams[1].aborted).toBe(true);
   });
 
-  it('is not written where the second reading fails', async () => {
+  it('is a mishearing as first read where the second reading fails', async () => {
     const { engine, seen } = await heard();
     engine.say({ id: 1, type: 'done', text: 'क्यों हो', language: 'hi' });
     await settled();
     engine.say({ id: 2, type: 'error', message: 'HTTP 503' });
-    expect(seen.results).toEqual(['']);
-    expect(seen.unsaid).toEqual([true]);
+    expect(seen.results).toEqual(['क्यों हो']);
+    expect(seen.misheard).toEqual([true]);
   });
 
-  it('is not written from what was heard on the way, where the first reading never ends', async () => {
+  it('is a mishearing as heard on the way, where the first reading never ends', async () => {
     const { engine, seen, clock } = await heard();
     engine.say({ id: 1, type: 'partial', text: 'क्यों हो' });
     clock.advance(LAST_WORDS_TIMEOUT_MS);
-    expect(seen.results).toEqual(['']);
-    expect(seen.unsaid).toEqual([true]);
+    expect(seen.results).toEqual(['क्यों हो']);
+    expect(seen.misheard).toEqual([true]);
   });
 
   it('holds the next stretch until it is settled', async () => {

@@ -328,6 +328,18 @@ describe('the chatbox', () => {
     expect(t.chatboxLines()).toEqual(['今日は行きます', '谢谢\nありがとう']);
   });
 
+  it('never sends what was heard in none of the user’s languages (fork)', () => {
+    useVRChatStore.setState({ chatbox: 'both' });
+    for (const coached of [false, true]) {
+      const t = setup({ coached: () => coached });
+      const entry = exchange('m', 'Kir Kirhum.', '');
+      if (entry.kind !== 'exchange') throw new Error('expected exchange');
+      t.show([{ ...entry, source: entry.source.map((r) => ({ ...r, language: 'en', misheard: true as const })) }]);
+      expect(t.chatboxLines()).toEqual([]);
+      t.controller.stop();
+    }
+  });
+
   it('sends a coached sentence once it is final, without waiting for its feedback', () => {
     useVRChatStore.setState({ chatbox: 'translation' });
     const t = setup({ coached: () => true });

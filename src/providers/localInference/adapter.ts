@@ -454,17 +454,23 @@ class LocalSession implements AdapterSession {
    * closing a segment its partials opened with its last text. AST: the final
    * already is the translation — no source segment.
    */
-  private final(result: { text: string; durationMs: number; recognitionTimeMs: number; language?: string; unsaid?: true }): void {
+  private final(result: { text: string; durationMs: number; recognitionTimeMs: number; language?: string; misheard?: true }): void {
     if (this.ended) return;
     const text = result.text.trim();
     if (!text) {
       this.cut?.reset();
-      // Fork: a mishearing the recognizer takes back: its segment closes empty, not with what the partials showed.
-      if (result.unsaid && this.utterance?.text) {
-        this.utterance.text = '';
-        this.emit('segmentText', { ref: this.utterance.ref, text: '' });
-      }
       this.abandonUtterance();
+      return;
+    }
+    // Fork: read in none of the speaker's languages: shown as it was first read and said to be so, and nothing
+    // translates it.
+    if (result.misheard) {
+      this.cut?.reset();
+      const segment = this.utterance ?? { ref: this.nextRef++, origin: this.nextOrigin(), text: '' };
+      if (!this.utterance) this.emit('segmentOpened', { ref: segment.ref, side: 'source', origin: segment.origin });
+      this.utterance = null;
+      this.emit('segmentText', { ref: segment.ref, text, ...(result.language ? { language: result.language } : {}), misheard: true });
+      this.emit('segmentClosed', { ref: segment.ref, origin: segment.origin });
       return;
     }
     this.frame('in', 'local.asr.end', {

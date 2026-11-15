@@ -11,6 +11,8 @@ const row = (r: Row): ViewerRow => ({ key: r.key, text: r.text, final: r.final, 
 export function toViewerEntry(entry: Entry, feedback = false): ViewerEntry | null {
   // Fork: a video's words (VRChat) are the host's aside, not the conversation.
   if (entry.kind !== 'exchange' || entry.lane === 'video') return null;
+  // Fork: a mishearing is the host's to see, not something anyone said.
+  if (entry.source.length > 0 && entry.source.every((r) => r.misheard)) return null;
   return {
     id: entry.id,
     leg: entry.leg,

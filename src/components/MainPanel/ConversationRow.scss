@@ -67,6 +67,11 @@
   }
 }
 
+// Fork: heard in none of the speaker's languages: there to be seen, and plainly not one of the sentences.
+.conversation-row.kt-misheard-row {
+  opacity: 0.45;
+}
+
 .row-name {
   display: flex;
   align-items: baseline;

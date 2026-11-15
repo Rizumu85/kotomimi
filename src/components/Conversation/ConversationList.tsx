@@ -181,7 +181,7 @@ const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, r
   const isPlayingRow = upTo !== undefined && ((upTo >= row.start && upTo < row.end) || (item.endsSegment && upTo >= row.end));
 
   return (
-    <div className={`conversation-row source-${leg} ${item.header ? 'with-header' : 'grouped'} ${compact ? 'compact' : 'expanded'}${video ? ' kt-video-row' : ''}`} data-purpose={row.purpose}>
+    <div className={`conversation-row source-${leg} ${item.header ? 'with-header' : 'grouped'} ${compact ? 'compact' : 'expanded'}${video ? ' kt-video-row' : ''}${row.misheard ? ' kt-misheard-row' : ''}`} data-purpose={row.purpose}>
       {!compact && item.header && (
         <div className="row-header">
           <div className={`row-avatar ${video ? 'avatar-video' : `avatar-${leg}`}`}>

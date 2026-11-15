@@ -62,6 +62,24 @@ describe('Conversation — identity and text', () => {
     expect(seg.marks).toEqual([{ at: 10_000 + MARK_COMPACT_MS - 1, len: 3 }, { at: 12_099, len: 5 }]);
   });
 
+  it('keeps a source said to be a mishearing so, until a text comes without the mark (fork)', () => {
+    const { conv, apply } = make();
+    apply({ kind: 'segmentOpened', payload: { ref: 1, side: 'source' } });
+    apply({ kind: 'segmentText', payload: { ref: 1, text: 'Kir Kirhum.', language: 'en', misheard: true } });
+    expect(conv.snapshot().segments[0]).toMatchObject({ text: 'Kir Kirhum.', language: 'en', misheard: true });
+    apply({ kind: 'segmentText', payload: { ref: 1, text: '今日は晴れ', language: 'ja' } });
+    expect(conv.snapshot().segments[0]).not.toHaveProperty('misheard');
+  });
+
+  it('keeps the mark through the punctuation it fills in itself (fork)', async () => {
+    const { conv, apply } = make({ punctuate: async (_lang: string, text: string) => `${text}.` });
+    apply({ kind: 'segmentOpened', payload: { ref: 1, side: 'source' } });
+    apply({ kind: 'segmentText', payload: { ref: 1, text: 'Hello there', language: 'en', misheard: true } });
+    apply({ kind: 'segmentClosed', payload: { ref: 1 } });
+    await conv.settled();
+    expect(conv.snapshot().segments[0]).toMatchObject({ text: 'Hello there.', misheard: true });
+  });
+
   it('closes a segment as final and records a stated origin', () => {
     const { conv, apply } = make();
     apply({ kind: 'segmentOpened', payload: { ref: 1, side: 'source' } }, { kind: 'segmentClosed', payload: { ref: 1, origin: 'u1' } });

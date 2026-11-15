@@ -98,7 +98,7 @@ export class Conversation {
   private dispatch(event: AdapterEvent): void {
     switch (event.kind) {
       case 'segmentOpened': return this.open(event.payload.ref, event.payload.side, event.payload.origin, event.payload.purpose, event.payload.accompaniesTranslation);
-      case 'segmentText': return this.text(event.payload.ref, event.payload.text, event.payload.timing, event.payload.language);
+      case 'segmentText': return this.text(event.payload.ref, event.payload.text, event.payload.timing, event.payload.language, event.payload.misheard);
       case 'segmentClosed': return this.close(event.payload.ref, event.payload.origin);
       case 'audio': return this.audio(event.payload.ref, event.payload.range, event.payload.pcm);
       case 'speechRanges': return this.ranges(event.payload.ref, event.payload.ranges);
@@ -233,16 +233,16 @@ export class Conversation {
     this.touch();
   }
 
-  private text(ref: number, text: string, timing?: SegmentTiming, language?: string): void {
+  private text(ref: number, text: string, timing?: SegmentTiming, language?: string, misheard?: true): void {
     this.unfilled.delete(ref);
     const i = this.indexByRef.get(ref);
     if (i === undefined) return this.violation(`text for ref ${ref} before it opened`);
     const seg = this.segments[i];
-    if (seg.text === text && sameTiming(seg.timing, timing ?? seg.timing) && (language ?? seg.language) === seg.language) return;
+    if (seg.text === text && sameTiming(seg.timing, timing ?? seg.timing) && (language ?? seg.language) === seg.language && !!misheard === !!seg.misheard) return;
     // A timing- or language-only snapshot is not growth: a mark there would
     // read as the end of a pause to L2's cut.
     const revision = seg.final;
-    this.replaceText(i, text, { timing, language, mark: seg.text !== text });
+    this.replaceText(i, text, { timing, language, misheard: misheard === true, mark: seg.text !== text });
     if (revision) this.clampRanges(i);
   }
 
@@ -349,7 +349,7 @@ export class Conversation {
   // ---- hooks ----
 
   /** Replaces a segment's text, re-anchoring its speech ranges and extending the growth trace. */
-  private replaceText(i: number, text: string, o: { timing?: SegmentTiming; language?: string; mark: boolean }): void {
+  private replaceText(i: number, text: string, o: { timing?: SegmentTiming; language?: string; /** Absent: as it was. */ misheard?: boolean; mark: boolean }): void {
     const seg = this.segments[i];
     const ranges = reanchorRanges(seg.text, text, seg.speech.map((s) => s.range));
     const speech = seg.speech.map((s, k) => (ranges[k] === s.range ? s : { ...s, range: ranges[k] }));
@@ -358,7 +358,10 @@ export class Conversation {
       ? seg.marks
       : seg.marks.map((m) => ({ at: m.at, len: Math.min(text.length, offsetAfterSkeleton(text, countSkeleton(seg.text.slice(0, m.len)))) }));
     const marks = o.mark ? pushMark(remapped, this.opts.clock.now(), text.length) : remapped;
-    this.replace(i, { ...seg, text, timing: o.timing ?? seg.timing, language: o.language ?? seg.language, marks, speech });
+    // Said with each text the adapter sends: a later reading that is one of theirs takes the mark away. A text
+    // written here (the punctuation filled in) leaves it as it was.
+    const { misheard: was, ...rest } = seg;
+    this.replace(i, { ...rest, text, timing: o.timing ?? seg.timing, language: o.language ?? seg.language, marks, speech, ...((o.misheard ?? was === true) ? { misheard: true as const } : {}) });
   }
 
   /** Marks a segment final, checks its ranges against the now-settled text, and starts punctuation fill-in for it. */

@@ -22,6 +22,8 @@ export interface Row {
   final: boolean;
   /** The segment's detected language, when the provider reported one. */
   language?: string;
+  /** Fork: heard in none of the speaker's languages (`Segment.misheard`): drawn dimmed, and kept from what goes out. */
+  misheard?: true;
 }
 
 export type Pairing = 'stated' | 'inferred' | 'none';

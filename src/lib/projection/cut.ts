@@ -78,6 +78,7 @@ export function cutSegment(seg: Segment, settings: CutSettings): Row[] {
     text: seg.text.slice(start, end),
     final: seg.final,
     ...(seg.language !== undefined ? { language: seg.language } : {}),
+    ...(seg.misheard ? { misheard: seg.misheard } : {}),
   }));
 }
 

@@ -99,8 +99,9 @@ export function pairedLanguages(input: {
  *
  * A recognizer that names a language outside them has misheard — an accent, mostly: a learner's Korean was written as
  * Hindi, Arabic and Japanese (22 of some 250 lines, 2026-11-12). Such a stretch is read once more, told each of the
- * others in turn (`readAgainIn`; the speaker's own is seldom what was misheard), and is not written at all where no
- * reading comes out in a script of theirs (`writtenOutside`): what stood there was never something they said.
+ * others in turn (`readAgainIn`; the speaker's own is seldom what was misheard). Where no reading comes out in a
+ * script of theirs (`writtenOutside`) it is handed over as it was first read, marked `misheard`: shown dimmed, so
+ * that it is seen to have been heard, and neither answered nor sent anywhere — it was never something they said.
  */
 export function namedAmong(heard: string, own: string, others: readonly string[]): string[] {
   if (heard !== AUTO || others.length === 0 || others.some((other) => baseOf(other) === 'auto')) return [];

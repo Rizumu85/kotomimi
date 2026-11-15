@@ -155,14 +155,14 @@ describe('the LocalInference adapter — segments and jobs', () => {
     expectConformant(t.log, t.context);
   });
 
-  it('closes a segment empty where the recognizer takes its stretch back', async () => {
+  it('shows a stretch the recognizer read in none of the speaker’s languages as it was first read, said to be so, and translates nothing', async () => {
     const t = await open();
     t.asr.partial('क्यों हो');
-    t.asr.unsaid();
+    t.asr.misheard('क्यों हो जी', 'hi');
     expect(content(t.log)).toEqual([
       { kind: 'segmentOpened', payload: { ref: 1, side: 'source', origin: 'u1' } },
       { kind: 'segmentText', payload: { ref: 1, text: 'क्यों हो' } },
-      { kind: 'segmentText', payload: { ref: 1, text: '' } },
+      { kind: 'segmentText', payload: { ref: 1, text: 'क्यों हो जी', language: 'hi', misheard: true } },
       { kind: 'segmentClosed', payload: { ref: 1, origin: 'u1' } },
     ]);
     expect(t.translation.calls).toEqual([]);

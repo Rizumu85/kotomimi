@@ -83,8 +83,11 @@ export interface AdapterFrame {
 
 export interface AdapterEvents {
   segmentOpened(e: { ref: Ref; side: Side; origin?: string; purpose?: SegmentPurpose; accompaniesTranslation?: true }): void;
-  /** Always the whole text; a snapshot, never a delta. */
-  segmentText(e: { ref: Ref; text: string; timing?: SegmentTiming; language?: string }): void;
+  /**
+   * Always the whole text; a snapshot, never a delta. Fork: `misheard`, of a source the recognizer wrote in none of
+   * the speaker's languages (`namedAmong`, `hearingPlan.ts`): shown as heard, and answered by nothing.
+   */
+  segmentText(e: { ref: Ref; text: string; timing?: SegmentTiming; language?: string; misheard?: true }): void;
   segmentClosed(e: { ref: Ref; origin?: string }): void;
   /** `ref` absent: attributable to no segment (plays, pairs with nothing).
    *  `range` absent: this segment's audio, which characters unknown. */

@@ -54,6 +54,12 @@ describe('ConversationList — rows', () => {
     expect(container.querySelector('.row-text.tr')?.textContent).toBe(TEXT);
   });
 
+  it('marks a row heard in none of the speaker’s languages, with the language named for it (fork)', () => {
+    const { container } = render(<ConversationList {...props({ items: [rowItem({ row: row({ side: 'source', text: 'Kir Kirhum.', end: 11, language: 'en', misheard: true }) })] })} />);
+    expect(container.querySelector('.conversation-row.kt-misheard-row .lang-badge')?.textContent).toBe('EN');
+    expect(container.querySelector('.conversation-row.kt-misheard-row .row-text.src')?.textContent).toBe('Kir Kirhum.');
+  });
+
   it("takes a detected language over the leg's pair, and the source side's language on a source row", () => {
     const { container, rerender } = render(<ConversationList {...props({ items: [rowItem({ row: row({ language: 'zh' }) })] })} />);
     expect(container.querySelector('.lang-badge')?.textContent).toBe('ZH');

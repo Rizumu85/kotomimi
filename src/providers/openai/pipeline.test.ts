@@ -7,6 +7,7 @@ import { coachPrompt } from './coachPrompt';
 import { buildLocalAI, LOCALAI_DEFAULTS, localaiProvider, type LocalAIConfig, type LocalAICredentials, type LocalAISettings } from './localai';
 import { createPipelineAdapter, FIRST_REF, tidyAnswer, type AnswerStage } from './pipeline';
 import { SHARED } from './testing';
+import { SETTLE_MS } from './sentenceCut';
 
 const K: LocalAICredentials = { apiKey: '', endpoint: 'ws://192.168.1.10:8080/v1/realtime' };
 // "I read Chinese, the other side speaks Japanese": the speaker leg is zh → ja, the participant leg its reverse.
@@ -132,6 +133,49 @@ describe('a language the recognizer named that the writing rules out (fork)', ()
     expect(h.lastText(1)).toMatchObject({ language: 'zh' });
     await vi.waitFor(() => expect(h.calls.map((call) => call.body.model)).toEqual(['hy-mt2-1.8b']));
     await h.settled();
+    await h.session.stop();
+  });
+});
+
+describe('a stretch the recognizer read in none of the speaker’s languages (fork)', () => {
+  /** What this computer's recognizer hands the leg: no wire carries the mark. */
+  const inner = (h: Awaited<ReturnType<typeof live>>, event: AdapterEvent) => (h.session as unknown as { onInner(e: AdapterEvent): void }).onInner(event);
+
+  it('is shown as it was read, in the language named for it and said to be a mishearing, and nothing answers it', async () => {
+    for (const patch of [VIA_MODEL, { coach: true, coachServerModel: 'qwen3-4b', translateServerModel: 'hy-mt2-1.8b' }]) {
+      const h = await live(SPEAKER, patch, [], K, (config) => { delete config.stages!.leakCheck; });
+      inner(h, { kind: 'segmentOpened', payload: { ref: 1, side: 'source', origin: 'u1' } });
+      inner(h, { kind: 'segmentText', payload: { ref: 1, text: 'Kir Kir' } });
+      inner(h, { kind: 'segmentText', payload: { ref: 1, text: 'Kir Kirhum.', language: 'en', misheard: true } });
+      inner(h, { kind: 'segmentClosed', payload: { ref: 1, origin: 'u1' } });
+      h.clock.advance(10_000);
+      await Promise.resolve();
+      expect(h.lastText(1)).toEqual({ ref: 1, text: 'Kir Kirhum.', language: 'en', misheard: true });
+      expect(h.of('segmentClosed').map((e) => e.payload.ref)).toEqual([1]);
+      expect(h.calls).toEqual([]);
+      expect(h.of('segmentOpened').filter((e) => e.payload.side === 'translation')).toEqual([]);
+      await h.session.stop();
+    }
+  });
+
+  it('leaves the sentences closed from it as they are, and shows what is left as the mishearing, unanswered', async () => {
+    const h = await live(SPEAKER, VIA_MODEL, [sse('皆さんこんにちは。')], K, (config) => { delete config.stages!.leakCheck; });
+    inner(h, { kind: 'segmentOpened', payload: { ref: 1, side: 'source', origin: 'u1' } });
+    inner(h, { kind: 'segmentText', payload: { ref: 1, text: 'Hola a todos mis queridos amigos de la ciudad. Como estan ustedes esta noche en el parque' } });
+    h.clock.advance(SETTLE_MS);
+    inner(h, { kind: 'segmentText', payload: { ref: 1, text: 'Hola a todos mis queridos amigos de la ciudad. Como estan ustedes esta noche en el parque' } });
+    await vi.waitFor(() => expect(h.calls).toHaveLength(1));
+    inner(h, { kind: 'segmentText', payload: { ref: 1, text: 'Hola a todos mis queridos amigos de la ciudad. Como estan ustedes esta noche en el parque central.', language: 'es', misheard: true } });
+    inner(h, { kind: 'segmentClosed', payload: { ref: 1, origin: 'u1' } });
+    await h.settled();
+    h.clock.advance(10_000);
+    await Promise.resolve();
+    // The first sentence had gone to be translated before the recognizer said so; nothing is asked of the rest.
+    expect(h.calls).toHaveLength(1);
+    const rest = h.of('segmentOpened').map((e) => e.payload).filter((p) => p.side === 'source').pop()!;
+    expect(rest.ref).not.toBe(1);
+    expect(h.lastText(rest.ref)).toEqual({ ref: rest.ref, text: 'Como estan ustedes esta noche en el parque central.', language: 'es', misheard: true });
+    expect(h.of('segmentClosed').map((e) => e.payload.ref)).toContain(rest.ref);
     await h.session.stop();
   });
 });

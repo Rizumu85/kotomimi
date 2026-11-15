@@ -189,6 +189,8 @@ export const answersOf = (rows: readonly Row[]): string[] => {
  */
 export function finishedLine(entry: Entry, shows: ChatboxShows, said = false, translationFirst = false, theirs?: Theirs, settled = false): string | null {
   if (shows === 'off' || entry.kind !== 'exchange' || entry.leg !== 'speaker') return null;
+  // Fork: heard in none of the user's languages: nothing they said, and nothing to send.
+  if (entry.source.some((row) => row.misheard)) return null;
   // Speech already in the other language is shown as said unless the user enabled translation back into their own.
   const inTheirs = theirs !== undefined && entry.source.length > 0 && entry.source.every((row) => row.language !== undefined && theirs.languages.some((code) => base(code) === base(row.language!)));
   if (said || shows === 'source' || (inTheirs && !theirs.back)) {

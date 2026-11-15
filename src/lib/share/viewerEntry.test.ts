@@ -33,6 +33,16 @@ describe('toViewerEntry', () => {
     });
   });
 
+  it('leaves a mishearing with the host (fork)', () => {
+    const entry: Entry = {
+      kind: 'exchange', id: 'speaker:s:r1:speaker:1', leg: 'speaker', languages: { source: 'ja', target: 'zh-CN' },
+      pairing: 'none', t: 1000,
+      source: [{ ...row('r1:speaker:1:0', 'Kir Kirhum.', true), language: 'en', misheard: true }],
+      translation: [],
+    };
+    expect(toViewerEntry(entry)).toBeNull();
+  });
+
   it('leaves notices with the host', () => {
     const notice: Entry = { kind: 'notice', id: 'speaker:n:1', leg: 'speaker', severity: 'error', message: 'x', at: 1 };
     expect(toViewerEntry(notice)).toBeNull();

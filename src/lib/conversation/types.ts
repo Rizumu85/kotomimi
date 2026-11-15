@@ -30,6 +30,8 @@ export interface Segment {
   marks: readonly Mark[];
   timing?: SegmentTiming;
   language?: string;
+  /** Fork: heard, and written in none of the speaker's languages: shown as heard, answered by nothing. */
+  misheard?: true;
   /** Stated by the adapter only; inference lives in L2. */
   origin?: string;
   speech: readonly Speech[];

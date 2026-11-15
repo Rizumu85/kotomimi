@@ -20,7 +20,7 @@ const leg = one('speaker', 'participant');
 const pair = shape({ source: string, target: string });
 const row = shape({ key: string, segmentId: string, side: one('source', 'translation'),
   purpose: optional(one('translation', 'feedback')), accompaniesTranslation: optional(one(true)),
-  start: number, end: number, text: string, final: bool, language: optional(string) });
+  start: number, end: number, text: string, final: bool, language: optional(string), misheard: optional(one(true)) });
 const entry = (v) => object(v) && (v.kind === 'exchange'
   ? shape({ kind: one('exchange'), id: string, leg, languages: pair, pairing: one('stated', 'inferred', 'none'),
     source: array(row), translation: array(row), feedback: optional(array(row)), t: number, lane: optional(one('video')) })(v)

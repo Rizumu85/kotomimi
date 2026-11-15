@@ -356,11 +356,11 @@ describe('a service with a recognizer of its own (DeepSeek)', () => {
     expect(seen.results.map((r) => r.text)).toEqual(['こんにちは']);
   });
 
-  it("is not asked again for a stretch written outside the speaker's languages — it can be told no other — and that is not written", async () => {
+  it("is not asked again for a stretch written outside the speaker's languages — it can be told no other — and that is handed over as a mishearing", async () => {
     const api = fakeApi({ body: { text: 'बारी, आगे' } });
     const { seen } = await said(api, ['zh', 'ko']);
     expect(api.calls).toHaveLength(1);
-    expect(seen.results).toEqual([]);
+    expect(seen.results).toEqual([expect.objectContaining({ text: 'बारी, आगे', misheard: true })]);
     expect(seen.errors).toEqual([]);
   });
 
@@ -390,11 +390,11 @@ describe("a stretch the API names outside the speaker's languages", () => {
     expect(seen.results[0]).not.toHaveProperty('language');
   });
 
-  it('is not written where the second reading is outside them too', async () => {
+  it('is handed over as it was first read, said to be a mishearing, where the second reading is outside them too', async () => {
     const api = fakeApi({ body: { text: 'badan agak', language: 'id' } }, { body: { text: 'बारी, आगे', language: 'ko' } });
     const { seen } = await said(api);
     expect(api.calls).toHaveLength(2);
-    expect(seen.results).toEqual([]);
+    expect(seen.results).toEqual([expect.objectContaining({ text: 'badan agak', language: 'id', misheard: true })]);
     expect(seen.errors).toEqual([]);
   });
 
