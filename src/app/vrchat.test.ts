@@ -350,6 +350,21 @@ describe('the chatbox', () => {
     expect(t.chatboxLines()).toEqual(['Bonjour', 'Je suis ici']);
   });
 
+  it('sends a coached sentence as said though it is translated back for the user, and does not show that as what goes up', () => {
+    useVRChatStore.setState({ chatbox: 'both' });
+    const t = setup({ coached: () => true, theirs: () => ({ languages: ['fr'], back: false }) });
+    const entry = exchange('practice', 'Je suis ici', 'I am here');
+    if (entry.kind !== 'exchange') throw new Error('expected exchange');
+    t.show([{
+      ...entry,
+      source: entry.source.map((r) => ({ ...r, language: 'fr' })),
+      translation: entry.translation.map((r) => ({ ...r, purpose: 'translation' as const })),
+      feedback: [{ ...row('Private grammar explanation'), side: 'translation', purpose: 'feedback' }],
+    }]);
+    expect(t.chatboxLines()).toEqual(['Je suis ici']);
+    expect(useVRChatStore.getState().recent).toBeNull();
+  });
+
   it.each(['before', 'after'] as const)('publishes only the translation when combined feedback arrives %s it', (order) => {
     useVRChatStore.setState({ chatbox: 'translation' });
     const t = setup({ coached: () => true, theirs: () => ({ languages: ['fr'], back: true }) });

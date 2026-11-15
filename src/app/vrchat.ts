@@ -424,12 +424,16 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
       && !entry.translation.some((row) => row.purpose === 'translation')
       && !entry.source.some((row) => typed.has(row.segmentId))
       && !(theirs && entry.source.length > 0 && entry.source.every((row) => row.language && !theirs.languages.some((code) => base(code) === base(row.language!))));
+    // Said in the other side's language with no translation back asked for: it goes up as said (`finishedLine`), though
+    // a coached speaker's is translated back for them alone.
+    const asSaid = (entry: Extract<Entry, { kind: 'exchange' }>) => theirs !== undefined && !theirs.back && entry.source.length > 0
+      && entry.source.every((row) => row.language !== undefined && theirs.languages.some((code) => base(code) === base(row.language!)));
     // The last sentence of the user's translated as it would go up, for the settings to show the chatbox with: not
     // one answered with feedback, which is theirs alone.
     for (let i = state.entries.length - 1; i >= 0; i--) {
       const entry = state.entries[i];
       if (entry.kind !== 'exchange' || entry.leg !== 'speaker') continue;
-      if (feedback(entry)) continue;
+      if (feedback(entry) || asSaid(entry)) continue;
       if (finishedLine(entry, 'translation') === null) continue;
       store.getState().setRecent({ said: textOf(entry.source), translation: answersOf(entry.translation).join('\n') });
       break;

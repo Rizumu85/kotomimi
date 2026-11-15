@@ -128,7 +128,9 @@ export interface Stages {
   requiresLanguage?: boolean;
   /**
    * Fork: the speaker speaks the other side's language too (`speakBoth`; `heard` is then `auto`): a sentence in it —
-   * `language` — is answered by `stage`, into their own (`own`); one in their own by `speech`, as ever.
+   * `language` — is answered by `stage`, into their own (`own`); one in their own by `speech`, as ever. A coached
+   * speaker's too (`speech` the feedback, `heard` the language they practise): what they say in it is translated back
+   * by `stage`, the feedback beside it (`feedback`), and one in their own goes to `typed`.
    */
   back?: { stage?: AnswerStage; language: string; own: string; languages?: readonly string[] };
   /**
@@ -241,6 +243,8 @@ interface Job {
   typed: boolean;
   /** The sentence this leg heard just before, for a translator that takes one with its request. */
   before?: string;
+  /** Feedback asked beside a translation of the same sentence (`Stages.feedback`). */
+  beside?: true;
 }
 
 /** A sentence is given to the translator of the next while it is this recent, and no more of it than its last letters. */
@@ -899,7 +903,7 @@ class PipelineLeg implements AdapterSession {
     const feedback = this.stages.feedback;
     if (source && text && feedback) {
       const spoken = language ? baseOf(language) : oneOfTwo(text, this.request.context.direction.source, feedback.language);
-      if (spoken === baseOf(feedback.language)) this.push({ stage: feedback.stage, text, origin: payload.origin ?? source.origin, typed: false });
+      if (spoken === baseOf(feedback.language)) this.push({ stage: feedback.stage, text, origin: payload.origin ?? source.origin, typed: false, beside: true });
     }
   }
 
@@ -1047,7 +1051,7 @@ class PipelineLeg implements AdapterSession {
       if (!opened) {
         this.events.segmentOpened({
           ref, side: 'translation', purpose: stage.kind === 'coach' ? 'feedback' : 'translation',
-          ...(stage.kind === 'coach' && this.stages.feedback ? { accompaniesTranslation: true as const } : {}),
+          ...(job.beside ? { accompaniesTranslation: true as const } : {}),
           ...(job.origin !== undefined ? { origin: job.origin } : {}),
         });
         opened = true;

@@ -477,22 +477,42 @@ describe('a sentence already in the language the leg translates into', () => {
 describe('a coached speaker', () => {
   const COACH: Partial<LocalAISettings> = { coach: true, coachServerModel: 'qwen3-4b', translateServerModel: 'hy-mt2-1.8b' };
 
-  it('is heard in the language they practise, and their speech is answered with feedback in their own', async () => {
-    const h = await live(SPEAKER, COACH, [sse('昨日映画を見ました。\n', '“见”要用过去式。')]);
+  /** The request that went to the feedback model: the translation back is asked beside it. */
+  const coachCall = (h: Awaited<ReturnType<typeof live>>) => h.calls.find((call) => call.body.model === 'qwen3-4b')!;
+  /** The last text of the answer segments, by what each is for. */
+  const answers = (h: Awaited<ReturnType<typeof live>>) => Object.fromEntries(h.of('segmentOpened').map((e) => e.payload).filter((p) => p.side === 'translation').map((p) => [p.purpose, h.lastText(p.ref)]));
+
+  it('is heard in the language they practise, and their speech is answered with feedback in their own, a translation beside it', async () => {
+    const h = await live(SPEAKER, COACH, [sse('昨天看了电影。'), sse('昨日映画を見ました。\n', '“见”要用过去式。')]);
     expect((h.sent()[0].session as { type: string; audio: { input: { transcription: unknown } } }).audio.input.transcription).toEqual({ language: 'ja' });
     h.receive(...heard('item_1', '昨日映画を見ます。'));
     await h.settled();
     // The source is Japanese, though the leg's source language is Chinese: the row is told so.
     expect(h.lastText(1)).toMatchObject({ text: '昨日映画を見ます。', language: 'ja' });
-    expect(h.calls[0].body.model).toBe('qwen3-4b');
+    // Fork: translated back into their own by the translation model, the feedback asked beside it.
+    expect(h.calls.map((call) => call.body.model)).toEqual(['hy-mt2-1.8b', 'qwen3-4b']);
+    expect(h.config.stages).toMatchObject({ heard: 'ja', back: { language: 'ja', own: 'zh-CN', stage: { kind: 'translate', language: 'zh-CN' } }, feedback: { language: 'ja', stage: { kind: 'coach' } } });
     // The prompt for this pair — a Chinese speaker practising Japanese — and its worked examples as earlier turns, then what was said.
     const prompt = coachPrompt('ja', 'zh-CN');
-    expect(h.calls[0].body.messages).toEqual([
+    expect(coachCall(h).body.messages).toEqual([
       { role: 'system', content: prompt.system },
       ...prompt.shots.flatMap((shot) => [{ role: 'user', content: shot.said }, { role: 'assistant', content: shot.answer }]),
       { role: 'user', content: '昨日映画を見ます。' },
     ]);
-    expect(h.lastText(FIRST_REF + 1)).toEqual({ ref: FIRST_REF + 1, text: '昨日映画を見ました。\n“见”要用过去式。', language: 'zh-CN' });
+    expect(answers(h).feedback).toMatchObject({ text: '昨日映画を見ました。\n“见”要用过去式。', language: 'zh-CN' });
+    expect(answers(h).translation).toMatchObject({ text: '昨天看了电影。', language: 'zh-CN' });
+    // The feedback is beside a translation, whose caption keeps its turn.
+    expect(h.of('segmentOpened').map((e) => e.payload).find((p) => p.purpose === 'feedback')).toMatchObject({ accompaniesTranslation: true });
+  });
+
+  it('is answered with feedback alone where nothing translates', async () => {
+    const alone = { coach: true, coachAt: 'api' as const, coachModel: 'qwen3-4b', coachBaseUrl: 'http://localhost:11434/v1' };
+    const h = await live(SPEAKER, alone, [sse('✓')]);
+    expect(h.config.stages).not.toHaveProperty('back');
+    h.receive(...heard('item_1', '昨日映画を見ました。'));
+    await h.settled();
+    expect(h.calls.map((call) => call.body.model)).toEqual(['qwen3-4b']);
+    expect(h.of('segmentOpened').map((e) => e.payload).find((p) => p.purpose === 'feedback')).not.toHaveProperty('accompaniesTranslation');
   });
 
   it('is not given feedback on a sentence in their own language: that one is translated, and said to be in their language', async () => {
@@ -509,7 +529,7 @@ describe('a coached speaker', () => {
   it('is not coached on the voice of the other side come back through the microphone: that sentence is taken off the screen', async () => {
     // Asked by the user 2026-10-06: with loudspeakers on, what the other side said went to the feedback as the user's.
     const theirs = await live(PARTICIPANT, { translateServerModel: 'hy-mt2-1.8b' }, [sse('never mind')]);
-    const mine = await live(SPEAKER, COACH, [sse('OK')]);
+    const mine = await live(SPEAKER, COACH, [sse('昨天看了电影。'), sse('OK')]);
     // The other side is speaking; the microphone hears the same words, a little worse.
     theirs.receive(SERVER.committed('item_1'), SERVER.inputDelta('item_1', 'そうそうそう、それが好きなんですよ。'));
     mine.receive(...heard('item_1', 'そうそうそれが好きなんですよ'));
@@ -532,8 +552,8 @@ describe('a coached speaker', () => {
     expect(mine.of('segmentClosed')).toHaveLength(closedSoFar);
     mine.clock.advance(200);
     await mine.settled();
-    expect(mine.calls).toHaveLength(1);
-    expect(mine.calls[0].body.messages.slice(-1)[0]).toMatchObject({ content: '昨日映画を見ました。' });
+    expect(mine.calls).toHaveLength(2);
+    expect(coachCall(mine).body.messages.slice(-1)[0]).toMatchObject({ content: '昨日映画を見ました。' });
     await theirs.session.stop();
     await mine.session.stop();
   });
@@ -566,23 +586,23 @@ describe('a coached speaker', () => {
 
   it('is coached on a sentence repeated after the other side has finished it', async () => {
     const theirs = await live(PARTICIPANT, { translateServerModel: 'hy-mt2-1.8b' }, [sse('对对对，我就是喜欢这个。')]);
-    const mine = await live(SPEAKER, COACH, [sse('OK')]);
+    const mine = await live(SPEAKER, COACH, [sse('对对对，我就是喜欢这个。'), sse('OK')]);
     theirs.receive(...heard('item_1', 'そうそうそう、それが好きなんですよ。'));
     await theirs.settled();
     // Their sentence is over; the user says it after them, to practise.
     mine.receive(...heard('item_1', 'そうそうそう、それが好きなんですよ。'));
     await mine.settled();
-    expect(mine.calls).toHaveLength(1);
+    expect(mine.calls.map((call) => call.body.model)).toEqual(['hy-mt2-1.8b', 'qwen3-4b']);
     await theirs.session.stop();
     await mine.session.stop();
   });
 
   it('is coached with the user\'s own prompt when there is one: the pair filled in, no examples', async () => {
-    const h = await live(SPEAKER, { ...COACH, coachPrompt: '只检查{{SPOKEN}}的敬语，用{{NATIVE}}回答。' }, [sse('✓')]);
+    const h = await live(SPEAKER, { ...COACH, coachPrompt: '只检查{{SPOKEN}}的敬语，用{{NATIVE}}回答。' }, [sse('谢谢'), sse('✓')]);
     h.receive(...heard('item_1', 'ありがとう'));
     await h.settled();
-    expect(h.calls[0].body.messages).toHaveLength(2);
-    expect(h.calls[0].body.messages[0].content).toMatch(/^只检查日语的敬语，用.*中文.*回答。$/);
+    expect(coachCall(h).body.messages).toHaveLength(2);
+    expect(coachCall(h).body.messages[0].content).toMatch(/^只检查日语的敬语，用.*中文.*回答。$/);
   });
 
   it('still translates what they type, with the translation model', async () => {

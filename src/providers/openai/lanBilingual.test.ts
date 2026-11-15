@@ -291,26 +291,28 @@ describe('paired Apple recognition across the LAN wire and client pipeline', () 
     expect(h.of('failed')).toEqual([]);
   });
 
-  it('sends French for feedback and English for translation on a coached speaker', async () => {
+  it('sends French for feedback and a translation back, and English for translation, on a coached speaker', async () => {
     const h = await live(SPEAKER, { coach: true });
     expectPair(h, 'fr', 'en');
     await tentative(h, 1, FRENCH);
     h.asr.final(FRENCH, 'fr');
-    await h.settled(1);
+    await h.settled(2);
     expectHeard(h, 1, FRENCH, 'fr');
-    expect(h.calls[0].body.model).toBe('feedback-model');
-    expect(userText(h.calls[0])).toBe(FRENCH);
-    const feedback = h.of('segmentOpened').find((event) => event.payload.side === 'translation')!.payload;
+    // Fork: what they practise is translated back into their own, the feedback beside it.
+    expect(h.calls[0].body).toMatchObject({ model: 'translation-model', source_language: 'fr', target_language: 'en' });
+    expect(h.calls[1].body.model).toBe('feedback-model');
+    expect(userText(h.calls[1])).toBe(FRENCH);
+    const feedback = h.of('segmentOpened').find((event) => event.payload.purpose === 'feedback')!.payload;
     expect(feedback.origin).toBe('item_mac_session_1');
     expect(h.lastText(feedback.ref)).toEqual({ ref: feedback.ref, text: 'Your sentence is clear.', language: 'en' });
 
     await tentative(h, 2, ENGLISH);
     h.asr.final(ENGLISH, 'en');
-    await h.settled(2);
+    await h.settled(3);
     expectHeard(h, 2, ENGLISH, 'en');
-    expect(h.calls[1].body).toMatchObject({ model: 'translation-model', source_language: 'en', target_language: 'fr' });
-    expect(userText(h.calls[1])).toBe(ENGLISH);
-    expect(h.calls.map((call) => call.body.model)).toEqual(['feedback-model', 'translation-model']);
+    expect(h.calls[2].body).toMatchObject({ model: 'translation-model', source_language: 'en', target_language: 'fr' });
+    expect(userText(h.calls[2])).toBe(ENGLISH);
+    expect(h.calls.map((call) => call.body.model)).toEqual(['translation-model', 'feedback-model', 'translation-model']);
     expect(h.of('degraded')).toEqual([]);
     expect(h.of('failed')).toEqual([]);
   });

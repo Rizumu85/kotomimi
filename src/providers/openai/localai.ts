@@ -1400,10 +1400,14 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
     translate = chosen;
   }
   // Fork: a speaker who speaks both is answered in their own language when they speak the other side's.
+  // A coached speaker is too, beside the feedback, when they speak the one they practise — where the translation
+  // they have takes that direction (asked of a named model as the other side's leg asks it); a run starts without.
   let back: AnswerStage | undefined;
-  if (both && translate && backs.length > 0) {
+  const practised = soloCoach && !serverTranslatorUnfit(s, models, { source, target }, 'participant', target) ? [target] : [];
+  const backFrom = both ? backs : practised;
+  if (translate && backFrom.length > 0) {
     // Out of the one language they speak besides their own, or — where they speak more — whichever it was.
-    const from = backs.length === 1 ? backs[0] : AUTO;
+    const from = backFrom.length === 1 ? backFrom[0] : AUTO;
     const reversed = buildRealtime({ ...context, direction: { source: from, target: told } }, { ...s, model: pinned }, { ...shared, models: [{ id: pinned }] });
     const chosen = translatorFor(from, told, 'refused' in reversed ? base.instructions : reversed.instructions);
     if (chosen && 'refused' in chosen) return chosen;
@@ -1468,8 +1472,9 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   if (plain) {
     stages = { speech: null, typed: null, asIs: true };
   } else if (soloCoach && coaching) {
-    // The speaker speaks the target language; what they type is still their own, and is translated.
-    stages = { speech: coaching, typed: translate, heard: target };
+    // The speaker speaks the target language; what they type is still their own, and is translated. Fork: what they
+    // say in it is translated back for them as well (`back`), the feedback beside it.
+    stages = { speech: coaching, typed: translate, heard: target, ...(back ? { back: { stage: back, language: target, own: told }, feedback: { stage: coaching, language: target } } : {}) };
   } else if (translate) {
     // A detected leg says so to what runs it: the recognizer is told no language, and each sentence is given its own.
     stages = {
