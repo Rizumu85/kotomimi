@@ -801,6 +801,16 @@ describe('the other side\u2019s language left to be detected', () => {
     expect(update.mock.calls[update.mock.calls.length - 1][0]).not.toHaveProperty('coach');
   });
 
+  it('keeps the languages the user speaks when what hears changes, though what heard could not tell them apart (fork)', () => {
+    // Emptied here until 2026-11-14: another device that was not answering lost the user their "我也会说", unseen.
+    const { places, update } = draw({ settings: { asrVia: 'server', speakAlso: ['ja'], coach: true, translateAt: 'device' }, models: [] });
+    fireEvent.click(places(HEAR)[2]);
+    const patch = update.mock.calls[update.mock.calls.length - 1][0];
+    expect(patch).toMatchObject({ asrVia: 'device' });
+    expect(patch).not.toHaveProperty('speakAlso');
+    expect(patch).not.toHaveProperty('speakBoth');
+  });
+
   it('keeps a detection kept from before when what hears changes: every model here is a best effort', () => {
     useNativeEngineStore.setState({ status: engineOf({ 'r2t2-q8': 'downloaded', 'qwen3-asr-1.7b-q8': 'downloaded' }) });
     const { card, update } = draw({ settings: { asrVia: 'device', asrHere: 'native', asrDetectOther: true, speakBoth: true, translateAt: 'device' }, legs: BOTH });

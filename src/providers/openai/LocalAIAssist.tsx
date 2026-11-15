@@ -763,11 +763,11 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   const put = useCallback((asked: Partial<S>) => {
     const now = latest.current;
     // A detection kept from when what hears could detect is shown off while it cannot (`localaiLanguages.detection`):
-    // a change of what hears drops it, so that it never comes back on unseen.
+    // a change of what hears drops it, so that it never comes back on unseen. The languages the user speaks are kept:
+    // the row shows them, dimmed while what hears cannot use them.
     const hearing = 'asrVia' in asked || 'asrHere' in asked || 'asrOther' in asked;
     const patch: Partial<S> = {
       ...(hearing && now.asrDetectOther && !detectsOther(now, listed.current) ? { asrDetectOther: false } : {}),
-      ...(hearing && alsoSpoken(now, pair).length > 0 && !speaksBoth(now, listed.current, pair) ? { speakBoth: false, speakAlso: [] } : {}),
       ...asked,
     };
     if (pinned.current) {
