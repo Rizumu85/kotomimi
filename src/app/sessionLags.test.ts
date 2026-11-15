@@ -25,6 +25,17 @@ describe('session lag measurement', () => {
     for (let i = 0; i < 5; i++) lags.sample('speaker', 'new', 8000);
     expect(lags.state.getState().fallingBehind.speaker).toBe(first);
   });
+  it('gives no notice for a stage that is not one of this computer’s own models, and still knows it falls behind (fork)', () => {
+    const lags = createSessionLags(); lags.begin();
+    const planned = new Set(['translation'] as const);
+    // Another device hears: there is no lighter plan to offer for it.
+    for (let i = 0; i < 5; i++) lags.sample('speaker', 'apple-speech', 2600, planned);
+    expect(lags.state.getState().notice).toBeNull();
+    expect(lags.state.getState().fallingBehind.speaker).toEqual({ stage: 'speaker', model: 'apple-speech', averageMS: 2600 });
+    // This computer translates: that one is said.
+    for (let i = 0; i < 5; i++) lags.sample('translation', 'translator', 4000, planned);
+    expect(lags.state.getState().notice).toMatchObject({ stage: 'translation', model: 'translator' });
+  });
   it('uses exactly the latest five, isolated by side and model', () => {
     const lags = createSessionLags(); lags.begin();
     for (let i = 0; i < 5; i++) lags.sample('participant', 'same', 2000);

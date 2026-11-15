@@ -13,9 +13,16 @@ export interface FallingBehind { stage: LagStage; model: string; averageMS: numb
 export interface SessionLagState {
   averages: Record<string, number>;
   fallingBehind: Partial<Record<LagStage, FallingBehind>>;
-  /** The first threshold crossing only, stable until the session ends. */
+  /**
+   * The first threshold crossing only, stable until the session ends. Fork: of a stage one of this computer's own
+   * models runs (`LagPlanned`) — the notice offers a lighter plan, and there is none for another device, an API or a
+   * cloud provider.
+   */
   notice: FallingBehind | null;
 }
+/** The stages whose model is one of this computer's own, which a plan can change. */
+export type LagPlanned = ReadonlySet<LagStage>;
+const EVERY_STAGE: LagPlanned = new Set<LagStage>(['speaker', 'participant', 'translation']);
 
 /** Session-owned measurements; all surfaces read the same averages. Times are milliseconds. */
 export function createSessionLags() {
@@ -32,7 +39,7 @@ export function createSessionLags() {
     sounds.speaker = { on: false, ended: null }; sounds.participant = { on: false, ended: null };
     state.setState(empty(), true);
   };
-  const sample = (stage: LagStage, model: string, ms: number) => {
+  const sample = (stage: LagStage, model: string, ms: number, planned: LagPlanned = EVERY_STAGE) => {
     if (!active || !Number.isFinite(ms) || ms < 0) return;
     const key = `${stage}:${model}`;
     const list = [...(samples.get(key) ?? []), ms].slice(-5);
@@ -42,7 +49,7 @@ export function createSessionLags() {
     const behind = list.length === 5 && averageMS > (stage === 'translation' ? 3000 : 2000) && !previous.fallingBehind[stage]
       ? { stage, model, averageMS } : null;
     state.setState({ averages: { ...previous.averages, [key]: averageMS },
-      ...(behind ? { fallingBehind: { ...previous.fallingBehind, [stage]: behind }, notice: previous.notice ?? behind } : {}) });
+      ...(behind ? { fallingBehind: { ...previous.fallingBehind, [stage]: behind }, notice: previous.notice ?? (planned.has(stage) ? behind : null) } : {}) });
   };
   return {
     state,
@@ -59,7 +66,7 @@ export function createSessionLags() {
       if (!sound.on && heard) sound.ended = null;
       sound.on = heard;
     },
-    measure(entries: readonly Entry[], models: LagModels, now: number) {
+    measure(entries: readonly Entry[], models: LagModels, now: number, planned: LagPlanned = EVERY_STAGE) {
       if (!active) return;
       for (const entry of entries) {
         if (entry.kind !== 'exchange' || entry.lane === 'video') continue;
@@ -72,14 +79,14 @@ export function createSessionLags() {
           const end = sounds[entry.leg].ended;
           const model = models[entry.leg];
           if (end !== null && model && now >= end) {
-            sample(entry.leg, model, now - end);
+            sample(entry.leg, model, now - end, planned);
             // A later typed line or unrelated sentence must not reuse an old sound ending.
             sounds[entry.leg].ended = null;
           }
         }
         if (timing && !timing.translated && entry.translation.some((r) => r.text.trim()) && entry.translation.every((r) => r.final)) {
           timing.translated = true;
-          if (timing.model) sample('translation', timing.model, now - timing.said);
+          if (timing.model) sample('translation', timing.model, now - timing.said, planned);
         }
       }
     },
@@ -94,6 +101,8 @@ export function driveSessionLags(deps: {
   view: Readable<{ entries: readonly Entry[] }>;
   levels(): Promise<Readonly<Record<LegName, LevelMeter>> | null>;
   models(): LagModels;
+  /** Absent: every stage. */
+  planned?(): LagPlanned;
   clock: Clock;
   lags?: SessionLags;
 }): () => void {
@@ -105,7 +114,7 @@ export function driveSessionLags(deps: {
   const ignored = new Set<string>();
   const keyOf = (entry: Entry) => `${entry.leg}:${entry.id}`;
   const measure = () => {
-    if (running) lags.measure(deps.view.get().entries.filter((entry) => !ignored.has(keyOf(entry))), deps.models(), deps.clock.now());
+    if (running) lags.measure(deps.view.get().entries.filter((entry) => !ignored.has(keyOf(entry))), deps.models(), deps.clock.now(), deps.planned?.());
   };
   const phase = () => {
     const next = deps.runner.state.getState().phase === 'running';

@@ -6,7 +6,7 @@
  * first `audio()` or leg.
  */
 import { createSessionRecording } from './sessionRecording';
-import { driveSessionLags, type LagModels } from './sessionLags';
+import { driveSessionLags, type LagModels, type LagPlanned, type LagStage } from './sessionLags';
 import { asrApiModelOf, runSideHearing, type LocalAISettings } from '../providers/openai/localai';
 import { nativePicked } from '../providers/openai/localaiNative';
 import { heardBy } from '../providers/openai/localaiDevice';
@@ -133,6 +133,8 @@ export function createAppSession(options: AppSessionOptions = {}): AppSession {
     stages?: Record<keyof LagModels, { location?: string; model: string | null }>;
   } = {};
   let lagModels: LagModels = { speaker: null, participant: null, translation: null };
+  /** Fork: the stages this computer's own models run: the only ones a falling-behind notice can offer a lighter plan for. */
+  let lagPlanned: LagPlanned = new Set();
   const runner: Runner = createRunner({
     clock,
     platform: getEnvironment(),
@@ -146,9 +148,11 @@ export function createAppSession(options: AppSessionOptions = {}): AppSession {
             : s.asrVia === 'api' ? asrApiModelOf(s) : s.asrOther.trim() ? s.asrOtherModel : s.asrModel;
           lagModels = { speaker: hearing('speaker'), participant: hearing('participant'), translation: s.translateAt === 'device' ? s.translateNativeModel
             : s.translateAt === 'api' ? s.translateModel : s.translateOther.trim() ? s.translateOtherModel : s.translateServerModel };
+          lagPlanned = new Set<LagStage>([...(s.asrVia === 'device' ? ['speaker', 'participant'] as const : []), ...(s.translateAt === 'device' ? ['translation'] as const : [])]);
         } else {
           const model = typeof s.model === 'string' && s.model ? s.model : shape.provider.id;
           lagModels = { speaker: model, participant: model, translation: model };
+          lagPlanned = new Set();
         }
       }
       if (shape) {
@@ -326,7 +330,7 @@ export function createAppSession(options: AppSessionOptions = {}): AppSession {
                 model: translated.speaker || translated.participant || resolved?.models.translationModel || lagModels.translation },
             }, heardBy: heard, translatedBy: translated };
         } }),
-        driveSessionLags({ runner, view, clock, levels: () => audio().then((a) => a.capture.levels, () => null), models: () => ({
+        driveSessionLags({ runner, view, clock, levels: () => audio().then((a) => a.capture.levels, () => null), planned: () => lagPlanned, models: () => ({
           ...lagModels,
           ...useHeardByStore.getState().byLeg,
           translation: lagModels.translation || useTranslatedByStore.getState().byLeg.speaker || useTranslatedByStore.getState().byLeg.participant || null,
