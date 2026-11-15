@@ -30,7 +30,7 @@ The door is `electron/lan-server.js`.
 
 Every HTTP answer, refusals included, carries the URL-encoded name in `X-Kotomimi-Name`. Errors are `{error: {message, type, code}}`, with file paths replaced by `…` (`withoutPaths`).
 
-Capabilities are `transcript` (plus `bilingual` on Apple Speech), `translate`, `feedback`; the pipeline has `null`. Empty `languages` means any; `auto` among them means the recognizer names the language. `pair: [source, target]` marks a one-way translator.
+Capabilities are `transcript` (plus `bilingual` on Apple Speech, and `trilingual` where it hears a third language: a Mac's), `translate`, `feedback`; the pipeline has `null`. Empty `languages` means any; `auto` among them means the recognizer names the language. `pair: [source, target]` marks a one-way translator.
 
 Translation needs `source_language`, `target_language` and a `user` message; the system message is not read. `model` is a shared translator, or `kotomimi` for the host's choice. A model that cannot take the pair never answers: 422 `model_unfit`, or 503 `translator_busy` when such a model holds the engine. Otherwise the model holding the engine answers for the named one, and the answer's `model` says so. Nothing fits: 404 `model_not_found`.
 

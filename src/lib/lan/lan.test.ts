@@ -40,7 +40,7 @@ function fakeRecognizer() {
   return fake;
 }
 
-function socket(dialled = LAN_PIPELINE, resolve: (language: string, wanted: string, also?: string) => { modelId: string; streaming: boolean; also?: string } | null = () => ({ modelId: 'sensevoice-int8', streaming: false }), refusal?: (language: string, wanted: string) => 'busy' | null) {
+function socket(dialled = LAN_PIPELINE, resolve: (language: string, wanted: string, also?: string, third?: string) => { modelId: string; streaming: boolean; also?: string; third?: string } | null = () => ({ modelId: 'sensevoice-int8', streaming: false }), refusal?: (language: string, wanted: string) => 'busy' | null) {
   const sent: Array<Record<string, unknown>> = [];
   const closed: Array<{ code: number; reason: string }> = [];
   const engines: Array<ReturnType<typeof fakeRecognizer>> = [];
@@ -48,7 +48,7 @@ function socket(dialled = LAN_PIPELINE, resolve: (language: string, wanted: stri
   const asked: Array<[string, string]> = [];
   const t = new LanTranscriber({
     recognizer: () => { const e = fakeRecognizer(); engines.push(e); return e; },
-    resolve: (language, wanted, also) => { asked.push([language, wanted]); return resolve(language, wanted, also); },
+    resolve: (language, wanted, also, third) => { asked.push([language, wanted]); return third ? resolve(language, wanted, also, third) : resolve(language, wanted, also); },
     ...(refusal ? { refusal } : {}),
     send: (event) => sent.push(event),
     close: (code, reason) => closed.push({ code, reason }),
@@ -124,7 +124,7 @@ describe('a Realtime socket of a sharing Kotomimi', () => {
   });
 
   it('refuses malformed or unsupported pairs without starting a single-language substitute', () => {
-    for (const languages of [[], ['en'], ['en', 'fr', 'de'], ['en', 'en-US'], ['en', 'auto'], ['fr', 'en'], ['en', 7], 'en,fr']) {
+    for (const languages of [[], ['en'], ['en', 'fr', 'de', 'ja'], ['en', 'fr', 'fr'], ['en', 'en-US'], ['en', 'auto'], ['fr', 'en'], ['en', 7], 'en,fr']) {
       const s = socket();
       s.update('en', { languages });
       expect(s.sent[0]).toMatchObject({ type: 'error', error: { code: 'invalid_languages' } });
@@ -134,6 +134,15 @@ describe('a Realtime socket of a sharing Kotomimi', () => {
     single.update('en', { languages: ['en', 'fr'] });
     expect(single.sent[0]).toMatchObject({ type: 'error', error: { code: 'bilingual_unavailable' } });
     expect(single.engines).toHaveLength(0);
+  });
+
+  it('takes a third language where its recognizer hears three, and confirms the pair alone where it does not (fork)', () => {
+    const three = socket(LAN_PIPELINE, (language, _wanted, also, third) => ({ modelId: `apple-speech:${language}`, streaming: true, ...(also ? { also } : {}), ...(third ? { third } : {}) }));
+    three.update('ja', { languages: ['ja', 'en', 'zh-CN'] });
+    expect(three.sent[0]).toMatchObject({ type: 'session.updated', session: { audio: { input: { transcription: { language: 'ja', languages: ['ja', 'en', 'zh'] } } } } });
+    const two = socket(LAN_PIPELINE, (language, _wanted, also) => ({ modelId: `apple-speech:${language}`, streaming: true, ...(also ? { also } : {}) }));
+    two.update('ja', { languages: ['ja', 'en', 'zh-CN'] });
+    expect(two.sent[0]).toMatchObject({ type: 'session.updated', session: { audio: { input: { transcription: { language: 'ja', languages: ['ja', 'en'] } } } } });
   });
 
   it('announces its session, and confirms a configuration at once while the model loads', () => {

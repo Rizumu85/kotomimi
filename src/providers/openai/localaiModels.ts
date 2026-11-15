@@ -27,6 +27,8 @@ export interface LocalAIModel extends ModelOption {
   languages?: readonly string[];
   /** Can arbitrate between two installed language models of this family. */
   bilingual?: boolean;
+  /** And between three (`src/lib/lan/protocol.ts`). */
+  trilingual?: boolean;
   /** A translation model that translates one way only, `[source, target]` (`src/lib/lan/protocol.ts`); absent: both ways. */
   pair?: readonly string[];
 }

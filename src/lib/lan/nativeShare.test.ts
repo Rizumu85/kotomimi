@@ -36,8 +36,8 @@ describe('what of the native engines is shared', () => {
     useNativeEngineStore.setState({ status: MAC });
     useNativeTranslatorStore.setState({ status: TRANSLATORS });
     expect(nativeShared()).toEqual([
-      { id: 'apple-speech:ja', kind: 'asr', languages: ['ja'], bilingual: true },
-      { id: 'apple-speech:en', kind: 'asr', languages: ['en'], bilingual: true },
+      { id: 'apple-speech:ja', kind: 'asr', languages: ['ja'], bilingual: true, trilingual: true },
+      { id: 'apple-speech:en', kind: 'asr', languages: ['en'], bilingual: true, trilingual: true },
       // Every language: none listed.
       { id: 'index-translate-2b', kind: 'translate', languages: [] },
       { id: 'hy-mt2-1.8b', kind: 'translate', languages: expect.arrayContaining(['ja', 'zh', 'en']) },

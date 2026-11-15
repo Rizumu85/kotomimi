@@ -10,7 +10,7 @@ const knownHere = (name: string): string => (name && nativeShared().some((m) => 
 
 export const appLanModels: LanModels = {
   shared: nativeShared,
-  recognizer: (language, named, also) => nativeRecognizerFor(language, also ? named : knownHere(named), also),
+  recognizer: (language, named, also, third) => nativeRecognizerFor(language, also ? named : knownHere(named), also, third),
   recognizerRefusal: (language, named) => nativeRecognizerRefusal(language, knownHere(named)),
   translator: (source, target, named) => nativeTranslatorFor(source, target, knownHere(named)),
   refusal(source, target, named_) {

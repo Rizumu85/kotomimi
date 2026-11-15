@@ -31,13 +31,14 @@ export interface Recognizer {
   onFatal: ((error: string) => void) | null;
 }
 
-export interface RecognitionModel { modelId: string; streaming: boolean; also?: string; hints?: readonly string[] }
+/** `also`: a second language the same speech may be in (a pair); `third`: one more, where the recognizer hears three. */
+export interface RecognitionModel { modelId: string; streaming: boolean; also?: string; third?: string; hints?: readonly string[] }
 
 export interface TranscriberDeps {
   /** A recognizer for this model: the app's own engine, a fake in tests. */
   recognizer(model: RecognitionModel): Recognizer;
   /** The model for a language: the one named when it is shared and hears that language, else the best shared. Null: none. */
-  resolve(language: string, wanted: string, also?: string): RecognitionModel | null;
+  resolve(language: string, wanted: string, also?: string, third?: string): RecognitionModel | null;
   /** Why `resolve` answered null: a model that hears the language is here, but the engine is in use with another ('busy'). */
   refusal?(language: string, wanted: string): 'busy' | null;
   /** Fork: no model here hears the language: the settings offer one to download. */
@@ -159,17 +160,18 @@ export class LanTranscriber {
     if (!language) return this.error('language_required', 'Say which language is spoken, or "auto" to have it detected (audio.input.transcription.language).');
     const candidates = input.transcription?.languages;
     let also: string | undefined;
+    let third: string | undefined;
     if (candidates !== undefined) {
-      if (!Array.isArray(candidates) || candidates.length !== 2) return this.error('invalid_languages', 'Name exactly two distinct candidate languages.');
+      if (!Array.isArray(candidates) || candidates.length < 2 || candidates.length > 3) return this.error('invalid_languages', 'Name two or three distinct candidate languages.');
       const pair = candidates.map(baseLanguage);
-      if (pair.some((l) => !/^[a-z]{2,3}$/.test(l) || l === 'auto') || pair[0] === pair[1] || pair[0] !== language) {
-        return this.error('invalid_languages', 'Name two distinct languages, with the primary language first.');
+      if (pair.some((l) => !/^[a-z]{2,3}$/.test(l) || l === 'auto') || new Set(pair).size !== pair.length || pair[0] !== language) {
+        return this.error('invalid_languages', 'Name distinct languages, with the primary language first.');
       }
-      also = pair[1];
+      [, also, third] = pair;
     }
     const named = typeof input.transcription?.model === 'string' ? input.transcription.model : '';
     const wanted = named || (this.dialled !== LAN_PIPELINE ? this.dialled : '');
-    const model = also ? this.deps.resolve(language, wanted, also) : this.deps.resolve(language, wanted);
+    const model = third ? this.deps.resolve(language, wanted, also, third) : also ? this.deps.resolve(language, wanted, also) : this.deps.resolve(language, wanted);
     if (!model && !also && this.deps.refusal?.(language, wanted) === 'busy') {
       return this.error('recognizer_busy', `This Kotomimi's speech recognition is in use with another model, which does not hear "${language}".`);
     }
@@ -181,11 +183,11 @@ export class LanTranscriber {
     const vad = vadFrom(input.turn_detection);
     const said = input.transcription?.keywords;
     const hints = Array.isArray(said) ? said.filter((word): word is string => typeof word === 'string') : [];
-    const asked = JSON.stringify([model.modelId, language, vad, model.also, hints]);
+    const asked = JSON.stringify([model.modelId, language, vad, model.also, model.third, hints]);
     if (asked !== this.running) this.start({ ...model, ...(hints.length ? { hints } : {}) }, language, vad, asked);
     this.deps.send({
       type: 'session.updated',
-      session: { id: this.sessionId, object: 'realtime.session', type: 'transcription', audio: { input: { transcription: { model: model.modelId, language, ...(also ? { languages: [language, also] } : {}) }, turn_detection: input.turn_detection ?? null } } },
+      session: { id: this.sessionId, object: 'realtime.session', type: 'transcription', audio: { input: { transcription: { model: model.modelId, language, ...(also ? { languages: [language, also, ...(model.third ? [model.third] : [])] } : {}) }, turn_detection: input.turn_detection ?? null } } },
     });
   }
 

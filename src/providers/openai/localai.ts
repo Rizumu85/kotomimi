@@ -785,6 +785,7 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
           // Another Kotomimi says which languages each of its models takes, too — and which direction a pair model translates.
           const languages = new Map<string, readonly string[]>();
           const bilingual = new Set<string>();
+          const trilingual = new Set<string>();
           const pairs = new Map<string, readonly string[]>();
           try {
             const answer = await doFetch(`${localaiModelsUrl(k.endpoint)}/capabilities`, listing(k.apiKey, signal));
@@ -793,6 +794,7 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
                 if (typeof m.id !== 'string') continue;
                 kinds.set(m.id, kindOf(m.capabilities));
                 if (Array.isArray(m.capabilities) && m.capabilities.includes('bilingual')) bilingual.add(m.id);
+                if (Array.isArray(m.capabilities) && m.capabilities.includes('trilingual')) trilingual.add(m.id);
                 if (Array.isArray(m.languages)) languages.set(m.id, m.languages.filter((l): l is string => typeof l === 'string'));
                 if (Array.isArray(m.pair) && m.pair.length === 2 && m.pair.every((one) => typeof one === 'string')) pairs.set(m.id, m.pair as string[]);
               }
@@ -809,6 +811,7 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
               ...(m.kotomimi ? { host: KOTOMIMI_HOST } : {}),
               ...(taken?.length ? { languages: taken } : {}),
               ...(m.kotomimi && bilingual.has(m.id) ? { bilingual: true } : {}),
+              ...(m.kotomimi && trilingual.has(m.id) ? { trilingual: true } : {}),
               ...(pair ? { pair } : {}),
             });
           }
@@ -1303,7 +1306,10 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
       ? { source: target, target: source }
       : participant
         ? { source: runPair.target, target: remoteSecond ?? runPair.source }
-        : { source, target: remoteSecond ?? alsoMain }, models)
+        : { source, target: remoteSecond ?? alsoMain }, models,
+    // Fork: and a third where the device hears three (the Mac): the other side's two lit, and the user's own — theirs
+    // said in it is then written as it is, not as one of the two.
+    soloCoach || !remoteSecond ? undefined : pairedWith[1])
     : null;
   let device: DeviceHearing | undefined;
   /** A native model that names the language, where one is downloaded: the leg is asked for `auto` through it. */

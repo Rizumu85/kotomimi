@@ -52,6 +52,8 @@ export interface SharedModel {
   languages: readonly string[];
   /** Can arbitrate between two installed languages of this recognizer's family. */
   bilingual?: boolean;
+  /** And between three: a third language beside the pair (the Mac's recognition; an iPad's hears two). */
+  trilingual?: boolean;
   /**
    * A translation model that translates one way only, as `[source, target]`: `languages` alone
    * would claim the other direction too. Absent: it takes both (a multilingual model).
@@ -75,6 +77,7 @@ export function capabilityList(models: readonly SharedModel[]): { object: 'list'
         capabilities: [
           m.kind === 'asr' ? 'transcript' : m.kind,
           ...(m.kind === 'asr' && m.bilingual ? ['bilingual'] : []),
+          ...(m.kind === 'asr' && m.bilingual && m.trilingual ? ['trilingual'] : []),
         ],
         languages: m.languages,
         ...(m.pair ? { pair: m.pair } : {}),

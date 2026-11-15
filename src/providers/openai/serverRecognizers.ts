@@ -14,8 +14,11 @@ import { KOTOMIMI_HOST, modelsFor, type LocalAIModel } from './localaiModels';
 
 const base = (code: string): string => code.trim().toLowerCase().split(/[-_]/)[0];
 
-/** Two explicitly supported languages of a sharing host's recognizer, in the requested order. */
-export function serverBilingual(chosen: string, pair: { source: string; target: string }, models: readonly LocalAIModel[]): { model: string; languages: [string, string] } | null {
+/**
+ * Two explicitly supported languages of a sharing host's recognizer, in the requested order — and `third` after them,
+ * where the host says it hears three (`trilingual`) and has that language's model.
+ */
+export function serverBilingual(chosen: string, pair: { source: string; target: string }, models: readonly LocalAIModel[], third?: string): { model: string; languages: string[] } | null {
   const first = base(pair.source);
   const second = base(pair.target);
   if (!first || !second || first === second || first === AUTO || second === AUTO) return null;
@@ -24,7 +27,10 @@ export function serverBilingual(chosen: string, pair: { source: string; target: 
   for (const family of families) {
     const member = (language: string) => eligible.find((m) => choiceOf(m.id) === family && base(perLanguage(m.id)!.language) === language && m.languages?.some((l) => base(l) === language));
     const one = member(first);
-    if (one && member(second)) return { model: one.id, languages: [first, second] };
+    if (!one || !member(second)) continue;
+    const more = third ? base(third) : '';
+    const withThird = more !== '' && more !== AUTO && more !== first && more !== second && one.trilingual === true && !!member(more)?.trilingual;
+    return { model: one.id, languages: [first, second, ...(withThird ? [more] : [])] };
   }
   return null;
 }

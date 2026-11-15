@@ -37,7 +37,7 @@ interface TextCall {
 }
 
 /** The real client and LAN server exchange JSON; only the Mac's ASR and text-model answers are simulated. */
-async function live(context: SessionContext, patch: Partial<LocalAISettings>, wire = (event: Record<string, unknown>) => event) {
+async function live(context: SessionContext, patch: Partial<LocalAISettings>, wire = (event: Record<string, unknown>) => event, models: LocalAIModel[] = MODELS) {
   const config = buildLocalAI(context, {
     ...LOCALAI_DEFAULTS,
     model: LAN_PIPELINE,
@@ -46,7 +46,7 @@ async function live(context: SessionContext, patch: Partial<LocalAISettings>, wi
     coachServerModel: 'feedback-model',
     translateBySentence: true,
     ...patch,
-  }, { ...SHARED, models: MODELS, reversed: (direction) => direction.source === 'fr' });
+  }, { ...SHARED, models, reversed: (direction) => direction.source === 'fr' });
   if ('refused' in config) throw new Error(config.refused);
   const { events, log } = recordEvents();
   const clock = createVirtualClock(0);
@@ -66,10 +66,11 @@ async function live(context: SessionContext, patch: Partial<LocalAISettings>, wi
   }, events);
   const socket = sockets.last();
   const serverEvents: Array<Record<string, unknown>> = [];
-  const resolve = vi.fn((language: string, wanted: string, also?: string): RecognitionModel | null => {
-    const primary = MODELS.find((model) => model.id === wanted && model.languages?.includes(language));
-    const secondary = MODELS.find((model) => model.id === `apple-speech:${also}` && model.bilingual);
-    return primary?.bilingual && secondary && also ? { modelId: primary.id, streaming: true, also } : null;
+  const resolve = vi.fn((language: string, wanted: string, also?: string, third?: string): RecognitionModel | null => {
+    const primary = models.find((model) => model.id === wanted && model.languages?.includes(language));
+    const secondary = models.find((model) => model.id === `apple-speech:${also}` && model.bilingual);
+    const more = third ? models.find((model) => model.id === `apple-speech:${third}` && model.trilingual) : undefined;
+    return primary?.bilingual && secondary && also ? { modelId: primary.id, streaming: true, also, ...(more && third ? { third } : {}) } : null;
   });
   const recognizer = vi.fn((_model: RecognitionModel) => fakes.asr);
   const server = new LanTranscriber({
@@ -146,6 +147,39 @@ describe('paired Apple recognition across the LAN wire and client pipeline', () 
   it('uses the participant side’s lit language beside its target', async () => {
     const h = await live(PARTICIPANT, { asrDetectOther: true, theyAlso: ['es'], theyLit: 'es' });
     expectPair(h, 'fr', 'es');
+  });
+
+  it('hears the other side in its two lit languages and the user’s own, where the Mac hears three: theirs in it is shown as said (fork)', async () => {
+    const three = MODELS.map((model) => (model.bilingual ? { ...model, trilingual: true } : model));
+    const h = await live(PARTICIPANT, { asrDetectOther: true, theyAlso: ['es'], theyLit: 'es' }, undefined, three);
+    const sent = h.socket.sentJson<{ session: { audio: { input: { transcription: unknown } } } }>();
+    expect(sent[0].session.audio.input.transcription).toEqual({ model: 'apple-speech:fr', language: 'fr', languages: ['fr', 'es', 'en'] });
+    expect(h.resolve).toHaveBeenCalledWith('fr', 'apple-speech:fr', 'es', 'en');
+    expect(h.recognizer).toHaveBeenCalledWith({ modelId: 'apple-speech:fr', streaming: true, also: 'es', third: 'en' });
+    // Said in the user's own language: written as it is, and nothing translates it.
+    await tentative(h, 1, ENGLISH);
+    h.asr.final(ENGLISH, 'en');
+    await flush();
+    expectHeard(h, 1, ENGLISH, 'en');
+    expect(h.calls).toEqual([]);
+    expect(h.of('degraded')).toEqual([]);
+    expect(h.of('failed')).toEqual([]);
+  });
+
+  it('keeps to the pair where the Mac cannot hear the third: an older one, or its language not installed (fork)', async () => {
+    // The listing says three; the Mac resolves the pair alone, and says so.
+    const listed = MODELS.map((model) => (model.bilingual ? { ...model, trilingual: true } : model));
+    const h = await live(PARTICIPANT, { asrDetectOther: true, theyAlso: ['es'], theyLit: 'es' }, (event) => {
+      const session = (event as { session?: { audio?: { input?: { transcription?: { languages?: string[] } } } } }).session;
+      const languages = session?.audio?.input?.transcription?.languages;
+      if (event.type === 'session.updated' && languages) languages.length = 2;
+      return event;
+    }, listed);
+    expect(h.of('failed')).toEqual([]);
+    await tentative(h, 1, FRENCH);
+    h.asr.final(FRENCH, 'fr');
+    await h.settled(1);
+    expectHeard(h, 1, FRENCH, 'fr');
   });
 
   it('translates both directions with grammar feedback attached only to spoken foreign sentences', async () => {

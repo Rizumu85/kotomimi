@@ -124,7 +124,8 @@ class RealtimeLeg implements AdapterSession {
   private readonly items: RealtimeItems;
   private readonly queue: ResponseQueue;
   /** Fork (Kotomimi): a requested pair needs an explicit acknowledgement and a language on every final. */
-  private readonly languagePair: readonly [string, string] | undefined;
+  /** The languages a paired recognition hears: two, or three where the server hears a third. */
+  private readonly languagePair: readonly string[] | undefined;
   /** The client's own ids, one counter: request event ids (`sokuji_<n>`) and typed items' (`sokuji_text_<n>`, under the API's 32 characters). */
   private ids = 0;
   /** Typed items already sent: a request asked again sends its `response.create` alone (choice 10). */
@@ -152,7 +153,7 @@ class RealtimeLeg implements AdapterSession {
     // Always `websocket` (ruling 12; choice 18): the owner abandoned WebRTC for this provider (2026-09-29). Analytics reports it.
     this.info = { transport: config.transport };
     const candidates = config.transcription.languages;
-    this.languagePair = config.transcribeOnly && candidates?.length === 2 ? [candidates[0], candidates[1]] : undefined;
+    this.languagePair = config.transcribeOnly && candidates && candidates.length >= 2 && candidates.length <= 3 ? [...candidates] : undefined;
     this.items = new RealtimeItems(events);
     this.queue = new ResponseQueue({
       clock,
@@ -329,7 +330,8 @@ class RealtimeLeg implements AdapterSession {
       const transcription = (s.audio as { input?: { transcription?: { language?: unknown; languages?: unknown } } } | null)?.input?.transcription;
       const confirmed = transcription?.languages;
       if (languageOf(transcription?.language) !== this.request.config.transcription.language
-        || !Array.isArray(confirmed) || confirmed.length !== pair.length
+        // The pair, at least: a server without the third language's model hears the two, and says so.
+        || !Array.isArray(confirmed) || confirmed.length < 2 || confirmed.length > pair.length
         || !confirmed.every((language, i) => languageOf(language) === pair[i])) {
         this.refuse(new AdapterStartError(
           'The server did not confirm the requested pair of speech languages. Update Kotomimi on both devices and install both Apple Speech languages on the Mac.',

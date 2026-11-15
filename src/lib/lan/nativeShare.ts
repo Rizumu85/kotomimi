@@ -54,7 +54,7 @@ export function nativeShared(): SharedModel[] {
   const hearing = useNativeEngineStore.getState().status;
   const translating = useNativeTranslatorStore.getState().status;
   return [
-    ...NATIVE_MODELS.filter((m) => nativeDownloaded(hearing, m.id)).map((m): SharedModel => ({ id: m.id, kind: 'asr', languages: [...m.languages, ...(m.detects ? [AUTO] : [])], ...(isApple(m.id) ? { bilingual: true } : {}) })),
+    ...NATIVE_MODELS.filter((m) => nativeDownloaded(hearing, m.id)).map((m): SharedModel => ({ id: m.id, kind: 'asr', languages: [...m.languages, ...(m.detects ? [AUTO] : [])], ...(isApple(m.id) ? { bilingual: true, trilingual: true } : {}) })),
     // A model of every language lists none: the list is what a device reads to rule a model out.
     ...NATIVE_TRANSLATORS.filter((m) => nativeDownloaded(translating, m.id)).map((m): SharedModel => ({ id: m.id, kind: 'translate', languages: m.languages === 'any' ? [] : [...m.languages] })),
     // The feedback engine's models: chat models, lent for grammar feedback in whatever languages they are asked.
@@ -90,7 +90,7 @@ export async function nativeCoachAnswer(model: string, messages: unknown, extra:
 }
 
 /** The native recognizer for a language: the one named when it is downloaded and hears it, else — nothing named — the first downloaded that does. Null: no native recognizer is available. */
-export function nativeRecognizerFor(language: string, wanted: string, also?: string): { modelId: string; streaming: boolean; also?: string } | null {
+export function nativeRecognizerFor(language: string, wanted: string, also?: string, third?: string): { modelId: string; streaming: boolean; also?: string; third?: string } | null {
   const status = useNativeEngineStore.getState().status;
   const usable = (id: string) => nativeDownloaded(status, id);
   if (wanted && !isNativeRecognizer(wanted)) return null;
@@ -100,8 +100,11 @@ export function nativeRecognizerFor(language: string, wanted: string, also?: str
     // and the session is refused as unable to hear the pair, not as having no model for its language.
     if (named && !isApple(named.id)) return usable(named.id) ? { modelId: named.id, streaming: true } : null;
     const second = named ? nativeModelFor(named.id, also) : null;
+    // A third language is heard where its model is here too; else the pair alone, and the session is told so.
+    const more = named && third && third !== language && third !== also ? nativeModelFor(named.id, third) : null;
+    const withThird = !!more && more.id !== named!.id && more.id !== second?.id && usable(more.id);
     return named && second && named.id !== second.id && usable(named.id) && usable(second.id)
-      ? { modelId: named.id, streaming: true, also }
+      ? { modelId: named.id, streaming: true, also, ...(withThird ? { third } : {}) }
       : null;
   }
   // The engine the app downloads runs one model at a time. While it is someone's — a run of this computer, or a
@@ -209,14 +212,14 @@ export function nativeTranslatorFor(source: string, target: string, wanted: stri
 }
 
 /** A recognizer for a native model, as the sharing host drives one; null for any other model. The engine is held while it listens: the app's own check does not stop it under a device that is using it. */
-export function nativeRecognizer(model: { modelId: string; also?: string; hints?: readonly string[] }): Recognizer | null {
+export function nativeRecognizer(model: { modelId: string; also?: string; third?: string; hints?: readonly string[] }): Recognizer | null {
   if (!isNativeRecognizer(model.modelId)) return null;
   const native = nativeModel(model.modelId);
   const asr = createNativeAsr({
     bridge: ipcNativeBridge,
     start: () => useNativeEngineStore.getState().start(native.id),
     model: native.id,
-    ...(model.also ? { also: [model.also] } : {}),
+    ...(model.also ? { also: [model.also, ...(model.third ? [model.third] : [])] } : {}),
     ...(native.takesHints !== false && model.hints?.length ? { hints: model.hints } : {}),
     ...(native.limits ? { limits: native.limits } : {}),
   });

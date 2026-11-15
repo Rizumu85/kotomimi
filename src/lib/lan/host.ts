@@ -30,7 +30,7 @@ export interface LanBridge {
 export interface LanModels {
   /** Every recognizer and translation model ready to run. */
   shared(): SharedModel[];
-  recognizer(language: string, wanted: string, also?: string): { modelId: string; streaming: boolean; also?: string } | null;
+  recognizer(language: string, wanted: string, also?: string, third?: string): { modelId: string; streaming: boolean; also?: string; third?: string } | null;
   /** Why `recognizer` answered null for a language: one that hears it is here, but the engine is in use with another model ('busy'). Absent, or null: refused as having no model. */
   recognizerRefusal?(language: string, wanted: string): 'busy' | null;
   translator(source: string, target: string, wanted: string): string | null;
@@ -47,7 +47,7 @@ export interface LanModels {
 export interface LanHostDeps {
   bridge: LanBridge;
   models: LanModels;
-  engines: { recognizer(model: { modelId: string; streaming: boolean; also?: string; hints?: readonly string[] }): Recognizer; translator(): Translator; /** The feedback engine: its answer to a chat, and the hold that keeps it up. Absent: no feedback model is lent. */ coach?: Pick<CoachDeps, 'answer' | 'hold'> };
+  engines: { recognizer(model: { modelId: string; streaming: boolean; also?: string; third?: string; hints?: readonly string[] }): Recognizer; translator(): Translator; /** The feedback engine: its answer to a chat, and the hold that keeps it up. Absent: no feedback model is lent. */ coach?: Pick<CoachDeps, 'answer' | 'hold'> };
   clock: Clock;
   /** How many sockets are open changed: the settings show it. */
   onClients?(count: number): void;
