@@ -105,6 +105,37 @@ describe('a leg heard in the language it is shown in (fork)', () => {
   });
 });
 
+describe('a language the recognizer named that the writing rules out (fork)', () => {
+  const context = { ...SPEAKER, direction: { source: 'zh-CN', target: 'en' } };
+  const both = (config: LocalAIConfig) => {
+    config.stages = {
+      ...config.stages!, heard: 'auto', whole: true, requiresLanguage: true,
+      back: { own: 'zh-CN', language: 'en', languages: ['en'], stage: { kind: 'translate', model: 'back', baseUrl: '', system: 'Translate into Chinese', language: 'zh-CN' } },
+    };
+    delete config.stages.leakCheck;
+  };
+  const named = (id: string, transcript: string, language: string) =>
+    [SERVER.committed(id), frame({ type: 'conversation.item.input_audio_transcription.completed', item_id: id, content_index: 0, transcript, language })];
+
+  it('takes a sentence in Latin letters alone for the speaker’s English, though it was named Chinese', async () => {
+    const h = await live(context, VIA_MODEL, [sse('你很奇怪吗？')], K, both);
+    h.receive(...named('english', 'Are you wead?', 'zh'));
+    expect(h.lastText(1)).toMatchObject({ text: 'Are you wead?', language: 'en' });
+    await vi.waitFor(() => expect(h.calls.map((call) => call.body.model)).toEqual(['back']));
+    await h.settled();
+    await h.session.stop();
+  });
+
+  it('leaves a Chinese sentence that has English words in it as it was named', async () => {
+    const h = await live(context, VIA_MODEL, [sse('"No cap" means no joking.')], K, both);
+    h.receive(...named('mixed', 'No cap是没开玩笑的意思。', 'zh'));
+    expect(h.lastText(1)).toMatchObject({ language: 'zh' });
+    await vi.waitFor(() => expect(h.calls.map((call) => call.body.model)).toEqual(['hy-mt2-1.8b']));
+    await h.settled();
+    await h.session.stop();
+  });
+});
+
 describe('a bilingual sentence whose language needs text detection', () => {
   const text = 'Vraiment magnifique cette exposition photographique';
   const context = { ...SPEAKER, direction: { source: 'en', target: 'fr' } };

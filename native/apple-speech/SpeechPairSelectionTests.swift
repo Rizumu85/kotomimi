@@ -52,6 +52,21 @@ struct SpeechPairSelectionTests {
             candidate("123", -1, "en_US"), candidate(" \n ", -1, "zh_CN"),
         ], preferred: 1, expected: 0)
         check("Two empty candidates retain preference", [candidate("", -1, "zh_CN"), candidate("", -1, "en_US")], preferred: 1, expected: 1)
+        // Heard on macOS: a short English sentence, which the Chinese model writes in English too.
+        let short = [candidate("Are you wead?", 0.91, "zh_CN"), candidate("Are you weird?", 0.88, "en_US")]
+        check("Latin letters alone are not Chinese, however sure the Chinese model", short, preferred: 0, expected: 1)
+        check("The same with three languages: the surer of the two written so", [
+            short[0], short[1], candidate("Are you oui?", 0.60, "fr_FR"),
+        ], preferred: 0, expected: 1)
+        check("A Chinese sentence with English words in it stays Chinese", [
+            candidate("No cap是没开玩笑的意思。", 0.90, "zh_CN"), candidate("No cap sure may kind of one shout the Easter", 0.70, "en_US"),
+        ], preferred: 0, expected: 0)
+        check("Latin letters from both of a pair with no language written in them keep the preference", [
+            candidate("OK", 0.90, "zh_CN"), candidate("OK", 0.92, "ja_JP"),
+        ], preferred: 0, expected: 0)
+        check("Japanese written in kana is not ruled out by an English candidate", [
+            candidate("ありがとう", 0.90, "ja_JP"), candidate("Arigato", 0.80, "en_US"),
+        ], preferred: 0, expected: 0)
         check("An unrelated text language cannot escape the pair", [
             candidate("Je voudrais apprendre une nouvelle langue avec mes amis.", 0.94, "en_US"),
             candidate("Je voudrais apprendre une nouvelle langue avec mes amis.", 0.92, "zh_CN"),

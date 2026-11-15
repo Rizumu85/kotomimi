@@ -19,6 +19,17 @@ enum SpeechPairSelection {
             candidates[index].text.unicodeScalars.contains { CharacterSet.alphanumerics.contains($0) }
         }
         if usable.count == 1 { return usable[0] }
+        // A language with a script of its own is not what a transcript in Latin letters alone is in: a Chinese
+        // model writes the English it hears in English, and a short one gets no text consensus below
+        // ("Are you weird?" came out Chinese). Such a candidate gives way to one whose language is written so.
+        let latinAlone = usable.filter { inLatinAlone(candidates[$0].text) }
+        let ruledOut = latinAlone.filter { hasOwnScript(candidates[$0].locale) }
+        let kept = ruledOut.count < latinAlone.count ? usable.filter { !ruledOut.contains($0) } : usable
+        return choose(among: kept, candidates, preferred: preferred)
+    }
+
+    private static func choose(among usable: [Int], _ candidates: [SpeechCandidate], preferred: Int) -> Int {
+        if usable.count == 1 { return usable[0] }
         // Some locale-specific Apple models also transcribe other languages. Comparing their
         // speech confidence alone can label identical English text as Chinese. Override only
         // when both sufficiently long transcripts independently agree with high confidence.
@@ -33,6 +44,19 @@ enum SpeechPairSelection {
         let others = usable.filter { $0 != preferred }
         guard let surestOther = others.max(by: { candidates[$0].confidence < candidates[$1].confidence }) else { return preferred }
         return candidates[surestOther].confidence > candidates[preferred].confidence + tie ? surestOther : preferred
+    }
+
+    /// Whether a locale's language is written in a script other than Latin letters (Han, kana, hangul, Cyrillic…).
+    private static func hasOwnScript(_ locale: Locale) -> Bool {
+        let script = Locale.Language(identifier: locale.language.maximalIdentifier).script?.identifier
+        return script != nil && script != "Latn"
+    }
+
+    /// Whether a text has letters, at least two, and every one of them Latin.
+    private static func inLatinAlone(_ text: String) -> Bool {
+        let letters = text.unicodeScalars.filter { CharacterSet.letters.contains($0) }
+        // Basic Latin to Latin Extended-B, and Latin Extended Additional (Vietnamese).
+        return letters.count >= 2 && letters.allSatisfy { $0.value < 0x250 || (0x1E00...0x1EFF).contains($0.value) }
     }
 
     private static func clearLanguage(_ text: String) -> String? {

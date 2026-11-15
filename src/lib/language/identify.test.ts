@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { identifyLanguage, namedOutside, readAgainIn, scriptLanguage, textLanguage, writtenOutside } from './identify';
+import { identifyLanguage, namedByWriting, namedOutside, readAgainIn, scriptLanguage, textLanguage, writtenOutside } from './identify';
 
 describe('identifyLanguage (fork: the language of a sentence the recognizer did not name)', () => {
   it('names a language its writing states, without the detector', () => {
@@ -70,6 +70,21 @@ describe('a reading outside the languages a speaker speaks', () => {
     expect(writtenOutside('I love 東京.', ['en', 'fr'])).toBe(false);
     expect(writtenOutside('OK नमस्ते जी', ['en', 'fr'])).toBe(true);
     expect(writtenOutside('OK 東京', ['ko', 'uk'])).toBe(true);
+  });
+
+  it('is put right where a language with a script of its own was named for a sentence in Latin letters alone (fork)', () => {
+    expect(namedByWriting('Are you wead?', 'zh', ['zh-CN', 'en-US'])).toBe('en');
+    expect(namedByWriting('You bet.', 'ja', ['ja', 'en'])).toBe('en');
+    // A letter of its script, and it stays: English words in a Chinese sentence.
+    expect(namedByWriting('No cap是没开玩笑的意思。', 'zh', ['zh-CN', 'en-US'])).toBe('zh');
+    expect(namedByWriting('OK，好的', 'zh', ['zh', 'en'])).toBe('zh');
+    // No language of theirs is written in Latin letters, or the recognizer named one that is: as named.
+    expect(namedByWriting('OK, VRC.', 'zh', ['zh', 'ja'])).toBe('zh');
+    expect(namedByWriting('Bonjour tout le monde', 'en', ['en', 'fr'])).toBe('en');
+    expect(namedByWriting('2024', 'zh', ['zh', 'en'])).toBe('zh');
+    // Several written in Latin letters: the one its words name, else as named.
+    expect(namedByWriting('What is the name of this world?', 'zh', ['zh', 'en', 'fr'])).toBe('en');
+    expect(namedByWriting('OK', 'zh', ['zh', 'en', 'fr'])).toBe('zh');
   });
 
   it('is read again in the others, two at most, never the speaker’s own', () => {

@@ -29,7 +29,7 @@ import type { LocalEngines } from '../localInference/engines';
 import { createApiAsr } from './apiAsr';
 import { createNativeAsr, type NativeLimits } from './nativeAsr';
 import { oneOfTwo, saidInOwn, sameSpeech, writtenInCantonese } from '../../lib/language/script';
-import { identifyLanguage, writtenOutside } from '../../lib/language/identify';
+import { identifyLanguage, namedByWriting, writtenOutside } from '../../lib/language/identify';
 import { AUTO } from '../../lib/provider/languages';
 import { BEFORE_SLOT, TEXT_SLOT, reviseLanguage, reviseRequest } from './nativeTranslators';
 import { normalizeRecognitionText } from '../../lib/glossary/glossary';
@@ -515,8 +515,10 @@ class PipelineLeg implements AdapterSession {
       case 'segmentText': {
         const source = this.sources.get(e.payload.ref);
         // Said by a recognizer left to detect it (Qwen3-ASR, SenseVoice): kept where it is one the leg may be in, and
-        // one outside them read from the writing, as a sentence it said nothing of is.
-        const said = e.payload.language && (this.stages.heard !== AUTO || this.mayBeIn(e.payload.language)) ? e.payload.language : undefined;
+        // one outside them read from the writing, as a sentence it said nothing of is. Fork: one the writing rules out
+        // (Chinese, of a sentence in Latin letters alone) is first put right (`namedByWriting`).
+        const named = e.payload.language ? namedByWriting(e.payload.text, e.payload.language, this.mayBeAmong()) : undefined;
+        const said = named && (this.stages.heard !== AUTO || this.mayBeIn(named)) ? named : undefined;
         if (source) {
           source.text = e.payload.text;
           if (said) source.language = said;
@@ -972,6 +974,13 @@ class PipelineLeg implements AdapterSession {
     const back = this.stages.back;
     const among = back ? [back.own, ...(back.languages?.length ? back.languages : [back.language])] : [];
     return among.length === 0 || among.some((one) => one === AUTO || baseOf(one) === baseOf(language));
+  }
+
+  /** Fork: the languages a sentence of this leg may be in: a speaker's own and the others they speak; else the pair's two. */
+  private mayBeAmong(): string[] {
+    const back = this.stages.back;
+    const { source, target } = this.request.context.direction;
+    return back ? [back.own, ...(back.languages?.length ? back.languages : [back.language])] : [source, target];
   }
 
   /**

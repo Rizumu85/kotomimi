@@ -84,7 +84,6 @@ export function textLanguage(text: string, candidates: readonly string[] = []): 
  */
 export function writtenOutside(text: string, candidates: readonly string[]): boolean {
   const bases = candidates.map(baseOf);
-  const inLatin = (base: string) => !hasOwnScript(base) && !Object.values(SHARED_SCRIPTS).some((written) => written.includes(base));
   let inside = bases.some(inLatin) ? latinLetters(text) : 0;
   let outside = 0;
   for (const [language, letters] of lettersByScript(text)) {
@@ -93,6 +92,24 @@ export function writtenOutside(text: string, candidates: readonly string[]): boo
     else outside += letters;
   }
   return outside > 0 && outside >= inside;
+}
+
+/** Whether a language (a base code) is written in Latin letters: it has no script of its own, nor a shared one. */
+const inLatin = (base: string): boolean => !hasOwnScript(base) && !Object.values(SHARED_SCRIPTS).some((written) => written.includes(base));
+
+/**
+ * Fork: the language a recognizer named, put right where the writing rules it out: one with a script of its own, of
+ * a sentence in Latin letters alone. A Chinese recognizer writes the English it hears in English, and what chooses
+ * between a pair's two recognizers may still call a short one Chinese ("Are you weird?", 2026-11-14). It is then
+ * the one of `among` (the languages the leg may be in) written in Latin letters — of several, the one its words
+ * name — as a base code; and stays as named where `among` has none or the words do not say.
+ */
+export function namedByWriting(text: string, named: string, among: readonly string[]): string {
+  const said = baseOf(named);
+  if (!said || said === 'auto' || inLatin(said) || latinLetters(text) < 2 || lettersByScript(text).length > 0) return named;
+  const latin = among.map(baseOf).filter((base, at, all) => base !== '' && base !== 'auto' && inLatin(base) && all.indexOf(base) === at);
+  if (latin.length === 1) return latin[0]!;
+  return (latin.length > 1 ? identifyLanguage(text, latin)?.language : undefined) ?? named;
 }
 
 const sinitic = (code: string): boolean => code === 'zh' || code === 'yue';
