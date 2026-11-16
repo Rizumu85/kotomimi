@@ -135,7 +135,7 @@ export interface Stages {
   back?: { stage?: AnswerStage; language: string; own: string; languages?: readonly string[] };
   /**
    * Fork: two of the other side's languages lit, and the speaker speaks one of them (`crossings`): a sentence in it
-   * (`language`) is answered by `stage`, into the other — not back into their own.
+   * (`language`) is answered by `stage`, into the other, then by `back.stage` into their own.
    */
   cross?: ReadonlyArray<{ language: string; stage: AnswerStage }>;
   /** Feedback alongside translation, only for speech in the language being practised. */
@@ -243,7 +243,7 @@ interface Job {
   typed: boolean;
   /** The sentence this leg heard just before, for a translator that takes one with its request. */
   before?: string;
-  /** Feedback asked beside a translation of the same sentence (`Stages.feedback`). */
+  /** An answer asked beside a translation of the same sentence. */
   beside?: true;
 }
 
@@ -461,9 +461,10 @@ class PipelineLeg implements AdapterSession {
     this.events.segmentText({ ref, text: trimmed, ...(language ? { language } : {}) });
     this.events.segmentClosed({ ref });
     if (stage) {
-      const answer = this.backFor(trimmed, language) ?? stage;
+      const backward = this.backFor(trimmed, language);
+      const answer = backward ?? stage;
       this.push({ stage: answer, text: trimmed, origin, typed: true });
-      if (answer === stage) this.alsoInto(trimmed, origin, true);
+      this.alsoInto(trimmed, origin, true, undefined, backward);
     } else if (!this.stages.asIs) this.events.degraded({ code: 'translation_unavailable', message: 'Typed text has no translation stage in this session — shown as typed.' });
   }
 
@@ -932,7 +933,7 @@ class PipelineLeg implements AdapterSession {
       const before = stage.kind === 'translate' && this.said && now - this.said.at <= BEFORE_WITHIN_MS ? this.said.text.slice(-BEFORE_MOST) : undefined;
       if (stage.kind === 'translate') this.said = { text, at: now };
       this.push({ stage, text, origin: payload.origin ?? source.origin, typed: false, ...(before ? { before } : {}) });
-      if (stage === this.stages.speech) this.alsoInto(text, payload.origin ?? source.origin, false, before);
+      if (backward || stage === this.stages.speech) this.alsoInto(text, payload.origin ?? source.origin, false, before, backward);
     }
     const feedback = this.stages.feedback;
     if (source && text && feedback) {
@@ -941,8 +942,13 @@ class PipelineLeg implements AdapterSession {
     }
   }
 
-  /** Fork: a sentence translated forward is translated into the other side's second language too (`Stages.into`). */
-  private alsoInto(text: string, origin: string | undefined, typed: boolean, before?: string): void {
+  /** Fork: a second answer, into their other lit language when forward, or the user's own when crossing. */
+  private alsoInto(text: string, origin: string | undefined, typed: boolean, before?: string, backward?: AnswerStage): void {
+    if (backward) {
+      const back = this.stages.back?.stage;
+      if (back && backward !== back) this.push({ stage: back, text, origin, typed, beside: true, ...(before ? { before } : {}) });
+      return;
+    }
     const into = this.stages.into;
     if (!into || this.stages.speech?.kind !== 'translate') return;
     this.push({ stage: into, text, origin, typed, ...(before ? { before } : {}) });

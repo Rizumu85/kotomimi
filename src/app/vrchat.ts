@@ -162,9 +162,8 @@ export function chatboxPages(line: string): string[] {
 /**
  * A sentence of the user's that is done, as it goes above their avatar: its own words and its translation final.
  * Coached and spoken, it is the sentence as they said it, once that is final — what answers it is feedback for them,
- * never shown to others. With both shown, each has a line of its own: the original first, or — `translationFirst` —
- * the translation. With the original alone (`source`), it goes up once its own words are final, with no translation
- * waited for. Null while it is not done, or for anything else.
+ * never shown to others. Each language has a line of its own. With the original alone (`source`), it goes up once
+ * its own words are final, with no translation waited for. Null while it is not done, or for anything else.
  */
 const base = (code: string) => code.toLowerCase().split(/[-_]/)[0];
 
@@ -172,20 +171,20 @@ const base = (code: string) => code.toLowerCase().split(/[-_]/)[0];
 export interface Theirs { languages: readonly string[]; back: boolean }
 
 /** Each answer's text, in order: one per translation segment (the second language lit gives a sentence two). */
-export const answersOf = (rows: readonly Row[]): string[] => {
-  const out: { id: string; text: string }[] = [];
+export const answersOf = (rows: readonly Row[]): { text: string; language?: string }[] => {
+  const out: { id: string; text: string; language?: string }[] = [];
   for (const row of rows) {
     if (row.purpose === 'feedback') continue;
-    if (out[out.length - 1]?.id !== row.segmentId) out.push({ id: row.segmentId, text: '' });
+    if (out[out.length - 1]?.id !== row.segmentId) out.push({ id: row.segmentId, text: '', language: row.language });
     out[out.length - 1].text += row.text;
   }
-  return out.map((answer) => answer.text.trim()).filter(Boolean);
+  return out.map(({ text, language }) => ({ text: text.trim(), language })).filter((answer) => answer.text);
 };
 
 /**
- * With two languages lit a sentence has two translations, each on a line of its own; where the two and the original do
- * not fit the chatbox together, the original goes, and the two go up alone (the user, 2026-11-08). `settled`: the
- * second will not come — a later sentence of the user's is already translated, and translations are done in order.
+ * Each sentence goes up in language order: the user's own, their main, their second; `translationFirst` puts theirs
+ * before the user's own. Every line is kept, paged where needed (the user, 2026-11-15). `settled`: missing answers
+ * will not come — a later sentence of the user's is already translated, and translations are done in order.
  */
 export function finishedLine(entry: Entry, shows: ChatboxShows, said = false, translationFirst = false, theirs?: Theirs, settled = false): string | null {
   if (shows === 'off' || entry.kind !== 'exchange' || entry.leg !== 'speaker') return null;
@@ -199,16 +198,21 @@ export function finishedLine(entry: Entry, shows: ChatboxShows, said = false, tr
   }
   if (entry.source.length === 0 || entry.translation.length === 0) return null;
   if (!entry.source.every((row) => row.final) || !entry.translation.every((row) => row.final)) return null;
-  const answers = answersOf(entry.translation);
+  const answers = answersOf(entry.translation).map(({ text, language }) => ({ text, language: base(language || entry.languages.target) }));
   if (answers.length === 0) return null;
-  // Back into their own, a sentence has one; else one for each language of theirs.
-  const wanted = inTheirs ? 1 : Math.max(1, theirs?.languages.length ?? 1);
+  // Forward and crossing sentences have one answer per language of theirs; with one lit, back has one too.
+  const wanted = Math.max(1, theirs?.languages.length ?? 1);
   if (answers.length < wanted && !settled) return null;
-  const translation = answers.join('\n');
-  if (shows !== 'both') return translation;
-  const original = textOf(entry.source);
-  const line = translationFirst ? `${translation}\n${original}` : `${original}\n${translation}`;
-  return answers.length > 1 && [...line].length > CHATBOX_MOST ? translation : line;
+  if (shows === 'both') answers.unshift({ text: textOf(entry.source), language: base(entry.source[0].language || entry.languages.source) });
+  const own = base(entry.languages.source);
+  const other = (theirs?.languages ?? [entry.languages.target]).map(base);
+  const order = translationFirst ? [...other, own] : [own, ...other];
+  answers.sort((a, b) => {
+    const first = order.indexOf(a.language);
+    const second = order.indexOf(b.language);
+    return (first < 0 ? order.length : first) - (second < 0 ? order.length : second);
+  });
+  return answers.map((answer) => answer.text).join('\n');
 }
 
 export interface VRChatController {
@@ -430,14 +434,18 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
     // a coached speaker's is translated back for them alone.
     const asSaid = (entry: Extract<Entry, { kind: 'exchange' }>) => theirs !== undefined && !theirs.back && entry.source.length > 0
       && entry.source.every((row) => row.language !== undefined && theirs.languages.some((code) => base(code) === base(row.language!)));
+    // The newest of the user's sentences that is translated: every one before it has all the translations it will get.
+    let newest = -1;
+    state.entries.forEach((entry, i) => { if (entry.kind === 'exchange' && entry.leg === 'speaker' && answersOf(entry.translation).length > 0) newest = i; });
     // The last sentence of the user's translated as it would go up, for the settings to show the chatbox with: not
     // one answered with feedback, which is theirs alone.
     for (let i = state.entries.length - 1; i >= 0; i--) {
       const entry = state.entries[i];
       if (entry.kind !== 'exchange' || entry.leg !== 'speaker') continue;
       if (feedback(entry) || asSaid(entry)) continue;
-      if (finishedLine(entry, 'translation') === null) continue;
-      store.getState().setRecent({ said: textOf(entry.source), translation: answersOf(entry.translation).join('\n') });
+      const translation = finishedLine(entry, 'translation', false, store.getState().chatboxTranslationFirst, theirs, i < newest);
+      if (translation === null) continue;
+      store.getState().setRecent({ said: textOf(entry.source), translation });
       break;
     }
     // Said with the chatbox off: for the user alone, and not sent once it is turned on again — whatever of it is
@@ -449,9 +457,6 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
       showTyping();
       return;
     }
-    // The newest of the user's sentences that is translated: every one before it has all the translations it will get.
-    let newest = -1;
-    state.entries.forEach((entry, i) => { if (entry.kind === 'exchange' && entry.leg === 'speaker' && answersOf(entry.translation).length > 0) newest = i; });
     state.entries.forEach((entry, i) => {
       if (entry.kind !== 'exchange' || sent.has(entry.id)) return;
       const said = feedback(entry);
@@ -464,7 +469,7 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
     showTyping();
   };
   // What is finished on screen when this begins was said before: it is not sent now. A sentence still under way is.
-  for (const entry of deps.view.get().entries) if (finishedLine(entry, 'translation') !== null) sent.add(entry.id);
+  for (const entry of deps.view.get().entries) if (finishedLine(entry, 'translation', false, false, deps.theirs?.()) !== null) sent.add(entry.id);
   offs.push(deps.view.subscribe(look));
   if (deps.onReset) offs.push(deps.onReset(() => { queue.length = 0; rest = []; }));
 

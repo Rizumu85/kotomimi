@@ -20,6 +20,31 @@ describe("displayItems — a video's words (fork)", () => {
   });
 });
 
+describe("displayItems \u2014 the user's sentence, its lines by language (fork)", () => {
+  const said = (language: string): Row => ({ ...row('said', 'source'), language });
+  const answer = (id: string, language: string, k = 0): Row => ({ ...row(id, 'translation', k), language });
+  const mine = (source: Row[], translation: Row[]) => ({ ...exchange('m', 'speaker', source, translation), languages: { source: 'zh-CN', target: 'ja' } });
+  const order = (entry: Entry) => displayItems([entry], both).map((i) => (i.kind === 'row' ? i.row.key : 'notice'));
+
+  it('reads their own language, the other side\u2019s main one, then any other, whichever it was said in', () => {
+    // Said in Chinese: as its lines came.
+    expect(order(mine([said('zh')], [answer('ja', 'ja'), answer('en', 'en')]))).toEqual(['said:0', 'ja:0', 'en:0']);
+    // Said in English, answered in Japanese and then in Chinese: the Chinese first, the sentence as said last.
+    expect(order(mine([said('en')], [answer('ja', 'ja'), answer('zh', 'zh')]))).toEqual(['zh:0', 'ja:0', 'said:0']);
+    // Said in Japanese, answered in English and then in Chinese, the English in two rows.
+    expect(order(mine([said('ja')], [answer('en', 'en'), answer('en', 'en', 1), answer('zh', 'zh')]))).toEqual(['zh:0', 'said:0', 'en:0', 'en:1']);
+    // The header is the first line drawn, whichever that is.
+    expect(shape(displayItems([mine([said('en')], [answer('zh', 'zh')])], both))).toEqual(['zh:0+h+e', 'said:0+e']);
+  });
+
+  it('leaves alone the other side\u2019s sentences, and one with an answer in a language not told', () => {
+    const theirs = { ...exchange('t', 'participant', [said('en')], [answer('zh', 'zh')]), languages: { source: 'ja', target: 'zh-CN' } };
+    expect(order(theirs)).toEqual(['said:0', 'zh:0']);
+    expect(order(mine([said('en')], [answer('ja', 'ja'), row('untold', 'translation')]))).toEqual(['said:0', 'ja:0', 'untold:0']);
+    expect(order(mine([row('said', 'source')], [answer('zh', 'zh')]))).toEqual(['said:0', 'zh:0']);
+  });
+});
+
 describe('displayItems', () => {
   it('draws feedback separately with its own answer and the source it answers, while obeying side filters', () => {
     const source = row('source', 'source', 0, 'I goes.');

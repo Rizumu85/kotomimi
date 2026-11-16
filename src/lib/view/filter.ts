@@ -65,9 +65,33 @@ export function showsSide(filter: SideFilter, side: Side): boolean {
   return filter === 'both' || filter === side;
 }
 
+const base = (code: string) => code.toLowerCase().split(/[-_]/)[0];
+
+/**
+ * Fork: the lines of a sentence of the user's, by language: their own first, then the other side's main one, then any
+ * other, whichever of them it was said in (the user, 2026-11-15: every sentence of theirs reads Chinese, Japanese,
+ * English, always). So one said in another language has its translation into their own above it. A sentence said in
+ * their own is in that order already, and so is every one of the other side's; one with an answer whose language is
+ * not told keeps the order its lines came in.
+ */
+function byLanguage(entry: Extract<Entry, { kind: 'exchange' }>, source: readonly Row[], translation: readonly Row[]): Row[] {
+  const own = base(entry.languages.source);
+  const said = source[0]?.language;
+  if (entry.leg !== 'speaker' || !said || base(said) === own || translation.some((row) => !row.language)) return [...source, ...translation];
+  const rank = (language: string) => (base(language) === own ? 0 : base(language) === base(entry.languages.target) ? 1 : 2);
+  const lines: Array<{ rank: number; rows: Row[] }> = [{ rank: rank(said), rows: [...source] }];
+  for (const row of translation) {
+    const last = lines[lines.length - 1];
+    if (last.rows[0].side === 'translation' && last.rows[0].segmentId === row.segmentId) last.rows.push(row);
+    else lines.push({ rank: rank(row.language!), rows: [row] });
+  }
+  // Array.prototype.sort is stable: two lines of one rank stay as they came.
+  return lines.sort((a, b) => a.rank - b.rank).flatMap((line) => line.rows);
+}
+
 /**
  * The lines a bubble surface draws. Within an exchange the source rows come
- * first. A header opens where the leg changes from the last row drawn; a
+ * first (but see `byLanguage`). A header opens where the leg changes from the last row drawn; a
  * notice is drawn under every filter and neither opens nor breaks a header
  * group — today's panel on each count (spec: "UI rules deferred to the UI
  * work"). `previous`, the last call's output, keeps an unchanged line's
@@ -89,8 +113,7 @@ export function displayItems(entries: readonly Entry[], filters: LegFilters, pre
     }
     const filter = filters[entry.leg];
     const rows = [
-      ...(showsSide(filter, 'source') ? entry.source : []),
-      ...(showsSide(filter, 'translation') ? entry.translation : []),
+      ...byLanguage(entry, showsSide(filter, 'source') ? entry.source : [], showsSide(filter, 'translation') ? entry.translation : []),
       ...(showsSide(filter, 'translation') ? entry.feedback ?? [] : []),
     ];
     const said = entry.source.map((row) => row.text).join('').trim();

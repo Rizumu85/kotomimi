@@ -10,7 +10,7 @@ const last = <T>(list: readonly T[]): T | undefined => list[list.length - 1];
 const row = (text: string, final = true) => ({ key: `${text}:0`, segmentId: text, side: 'source' as const, start: 0, end: text.length, text, final });
 const exchange = (id: string, source: string, translation: string, { leg = 'speaker', final = true } = {}): Entry => ({
   kind: 'exchange', id, leg: leg as 'speaker' | 'participant', languages: { source: 'zh', target: 'ja' }, pairing: 'stated',
-  source: [row(source, final)], translation: translation ? [{ ...row(translation, final), side: 'translation' }] : [], t: 0,
+  source: [{ ...row(source, final), language: 'zh' }], translation: translation ? [{ ...row(translation, final), side: 'translation', language: 'ja' }] : [], t: 0,
 });
 
 function setup(over: Partial<VRChatDeps> = {}, initial: Entry[] = []) {
@@ -69,11 +69,12 @@ describe('finishedLine', () => {
   it('shows the reverse translation when enabled, or the original with it where both show', () => {
     const inJapanese = (translation: string): Entry => {
       const e = exchange('a', '次のワールドに行こう', translation);
-      return e.kind === 'exchange' ? { ...e, source: e.source.map((r) => ({ ...r, language: 'ja' })) } : e;
+      return e.kind === 'exchange' ? { ...e, source: e.source.map((r) => ({ ...r, language: 'ja' })), translation: e.translation.map((r) => ({ ...r, language: 'zh' })) } : e;
     };
     const back = { languages: ['ja'], back: true };
     expect(finishedLine(inJapanese('我们去下一个世界吧'), 'translation', false, false, back)).toBe('我们去下一个世界吧');
-    expect(finishedLine(inJapanese('我们去下一个世界吧'), 'both', false, false, back)).toBe('次のワールドに行こう\n我们去下一个世界吧');
+    expect(finishedLine(inJapanese('我们去下一个世界吧'), 'both', false, false, back)).toBe('我们去下一个世界吧\n次のワールドに行こう');
+    expect(finishedLine(inJapanese('我们去下一个世界吧'), 'both', false, true, back)).toBe('次のワールドに行こう\n我们去下一个世界吧');
     // Not answered back: shown as said, with no translation to wait for.
     expect(finishedLine(inJapanese(''), 'both', false, false, { languages: ['ja'], back: false })).toBe('次のワールドに行こう');
     // Their own language: the translation, as ever.
@@ -120,10 +121,82 @@ describe('finishedLine', () => {
     expect(finishedLine(twice('我们走吧', '行こう', "Let's go"), 'both', false, false, two)).toBe("我们走吧\n行こう\nLet's go");
   });
 
-  it('leaves the original out where it and the two translations do not fit the chatbox together', () => {
+  it.each(['zh-CN', 'ja', 'en'])('puts a sentence said in %s at its language’s place and waits for both answers', (language) => {
+    const texts = [
+      { language: 'zh-CN', text: '我们走吧' },
+      { language: 'ja', text: '行こう' },
+      { language: 'en', text: "Let's go" },
+    ];
+    const said = texts.find((text) => text.language === language)!.text;
+    const entry: Entry = {
+      kind: 'exchange', id: 'cross', leg: 'speaker', languages: { source: 'zh-CN', target: 'ja' }, pairing: 'stated', t: 0,
+      source: [{ ...row(said), language }],
+      // Deliberately unlike the display order; split rows still make one answer.
+      translation: texts.filter((text) => text.language !== language).reverse().flatMap(({ text, language }) => [
+        { ...row(text), text: text.slice(0, 1), side: 'translation' as const, language, ...(language === 'zh-CN' ? { accompaniesTranslation: true as const } : {}) },
+        { ...row(text), key: `${text}:1`, text: text.slice(1), side: 'translation' as const, language, ...(language === 'zh-CN' ? { accompaniesTranslation: true as const } : {}) },
+      ]),
+    };
+    const theirs = { ...two, back: true };
+    for (const translationFirst of [false, true]) {
+      const ordered = translationFirst ? [texts[1], texts[2], texts[0]] : texts;
+      expect(finishedLine(entry, 'both', false, translationFirst, theirs)).toBe(ordered.map((text) => text.text).join('\n'));
+      expect(finishedLine(entry, 'translation', false, translationFirst, theirs)).toBe(ordered.filter((text) => text.language !== language).map((text) => text.text).join('\n'));
+    }
+    const missing = { ...entry, translation: entry.translation.slice(0, 2) };
+    const unfinished = { ...entry, translation: entry.translation.map((r, i) => ({ ...r, final: i < 2 })) };
+    expect(finishedLine(missing, 'both', false, false, theirs)).toBeNull();
+    expect(finishedLine(missing, 'translation', false, false, theirs, true)).toBe(texts.filter((text) => text.language !== language).pop()!.text);
+    expect(finishedLine(unfinished, 'both', false, false, theirs, true)).toBeNull();
+    const h = setup({ theirs: () => theirs });
+    useVRChatStore.getState().setChatbox('both');
+    h.show([missing]);
+    expect(h.chatboxLines()).toEqual([]);
+    expect(useVRChatStore.getState().recent).toBeNull();
+    h.show([unfinished]);
+    expect(h.chatboxLines()).toEqual([]);
+    expect(useVRChatStore.getState().recent).toBeNull();
+    h.show([entry]);
+    expect(h.chatboxLines()).toEqual(["我们走吧\n行こう\nLet's go"]);
+    expect(useVRChatStore.getState().recent?.translation).toBe(texts.filter((text) => text.language !== language).map((text) => text.text).join('\n'));
+    useVRChatStore.getState().setChatboxTranslationFirst(true);
+    h.show([entry]);
+    expect(useVRChatStore.getState().recent?.translation).toBe([texts[1], texts[2], texts[0]].filter((text) => text.language !== language).map((text) => text.text).join('\n'));
+    h.controller.stop();
+  });
+
+  it.each([false, true])('uses the leg languages for unlabelled source and forward answer with translationFirst=%s', (translationFirst) => {
+    const entry = twice('我们走吧', '行こう', "Let's go");
+    if (entry.kind !== 'exchange') throw new Error('Expected exchange');
+    entry.source = entry.source.map((r) => ({ ...r, language: undefined }));
+    entry.translation[0] = { ...entry.translation[0], language: undefined };
+    expect(finishedLine(entry, 'both', false, translationFirst, two)).toBe(translationFirst ? "行こう\nLet's go\n我们走吧" : "我们走吧\n行こう\nLet's go");
+    expect(finishedLine(entry, 'translation', false, translationFirst, two)).toBe("行こう\nLet's go");
+  });
+
+  it.each([false, true])('puts a language outside the run last with translationFirst=%s', (translationFirst) => {
+    const entry = twice('我们走吧', '行こう', '가자');
+    if (entry.kind !== 'exchange') throw new Error('Expected exchange');
+    entry.translation[1] = { ...entry.translation[1], language: 'ko' };
+    expect(finishedLine(entry, 'both', false, translationFirst, two)).toBe(translationFirst ? '行こう\n我们走吧\n가자' : '我们走吧\n行こう\n가자');
+    expect(finishedLine(entry, 'translation', false, translationFirst, two)).toBe('行こう\n가자');
+  });
+
+  it.each([false, true])('sends all three languages in pages with translationFirst=%s when they do not fit together', (translationFirst) => {
     const said = '我们'.repeat(30);
-    const line = finishedLine(twice(said, '行こう'.repeat(15), "Let's go ".repeat(5).trim()), 'both', false, false, two);
-    expect(line).toBe(`${'行こう'.repeat(15)}\n${"Let's go ".repeat(5).trim()}`);
+    const japanese = '行こう'.repeat(15);
+    const english = "Let's go ".repeat(5).trim();
+    const entry = twice(said, japanese, english);
+    const expected = translationFirst ? [japanese, english, said] : [said, japanese, english];
+    expect(finishedLine(entry, 'both', false, translationFirst, two)).toBe(expected.join('\n'));
+    useVRChatStore.setState({ chatbox: 'both', chatboxTranslationFirst: translationFirst });
+    const h = setup({ theirs: () => two });
+    h.show([entry]);
+    expect(h.chatboxLines()).toEqual(expected.slice(0, 1));
+    h.timers.shift()!();
+    h.timers.shift()!();
+    expect(h.chatboxLines()).toEqual(expected);
+    h.controller.stop();
   });
 });
 

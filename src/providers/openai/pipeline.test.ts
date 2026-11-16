@@ -1113,11 +1113,11 @@ describe('the other side’s second language, lit by hand (fork)', () => {
 describe('a sentence in one of two lit languages of theirs, which the user speaks too (fork)', () => {
   const api = { ...VIA_MODEL, asrVia: 'api' as const, asrApiBaseUrl: 'http://127.0.0.1:9000/v1', asrApiModel: 'whisper' };
 
-  it('is built to go into the other lit one, not back into the user’s own; nothing is built for a language not lit', () => {
+  it('is built to go into the other lit one and back into the user’s own; nothing is built for a language not lit', () => {
     const lit = { ...api, speakAlso: ['en', 'ko'], theyAlso: ['ja', 'en'], theyLit: 'en', asrDetectOther: true };
     const built = buildLocalAI(SPEAKER, { ...LOCALAI_DEFAULTS, ...lit }, shared) as LocalAIConfig;
     expect(built.stages?.cross).toEqual([{ language: 'en', stage: expect.objectContaining({ kind: 'translate', language: 'ja' }) }]);
-    expect(built.stages?.back?.stage).toBeUndefined();
+    expect(built.stages?.back?.stage).toMatchObject({ kind: 'translate', language: 'zh-CN' });
     expect(built.stages?.back?.languages).toEqual(['en']);
     // Korean is one the user speaks, and not lit for them: the user is not heard in it.
     const dark = buildLocalAI(SPEAKER, { ...LOCALAI_DEFAULTS, ...api, speakAlso: ['ko'] }, shared) as LocalAIConfig;
@@ -1125,24 +1125,45 @@ describe('a sentence in one of two lit languages of theirs, which the user speak
     expect(dark.stages?.heard).toBeUndefined();
   });
 
-  it('answers it with the other lit language, and the user’s own as ever', async () => {
+  it.each([
+    { language: 'en', target: 'ja', said: "Let's go to the next world, everyone", translated: '次のワールドに行こう' },
+    { language: 'ja', target: 'en', said: '次のワールドに行こう', translated: "Let's go to the next world, everyone" },
+  ])('answers $language with the other lit language first and the user’s own second', async ({ language, target, said, translated }) => {
     const crossing = (config: LocalAIConfig) => {
       config.stages = {
         ...config.stages!, heard: 'auto',
-        back: { own: 'zh-CN', language: 'en', languages: ['en'] },
-        cross: [{ language: 'en', stage: { kind: 'translate', model: 'across', baseUrl: '', system: 'Translate into Japanese', language: 'ja' } }],
+        back: { own: 'zh-CN', language, languages: [language], stage: { kind: 'translate', model: 'back', baseUrl: '', system: 'Translate into Chinese', language: 'zh-CN' } },
+        cross: [{ language, stage: { kind: 'translate', model: 'across', baseUrl: '', system: `Translate into ${target}`, language: target } }],
       };
       delete config.stages.leakCheck;
     };
-    const h = await live(SPEAKER, VIA_MODEL, [sse('次のワールドに行こう'), sse('次へ')], K, crossing);
-    h.receive(...heard('first', "Let's go to the next world, everyone"));
-    await vi.waitFor(() => expect(h.calls).toHaveLength(1));
+    const h = await live(SPEAKER, VIA_MODEL, [sse(translated), sse('我们去下一个世界吧'), sse('次へ'), sse(translated), sse('我们去下一个世界吧')], K, crossing);
+    h.receive(...heard('first', said));
     await h.settled();
-    expect(h.calls[0].body.model).toBe('across');
-    expect(h.lastText(FIRST_REF + 1)).toMatchObject({ text: '次のワールドに行こう', language: 'ja' });
+    expect(h.calls.map((c) => c.body.model)).toEqual(['across', 'back']);
+    expect(h.calls.map((c) => c.body.messages.slice(-1)[0]?.content)).toEqual([said, said]);
+    expect(h.of('segmentOpened').filter((e) => e.payload.side === 'translation').map((e) => e.payload)).toEqual([
+      { ref: FIRST_REF + 1, side: 'translation', purpose: 'translation', origin: 'first' },
+      { ref: FIRST_REF + 2, side: 'translation', purpose: 'translation', accompaniesTranslation: true, origin: 'first' },
+    ]);
+    expect(h.lastText(FIRST_REF + 1)).toMatchObject({ text: translated, language: target });
+    expect(h.lastText(FIRST_REF + 2)).toMatchObject({ text: '我们去下一个世界吧', language: 'zh-CN' });
     h.receive(...heard('second', '我们走吧大家一起去'));
-    await vi.waitFor(() => expect(h.calls).toHaveLength(2));
-    expect(h.calls[1].body.model).toBe('hy-mt2-1.8b');
+    await h.settled();
+    expect(h.calls.map((c) => c.body.model)).toEqual(['across', 'back', 'hy-mt2-1.8b']);
+    expect(h.of('segmentOpened').filter((e) => e.payload.side === 'translation' && e.payload.origin === 'second')).toHaveLength(1);
+    h.session.appendText(said);
+    await h.settled();
+    expect(h.calls.slice(3).map((c) => c.body.model)).toEqual(['across', 'back']);
+    expect(h.calls.slice(3).map((c) => c.body.messages.slice(-1)[0]?.content)).toEqual([said, said]);
+    const typed = h.of('segmentOpened').filter((e) => e.payload.side === 'translation' && e.payload.origin === 'sokuji_typed_1').map((e) => e.payload);
+    expect(typed).toEqual([
+      { ref: expect.any(Number), side: 'translation', purpose: 'translation', origin: 'sokuji_typed_1' },
+      { ref: expect.any(Number), side: 'translation', purpose: 'translation', accompaniesTranslation: true, origin: 'sokuji_typed_1' },
+    ]);
+    expect(h.lastText(typed[0].ref)).toMatchObject({ text: translated, language: target });
+    expect(h.lastText(typed[1].ref)).toMatchObject({ text: '我们去下一个世界吧', language: 'zh-CN' });
+    await h.session.stop();
   });
 });
 

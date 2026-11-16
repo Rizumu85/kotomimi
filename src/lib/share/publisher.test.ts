@@ -42,6 +42,26 @@ function harness() {
 }
 
 describe('startSharePublisher', () => {
+  it('shares both answers to a crossing, including the user’s own language', async () => {
+    const h = harness();
+    await flush();
+    const entry: Entry = {
+      kind: 'exchange', id: 'cross', leg: 'speaker', languages: { source: 'zh-CN', target: 'ja' }, pairing: 'stated', t: 1,
+      source: [{ key: 's:0', segmentId: 's', side: 'source', start: 0, end: 8, text: "Let's go", language: 'en', final: true }],
+      translation: [
+        { key: 't:0', segmentId: 't', side: 'translation', start: 0, end: 3, text: '行こう', language: 'ja', final: true },
+        { key: 'b:0', segmentId: 'b', side: 'translation', start: 0, end: 4, text: '我们走吧', language: 'zh', accompaniesTranslation: true, final: false },
+      ],
+    };
+    h.view.set({ entries: [entry] });
+    await flush();
+    expect(lastOf(h.port.patch.mock.calls)![0].upsert[0].translation.map((r) => r.text)).toEqual(['行こう', '我们走吧']);
+    h.view.set({ entries: [{ ...entry, translation: entry.translation.slice(1) }] });
+    await flush();
+    expect(lastOf(h.port.patch.mock.calls)![0].upsert[0].translation.map((r) => r.text)).toEqual(['我们走吧']);
+    h.stop();
+  });
+
   it('sends the state and the current entries at once, then only what changes', async () => {
     const h = harness();
     await flush();
