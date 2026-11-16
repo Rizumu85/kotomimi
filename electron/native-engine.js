@@ -48,6 +48,7 @@ const net = require('net');
 const os = require('os');
 const path = require('path');
 const { spawn: nodeSpawn, execFile } = require('child_process');
+const bunzip2 = require('./bunzip2');
 const { pullWhole, relaysOf, hfMirrorOf, inMainlandChina, ANSWER_WITHIN_MS } = require('./fetch-file');
 
 const LOOPBACK = '127.0.0.1';
@@ -397,10 +398,17 @@ function systemTar(platform = process.platform, env = process.env) {
  * letters outside the system's code page reaches this program as question marks, and it opens nothing (seen
  * 2026-10-06 on Windows, a folder named in Korean on a Chinese system; from inside the folder it unpacked).
  */
-function untar(archive, into) {
-  return new Promise((resolve, reject) => {
-    execFile(systemTar(), ['-xf', path.relative(into, archive), '-C', '.'], { cwd: into, windowsHide: true }, (error) => (error ? reject(error) : resolve()));
-  });
+async function untar(archive, into, { platform = process.platform, run = execFile, decompress = bunzip2 } = {}) {
+  // Windows 10's tar has no bzip2 support. Give it a plain tar, beside the download.
+  const tar = platform === 'win32' && archive.endsWith('.tar.bz2') ? archive.slice(0, -4) : null;
+  try {
+    if (tar) await decompress(archive, tar);
+    await new Promise((resolve, reject) => {
+      run(systemTar(platform), ['-xf', path.relative(into, tar ?? archive), '-C', '.'], { cwd: into, windowsHide: true }, (error) => (error ? reject(error) : resolve()));
+    });
+  } finally {
+    if (tar) await fs.promises.rm(tar, { force: true });
+  }
 }
 
 /** The name of the program a process runs, in small letters; null where there is no such process or it cannot be asked. */
@@ -932,7 +940,7 @@ function tidied(answer, text) {
   return { ...rest, text, ...(hinted.length > 0 ? { hinted } : {}) };
 }
 
-function openWindow({ port, pathname, model, sampleRate, language, context, timeoutMs = WINDOW_READ_TIMEOUT_MS, read: readAsIs = readWhole, tidy = null, now = () => Date.now(), setTimer = setTimeout, clearTimer = clearTimeout, note = () => {} }, onEvent) {
+function openWindow({ port, pathname, model, sampleRate, language, context, timeoutMs = WINDOW_READ_TIMEOUT_MS, read: readAsIs = readWhole, tidy = null, /** How much new sound a reading on the way waits for: more, for a model whose readings cost the processor. */ newSeconds = WINDOW_NEW_SECONDS, now = () => Date.now(), setTimer = setTimeout, clearTimer = clearTimeout, note = () => {} }, onEvent) {
   const read = tidy ? (asked) => {
     const one = readAsIs(asked);
     return { done: one.done.then((answer) => (answer.ok ? tidied(answer, tidy(answer.text)) : answer)), abort: () => one.abort() };
@@ -1035,7 +1043,7 @@ function openWindow({ port, pathname, model, sampleRate, language, context, time
     timer = setTimer(() => {
       timer = null;
       if (over || ended || reading) return;
-      if (bytes - readBytes >= WINDOW_NEW_SECONDS * sampleRate * 2) start(false);
+      if (bytes - readBytes >= newSeconds * sampleRate * 2) start(false);
       else plan();
     }, Math.max(WINDOW_REST_MS, lastTook));
   }
@@ -1469,7 +1477,8 @@ function createNativeEngine(deps = {}) {
     const model = MODELS_[id];
     let mine;
     try {
-      mine = spawn(exe, runtime.launch({ id, model, port, key, build, modelsDir, files }), { cwd: modelsDir, env: childEnv, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+      // A runtime of several programs says which one runs this model (`program`): else the build's own.
+      mine = spawn(runtime.program?.({ id, model, build, engineDir }) ?? exe, runtime.launch({ id, model, port, key, build, modelsDir, files }), { cwd: modelsDir, env: childEnv, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
     } catch (error) {
       return setRun({ state: 'failed', tail: String(error?.message ?? error) });
     }
@@ -1577,4 +1586,4 @@ function createNativeEngine(deps = {}) {
   return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream, updateRuntime };
 }
 
-module.exports = { createNativeEngine, openLive, openWindow, readWhole, wavOf, loopAt, unloop, unspaced, echoOf, endless, hintChecked, tidied, CONTEXT_LEAD, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, translatorFits, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };
+module.exports = { createNativeEngine, openLive, openWindow, readWhole, wavOf, loopAt, unloop, unspaced, echoOf, endless, hintChecked, tidied, CONTEXT_LEAD, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, translatorFits, systemTar, untar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };

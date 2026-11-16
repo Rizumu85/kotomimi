@@ -4,7 +4,7 @@ import { EventEmitter } from 'node:events';
 import { createRequire } from 'node:module';
 import { WebSocketServer } from 'ws';
 const require = createRequire(import.meta.url);
-const { openSherpa, languageOf, ENGINE, MODELS, RUNTIME, MODEL_ID, createSherpaEngine } = require('./sherpa-engine');
+const { openSherpa, readOffline, saidLanguage, languageOf, ENGINE, MODELS, RUNTIME, MODEL_ID, SENSE_ID, createSherpaEngine } = require('./sherpa-engine');
 
 afterEach(() => vi.useRealTimers());
 
@@ -97,6 +97,58 @@ describe('the CPU transducer wire', () => {
       const results = await Promise.all([run(), run()]);
       for (const events of results) expect(events).toEqual([{ type: 'partial', text: 'Hello' }, { type: 'done', text: 'Hello!', language: 'en' }]);
     } finally { for (const socket of server.clients) socket.terminate(); await new Promise((resolve) => server.close(resolve)); }
+  });
+});
+
+describe('a stretch read whole on the processor (SenseVoice)', () => {
+  it('sends the rate, the length and the samples as floats, and takes the one answer with the language it names', async () => {
+    const server = new WebSocketServer({ port: 0, host: '127.0.0.1' });
+    await new Promise((resolve) => server.once('listening', resolve));
+    const got = [];
+    server.on('connection', (socket) => {
+      let bytes = Buffer.alloc(0);
+      socket.on('message', (data, binary) => {
+        if (!binary) { got.push(String(data)); return; }
+        bytes = Buffer.concat([bytes, data]);
+        if (bytes.length >= 8 && bytes.length === 8 + bytes.readInt32LE(4)) {
+          got.push([bytes.readInt32LE(0), bytes.readInt32LE(4), bytes.readFloatLE(8), bytes.readFloatLE(12)]);
+          socket.send(JSON.stringify({ lang: '<|ja|>', emotion: '<|NEUTRAL|>', text: ' こんにちは。 ' }));
+        }
+      });
+    });
+    try {
+      const pcm = Buffer.alloc(4); pcm.writeInt16LE(16384, 0); pcm.writeInt16LE(-16384, 2);
+      expect(await readOffline({ port: server.address().port, sampleRate: 24000, pcm }).done).toEqual({ ok: true, text: 'こんにちは。', language: 'ja' });
+      await vi.waitFor(() => expect(got).toEqual([[24000, 8, .5, -.5], 'Done']));
+    } finally { for (const socket of server.clients) socket.terminate(); await new Promise((resolve) => server.close(resolve)); }
+  });
+
+  it('says so where the engine answers nothing usable, closes first, or is not there', async () => {
+    const answer = (act) => { const reading = readOffline({ port: 1, sampleRate: 16000, pcm: Buffer.alloc(2) }, Socket); act(Socket.last); return reading.done; };
+    expect(await answer((s) => s.emit('message', Buffer.from('bad')))).toMatchObject({ ok: false });
+    expect(await answer((s) => s.result({ lang: '<|ja|>' }))).toMatchObject({ ok: false });
+    expect(await answer((s) => s.emit('close'))).toMatchObject({ ok: false });
+    expect(await answer((s) => s.emit('error', new Error('refused')))).toEqual({ ok: false, message: 'refused' });
+    // A language outside its five is not named.
+    expect(await answer((s) => s.result({ lang: '<|nospeech|>', text: 'x' }))).toEqual({ ok: true, text: 'x' });
+    expect(saidLanguage('<|yue|>')).toBe('yue');
+  });
+
+  it('is started by the same archive’s other server, on two threads, with its own files', () => {
+    const model = MODELS[SENSE_ID];
+    expect(model).toMatchObject({ mode: 'offline', unspaced: true, bytes: 239549735, languages: ['zh', 'en', 'ja', 'ko', 'yue'] });
+    for (const part of model.files) {
+      expect(part.sha256).toMatch(/^[a-f0-9]{64}$/);
+      expect(part.url).toContain('/2365baeacb507f821a0c8120fcee3d484dba7a07/');
+    }
+    // Not X-ASR's names: the two share a folder.
+    expect(model.files.map((part) => part.file).some((file) => MODELS[MODEL_ID].files.some((other) => other.file === file))).toBe(false);
+    const build = ENGINE.builds['win32-x64'];
+    expect(RUNTIME.program({ model, build, engineDir: 'E' }).split(String.fromCharCode(92)).join('/')).toBe(`E/${build.offline}`);
+    expect(build.offline).toMatch(/sherpa-onnx-offline-websocket-server\.exe$/);
+    expect(ENGINE.builds['darwin-arm64'].offline).toMatch(/sherpa-onnx-offline-websocket-server$/);
+    expect(RUNTIME.program({ model: MODELS[MODEL_ID], build, engineDir: 'E' })).toBeNull();
+    expect(RUNTIME.launch({ port: 6006, build, model })).toEqual(expect.arrayContaining(['--num-threads=2', '--sense-voice-model=sensevoice-small-int8.onnx', '--tokens=sensevoice-small-tokens.txt', '--sense-voice-language=auto']));
   });
 });
 
