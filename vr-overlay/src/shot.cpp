@@ -7,7 +7,8 @@
 // One line of JSON on stdout says what happened:
 //   {"state":"saved","width":W,"height":H,"signature":"…"}   the picture is at <out.jpg>
 //   {"state":"same","signature":"…"}                          it looks like the last one (`--last`): nothing written
-//   {"state":"none"}                                          no VRChat window, or it is minimized or all black
+//   {"state":"none"}                                          no VRChat window, or it is minimized, all black, or
+//                                                             too small for a chat bubble's letters to be read
 // The signature is the picture's brightness in a 16×16 grid, as hex: what the next call is given as `--last`.
 #include <windows.h>
 #include <wincodec.h>
@@ -129,6 +130,11 @@ bool writeJpeg(const wchar_t* file, uint8_t* bgra, int width, int height) {
 
 }  // namespace
 
+// A window shorter than this is not kept: a chat bubble's letters scale with the window's height, and under about
+// 10 px they are not read (measured 2026-11-15: 11 px letters at 2560x1415 shrunk to 566 high read 92 % of their
+// characters, 9 px at 470 high 80-85 %, 7 px at 354 high a third of the Chinese; a 428x286 window none).
+constexpr int LEAST_HEIGHT = 560;
+
 int wmain(int argc, wchar_t** argv) {
     if (argc < 2) return 2;
     const wchar_t* out = argv[1];
@@ -143,7 +149,7 @@ int wmain(int argc, wchar_t** argv) {
     RECT client = {};
     GetClientRect(window, &client);
     const int width = client.right, height = client.bottom;
-    if (width < 320 || height < 240) return none();
+    if (width < 320 || height < LEAST_HEIGHT) return none();
 
     BITMAPINFO info = {};
     info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
