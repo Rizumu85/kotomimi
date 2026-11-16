@@ -25,6 +25,7 @@ const os = require('os');
 const path = require('path');
 const http = require('http');
 const dgram = require('dgram');
+const { execFile } = require('child_process');
 
 const LOG_DIR = path.join(os.homedir(), 'AppData', 'LocalLow', 'VRChat', 'VRChat');
 /** How often the log is looked at. */
@@ -33,6 +34,8 @@ const TAIL_EVERY_MS = 1000;
 const MUTE_EVERY_MS = 250;
 /** The start of a log, where VRChat writes its ports: read when the file is first seen, the rest only from then on. */
 const HEAD_BYTES = 512 * 1024;
+/** How often VRChat is looked for among the running programs, while its log names a service that does not answer. */
+const RUNS_EVERY_MS = 5000;
 /** VRChat's chatbox shows at most this many characters. */
 const CHATBOX_MOST = 144;
 
@@ -119,11 +122,24 @@ function getJson(port, pathname, timeoutMs = 800) {
 }
 
 /**
+ * Whether VRChat is among the running programs: its log stays when it has quit, and names a service that is gone.
+ * Null where that cannot be told, which is taken as running.
+ */
+function vrchatRuns() {
+  return new Promise((resolve) => {
+    const tasklist = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'tasklist.exe');
+    execFile(tasklist, ['/FI', 'IMAGENAME eq VRChat.exe', '/FO', 'CSV', '/NH'], { windowsHide: true, timeout: 4000 }, (error, stdout) => {
+      resolve(error ? null : /"VRChat\.exe"/i.test(String(stdout)));
+    });
+  });
+}
+
+/**
  * The app's side of VRChat. `push(channel, payload)` tells the window: `vrchat:state` (`{ found, connected, muted }`),
  * `vrchat:video` (`{ url }`) and `vrchat:world` (`{}`). `watch(true)` asks the mute a few times a second until
  * `watch(false)`; `chatbox(text)` sends a line above the avatar.
  */
-function createVRChat({ push, dir = LOG_DIR, tailEveryMs = TAIL_EVERY_MS, muteEveryMs = MUTE_EVERY_MS, ask = getJson, udp = () => dgram.createSocket('udp4') }) {
+function createVRChat({ push, dir = LOG_DIR, tailEveryMs = TAIL_EVERY_MS, muteEveryMs = MUTE_EVERY_MS, ask = getJson, udp = () => dgram.createSocket('udp4'), runs = async () => true, runsEveryMs = RUNS_EVERY_MS }) {
   let file = null;
   let offset = 0;
   let rest = '';
@@ -135,6 +151,8 @@ function createVRChat({ push, dir = LOG_DIR, tailEveryMs = TAIL_EVERY_MS, muteEv
   /** Bumped by every watch and every new log: a loop, or an answer, of an older one ends there. */
   let generation = 0;
   let socket = null;
+  /** When VRChat was last looked for among the running programs. */
+  let lookedAt = -Infinity;
 
   const setState = (next) => {
     const merged = { ...state, ...next };
@@ -189,6 +207,8 @@ function createVRChat({ push, dir = LOG_DIR, tailEveryMs = TAIL_EVERY_MS, muteEv
       } catch {
         return;
       }
+      // The newest log may be of a VRChat that has quit: `found` is of one that runs.
+      if (state.found) void confirm();
       if (watching) void loop(generation);
       return;
     }
@@ -209,13 +229,30 @@ function createVRChat({ push, dir = LOG_DIR, tailEveryMs = TAIL_EVERY_MS, muteEv
     }
   };
 
+  /** A log read for the first time: is its VRChat still there? Of that log, whatever is watched meanwhile. */
+  const confirm = async () => {
+    const mine = file;
+    lookedAt = Date.now();
+    const there = await runs();
+    if (mine === file && there === false && !state.connected) setState({ found: false });
+  };
+
   const askMute = async (mine) => {
     if (!oscQueryPort) { setState({ connected: false, muted: null }); return; }
     const node = await ask(oscQueryPort, '/avatar/parameters/MuteSelf');
     if (mine !== generation) return;
     const value = Array.isArray(node?.VALUE) ? node.VALUE[0] : undefined;
-    if (typeof value === 'boolean') setState({ connected: true, muted: value });
-    else setState({ connected: false, muted: null });
+    // An answer is of a VRChat that runs, whatever was thought before.
+    if (typeof value === 'boolean') { setState({ found: true, connected: true, muted: value }); return; }
+    // No answer: OSC is off in a VRChat that runs, or VRChat has quit and left its log. Looked up before the window
+    // is told, so that it is not asked to turn OSC on in a game that is not there.
+    if (state.found && Date.now() - lookedAt >= runsEveryMs) {
+      lookedAt = Date.now();
+      const there = await runs();
+      if (mine !== generation) return;
+      if (there === false) { setState({ found: false, connected: false, muted: null }); return; }
+    }
+    setState({ connected: false, muted: null });
   };
 
   const loop = async (mine) => {
@@ -267,7 +304,8 @@ function setupVRChat({ ipcMain, isTrustedSender, getMainWindow, platform = proce
     return { stop() {} };
   }
   const vrchat = createVRChat({
-    ...(dir ? { dir } : {}),
+    // A stand-in folder (a test with no VRChat) is taken as a VRChat that runs.
+    ...(dir ? { dir } : { runs: vrchatRuns }),
     push: (channel, payload) => {
       const win = getMainWindow();
       if (win && !win.isDestroyed()) win.webContents.send(channel, payload);
@@ -289,4 +327,4 @@ function setupVRChat({ ipcMain, isTrustedSender, getMainWindow, platform = proce
   return vrchat;
 }
 
-module.exports = { setupVRChat, createVRChat, readLine, chatboxMessage, typingMessage, forChatbox, CHATBOX_MOST };
+module.exports = { setupVRChat, createVRChat, vrchatRuns, readLine, chatboxMessage, typingMessage, forChatbox, CHATBOX_MOST };
