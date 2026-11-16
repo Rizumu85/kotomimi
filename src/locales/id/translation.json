@@ -773,7 +773,8 @@
       "tag_cpu": "Hanya CPU",
       "tagHint_cpu": "Berjalan di prosesor tanpa memakai kartu grafis, sehingga kartu grafis bisa dipakai untuk game. Dimuat saat sesi dimulai.",
       "noteNativeXAsr": "Teks muncul sambil Anda berbicara. Hanya memakai prosesor tanpa memori grafis: sekitar seperlima dari satu inti. Hanya mendukung bahasa Mandarin dan Inggris. Kata dalam kamus pribadi tidak diberikan sebelumnya, tetapi hasil pengenalan tetap dikoreksi berdasarkan bunyinya.",
-      "noteStreamRevise": "Mulai menerjemahkan saat lawan bicara masih berbicara, lalu menerjemahkan ulang seluruh kalimat setelah selesai. Hanya mendukung bahasa Mandarin, Inggris, dan Jepang."
+      "noteStreamRevise": "Mulai menerjemahkan saat lawan bicara masih berbicara, lalu menerjemahkan ulang seluruh kalimat setelah selesai. Hanya mendukung bahasa Mandarin, Inggris, dan Jepang.",
+      "noteNativeSenseVoiceCpu": "Hanya memakai prosesor, tanpa memakai memori grafis. Akurasinya hampir sama dengan SenseVoice di kartu grafis. Mendukung bahasa Mandarin, Kanton, Inggris, Jepang, dan Korea. Kata dalam kamus pribadi tidak diberikan sebelumnya, tetapi hasil pengenalan tetap dikoreksi berdasarkan bunyinya."
     }
   },
   "logsPanel": {
@@ -2108,6 +2109,10 @@
       "mark": "Tandai kalimat ini bermasalah",
       "marked": "Ditandai",
       "notRecorded": "Kalimat ini tidak memiliki rekaman suara"
+    },
+    "apart": {
+      "split": "Dengarkan sisi saya di tempat lain",
+      "merge": "Dengarkan kedua sisi di satu tempat"
     }
   }
 }

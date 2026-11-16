@@ -75,7 +75,7 @@ describe('the OpenAI Translate definition', () => {
 
   it("lets the participant speak when its switch is on, into the pair's source (ruling 5), and a speaker on Text only not speak (ruling 4)", () => {
     const participant = contextsFor(both({ source: 'ja', target: 'en' }, { participantSpeech: true })).participant!;
-    expect(participant).toEqual({ direction: { source: 'en', target: 'ja' }, speech: true, turns: 'auto' });
+    expect(participant).toEqual({ leg: 'participant', direction: { source: 'en', target: 'ja' }, speech: true, turns: 'auto' });
     expect((openaiTranslateProvider.build(participant, TRANSLATE_DEFAULTS, SHARED) as TranslateConfig).target).toBe('ja');
     expect(contextsFor(both({ source: 'ja', target: 'en' })).participant!.speech).toBe(false);
     expect(contextsFor(both({ source: 'ja', target: 'en' }, { textOnly: true })).speaker!.speech).toBe(false);

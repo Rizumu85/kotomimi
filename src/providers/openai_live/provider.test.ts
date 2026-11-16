@@ -82,7 +82,7 @@ describe('the OpenAI Live definition', () => {
 
   it("lets the participant speak on its switch, with Other's prompt (ruling 1), and refuses Both for Auto-detect (D20)", () => {
     const participant = contextsFor(both({ source: 'en', target: 'zh-CN' }, { participantSpeech: true })).participant!;
-    expect(participant).toEqual({ direction: { source: 'zh-CN', target: 'en' }, speech: true, turns: 'auto' });
+    expect(participant).toEqual({ leg: 'participant', direction: { source: 'zh-CN', target: 'en' }, speech: true, turns: 'auto' });
     const s: LiveSettings = { ...LIVE_DEFAULTS, useTemplateMode: false, systemInstructions: 'Mine.', participantSystemInstructions: "Other's." };
     expect(openaiLiveProvider.build(participant, s, { ...SHARED, reversed: (d) => d.source === 'zh-CN' && d.target === 'en' })).toMatchObject({ instructions: "Other's." });
     expect(contextsFor(both({ source: 'en', target: 'zh-CN' })).participant!.speech).toBe(false);

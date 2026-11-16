@@ -31,8 +31,8 @@ describe('contextsFor', () => {
   it('gives the speaker the pair and the participant its reverse, always with automatic turns', () => {
     const contexts = contextsFor(shape({ legs: ['speaker', 'participant'], turnMode: 'push-to-talk' }));
     expect(contexts).toEqual({
-      speaker: { direction: { source: 'en', target: 'ja' }, speech: true, turns: 'manual' },
-      participant: { direction: { source: 'ja', target: 'en' }, speech: false, turns: 'auto' },
+      speaker: { leg: 'speaker', direction: { source: 'en', target: 'ja' }, speech: true, turns: 'manual' },
+      participant: { leg: 'participant', direction: { source: 'ja', target: 'en' }, speech: false, turns: 'auto' },
     });
   });
 

@@ -47,6 +47,14 @@
     "en": "Text",
     "text": "Teks"
   },
+  "fork.apart.merge": {
+    "en": "Hear both sides in one place",
+    "text": "Dengar kedua-dua pihak di satu tempat"
+  },
+  "fork.apart.split": {
+    "en": "Hear my side somewhere else",
+    "text": "Dengar suara saya di tempat lain"
+  },
   "fork.audio.echoAction": {
     "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
     "text": "Gunakan fon kepala untuk memutuskan gelung audio, atau naikkan ambang pengaktifan mikrofon dalam Tetapan → Mikrofon."
@@ -1922,6 +1930,10 @@
   "providers.localai.noteNativeSenseVoice": {
     "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
     "text": "Paling ringan dan pantas: menggunakan kira-kira 0.4 GB memori grafik. Dalam ujian perbualan santai bahasa Jepun, ketepatannya setanding Qwen3-ASR 0.6B, tetapi jarang menggunakan tanda baca. Hanya menyokong bahasa Cina, Kantonis, Inggeris, Jepun dan Korea."
+  },
+  "providers.localai.noteNativeSenseVoiceCpu": {
+    "en": "On the processor, with no video memory taken. About as right as SenseVoice on the graphics card: Chinese, Cantonese, English, Japanese and Korean. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",
+    "text": "Hanya guna pemproses, tanpa menggunakan memori grafik. Ketepatan hampir sama dengan SenseVoice pada kad grafik. Menyokong bahasa Cina, Kantonis, Inggeris, Jepun dan Korea. Perkataan dalam kamus peribadi tidak diberikan terlebih dahulu, tetapi hasil pengecaman tetap dibetulkan mengikut sebutan."
   },
   "providers.localai.noteNativeXAsr": {
     "en": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",

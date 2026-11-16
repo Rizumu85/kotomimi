@@ -78,6 +78,8 @@ export interface MySide {
   main: string;
   row: readonly string[];
   using: readonly string[];
+  /** Of the user's languages lit for the other side, those their own recognizer does not hear: unused, the chip says why. */
+  quiet?: { codes: readonly string[]; by: string };
   more: boolean;
   apply(next: MyNext): void;
 }
@@ -221,6 +223,7 @@ function MyRow({ side, ordered, suggested, name, showHearer, onOpenHearing, disa
               aria-pressed={own}
               onClick={() => { const next = pressMine(now, code); if (next) side.apply(next); }}
               disabled={disabled}
+              {...(side.quiet?.codes.some((one) => baseCode(one) === baseCode(code)) ? { title: t('fork.gap.cannot', { model: side.quiet.by, languages: name(code) }) } : {})}
             >
               {name(code)}
             </button>

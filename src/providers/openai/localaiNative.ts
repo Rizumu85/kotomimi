@@ -111,6 +111,10 @@ export const NATIVE_MODELS: readonly NativeModel[] = [
   // SenseVoice-Small, which is lighter and more right, is its languages.
   { id: 'nemotron-asr-0.6b-q8', vramMB: 1024, name: 'Nemotron 3.5 ASR 0.6B GGUF', bytes: 930625888, languages: NEMOTRON_LANGUAGES, limits: WINDOW_LIMITS },
   { id: 'x-asr-zh-en', vramMB: 0, name: 'X-ASR-zh-en', bytes: 614596718, languages: ['zh', 'en'], detects: true, engine: 'sherpa-onnx', usesGpu: false, takesHints: false },
+  // SenseVoice-Small on the processor (`electron/sherpa-engine.js`): the five languages of the graphics card's own,
+  // 21.2 % of the characters wrong against its 20.3 (measured 2026-11-15, the stretches the app cuts). For a side heard
+  // here while the graphics card's model hears the other; with X-ASR it shares the engine, one model at a time.
+  { id: 'sensevoice-small-cpu', vramMB: 0, name: 'SenseVoice-Small CPU', bytes: 239549735, languages: SENSEVOICE_LANGUAGES, limits: WINDOW_LIMITS, detects: true, engine: 'sherpa-onnx', usesGpu: false, takesHints: false },
 ];
 
 /** Models on different engines can hear together; each downloaded engine holds one model at a time. */

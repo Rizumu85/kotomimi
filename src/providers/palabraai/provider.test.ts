@@ -83,7 +83,7 @@ describe('the Palabra AI definition', () => {
 
   it("runs the participant in Palabra's own reverse — a region target by its source code — and speaks it when its switch is on (rulings 7, 9)", () => {
     const participant = contextsFor(both({ source: 'ja', target: 'en-US' }, { participantSpeech: true })).participant!;
-    expect(participant).toEqual({ direction: { source: 'en', target: 'ja' }, speech: true, turns: 'auto' });
+    expect(participant).toEqual({ leg: 'participant', direction: { source: 'en', target: 'ja' }, speech: true, turns: 'auto' });
     expect(palabraProvider.build(participant, PALABRA_DEFAULTS, SHARED)).toMatchObject({ source: 'en', target: 'ja', speech: true });
     expect(gate(both({ source: 'ja', target: 'en-US' }), 'electron')).toBeNull();
     // The other way: English reverses to its documented US English.

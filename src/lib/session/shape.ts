@@ -47,6 +47,7 @@ export function contextsFor(shape: RunShape): Partial<Record<LegName, SessionCon
   const contexts: Partial<Record<LegName, SessionContext>> = {};
   if (shape.legs.includes('speaker')) {
     contexts.speaker = {
+      leg: 'speaker',
       direction: { source: pair.source, target: pair.target },
       speech: legSpeaks(p, 'speaker', shape),
       turns: shape.turnMode === 'auto' ? 'auto' : 'manual',
@@ -54,6 +55,7 @@ export function contextsFor(shape: RunShape): Partial<Record<LegName, SessionCon
   }
   if (shape.legs.includes('participant')) {
     contexts.participant = {
+      leg: 'participant',
       // The gate refused a pair with no reverse before anything asks (D20); the plain swap only answers a shape nothing gated.
       direction: reversedPair(p, shape.settings, pair) ?? { source: pair.target, target: pair.source },
       speech: legSpeaks(p, 'participant', shape),

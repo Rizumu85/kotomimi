@@ -44,6 +44,7 @@ const NOTES: Readonly<Record<string, string>> = {
   'qwen3-asr-0.6b-q8': 'noteNativeQwenSmall',
   'nemotron-asr-0.6b-q8': 'noteNativeNemotron',
   'x-asr-zh-en': 'noteNativeXAsr',
+  'sensevoice-small-cpu': 'noteNativeSenseVoiceCpu',
   'apple-speech': 'noteAppleSpeech',
   'index-translate-2b': 'noteIndexTranslate',
   'hy-mt2-1.8b': 'noteHyMt2',

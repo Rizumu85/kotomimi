@@ -773,7 +773,8 @@
       },
       "tag_cpu": "CPU only",
       "tagHint_cpu": "Runs on the processor, leaving the graphics card to the game. Loads when a session starts.",
-      "noteNativeXAsr": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards."
+      "noteNativeXAsr": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",
+      "noteNativeSenseVoiceCpu": "On the processor, with no video memory taken. About as right as SenseVoice on the graphics card: Chinese, Cantonese, English, Japanese and Korean. Glossary words are not told to it beforehand; it puts them right by sound afterwards."
     }
   },
   "logsPanel": {
@@ -2093,6 +2094,10 @@
       "fix": "Use {{model}} for all",
       "hearsAll": "Recognize {{languages}}",
       "only": "{{languages}} only"
+    },
+    "apart": {
+      "split": "Hear my side somewhere else",
+      "merge": "Hear both sides in one place"
     },
     "capture": {
       "save": "Save what the subtitle just showed",

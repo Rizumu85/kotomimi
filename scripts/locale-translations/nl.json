@@ -55,6 +55,14 @@
     "en": "Text",
     "text": "Tekst"
   },
+  "fork.apart.merge": {
+    "en": "Hear both sides in one place",
+    "text": "Beide kanten op één plek beluisteren"
+  },
+  "fork.apart.split": {
+    "en": "Hear my side somewhere else",
+    "text": "Mijn kant ergens anders beluisteren"
+  },
   "fork.audio.echoAction": {
     "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
     "text": "Gebruik een hoofdtelefoon om de geluidslus te doorbreken, of verhoog de activeringsdrempel bij Instellingen → Microfoon."
@@ -1946,6 +1954,10 @@
   "providers.localai.noteNativeSenseVoice": {
     "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
     "text": "Het lichtste en snelste model: gebruikt ongeveer 0.4 GB videogeheugen. In tests met informele Japanse gesprekken even nauwkeurig als Qwen3-ASR 0.6B, maar gebruikt weinig leestekens. Ondersteunt alleen Chinees, Kantonees, Engels, Japans en Koreaans."
+  },
+  "providers.localai.noteNativeSenseVoiceCpu": {
+    "en": "On the processor, with no video memory taken. About as right as SenseVoice on the graphics card: Chinese, Cantonese, English, Japanese and Korean. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",
+    "text": "Gebruikt alleen de processor, geen videogeheugen. Ongeveer even nauwkeurig als SenseVoice op de grafische kaart. Ondersteunt Chinees, Kantonees, Engels, Japans en Koreaans. Woorden uit je persoonlijke woordenlijst worden niet vooraf doorgegeven, maar na de herkenning wel op basis van de uitspraak gecorrigeerd."
   },
   "providers.localai.noteNativeXAsr": {
     "en": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",

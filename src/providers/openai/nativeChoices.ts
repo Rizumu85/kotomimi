@@ -22,7 +22,9 @@ export interface NativeChoiceRow {
 /** Pass the active legs, not every possible leg. No catalogue filtering happens here. */
 export function nativeChoiceRows(s: LocalAISettings, pair: LanguagePair, legs: readonly LegName[], has = here): NativeChoiceRow[] {
   const extra = alsoSpoken(s, pair);
-  const fallback = hearingPick(s, pair, { detecting: s.asrDetectOther, both: extra.length > 0, bestEffort: s.asrDetectOther || extra.length > 0 }, has);
+  // The other side's detection is no reason to pick a detector for the user's own side heard here alone (`hearingOf`).
+  const detects = s.asrDetectOther && s.asrAlone !== 'speaker';
+  const fallback = hearingPick(s, pair, { detecting: detects, both: extra.length > 0, bestEffort: detects || extra.length > 0 }, has);
   return legs.map((key) => {
     const heard = heardBy(s, pair, key);
     const detecting = isAutoLanguage(heard);
@@ -31,7 +33,10 @@ export function nativeChoiceRows(s: LocalAISettings, pair: LanguagePair, legs: r
     const named = s.asrNativeByLanguage[selection];
     const known = NATIVE_MODELS.find((m) => m.id === named);
     const languages = detecting ? (key === 'speaker' ? [own, ...extra] : theirLitLanguages(s, pair)) : [heard];
-    const pick: NativePick = known ? { model: known.id, byLanguage: { ...s.asrNativeByLanguage, auto: known.id }, bestEffort: !known.detects && !isApple(known.id) } : fallback;
+    // Fork: the user's own side alone on this computer (`hearingOf`) is heard by its row's model whatever it hears: a
+    // coached speaker hears the other side's language, and the model chosen for that language is the other side's.
+    const alone = key === 'speaker' && s.asrAlone === 'speaker' && !detecting ? { [base(heard)]: known?.id } : {};
+    const pick: NativePick = known ? { model: known.id, byLanguage: { ...s.asrNativeByLanguage, auto: known.id, ...alone }, bestEffort: !known.detects && !isApple(known.id) } : fallback;
     if (known && isApple(known.id) && detecting) pick.either = { own, others: languages.slice(1) };
     return {
       key, selection, languages: [...new Set(languages.filter((code) => !isAutoLanguage(code)).map(base))], detecting,
@@ -55,7 +60,9 @@ export function nativeRowChoice(rows: readonly NativeChoiceRow[], key: LegName, 
       const unheard = one.languages.find((code, index) => index === 0 ? !nativeHears(chosen, code) : !NATIVE_MODELS.some((m) => m.id === `apple-speech:${code}`) || !has(`apple-speech:${code}`));
       if (unheard) return { ok: false, unheard };
     } else {
-      const unheard = one.languages.find((code) => !nativeHears(chosen, code));
+      // The user's own row: their main language; the others they speak step aside for the model (`alsoSpoken`).
+      const needed = one.key === 'speaker' ? one.languages.slice(0, 1) : one.languages;
+      const unheard = needed.find((code) => !nativeHears(chosen, code));
       if (unheard) return { ok: false, unheard };
     }
   }

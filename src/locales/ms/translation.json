@@ -773,7 +773,8 @@
       "tag_cpu": "CPU sahaja",
       "tagHint_cpu": "Berjalan pada pemproses, jadi kad grafik boleh digunakan untuk permainan. Dimuatkan apabila sesi bermula.",
       "noteNativeXAsr": "Memaparkan teks semasa anda bercakap, hanya menggunakan pemproses tanpa menggunakan memori grafik: kira-kira satu perlima daripada satu teras. Hanya menyokong bahasa Cina dan Inggeris. Perkataan dalam kamus peribadi tidak diberikan terlebih dahulu; selepas pengecaman, perkataan tetap dibetulkan mengikut sebutan.",
-      "noteStreamRevise": "Terjemahan mula dipaparkan semasa orang lain masih bercakap, kemudian seluruh ayat diterjemahkan semula apabila selesai. Hanya menyokong bahasa Cina, Inggeris dan Jepun."
+      "noteStreamRevise": "Terjemahan mula dipaparkan semasa orang lain masih bercakap, kemudian seluruh ayat diterjemahkan semula apabila selesai. Hanya menyokong bahasa Cina, Inggeris dan Jepun.",
+      "noteNativeSenseVoiceCpu": "Hanya guna pemproses, tanpa menggunakan memori grafik. Ketepatan hampir sama dengan SenseVoice pada kad grafik. Menyokong bahasa Cina, Kantonis, Inggeris, Jepun dan Korea. Perkataan dalam kamus peribadi tidak diberikan terlebih dahulu, tetapi hasil pengecaman tetap dibetulkan mengikut sebutan."
     }
   },
   "logsPanel": {
@@ -2108,6 +2109,10 @@
       "mark": "Tandakan ayat ini bermasalah",
       "marked": "Ditandakan",
       "notRecorded": "Tiada rakaman audio untuk ayat ini"
+    },
+    "apart": {
+      "split": "Dengar suara saya di tempat lain",
+      "merge": "Dengar kedua-dua pihak di satu tempat"
     }
   }
 }

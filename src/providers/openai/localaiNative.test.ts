@@ -114,14 +114,14 @@ describe('the native engine as what hears on this computer', () => {
 
   it('lists the models in the order they were measured: the recognition of the system itself, then the one read a stretch at a time, then the one that writes as it listens', () => {
     const families = NATIVE_MODELS.map((m) => m.name).filter((name, at, all) => all.indexOf(name) === at);
-    expect(families).toEqual(['Apple Speech', 'Qwen3-ASR 1.7B GGUF', 'Confucius4 R2T2 GGUF', 'SenseVoice-Small GGUF', 'Qwen3-ASR 0.6B GGUF', 'Nemotron 3.5 ASR 0.6B GGUF', 'X-ASR-zh-en']);
+    expect(families).toEqual(['Apple Speech', 'Qwen3-ASR 1.7B GGUF', 'Confucius4 R2T2 GGUF', 'SenseVoice-Small GGUF', 'Qwen3-ASR 0.6B GGUF', 'Nemotron 3.5 ASR 0.6B GGUF', 'X-ASR-zh-en', 'SenseVoice-Small CPU']);
   });
 
   it('has, between the accurate ones and the small Qwen3 it is level with, the lightest: five languages, read a stretch at a time, left to detect only among them', () => {
     const light = nativeModel('sensevoice-small-q8');
     expect(light).toMatchObject({ name: 'SenseVoice-Small GGUF', bytes: 254211200 });
     const order = NATIVE_MODELS.map((m) => m.id).filter((id) => !id.startsWith(APPLE_PREFIX));
-    expect(order).toEqual(['qwen3-asr-1.7b-q8', 'r2t2-q8', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8', 'x-asr-zh-en']);
+    expect(order).toEqual(['qwen3-asr-1.7b-q8', 'r2t2-q8', 'sensevoice-small-q8', 'qwen3-asr-0.6b-q8', 'nemotron-asr-0.6b-q8', 'x-asr-zh-en', 'sensevoice-small-cpu']);
     expect(light.bytes).toBeLessThan(nativeModel('nemotron-asr-0.6b-q8').bytes / 3);
     // Its five languages, and no other: told another it would write the speech down as one of these.
     expect([...light.languages].sort()).toEqual(['en', 'ja', 'ko', 'yue', 'zh']);

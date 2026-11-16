@@ -103,6 +103,14 @@
     "en": "Text",
     "text": "Teksto"
   },
+  "fork.apart.merge": {
+    "en": "Hear both sides in one place",
+    "text": "Pakinggan ang magkabilang panig sa iisang lugar"
+  },
+  "fork.apart.split": {
+    "en": "Hear my side somewhere else",
+    "text": "Pakinggan sa iba ang panig ko"
+  },
   "fork.audio.echoAction": {
     "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
     "text": "Gumamit ng headphone para maputol ang pag-ikot ng tunog; o itaas ang antas ng tunog para ma-activate ang mikropono sa Mga setting → Mikropono."
@@ -2034,6 +2042,10 @@
   "providers.localai.noteNativeSenseVoice": {
     "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
     "text": "Pinakamagaan at pinakamabilis: mga 0.4 GB na memorya ng graphics card. Sa pagsubok sa usapang Hapon: kasingtumpak ng Qwen3-ASR 0.6B, pero bihirang maglagay ng bantas. Tsino, Cantonese, Ingles, Hapon, at Koreano lang."
+  },
+  "providers.localai.noteNativeSenseVoiceCpu": {
+    "en": "On the processor, with no video memory taken. About as right as SenseVoice on the graphics card: Chinese, Cantonese, English, Japanese and Korean. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",
+    "text": "Processor lang ang gamit, walang kinakain na video memory. Halos kasing-tumpak ng SenseVoice sa graphics card. Suportado ang Chinese, Cantonese, English, Japanese at Korean. Hindi nito nakukuha nang maaga ang mga salita sa personal mong diksyunaryo; itinatama pa rin ang mga ito ayon sa tunog pagkatapos makilala ang pananalita."
   },
   "providers.localai.noteNativeXAsr": {
     "en": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",

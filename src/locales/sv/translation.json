@@ -773,7 +773,8 @@
       "tag_cpu": "Endast CPU",
       "tagHint_cpu": "Körs på processorn och lämnar grafikkortet åt spelet. Laddas när en session startar.",
       "noteNativeXAsr": "Skriver medan du pratar och använder bara processorn, inget grafikminne: ungefär en femtedel av en kärna. Stöder bara kinesiska och engelska. Orden i din personliga ordlista ges inte till modellen i förväg, men texten rättas ändå efteråt utifrån uttalet.",
-      "noteStreamRevise": "Översätter medan den andra personen pratar och översätter sedan hela meningen igen när den är klar. Stöder bara kinesiska, engelska och japanska."
+      "noteStreamRevise": "Översätter medan den andra personen pratar och översätter sedan hela meningen igen när den är klar. Stöder bara kinesiska, engelska och japanska.",
+      "noteNativeSenseVoiceCpu": "Använder bara processorn och tar inget grafikminne. Ungefär lika träffsäker som SenseVoice på grafikkortet. Stöder kinesiska, kantonesiska, engelska, japanska och koreanska. Orden i din personliga ordlista skickas inte till modellen i förväg, men rättas ändå efter uttalet när talet har tolkats."
     }
   },
   "logsPanel": {
@@ -2108,6 +2109,10 @@
       "mark": "Markera ett problem med den här raden",
       "marked": "Markerad",
       "notRecorded": "Den här raden har ingen ljudinspelning"
+    },
+    "apart": {
+      "split": "Lyssna på min sida någon annanstans",
+      "merge": "Lyssna på båda sidor på samma ställe"
     }
   }
 }

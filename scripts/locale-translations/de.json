@@ -55,6 +55,14 @@
     "en": "Text",
     "text": "Text"
   },
+  "fork.apart.merge": {
+    "en": "Hear both sides in one place",
+    "text": "Beide Seiten an einem Ort hören"
+  },
+  "fork.apart.split": {
+    "en": "Hear my side somewhere else",
+    "text": "Meine Seite woanders hören"
+  },
   "fork.audio.echoAction": {
     "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
     "text": "Mit Kopfhörern lässt sich die Rückkopplung unterbrechen. Alternativ kannst du unter Einstellungen → Mikrofon die Mikrofon-Aktivierungsschwelle erhöhen."
@@ -1938,6 +1946,10 @@
   "providers.localai.noteNativeSenseVoice": {
     "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
     "text": "Am sparsamsten und schnellsten: benötigt etwa 0.4 GB Grafikspeicher. Im Test mit japanischen Alltagsgesprächen so genau wie Qwen3-ASR 0.6B, setzt aber kaum Satzzeichen. Unterstützt nur Chinesisch, Kantonesisch, Englisch, Japanisch und Koreanisch."
+  },
+  "providers.localai.noteNativeSenseVoiceCpu": {
+    "en": "On the processor, with no video memory taken. About as right as SenseVoice on the graphics card: Chinese, Cantonese, English, Japanese and Korean. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",
+    "text": "Läuft nur auf dem Prozessor und belegt keinen Grafikspeicher. Etwa so genau wie SenseVoice auf der Grafikkarte. Unterstützt Chinesisch, Kantonesisch, Englisch, Japanisch und Koreanisch. Wörter aus deinem persönlichen Wörterbuch werden nicht vorab übermittelt, aber nach der Erkennung anhand der Aussprache korrigiert."
   },
   "providers.localai.noteNativeXAsr": {
     "en": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",

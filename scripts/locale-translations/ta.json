@@ -51,6 +51,14 @@
     "en": "Text",
     "text": "உரை"
   },
+  "fork.apart.merge": {
+    "en": "Hear both sides in one place",
+    "text": "இரு தரப்பையும் ஒரே இடத்தில் கேட்க"
+  },
+  "fork.apart.split": {
+    "en": "Hear my side somewhere else",
+    "text": "என் பேச்சை வேறொரு இடத்தில் கேட்க"
+  },
   "fork.audio.echoAction": {
     "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
     "text": "காதணியைப் பயன்படுத்தினால் ஒலி மீண்டும் பதிவாகும் சுழற்சி நிற்கும். அல்லது அமைப்புகள் → ஒலிவாங்கி பகுதியில் செயல்படும் குறைந்தபட்ச ஒலி அளவை உயர்த்துங்கள்."
@@ -1906,6 +1914,10 @@
   "providers.localai.noteNativeSenseVoice": {
     "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
     "text": "மிகக் குறைந்த வளங்களில் மிக வேகமாக இயங்கும்: சுமார் 0.4 GB வரைகலை நினைவகம் தேவை. ஜப்பானிய இயல்புப் பேச்சுச் சோதனையில் Qwen3-ASR 0.6B அளவுக்குத் துல்லியம்; நிறுத்தற்குறிகளை அரிதாகவே இடும். சீனம், கான்டனீஸ், ஆங்கிலம், ஜப்பானியம், கொரியம் மட்டுமே ஆதரிக்கப்படும்."
+  },
+  "providers.localai.noteNativeSenseVoiceCpu": {
+    "en": "On the processor, with no video memory taken. About as right as SenseVoice on the graphics card: Chinese, Cantonese, English, Japanese and Korean. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",
+    "text": "செயலியை மட்டுமே பயன்படுத்தும்; கிராபிக்ஸ் நினைவகத்தைப் பயன்படுத்தாது. கிராபிக்ஸ் கார்டில் இயங்கும் SenseVoice அளவுக்குத் துல்லியமானது. சீனம், கான்டோனீஸ், ஆங்கிலம், ஜப்பானியம், கொரியன் ஆகிய மொழிகளை ஆதரிக்கும். உங்கள் தனிப்பட்ட அகராதிச் சொற்கள் இதற்கு முன்கூட்டியே வழங்கப்படாது; பேச்சை அறிந்த பிறகு உச்சரிப்பின் அடிப்படையில் சொற்கள் திருத்தப்படும்."
   },
   "providers.localai.noteNativeXAsr": {
     "en": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",

@@ -64,7 +64,7 @@ import { buildRealtime } from './config';
 import { glossaryRecognitionTerms } from '../../lib/glossary/glossary';
 import { recognizerAsked, serverBilingual } from './serverRecognizers';
 import { phoneBase, plainAddress } from '../../lib/lan/discover';
-import { alsoFirst, alsoInto, alsoListed, alsoSpoken, backInto, crossings, myRow, theirRow, theirLitLanguages, theyLitOf, deviceLanguage, canDetectOther, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, hearsNatively, needsServer, serverDetects, PLACE_FIELDS, PLACES, translatesNatively, type AsrHere, type Place } from './localaiDevice';
+import { alsoFirst, alsoInto, alsoListed, alsoLit, alsoSpoken, mineReach, backInto, crossings, myRow, theirRow, theirLitLanguages, theyLitOf, deviceLanguage, canDetectOther, hearingOf, type HearingChoice, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, hearsNatively, needsServer, serverDetects, PLACE_FIELDS, PLACES, translatesNatively, type AsrHere, type Place } from './localaiDevice';
 import { NATIVE_MODELS, isApple, preferNative, type NativePick } from './localaiNative';
 import { NATIVE_DEFAULT_MODEL, appleAlso, coachBaseUrl, coachGap, coachIdle, coachUp, hearingPick, hearsByDownloaded, holdNativeForRun, nativeEither, nativeGap, nativeUp, restNative, translatorUp, nativeIdle, nativeModelFor, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_COACH_EXTRA, NATIVE_COACHES, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
@@ -101,6 +101,13 @@ export interface LocalAISettings extends RealtimeSettings {
    */
   asrOther: string;
   asrOtherModel: string;
+  /**
+   * Fork: the user's own side heard in a place of its own: where, and by what there (`hearingOf`, `localaiDevice.ts`).
+   * Null: the two sides are heard in one place, the fields above. Set, those are the other side's.
+   */
+  asrMine: HearingChoice | null;
+  /** Fork: set by `hearingOf` on the settings one side reads, where the other is heard elsewhere; never stored. */
+  asrAlone?: LegName;
   /**
    * The other side's language is left to be detected: whoever they are, they
    * are heard and translated into the speaker's language, and the speaker's
@@ -215,6 +222,7 @@ export const LOCALAI_DEFAULTS: LocalAISettings = {
   asrApiNeedsKey: true,
   asrOther: '',
   asrOtherModel: '',
+  asrMine: null,
   asrDetectOther: false,
   speakBoth: false,
   speakAlso: [],
@@ -359,6 +367,16 @@ const quick = (baseUrl: string): { extra?: Readonly<Record<string, unknown>> } =
  */
 export const asrApiModelOf = (s: Pick<LocalAISettings, 'asrApiBaseUrl' | 'asrApiModel'>): string => hearsOf(s.asrApiBaseUrl)?.name ?? s.asrApiModel.trim();
 
+/** A side's own hearing as it was stored, held to its shape; null for anything else. */
+function hearingChoice(value: unknown): HearingChoice | null {
+  if (!value || typeof value !== 'object') return null;
+  const stored = value as Record<string, unknown>;
+  const asrVia = placeOf(stored.asrVia);
+  if (!asrVia) return null;
+  const text = (k: 'asrModel' | 'asrApiBaseUrl' | 'asrApiModel' | 'asrOther' | 'asrOtherModel') => (typeof stored[k] === 'string' ? (stored[k] as string) : '');
+  return { asrVia, asrModel: text('asrModel'), asrApiBaseUrl: text('asrApiBaseUrl'), asrApiModel: text('asrApiModel'), asrApiNeedsKey: stored.asrApiNeedsKey !== false, asrOther: text('asrOther'), asrOtherModel: text('asrOtherModel') };
+}
+
 export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>, inputs: MigrationInputs): LocalAISettings {
   const text = (k: 'asrModel' | 'asrApiBaseUrl' | 'asrApiModel' | 'asrOther' | 'asrOtherModel' | 'translateOther' | 'translateOtherModel' | 'coachOther' | 'coachOtherModel' | 'translateBaseUrl' | 'coachPrompt' | 'asrNativeModel' | 'translateNativeModel' | 'coachNativeModel') => (typeof stored[k] === 'string' ? (stored[k] as string) : LOCALAI_DEFAULTS[k]);
   const flag = (k: 'asrApiNeedsKey' | 'asrDetectOther' | 'speakBoth' | 'coach' | 'serverNeedsKey' | 'translateBySentence') => (typeof stored[k] === 'boolean' ? (stored[k] as boolean) : LOCALAI_DEFAULTS[k]);
@@ -372,6 +390,7 @@ export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>
     asrApiNeedsKey: flag('asrApiNeedsKey'),
     asrOther: text('asrOther'),
     asrOtherModel: text('asrOtherModel'),
+    asrMine: hearingChoice(stored.asrMine),
     asrDetectOther: flag('asrDetectOther'),
     speakBoth: flag('speakBoth'),
     speakAlso: Array.isArray(stored.speakAlso) ? (stored.speakAlso as unknown[]).filter((code): code is string => typeof code === 'string' && code.trim() !== '') : [],
@@ -441,9 +460,11 @@ export { detectsOther, heardBy, needsServer, PLACES, type Place } from './locala
 export function settled(stored: LocalAISettings): LocalAISettings {
   // A phone that lends its recognizer: its address and the model it lends, asked as an API's are. The run finds out
   // what it is and reads it live (`pipeline.ts`, `remoteEngine.ts`).
-  const s: LocalAISettings = hearsAtOwnDevice(stored)
-    ? { ...stored, asrVia: 'api', asrApiBaseUrl: phoneBase({ address: plainAddress(stored.asrOther) }), asrApiModel: stored.asrOtherModel, asrApiNeedsKey: false }
-    : stored;
+  const asApi = <C extends HearingChoice>(c: C): C => (hearsAtOwnDevice(c)
+    ? { ...c, asrVia: 'api', asrApiBaseUrl: phoneBase({ address: plainAddress(c.asrOther) }), asrApiModel: c.asrOtherModel, asrApiNeedsKey: false }
+    : c);
+  // Each side's own, where the user's is heard apart (`hearingOf`).
+  const s: LocalAISettings = { ...asApi(stored), asrMine: stored.asrMine ? asApi(stored.asrMine) : null };
   // LocalAI is retired: a setting kept from it falls to the native engine of this computer.
   return {
     ...s,
@@ -453,15 +474,20 @@ export function settled(stored: LocalAISettings): LocalAISettings {
   };
 }
 
+const SIDES: readonly LegName[] = ['speaker', 'participant'];
+/** A stage of either side's run is on the shared device (`needsServer`, of each side's own hearing). */
+const needsServerEither = (s: LocalAISettings): boolean => SIDES.some((leg) => needsServer(hearingOf(s, leg)));
+
 /** Every field is drawn by the provider's own view, beside the stage it belongs to (`LocalAIAssist`): the address with the search that finds it, a key with the API it opens. */
 const own = (key: string, labelKey: string, secret: boolean, placeholderKey = labelKey): CredentialField => ({ key, labelKey, secret, placeholderKey, drawnByAssist: true });
 
 export const localaiCredentials: Provider<LocalAISettings, LocalAICredentials, never>['credentials'] = {
   keys: ['endpoint', 'serverKey', 'asrKey', 'translateKey', 'coachKey'],
   fields: (s): CredentialField[] => [
-    ...(needsServer(s) ? [own('endpoint', 'providers.localai.endpoint', false, 'providers.localai.endpointPlaceholder')] : []),
-    ...(needsServer(s) && s.serverNeedsKey ? [own('serverKey', 'providers.localai.serverKey', true)] : []),
-    ...(s.asrVia === 'api' && s.asrApiNeedsKey ? [own('asrKey', 'providers.localai.asrKey', true)] : []),
+    ...(needsServerEither(s) ? [own('endpoint', 'providers.localai.endpoint', false, 'providers.localai.endpointPlaceholder')] : []),
+    ...(needsServerEither(s) && s.serverNeedsKey ? [own('serverKey', 'providers.localai.serverKey', true)] : []),
+    // One key for the recognition API, whichever side it hears: two services for the two sides would need two.
+    ...(SIDES.some((leg) => { const one = hearingOf(s, leg); return one.asrVia === 'api' && one.asrApiNeedsKey; }) ? [own('asrKey', 'providers.localai.asrKey', true)] : []),
     ...(s.translateAt === 'api' && s.translateNeedsKey ? [own('translateKey', 'providers.localai.translateKey', true)] : []),
     ...(coachIs(s, 'api') && s.coachNeedsKey ? [own('coachKey', 'providers.localai.coachKey', true)] : []),
   ],
@@ -652,10 +678,12 @@ interface OtherServer { slot: 'translate' | 'coach' | 'asr'; name: string; base:
 function otherServers(k: LocalAICredentials, s: LocalAISettings): OtherServer[] {
   const out: OtherServer[] = [];
   const base = (url: string) => url.trim().replace(/\/+$/, '');
-  if (s.asrVia === 'api' && s.asrApiBaseUrl.trim()) {
-    const phone = s.asrOther.trim() && base(s.asrApiBaseUrl) === phoneTextBase(s.asrOther) ? plainAddress(s.asrOther) : '';
+  for (const leg of SIDES) {
+    const one = hearingOf(s, leg);
+    if (one.asrVia !== 'api' || !one.asrApiBaseUrl.trim() || out.some((had) => had.slot === 'asr' && had.base === base(one.asrApiBaseUrl))) continue;
+    const phone = one.asrOther.trim() && base(one.asrApiBaseUrl) === phoneTextBase(one.asrOther) ? plainAddress(one.asrOther) : '';
     // A phone that asks for its access key is asked with the one given for it (`phoneKeys.ts`).
-    out.push({ slot: 'asr', name: 'speech recognition', base: base(s.asrApiBaseUrl), key: k.asrKey || (phone ? phoneKey(phone) || undefined : undefined), ...(phone ? { phone } : {}) });
+    out.push({ slot: 'asr', name: 'speech recognition', base: base(one.asrApiBaseUrl), key: (one.asrApiNeedsKey ? k.asrKey : undefined) || (phone ? phoneKey(phone) || undefined : undefined), ...(phone ? { phone } : {}) });
   }
   if (s.translateAt === 'api' && s.translateBaseUrl.trim()) out.push({ slot: 'translate', name: 'translation', base: base(s.translateBaseUrl), key: k.translateKey });
   if (coachIs(s, 'api') && s.coachBaseUrl.trim()) out.push({ slot: 'coach', name: 'feedback', base: base(s.coachBaseUrl), key: k.coachKey });
@@ -759,10 +787,10 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
     // The keys of phones that ask for one, read before any is asked (`phoneKeys.ts`).
     await loadPhoneKeys();
     const phones = phoneStages(s, ctx.legs);
-    const servers = needsServer(s) || otherServers(k, s).length > 0 || phones.length > 0
+    const servers = needsServerEither(s) || otherServers(k, s).length > 0 || phones.length > 0
       ? await boundedFetch({ clock, ms: CHECK_TIMEOUT_MS, signal: ctx.signal, late }, async (signal): Promise<CheckResult> => {
         const models: LocalAIModel[] = [];
-        if (needsServer(s)) {
+        if (needsServerEither(s)) {
           let response: Response;
           try {
             response = await doFetch(localaiModelsUrl(k.endpoint), listing(k.apiKey, signal));
@@ -817,6 +845,8 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
           }
         }
 
+        // Known limit: the lists are merged by model, not by device. Two lent devices, one a side, that name their
+        // recognizer alike (two iPads' "apple-speech") are read as one, with the languages of the first.
         for (const other of otherServers(k, s)) {
           let answer: Response;
           try {
@@ -909,7 +939,10 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
     if (!servers.ok) return servers;
 
     // Only the speaker is coached.
+    const whole = s;
     for (const leg of ctx.legs) {
+      // Fork: the leg as its own hearing reads the settings (`hearingOf`).
+      const s = hearingOf(whole, leg);
       const coached = s.coach && leg === 'speaker';
       const found = servers.models ?? [];
       // What the leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs.
@@ -951,10 +984,14 @@ interface NativeNeeds {
 /** Fork: what this computer's recognizer hears a run's languages with (`hearingPick`), for the run's pair. */
 export const runHearing = (s: LocalAISettings, pair: { source: string; target: string }, models: readonly LocalAIModel[] = []): NativePick => {
   const also = pairedLanguages({ leg: 'speaker', told: pair.source, pair, alsoFirst: alsoFirst(s, pair) })[0];
+  // Fork: of the side this computer hears alone, where the other is elsewhere (`hearingOf`): the other side's
+  // detection, or the speaker's two languages, are then no reason to pick a model that tells languages apart.
+  const detecting = s.asrAlone !== 'speaker' && detectsOther(s, models);
+  const both = s.asrAlone !== 'participant' && speaksBoth(s, models, pair) && pair.source.toLowerCase() !== pair.target.toLowerCase();
   return hearingPick(s, also ? { source: pair.source, target: also } : pair, {
-    detecting: detectsOther(s, models),
-    both: speaksBoth(s, models, pair) && pair.source.toLowerCase() !== pair.target.toLowerCase(),
-    bestEffort: (speaksBoth(s, models, pair) && pair.source.toLowerCase() !== pair.target.toLowerCase()) || s.asrDetectOther === true,
+    detecting,
+    both,
+    bestEffort: both || (s.asrAlone !== 'speaker' && s.asrDetectOther === true),
   });
 };
 
@@ -966,7 +1003,9 @@ export function runSideHearing(s: LocalAISettings, pair: { source: string; targe
   const chosen = s.asrNativeByLanguage[key];
   if (!chosen || !NATIVE_MODELS.some((m) => m.id === chosen)) return fallback;
   const others = leg === 'speaker' ? alsoSpoken(s, pair) : theirLitLanguages(s, pair).filter((code) => code !== own);
-  const pick: NativePick = { model: chosen, byLanguage: { ...s.asrNativeByLanguage, auto: chosen, [own.toLowerCase().split(/[-_]/)[0]]: chosen }, bestEffort: !nativeModelFor(chosen, AUTO)?.detects && !isApple(chosen) };
+  // Fork: the user's own side alone on this computer is heard by its own choice whatever it hears (`nativeChoiceRows`).
+  const heard = leg === 'speaker' && s.asrAlone === 'speaker' ? heardBy(s, pair, leg, models) : AUTO;
+  const pick: NativePick = { model: chosen, byLanguage: { ...s.asrNativeByLanguage, auto: chosen, [own.toLowerCase().split(/[-_]/)[0]]: chosen, ...(heard !== AUTO ? { [heard.toLowerCase().split(/[-_]/)[0]]: chosen } : {}) }, bestEffort: !nativeModelFor(chosen, AUTO)?.detects && !isApple(chosen) };
   if (isApple(chosen) && others.length) pick.either = { own, others };
   return pick;
 }
@@ -1035,9 +1074,16 @@ function hearerOf(s: LocalAISettings, models: readonly LocalAIModel[], pair: { s
   return { name, languages, ...(pairsTwo ? { apple: true as const } : {}), ...(detects ? { detects: true as const } : {}) };
 }
 
+/** Fork: the legs this computer's own recognizer hears, and the settings as the first of them reads them (`hearingOf`): where both do, they read alike. */
+function nativeHearing(s: LocalAISettings, legs: readonly LegName[]): { s: LocalAISettings; legs: LegName[] } | null {
+  const here = legs.filter((leg) => hearsNatively(hearingOf(s, leg)));
+  return here.length > 0 ? { s: hearingOf(s, here[0]), legs: here } : null;
+}
+
 function nativeNeeds(s: LocalAISettings, pair: { source: string; target: string }, legs: readonly ('speaker' | 'participant')[]): NativeNeeds {
+  const here = nativeHearing(s, legs);
   return {
-    ...(hearsNatively(s) ? { hears: runHearingNeeds(s, pair, legs) } : {}),
+    ...(here ? { hears: runHearingNeeds(here.s, pair, here.legs) } : {}),
     // Not where every leg is shown as said: nothing would ask it.
     ...(translatesNatively(s) && legs.some((leg) => !shownAsSaid(s, pair, leg)) ? { translates: s.translateNativeModel } : {}),
     ...(coachesNatively(s) && legs.includes('speaker') ? { coaches: s.coachNativeModel } : {}),
@@ -1152,9 +1198,10 @@ export function primeNativeOnce(ups: NativeUps = UPS, now: () => number = () => 
 export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISettings, ctx: CheckContext, check: typeof checkLocalAI = checkLocalAI, native: { gap: typeof nativeGap; idle: typeof nativeIdle; translatorGap?: typeof translatorGap; translatorIdle?: typeof translatorIdle; coachGap?: typeof coachGap; coachIdle?: typeof coachIdle } = { gap: nativeGap, idle: nativeIdle }): Promise<CheckResult> {
   // Asked first, beside the servers.
   let hears: ReturnType<typeof nativeGap> | null = null;
-  if (hearsNatively(s)) {
+  const here = nativeHearing(s, ctx.legs);
+  if (here) {
     // What each leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs.
-    const needs = runHearingNeeds(s, ctx.pair, ctx.legs);
+    const needs = runHearingNeeds(here.s, ctx.pair, here.legs);
     hears = native.gap(needs.pick, needs.heard);
     hears.catch(() => undefined);
   } else {
@@ -1232,7 +1279,10 @@ function transcriptionFor(s: Pick<LocalAISettings, 'asrModel'>, heard: string, t
 /** The key a stage on the other device is called with: the device's own access key, when it asks for one. */
 const serverKeyOf = (s: Pick<LocalAISettings, 'serverNeedsKey'>): { key?: StageKey } => (s.serverNeedsKey ? { key: 'apiKey' } : {});
 
-export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: SharedSettings): LocalAIConfig | ProviderRefusal {
+export function buildLocalAI(asked: SessionContext, all: LocalAISettings, shared: SharedSettings): LocalAIConfig | ProviderRefusal {
+  // Fork: where this leg is heard: the user's own side may have a place of its own (`hearingOf`).
+  // By the leg the request names; a caller that names none (a pair of two languages tells them apart) by its direction.
+  const s = hearingOf(all, asked.leg ?? (shared.reversed(asked.direction) ? 'participant' : 'speaker'));
   const models: readonly LocalAIModel[] = shared.models;
   // The other side's leg, with their language left to be detected: built as a leg whose source is to be detected.
   const detected = detectsOther(s, models) && shared.reversed(asked.direction);
@@ -1260,7 +1310,7 @@ export function buildLocalAI(asked: SessionContext, s: LocalAISettings, shared: 
   const soloCoach = coached && !both;
   /**
    * Fork: the languages they speak besides their own that are in use (those the other side has lit): each heard, and
-   * translated back (`Stages.back`) or across into the other lit one (`Stages.cross`); the first, what pairs with theirs.
+   * translated back (`Stages.back`) and across into the other lit one (`Stages.cross`); the first, what pairs with theirs.
    */
   const also = both ? alsoSpoken(s, asked.direction) : [];
   const backs = both ? backInto(s, asked.direction) : [];
@@ -1566,7 +1616,7 @@ export const localaiLanguages: Provider<LocalAISettings, never, never>['language
       if (hearer?.apple && mine && (!hearer.listed || hearer.languages?.some((code) => base(code) === base(pair.target)))) return { offered: [pair.target], most: 1, any: false };
       return { offered: hearer?.languages ?? null, most: 0, any: false };
     };
-    const mineHearer = hearerOf(s, listed, pair, 'speaker');
+    const mineHearer = hearerOf(hearingOf(s, 'speaker'), listed, pair, 'speaker');
     const theirsHearer = hearerOf(s, listed, pair, 'participant');
     const strip = (h: typeof mineHearer) => (h ? { hearer: { name: h.name, languages: h.languages } } : {});
     const spoken = alsoListed(s, pair);
@@ -1578,6 +1628,10 @@ export const localaiLanguages: Provider<LocalAISettings, never, never>['language
         chosen: mineHearer?.apple && !mineHearer.detects ? spoken.filter((code) => base(code) === base(pair.target)) : spoken,
         // In use: those the other side has lit. The row as shown, their own language among it.
         using: alsoSpoken(s, pair),
+        ...((reach) => {
+          const left = reach ? alsoLit(s, pair).filter((code) => !reach.languages.includes(base(code))) : [];
+          return left.length > 0 ? { quiet: { codes: left, by: reach!.name } } : {};
+        })(mineReach(s, pair)),
         row: myRow(s, pair),
         set: (chosen) => ({ speakAlso: [...chosen], speakBoth: false }),
       },
@@ -1595,19 +1649,25 @@ export const localaiLanguages: Provider<LocalAISettings, never, never>['language
   detection: (stored, models, pair) => {
     // Detection controls describe the selected recognizer. A downloaded alternative must not change the choice
     // or gate a best-effort run; model readiness is checked separately when the session starts.
-    const s = settled(stored);
-    const available = canDetectOther(s, models);
-    // The speaker in either of the pair's languages: also the Mac's recognition, where it hears theirs and has both.
-    const second = pairedLanguages({ leg: 'speaker', told: pair.source, pair, alsoFirst: alsoFirst(s, pair) })[0];
-    const either = (hearsNatively(s) && second !== undefined && nativeEither({ model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage, either: { own: pair.source, others: [second] } }) !== null)
-      || (hearingPlace(s) === 'server' && second !== undefined && serverBilingual(s.asrModel, { source: pair.source, target: second }, models as readonly LocalAIModel[]) !== null);
-    // A model chosen here that names the language, or a paired Apple one, is exact; everything else is a best effort.
-    const selected = hearsNatively(s) ? nativePicked(runHearing(s, pair), AUTO) : null;
-    const reliable = selected?.detects || either || (hearingPlace(s) === 'server' && serverDetects(models, s.asrModel));
-    const bestEffort = available && !reliable;
+    const all = settled(stored);
+    // Fork: each side by what hears it (`hearingOf`): the other side's detection is its recognizer's to do, the
+    // speaker's two languages their own's.
+    const of = (s: LocalAISettings) => {
+      const available = canDetectOther(s, models);
+      // The speaker in either of the pair's languages: also the Mac's recognition, where it hears theirs and has both.
+      const second = pairedLanguages({ leg: 'speaker', told: pair.source, pair, alsoFirst: alsoFirst(s, pair) })[0];
+      const either = (hearsNatively(s) && second !== undefined && nativeEither({ model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage, either: { own: pair.source, others: [second] } }) !== null)
+        || (hearingPlace(s) === 'server' && second !== undefined && serverBilingual(s.asrModel, { source: pair.source, target: second }, models as readonly LocalAIModel[]) !== null);
+      // A model chosen here that names the language, or a paired Apple one, is exact; everything else is a best effort.
+      const selected = hearsNatively(s) ? nativePicked(runHearing(s, pair), AUTO) : null;
+      const reliable = selected?.detects || either || (hearingPlace(s) === 'server' && serverDetects(models, s.asrModel));
+      return { available, either, bestEffort: available && !reliable };
+    };
+    const theirs = of(all);
+    const mine = of(hearingOf(all, 'speaker'));
     return {
-      other: { on: detectsOther(s, models), available, ...(bestEffort ? { bestEffort: true } : {}), turn: (on) => ({ asrDetectOther: on }) },
-      both: { on: speaksBoth(s, models, pair), available: available || either, ...(bestEffort ? { bestEffort: true } : {}), turn: (on) => ({ speakBoth: on }) },
+      other: { on: detectsOther(all, models), available: theirs.available, ...(theirs.bestEffort ? { bestEffort: true } : {}), turn: (on) => ({ asrDetectOther: on }) },
+      both: { on: speaksBoth(all, models, pair), available: mine.available || mine.either, ...(mine.bestEffort ? { bestEffort: true } : {}), turn: (on) => ({ speakBoth: on }) },
     };
   },
 };
@@ -1632,7 +1692,7 @@ export const localaiProvider: Provider<LocalAISettings, LocalAICredentials, Loca
   check: (k, s, ctx) => checkLocalAIWithNative(k, s, ctx),
   // What decides the credential fields, the endpoints the check reaches, and the models it asks this computer for.
   checkReads: [
-    'asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'asrOther', 'asrOtherModel', 'translateOther', 'translateOtherModel', 'coachOther', 'coachOtherModel', 'asrDetectOther', 'speakBoth', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'serverNeedsKey',
+    'asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'asrOther', 'asrOtherModel', 'asrMine', 'translateOther', 'translateOtherModel', 'coachOther', 'coachOtherModel', 'asrDetectOther', 'speakBoth', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'serverNeedsKey',
     // The models a start needs named (`unnamedStage`).
     'model', 'translateModel', 'translateServerModel', 'coachModel', 'coachServerModel',
     // Legacy runtime fields, normalized to native.

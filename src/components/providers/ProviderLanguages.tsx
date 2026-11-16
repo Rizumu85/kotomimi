@@ -82,6 +82,7 @@ export function ProviderLanguages({ providers, disabled, sentence }: ProviderLan
     main: entry.pair.source,
     row: own?.row ?? [entry.pair.source],
     using: legs.includes('speaker') ? own?.using ?? [] : [],
+    ...(own?.quiet ? { quiet: own.quiet } : {}),
     more: !!own && own.most !== 0,
     apply: (next: { main: string; row: readonly string[] }) => {
       const their = side?.light ? settleTheirs({ main: entry.pair.target, row: side.chosen, lit: side.lit ?? '' }, next.main) : null;

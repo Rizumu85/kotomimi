@@ -1,6 +1,6 @@
 import type { LanguagePair } from '../../lib/provider/types';
 import type { LocalAISettings } from './localai';
-import { alsoSpoken, alsoInto, backInto, crossings, theirLitLanguages, theyLitOf } from './localaiDevice';
+import { alsoLit, alsoSpoken, alsoInto, backInto, crossings, hearingOf, theirLitLanguages, theyLitOf } from './localaiDevice';
 import { isApple, NATIVE_MODELS, nativeEngineOf } from './localaiNative';
 import { NATIVE_TRANSLATORS, nativeTranslates } from './nativeTranslators';
 
@@ -37,7 +37,7 @@ const unique = (codes: readonly string[]) => [...new Set(codes.map(base))];
 
 /** Languages in use, independent of the capabilities of the current recognizer. */
 export function nativeSideLanguages(s: LocalAISettings, pair: LanguagePair, side: NativeSide): string[] | null {
-  if (side === 'speaker') return unique([pair.source, ...alsoSpoken(s, pair)]);
+  if (side === 'speaker') return unique([pair.source, ...alsoLit(s, pair)]);
   return theyLitOf(s, pair.target) === 'auto' || base(pair.target) === 'auto' ? null : unique(theirLitLanguages(s, pair));
 }
 
@@ -66,7 +66,7 @@ export function planTranslator(plan: NativePlanId, directions: readonly Language
 /** Settings' explicitly selected stages, including remote stages (null). No downloaded fallback hides an unusable choice. */
 export function currentNativeModels(s: LocalAISettings, pair: LanguagePair): Record<NativeStage, string | null> {
   const forSide = (side: NativeSide) => {
-    if (s.asrVia !== 'device') return null;
+    if (hearingOf(s, side).asrVia !== 'device') return null;
     const language = side === 'speaker' ? pair.source : s.asrDetectOther ? 'auto' : pair.target;
     return s.asrNativeByLanguage[base(language)] ?? s.asrNativeModel;
   };
@@ -113,7 +113,8 @@ export function nativePlans(input: NativePlanInputs): { plans: NativePlan[]; rec
 
 /** Known languages the chosen model cannot hear, and a complete on-computer replacement. */
 export function nativeLanguageGap(input: NativePlanInputs, side: NativeSide): { unsupported: string[]; replacement: PlanRecognition | null } {
-  const languages = nativeSideLanguages(input.settings, input.pair, side);
+  // The user's own side: what its recognizer is asked to hear (`alsoSpoken`), not everything a plan would cover.
+  const languages = side === 'speaker' ? unique([input.pair.source, ...alsoSpoken(input.settings, input.pair)]) : nativeSideLanguages(input.settings, input.pair, side);
   const id = currentNativeModels(input.settings, input.pair)[side];
   const model = NATIVE_MODELS.find((m) => m.id === id);
   if (!model) return { unsupported: [], replacement: null };

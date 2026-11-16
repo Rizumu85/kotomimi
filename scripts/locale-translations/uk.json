@@ -47,6 +47,14 @@
     "en": "Text",
     "text": "Текст"
   },
+  "fork.apart.merge": {
+    "en": "Hear both sides in one place",
+    "text": "Слухати обидві сторони в одному місці"
+  },
+  "fork.apart.split": {
+    "en": "Hear my side somewhere else",
+    "text": "Слухати мій голос в іншому місці"
+  },
   "fork.audio.echoAction": {
     "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
     "text": "Навушники розірвуть звукову петлю. Або підвищте поріг активації мікрофона в розділі «Налаштування → Мікрофон»."
@@ -1902,6 +1910,10 @@
   "providers.localai.noteNativeSenseVoice": {
     "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
     "text": "Найлегша й найшвидша: займає близько 0.4 ГБ відеопам’яті. У тестах невимушених розмов японською точність така сама, як у Qwen3-ASR 0.6B, але розділових знаків мало. Підтримує лише китайську, кантонську, англійську, японську та корейську."
+  },
+  "providers.localai.noteNativeSenseVoiceCpu": {
+    "en": "On the processor, with no video memory taken. About as right as SenseVoice on the graphics card: Chinese, Cantonese, English, Japanese and Korean. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",
+    "text": "Працює лише на процесорі, не займає відеопам’ять. Точність приблизно така сама, як у SenseVoice на відеокарті. Підтримує китайську, кантонську, англійську, японську та корейську. Слова з особистого словника не передаються заздалегідь, але після розпізнавання текст виправляється за їхнім звучанням."
   },
   "providers.localai.noteNativeXAsr": {
     "en": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",

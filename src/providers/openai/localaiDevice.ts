@@ -5,6 +5,7 @@ import type { EngineSlot, LanguagePair } from '../../lib/provider/types';
 import { AUTO } from '../../lib/provider/languages';
 import { choiceOf, serverBilingual } from './serverRecognizers';
 import { KOTOMIMI_HOST, type LocalAIModel } from './localaiModels';
+import { isApple, NATIVE_MODELS } from './localaiNative';
 
 /** What the model manifest calls a language: its base (`zh-CN` → `zh`). */
 export const deviceLanguage = (code: string): string => code.split('-')[0];
@@ -24,8 +25,40 @@ export const PLACE_FIELDS = ['translateAt', 'translateServerModel', 'translateMo
 
 export type AsrHere = 'native';
 
+/** Fork: the settings that say where a side is heard, and by what there. */
+export const HEARING_FIELDS = ['asrVia', 'asrModel', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'asrOther', 'asrOtherModel'] as const;
+export interface HearingChoice {
+  asrVia: Place;
+  asrModel: string;
+  asrApiBaseUrl: string;
+  asrApiModel: string;
+  asrApiNeedsKey: boolean;
+  asrOther: string;
+  asrOtherModel: string;
+}
+
+/**
+ * Fork: the settings as one side's hearing reads them. The two sides are heard in one place unless the user's own is
+ * given a place of its own (`asrMine`): the speaker's leg then reads that, and everything else — the other side's
+ * leg, the translation, the feedback — the settings as they are. Asked by whatever knows its leg (the builder, the
+ * check's loop over the legs, the engines' needs, the language rows); the result has no `asrMine`, so asking twice
+ * is asking once. One side on a recognizer that takes the whole of a model (a loud room on the other side) no longer
+ * holds the other up (the user, 2026-11-15).
+ */
+export function hearingOf<S extends { asrMine?: HearingChoice | null; asrVia?: Place; asrAlone?: LegName }>(s: S, leg: LegName): S {
+  const mine = s.asrMine;
+  // Both on this computer are one engine's two rows, as they are with no place apart: read alike, whole.
+  if (!mine || (mine.asrVia === 'device' && s.asrVia === 'device')) return s;
+  // `asrAlone`: this side is heard without the other, for what would else pick a recognizer for both (`runHearing`).
+  return leg === 'speaker' ? { ...s, ...mine, asrMine: null, asrAlone: 'speaker' } : { ...s, asrAlone: 'participant' };
+}
+
 /** Where each stage runs. The feedback's place counts only while the speaker is coached. */
 export interface StagePlacement {
+  /** Fork: the user's own side heard elsewhere than the other side's (`hearingOf`). */
+  asrMine?: HearingChoice | null;
+  /** Fork: set by `hearingOf` on the settings one side reads, where the other is heard elsewhere; never stored. */
+  asrAlone?: LegName;
   asrVia: Place;
   translateAt: Place;
   coach: boolean;
@@ -60,7 +93,11 @@ export interface DeviceChoices extends StagePlacement {
 const baseCode = (code: string): string => code.trim().toLowerCase().split(/[-_]/)[0];
 
 /** What decides the languages in use: the user's own others, and the other side's lit. */
-type Lit = { speakAlso?: readonly string[]; speakBoth?: boolean; theyAlso?: readonly string[]; theyLit?: string; asrDetectOther?: boolean };
+type Lit = {
+  speakAlso?: readonly string[]; speakBoth?: boolean; theyAlso?: readonly string[]; theyLit?: string; asrDetectOther?: boolean;
+  /** Where the user's own side is heard, and the model chosen there for each language: what `mineReach` reads. */
+  asrVia?: Place; asrMine?: HearingChoice | null; asrAlone?: LegName; asrNativeByLanguage?: Readonly<Record<string, string>>;
+};
 
 /**
  * Fork: the languages the speaker speaks besides their own ("我也会说", `speakAlso`), as they were picked, their own and
@@ -132,7 +169,7 @@ export function theirLitLanguages(s: Lit, pair: { source: string; target: string
  * speak does not have them heard, or translated, in every one of it. All of them while "any language" is lit, which
  * may be any.
  */
-export function alsoSpoken(s: Lit, pair: { source: string; target: string }): string[] {
+export function alsoLit(s: Lit, pair: { source: string; target: string }): string[] {
   const listed = alsoListed(s, pair);
   if (theyLitOf(s, pair.target) === 'auto') return listed;
   const lit = theirLitLanguages(s, pair);
@@ -140,8 +177,33 @@ export function alsoSpoken(s: Lit, pair: { source: string; target: string }): st
 }
 
 /**
+ * Fork: the recognizer the user chose for their own language on this computer, and the languages it hears, where it
+ * is one of a few (X-ASR: Chinese and English). Null: none chosen for it, their side heard elsewhere (whose reach is
+ * not known here), or the Mac's recognition, which has its own way with a second language.
+ */
+export function mineReach(s: Lit, pair: { source: string; target: string }): { model: string; name: string; languages: readonly string[] } | null {
+  if (hearingOf(s, 'speaker').asrVia !== 'device') return null;
+  const id = s.asrNativeByLanguage?.[baseCode(pair.source)];
+  const model = id && !isApple(id) ? NATIVE_MODELS.find((one) => one.id === id) : undefined;
+  return model ? { model: model.id, name: model.name.replace(/ GGUF$/, ''), languages: model.languages } : null;
+}
+
+/**
+ * Fork: of those (`alsoLit`), the ones the user's own recognizer hears (`mineReach`). "我也会说" is what the user can
+ * say, kept for good: a recognizer chosen for their own language that does not hear one of them is their choice not
+ * to be heard in it for now, and it steps aside quietly — the row shows it unused — where it used to hold the
+ * choice up (X-ASR could never be the user's while the other side had Japanese lit; the user, 2026-11-15). Their
+ * main language, and the other side's lit ones, are chosen for now: a recognizer that misses one of those is told.
+ */
+export function alsoSpoken(s: Lit, pair: { source: string; target: string }): string[] {
+  const lit = alsoLit(s, pair);
+  const reach = mineReach(s, pair);
+  return reach ? lit.filter((code) => reach.languages.includes(baseCode(code))) : lit;
+}
+
+/**
  * Fork: where two of theirs are lit and the user speaks one of them, a sentence of the user's in it goes into the other
- * (`Stages.cross`): its readers have it as said, the others its translation — and not back into the user's own.
+ * (`Stages.cross`): its readers have it as said, the others its translation. The user reads it in their own too.
  */
 export function crossings(s: Lit, pair: { source: string; target: string }): Array<{ source: string; target: string }> {
   const lit = theirLitLanguages(s, pair);
@@ -152,10 +214,9 @@ export function crossings(s: Lit, pair: { source: string; target: string }): Arr
   });
 }
 
-/** Fork: the user's other languages in use whose sentences go back into their own (`Stages.back`): those that do not cross. */
+/** Fork: every other language the user speaks in this run goes back into their own (`Stages.back`). */
 export function backInto(s: Lit, pair: { source: string; target: string }): string[] {
-  const crossing = crossings(s, pair);
-  return alsoSpoken(s, pair).filter((code) => !crossing.some((c) => baseCode(c.source) === baseCode(code)));
+  return alsoSpoken(s, pair);
 }
 
 /** Fork: the other side's second language lit, a language, where the user's speech goes as well (`Stages.into`); else undefined. */
@@ -267,7 +328,9 @@ export function canDetectOther(s: { asrVia: Place; asrHere?: AsrHere; asrOther?:
  * Fork: the speaker speaks the other side's language too (`speakBoth`), and what hears can tell the two apart: their
  * sentences in either are heard, and each translated into the other. Feedback can also answer their foreign speech.
  */
-export const speaksBoth = (s: Lit & { coach: boolean; asrVia: Place; asrHere?: AsrHere; asrOther?: string; asrModel?: string }, models: Listed = [], pair?: LanguagePair): boolean => {
+export const speaksBoth = (all: Lit & { coach: boolean; asrVia: Place; asrHere?: AsrHere; asrOther?: string; asrModel?: string; asrMine?: HearingChoice | null }, models: Listed = [], pair?: LanguagePair): boolean => {
+  // The speaker's own hearing: theirs where it is apart.
+  const s = hearingOf(all, 'speaker');
   const also = pair ? alsoFirst(s, pair) : (s.speakAlso?.[0] ?? (s.speakBoth ? 'other' : undefined));
   if (!also) return false;
   return canDetectOther(s, models) || (hearingPlace(s) === 'server' && !!pair && serverBilingual(s.asrModel ?? '', { source: pair.source, target: also }, models as readonly LocalAIModel[]) !== null);
@@ -321,7 +384,7 @@ export function deviceNeeds(s: DeviceChoices, pair: LanguagePair, legs: readonly
     const target = leg === 'participant' ? pair.source : pair.target;
     const coached = s.coach && leg === 'speaker';
     const both = leg === 'speaker' && speaksBoth(s, models, pair) && source.toLowerCase() !== target.toLowerCase();
-    if (s.asrVia === 'device') {
+    if (hearingOf(s, leg).asrVia === 'device') {
       const heard = coached && !both ? target : source;
       const other = coached && !both ? source : target;
       out.push({ leg, dir: slot(heard, other), stage: 'asr', source: heard, target: other, required: true });

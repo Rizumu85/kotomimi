@@ -47,6 +47,14 @@
     "en": "Text",
     "text": "Текст"
   },
+  "fork.apart.merge": {
+    "en": "Hear both sides in one place",
+    "text": "Слушать обе стороны вместе"
+  },
+  "fork.apart.split": {
+    "en": "Hear my side somewhere else",
+    "text": "Слушать мою речь в другом месте"
+  },
   "fork.audio.echoAction": {
     "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
     "text": "Используйте наушники, чтобы разорвать звуковую петлю, или повысьте порог включения микрофона в разделе «Настройки → Микрофон»."
@@ -1902,6 +1910,10 @@
   "providers.localai.noteNativeSenseVoice": {
     "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
     "text": "Самая лёгкая и быстрая: около 0.4 ГБ видеопамяти. В тесте на разговорном японском точность как у Qwen3-ASR 0.6B, но знаков препинания почти нет. Только китайский, кантонский, английский, японский и корейский."
+  },
+  "providers.localai.noteNativeSenseVoiceCpu": {
+    "en": "On the processor, with no video memory taken. About as right as SenseVoice on the graphics card: Chinese, Cantonese, English, Japanese and Korean. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",
+    "text": "Работает только на процессоре, не занимает видеопамять. По точности примерно как SenseVoice на видеокарте. Поддерживает китайский, кантонский, английский, японский и корейский. Слова из личного словаря не передаются заранее, но после распознавания текст всё равно исправляется по звучанию."
   },
   "providers.localai.noteNativeXAsr": {
     "en": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",

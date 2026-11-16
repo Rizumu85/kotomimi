@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { buildLocalAI, checkLocalAIWithNative, createLocalAICheck, LOCALAI_DEFAULTS, localaiLanguages, migrateLocalAISettings } from './localai';
-import { canDetectOther, cutsSentencesHere, deviceNeeds, heardBy, hearingPlace, hearsAtOwnDevice, needsServer, speaksBoth } from './localaiDevice';
+import { backInto, canDetectOther, crossings, cutsSentencesHere, deviceNeeds, heardBy, hearingPlace, hearsAtOwnDevice, needsServer, speaksBoth } from './localaiDevice';
 import { nativeGap, translatorGap } from './localaiNative';
 import { NO_NATIVE_ENGINE, type NativeEngineStatus } from '../../lib/native/nativeEngine';
 import { SHARED } from './testing';
@@ -13,6 +13,13 @@ const context = { direction: PAIR, speech: false, turns: 'auto' as const };
 const shared = { ...SHARED, models: [], reversed: (d: typeof PAIR) => d.source === 'ja' };
 
 describe('native-only local stages', () => {
+  it('translates every spoken lit language back into the user’s own, including those that cross', () => {
+    const s = settings({ speakAlso: ['ja', 'en', 'ko'], theyAlso: ['en'], theyLit: 'en', asrDetectOther: true });
+    expect(crossings(s, PAIR)).toEqual([{ source: 'ja', target: 'en' }, { source: 'en', target: 'ja' }]);
+    expect(backInto(s, PAIR)).toEqual(['ja', 'en']);
+    expect(backInto({ ...s, theyLit: '', asrDetectOther: false }, PAIR)).toEqual(['ja']);
+  });
+
   it.each(['app', 'localai', 'native', undefined])('migrates the legacy runner %s without changing stage locations or native choices', (old) => {
     const migrated = migrateLocalAISettings({
       ...LOCALAI_DEFAULTS,

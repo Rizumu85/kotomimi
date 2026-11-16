@@ -55,6 +55,14 @@
     "en": "Text",
     "text": "Văn bản"
   },
+  "fork.apart.merge": {
+    "en": "Hear both sides in one place",
+    "text": "Nghe cả hai bên ở cùng một nơi"
+  },
+  "fork.apart.split": {
+    "en": "Hear my side somewhere else",
+    "text": "Nghe phần tôi nói ở nơi khác"
+  },
   "fork.audio.echoAction": {
     "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
     "text": "Dùng tai nghe để ngắt vòng lặp; hoặc tăng ngưỡng kích hoạt mic trong Cài đặt → Mic."
@@ -1910,6 +1918,10 @@
   "providers.localai.noteNativeSenseVoice": {
     "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
     "text": "Nhẹ và nhanh nhất: dùng khoảng 0.4 GB bộ nhớ đồ họa. Thử với hội thoại tiếng Nhật: chính xác ngang Qwen3-ASR 0.6B, ít thêm dấu câu. Chỉ hỗ trợ tiếng Trung, Quảng Đông, Anh, Nhật và Hàn."
+  },
+  "providers.localai.noteNativeSenseVoiceCpu": {
+    "en": "On the processor, with no video memory taken. About as right as SenseVoice on the graphics card: Chinese, Cantonese, English, Japanese and Korean. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",
+    "text": "Chỉ dùng bộ xử lý, không chiếm bộ nhớ đồ họa. Độ chính xác gần bằng SenseVoice chạy trên card đồ họa, hỗ trợ tiếng Trung, tiếng Quảng Đông, tiếng Anh, tiếng Nhật và tiếng Hàn. Các từ trong từ điển cá nhân không được cung cấp trước cho mô hình, nhưng vẫn được sửa theo cách phát âm sau khi nhận dạng."
   },
   "providers.localai.noteNativeXAsr": {
     "en": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",

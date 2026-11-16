@@ -773,7 +773,8 @@
       "tag_cpu": "Vain CPU",
       "tagHint_cpu": "Toimii suorittimella ja jättää näytönohjaimen pelin käyttöön. Ladataan istunnon alkaessa.",
       "noteNativeXAsr": "Kirjoittaa puheesi tekstiksi reaaliajassa pelkällä suorittimella, ilman näyttömuistia: käyttää noin viidesosan yhden ytimen tehosta. Tukee vain kiinaa ja englantia. Oman sanaston sanoja ei anneta sille etukäteen, mutta tunnistettu teksti korjataan silti ääntämyksen perusteella.",
-      "noteStreamRevise": "Kääntää jo toisen puhuessa ja kääntää koko lauseen uudelleen sen päätyttyä. Tukee vain kiinaa, englantia ja japania."
+      "noteStreamRevise": "Kääntää jo toisen puhuessa ja kääntää koko lauseen uudelleen sen päätyttyä. Tukee vain kiinaa, englantia ja japania.",
+      "noteNativeSenseVoiceCpu": "Käyttää vain suoritinta, ei näytönohjaimen muistia. Suunnilleen yhtä tarkka kuin näytönohjaimella toimiva SenseVoice. Tukee kiinaa, kantoninkiinaa, englantia, japania ja koreaa. Oman sanaston sanoja ei anneta sille etukäteen, mutta tunnistettu teksti korjataan silti ääntämyksen perusteella."
     }
   },
   "logsPanel": {
@@ -2108,6 +2109,10 @@
       "mark": "Merkitse lauseessa oleva ongelma",
       "marked": "Merkitty",
       "notRecorded": "Tästä lauseesta ei ole äänitallennetta"
+    },
+    "apart": {
+      "split": "Oma puhe kuuluviin muualla",
+      "merge": "Molemmat puolet kuuluviin samassa paikassa"
     }
   }
 }

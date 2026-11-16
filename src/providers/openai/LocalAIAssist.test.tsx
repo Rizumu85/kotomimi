@@ -95,6 +95,60 @@ beforeEach(() => {
   saved.keys = {};
 });
 
+describe('the user’s own side heard in a place of its own (fork)', () => {
+  const BOTH: Array<'speaker' | 'participant'> = ['speaker', 'participant'];
+  const MINE = 'providers.localai.hearStage · fork.languageMenu.iSay';
+  const THEIRS = 'providers.localai.hearStage · fork.languageMenu.theySay';
+  const HERE = { asrVia: 'device' as const, asrModel: '', asrApiBaseUrl: '', asrApiModel: '', asrApiNeedsKey: true, asrOther: '', asrOtherModel: '' };
+
+  it('is offered on the recognition card of a run that hears both sides, and starts where they are heard now', () => {
+    const { update } = draw({ settings: { asrVia: 'server', asrModel: 'whisper-large-turbo' }, legs: BOTH, models: LISTED });
+    fireEvent.click(screen.getByRole('button', { name: 'fork.apart.split' }));
+    expect(update.mock.calls[update.mock.calls.length - 1][0]).toMatchObject({ asrMine: { ...HERE, asrVia: 'server', asrModel: 'whisper-large-turbo' } });
+  });
+
+  it('is not offered where the run hears one side', () => {
+    draw({ settings: { asrVia: 'server' }, legs: ['speaker'], models: LISTED });
+    expect(screen.queryByRole('button', { name: 'fork.apart.split' })).toBeNull();
+  });
+
+  it('has a card of its own, whose place and model are written to it and leave the other side’s as they are', () => {
+    const { places, update, card } = draw({ settings: { asrVia: 'server', asrMine: { ...HERE, asrVia: 'server' } }, legs: BOTH, models: LISTED });
+    expect(pressed(places(MINE))).toBe('providers.localai.placeServer');
+    expect(pressed(places(THEIRS))).toBe('providers.localai.placeServer');
+    expect(screen.queryByRole('button', { name: 'fork.apart.split' })).toBeNull();
+    fireEvent.click(places(MINE)[1]);
+    const placed = update.mock.calls[update.mock.calls.length - 1][0];
+    expect(placed.asrMine).toMatchObject({ asrVia: 'api' });
+    expect(placed).not.toHaveProperty('asrVia');
+    // Its model on the shared device is its own too.
+    fireEvent.change(card(MINE).getAllByRole('combobox')[0], { target: { value: 'whisper-large-turbo' } });
+    expect(update.mock.calls[update.mock.calls.length - 1][0]).toEqual({ asrMine: { ...HERE, asrVia: 'server', asrModel: 'whisper-large-turbo' } });
+  });
+
+  it('asks for the shared device’s address while the user’s own side alone is heard there', () => {
+    const HEAR_HERE = { asrVia: 'device' as const, translateAt: 'device' as const };
+    const alone = draw({ settings: { ...HEAR_HERE, asrMine: { ...HERE, asrVia: 'server' } }, legs: BOTH, models: LISTED });
+    expect(alone.card(MINE).queryByText('providers.localai.connectFirst')).not.toBeNull();
+    alone.unmount();
+    const none = draw({ settings: { ...HEAR_HERE, asrMine: { ...HERE, asrVia: 'api' } }, legs: BOTH, models: LISTED });
+    expect(none.card(MINE).queryByText('providers.localai.connectFirst')).toBeNull();
+  });
+
+  it('goes back with the other side’s at a press', () => {
+    const { update } = draw({ settings: { asrVia: 'server', asrMine: { ...HERE, asrVia: 'api' } }, legs: BOTH, models: LISTED });
+    fireEvent.click(screen.getByRole('button', { name: 'fork.apart.merge' }));
+    expect(update.mock.calls[update.mock.calls.length - 1][0]).toMatchObject({ asrMine: null });
+  });
+
+  it('writes its API where it is heard by one', () => {
+    const { card, update } = draw({ settings: { asrVia: 'server', asrMine: { ...HERE, asrVia: 'api' } }, legs: BOTH, models: LISTED });
+    const address = card(MINE).getByPlaceholderText('providers.localai.asrApiBaseUrlPlaceholder');
+    fireEvent.change(address, { target: { value: 'https://api.example.com/v1' } });
+    expect(update.mock.calls[update.mock.calls.length - 1][0].asrMine).toMatchObject({ asrVia: 'api', asrApiBaseUrl: 'https://api.example.com/v1' });
+  });
+});
+
 describe('the stage cards: where each stage runs', () => {
   it('gives every stage the same three places, each chosen by itself', () => {
     const { places, update } = draw({ settings: { asrVia: 'device', translateAt: 'server', coach: true, coachAt: 'api' } });

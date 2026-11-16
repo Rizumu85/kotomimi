@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { CircleCheck, CircleHelp, GraduationCap, Languages, LibraryBig, Loader, Mic, MonitorSmartphone, RefreshCw, Star } from 'lucide-react';
+import { CircleCheck, CircleHelp, GraduationCap, Languages, LibraryBig, Loader, Merge, Mic, MonitorSmartphone, RefreshCw, Split, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ServerFinder, type FinderStage } from '../../components/LanSharing/ServerFinder';
 import ToggleSwitch from '../../components/Settings/shared/ToggleSwitch';
@@ -24,7 +24,7 @@ import type { LocalAISettings as S } from './localai';
 import { coachesAtOwnDevice, coachesOnShared, deviceLanguage, hearingPlace, hearsAtOwnDevice, needsServer, PLACE_FIELDS, PLACES, translatePlace, translatesAtOwnDevice, type DeviceNeed, type Place } from './localaiDevice';
 import { NATIVE_MODELS, hearingPick, isApple, isAutoLanguage, nativeDownloaded, nativeEither, nativeEngineOf, nativeHears, nativeModel, nativeModelFor, nativePicked } from './localaiNative';
 import { chooseNativeRow, nativeChoiceFix, nativeChoiceRows, nativeRowChoice } from './nativeChoices';
-import { alsoFirst, alsoSpoken, detectsOther, heardBy, speaksBoth } from './localaiDevice';
+import { alsoFirst, alsoSpoken, detectsOther, heardBy, HEARING_FIELDS, hearingOf, speaksBoth, type HearingChoice } from './localaiDevice';
 import { languageLabel } from '../../lib/language/label';
 import { NativeEngineCard, nativeStoreOf, type NativeCardModel, type NativeKind } from './NativeEngineCard';
 import { NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator } from './nativeTranslators';
@@ -86,13 +86,14 @@ function PlaceSwitch({ label, value, onChange, disabled }: { label: string; valu
 }
 
 /** One stage: its name, and everything that decides how it runs. */
-function StageCard({ id, icon, title, tooltip, lead, children }: { id?: string; icon: ReactNode; title: string; tooltip: string; lead?: ReactNode; children?: ReactNode }) {
+function StageCard({ id, icon, title, tooltip, lead, corner, children }: { id?: string; icon: ReactNode; title: string; tooltip: string; lead?: ReactNode; /** At the head's far end: what acts on the whole card. */ corner?: ReactNode; children?: ReactNode }) {
   return (
     <section className="kt-card" aria-label={title} {...(id ? { id } : {})}>
       <h4 className="kt-card__head">
         <span className="kt-card__icon">{icon}</span>
         <span className="kt-card__title">{title}</span>
         <Tooltip content={tooltip} position="top" maxWidth={320}><CircleHelp className="tooltip-trigger" size={13} /></Tooltip>
+        {corner}
       </h4>
       {lead}
       {children}
@@ -781,19 +782,29 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   const found: readonly LocalAIModel[] = models;
   // On the device the stages share: a device of the hearing stage's own (a phone) is none of what follows.
   const onServer = hearingPlace(settings) === 'server';
-  const serverInUse = needsServer(settings);
+  // Either side's: the user's own may alone be heard there (`asrMine`).
+  const serverInUse = needsServer(settings) || needsServer(hearingOf(settings, 'speaker'));
   const address = values.endpoint ?? '';
   // The address names this computer itself: a model server running here (a LocalAI), reached the way another device is.
   const onThisComputer = /^(?:[a-z]+:\/\/)?(?:127\.0\.0\.1|localhost|\[::1\])(?::|\/|$)/i.test(address.trim());
   const kotomimi = serverInUse && isKotomimiServer(found);
   const ownModels = found.filter((m) => m.from === undefined);
 
+  // Fork: the user's own side heard in a place of its own (`asrMine`, `hearingOf`): it has a card of its own, and this
+  // one is the other side's. Both on this computer, they are one engine's rows again, drawn here as ever.
+  const mine = settings.asrMine ?? null;
+  const mineView = hearingOf(settings, 'speaker');
+  const bothHere = mine !== null && settings.asrVia === 'device' && mine.asrVia === 'device';
+  const hearLegs = mine !== null && !bothHere ? legs.filter((leg) => leg !== 'speaker') : legs;
+  const mineLegs = legs.filter((leg) => leg === 'speaker');
+  const putMine = (asked: Partial<HearingChoice>) => { if (mine) put({ asrMine: { ...mine, ...asked } } as Partial<S>); };
+
   // What hears on the other device.
   const pipelines = modelsFor(found, 'pipeline');
   const recognizers = modelsFor(found, 'asr');
   // As a person chooses among them (`serverRecognizers.ts`): one to a language is one choice, and only what hears a
   // language of this run is listed. A choice saved as one member of a family shows as the family.
-  const recognizerMenu = recognizerChoices(recognizers, legs.map((leg) => heardBy(settings, pair, leg, models))).map((id) => ({ id }));
+  const recognizerMenu = recognizerChoices(recognizers, hearLegs.map((leg) => heardBy(settings, pair, leg, models))).map((id) => ({ id }));
   // Fork: what the other device says it hears each leg with in the run under way — said beside the choice where it is
   // not simply the model chosen: left to the device, or another of its own taken in its place (`heardByStore.ts`).
   const inUse = useHeardByStore((state) => state.byLeg);
@@ -818,7 +829,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   // Fork: the languages of this run the chosen family has no member for (the Mac's Apple Speech without Korean): those
   // legs are left to the device, which said so only in the small "in use" beside the menu (the user, 2026-10-28).
   const familyMembers = recognizers.map((m) => perLanguage(m.id)).filter((one) => one !== null && one.family === choiceOf(settings.asrModel));
-  const familyMissing = familyMembers.length === 0 ? [] : [...new Set(legs.map((leg) => heardBy(settings, pair, leg, models)))]
+  const familyMissing = familyMembers.length === 0 ? [] : [...new Set(hearLegs.map((leg) => heardBy(settings, pair, leg, models)))]
     .filter((language) => language && !isAutoLanguage(language) && !familyMembers.some((one) => one!.language.split('-')[0] === language.split('-')[0]));
   // What a blank pipeline field runs (`effectiveLocalAIModel`): the first pipeline named `gpt-realtime*`, else the first.
   const fallback = pipelines.find((m) => isRealtimeModelId(m.id))?.id ?? pipelines[0]?.id ?? '';
@@ -966,19 +977,26 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   // The first card with a stage on this computer carries the tour's anchor.
   const tourAt = settings.asrVia === 'device' ? 'asr' : settings.translateAt === 'device' ? 'translation' : null;
   // What each leg hears: the speaker their own language, or — coached — the one they practise; the other side theirs.
-  const heardByLegs = legs.map((leg) => heardBy(settings, pair, leg, models));
+  const heardByLegs = hearLegs.map((leg) => heardBy(settings, pair, leg, models));
   // The native recognizer, language by language: a choice is the model in use from then on, and that language's by name.
   const bothOn = speaksBoth(settings, models, pair) && pair.source.toLowerCase() !== pair.target.toLowerCase();
   const nativePick = hearingPick(settings, pair, {
     detecting: detectsOther(settings, models),
-    both: bothOn,
+    // The speaker's two languages are their own recognizer's to tell, where that is elsewhere.
+    both: bothOn && hearLegs.includes('speaker'),
     // A model that cannot name the language is a best effort, not a reason to keep another one in its place.
     bestEffort: alsoSpoken(settings, pair).length > 0 || settings.asrDetectOther === true,
   });
-  const choiceRows = nativeChoiceRows(settings, pair, legs);
+  const choiceRows = nativeChoiceRows(settings, pair, hearLegs);
   const pickNativeFor = (id: string, slot?: DeviceNeed) => {
     const row = slot?.leg ?? choiceRows.find((one) => nativeRowChoice(choiceRows, one.key, id).ok)?.key;
     const next = row && chooseNativeRow(settings, choiceRows, row, id);
+    if (next) put(next);
+  };
+  // The user's own side's row, where it alone is heard on this computer.
+  const mineRows = mine !== null && !bothHere ? nativeChoiceRows(mineView, pair, mineLegs) : [];
+  const pickNativeMine = (id: string) => {
+    const next = mineRows.length > 0 && chooseNativeRow(mineView, mineRows, 'speaker', id);
     if (next) put(next);
   };
   // While the other side's language is left to be detected (chosen among the languages, `LanguagePairSection`): what
@@ -1027,9 +1045,10 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
     const at = plainAddress(server.address);
     const is = (one: string) => one.trim() !== '' && plainAddress(one) === at;
     const shared = serverInUse && is(address);
-    const hears = hearsAtOwnDevice(settings) ? is(settings.asrOther)
-      : settings.asrVia === 'api' ? server.kind === 'phone' && is(settings.asrApiBaseUrl)
-      : shared && hearingPlace(settings) === 'server';
+    const hearsFor = (one: Pick<S, 'asrVia' | 'asrOther' | 'asrApiBaseUrl'>) => (hearsAtOwnDevice(one) ? is(one.asrOther)
+      : one.asrVia === 'api' ? server.kind === 'phone' && is(one.asrApiBaseUrl)
+      : shared && hearingPlace(one) === 'server');
+    const hears = hearsFor(settings) || (mine !== null && hearsFor(mineView));
     return [
       ...(hears ? ['asr' as const] : []),
       ...((translatesAtOwn ? is(settings.translateOther) : shared && translatePlace(settings) === 'server') ? ['translate' as const] : []),
@@ -1104,8 +1123,93 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
         )}
       </section>
 
-      <StageCard id="hearing-section" icon={<Mic size={14} />} title={t('providers.localai.hearStage')} tooltip={t('providers.localai.hearStageTooltip')}>
-        <PlaceSwitch label={t('providers.localai.hearStage')} value={settings.asrVia} onChange={(asrVia) => put({ asrVia })} disabled={disabled} />
+      {mine !== null && (() => {
+        const ownMine = plainAddress(mine.asrOther);
+        const atOwn = mine.asrVia === 'server' && ownMine !== '';
+        const lent = seen.find((server) => server.kind === 'phone' && plainAddress(server.address) === ownMine)?.hears ?? [];
+        const menu = recognizerChoices(recognizers, mineLegs.map((leg) => heardBy(mineView, pair, leg, models))).map((id) => ({ id }));
+        const chosen = recognizers.some((m) => choiceOf(m.id) === choiceOf(mine.asrModel) && perLanguage(m.id)) ? choiceOf(mine.asrModel) : mine.asrModel;
+        const title = `${t('providers.localai.hearStage')} · ${t('fork.languageMenu.iSay')}`;
+        return (
+          <StageCard
+            icon={<Mic size={14} />} title={title} tooltip={t('providers.localai.hearStageTooltip')}
+            corner={(
+              <Tooltip content={t('fork.apart.merge')} position="top">
+                <button type="button" className="kt-card__corner" aria-label={t('fork.apart.merge')} onClick={() => put({ asrMine: null } as Partial<S>)} disabled={disabled}><Merge size={14} /></button>
+              </Tooltip>
+            )}
+          >
+            <PlaceSwitch label={title} value={mine.asrVia} onChange={(asrVia) => putMine({ asrVia })} disabled={disabled} />
+            {mine.asrVia === 'server' && hearingPhones.length > 0 && (
+              <StageDevice
+                value={ownMine}
+                shared={sharedLabel}
+                phones={hearingPhones}
+                onChange={(picked) => {
+                  const phone = hearingPhones.find((one) => plainAddress(one.address) === picked);
+                  putMine({ asrOther: phone ? phone.address : '', asrOtherModel: phone?.model ?? '' });
+                }}
+                disabled={disabled}
+              />
+            )}
+            {atOwn && (lent.length > 1 ? (
+              <ServerModel label={t('providers.localai.model')} value={mine.asrOtherModel} blank={t('providers.localai.deviceDefault')} options={lent.map((id) => ({ id }))} onChange={(asrOtherModel) => putMine({ asrOtherModel })} disabled={disabled} />
+            ) : (
+              <ServerModel label={t('providers.localai.model')} value="" blank={mine.asrOtherModel ? shownName(mine.asrOtherModel) : t('providers.localai.deviceDefault')} options={[]} onChange={() => {}} disabled />
+            ))}
+            {mine.asrVia === 'server' && !atOwn && (
+              <>
+                {connectFirst}
+                <ServerModel label={t('providers.localai.model')} value={chosen} blank={t('providers.localai.deviceDefault')} options={menu} onChange={(asrModel) => putMine({ asrModel })} disabled={disabled} />
+              </>
+            )}
+            {mine.asrVia === 'api' && (
+              <ApiFields
+                id="localai-asr-api-mine"
+                kind="asr"
+                others={[{ baseUrl: settings.translateBaseUrl, key: values.translateKey ?? '', name: t('providers.localai.translateStage') }, { baseUrl: settings.coachBaseUrl, key: values.coachKey ?? '', name: t('providers.localai.coachStage') }]}
+                baseUrl={mine.asrApiBaseUrl}
+                model={mine.asrApiModel}
+                needsKey={mine.asrApiNeedsKey}
+                apiKey={values.asrKey ?? ''}
+                urlPlaceholder={t('providers.localai.asrApiBaseUrlPlaceholder')}
+                modelPlaceholder={t('providers.localai.asrApiModelPlaceholder')}
+                options={found.filter((m) => m.from === 'asr')}
+                onChange={(p) => putMine({
+                  ...(p.baseUrl !== undefined ? { asrApiBaseUrl: p.baseUrl } : {}),
+                  ...(p.model !== undefined ? { asrApiModel: p.model } : {}),
+                  ...(p.needsKey !== undefined ? { asrApiNeedsKey: p.needsKey } : {}),
+                })}
+                onKey={(value) => set('asrKey', value)}
+                disabled={disabled}
+              />
+            )}
+            {mine.asrVia === 'device' && !bothHere && (
+              <DeviceModels
+                stage="asr" settings={mineView} update={put} pair={pair} legs={mineLegs} models={models} disabled={disabled}
+                native={{ onPick: pickNativeMine, inUse: (slot) => mineRows.find((row) => row.key === slot?.leg)?.model ?? null }}
+              />
+            )}
+          </StageCard>
+        );
+      })()}
+
+      <StageCard
+        id="hearing-section" icon={<Mic size={14} />} tooltip={t('providers.localai.hearStageTooltip')}
+        title={mine !== null ? `${t('providers.localai.hearStage')} · ${t('fork.languageMenu.theySay')}` : t('providers.localai.hearStage')}
+        // Fork: the user's own side given a place of its own, where a run hears both sides: it starts where this one is.
+        corner={mine === null && legs.length > 1 && (
+          <Tooltip content={t('fork.apart.split')} position="top">
+            <button
+              type="button" className="kt-card__corner" aria-label={t('fork.apart.split')} disabled={disabled}
+              onClick={() => put({ asrMine: Object.fromEntries(HEARING_FIELDS.map((field) => [field, settings[field]])) as unknown as HearingChoice } as Partial<S>)}
+            >
+              <Split size={14} />
+            </button>
+          </Tooltip>
+        )}
+      >
+        <PlaceSwitch label={mine !== null ? `${t('providers.localai.hearStage')} · ${t('fork.languageMenu.theySay')}` : t('providers.localai.hearStage')} value={settings.asrVia} onChange={(asrVia) => put({ asrVia })} disabled={disabled} />
         {/* Which device, where there is more than the shared one to choose from: the phones that lend their recognition. */}
         {settings.asrVia === 'server' && hearingPhones.length > 0 && (
           <StageDevice
@@ -1184,7 +1288,7 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
         )}
         {settings.asrVia === 'device' && (
           <DeviceModels
-            stage="asr" settings={settings} update={put} pair={pair} legs={legs} models={models} disabled={disabled} tour={tourAt === 'asr'}
+            stage="asr" settings={settings} update={put} pair={pair} legs={hearLegs} models={models} disabled={disabled} tour={tourAt === 'asr'}
             native={{
               onPick: pickNativeFor,
               inUse: (slot) => choiceRows.find((row) => row.key === slot?.leg)?.model ?? null,

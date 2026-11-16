@@ -51,6 +51,14 @@
     "en": "Text",
     "text": "पाठ"
   },
+  "fork.apart.merge": {
+    "en": "Hear both sides in one place",
+    "text": "दोनों तरफ़ की बातें एक जगह सुनें"
+  },
+  "fork.apart.split": {
+    "en": "Hear my side somewhere else",
+    "text": "मेरी बात अलग जगह सुनें"
+  },
   "fork.audio.echoAction": {
     "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
     "text": "हेडफ़ोन लगाने से आवाज़ का यह चक्र रुक जाएगा। या सेटिंग्स → माइक्रोफ़ोन में माइक चालू होने का आवाज़ स्तर बढ़ाएँ।"
@@ -1906,6 +1914,10 @@
   "providers.localai.noteNativeSenseVoice": {
     "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
     "text": "सबसे हल्का और तेज़: करीब 0.4 GB ग्राफ़िक्स मेमोरी। जापानी बातचीत के परीक्षण में Qwen3-ASR 0.6B जितना सटीक मिला, लेकिन विराम चिह्न बहुत कम लगाता है। केवल चीनी, कैंटोनीज़, अंग्रेज़ी, जापानी और कोरियाई का समर्थन करता है।"
+  },
+  "providers.localai.noteNativeSenseVoiceCpu": {
+    "en": "On the processor, with no video memory taken. About as right as SenseVoice on the graphics card: Chinese, Cantonese, English, Japanese and Korean. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",
+    "text": "सिर्फ़ प्रोसेसर पर चलता है, वीडियो मेमोरी नहीं लेता। इसकी सटीकता ग्राफ़िक्स कार्ड पर चलने वाले SenseVoice जैसी ही है। चीनी, कैंटोनीज़, अंग्रेज़ी, जापानी और कोरियाई भाषाएँ समझता है। आपकी निजी शब्दावली के शब्द इसे पहले से नहीं बताए जाते; पहचानने के बाद उच्चारण के आधार पर शब्द सुधारे जाते हैं।"
   },
   "providers.localai.noteNativeXAsr": {
     "en": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",

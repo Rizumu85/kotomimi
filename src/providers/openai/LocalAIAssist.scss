@@ -73,6 +73,30 @@
     min-width: 0;
   }
 
+  // What acts on the whole card (the two sides heard apart, or together again), at the head's far end.
+  .kt-card__head > :has(> .kt-card__corner),
+  .kt-card__head > .kt-card__corner {
+    margin-left: auto;
+  }
+
+  .kt-card__corner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    color: vars.$text-secondary;
+    background: transparent;
+    border: none;
+    border-radius: vars.$radius-sm;
+    cursor: pointer;
+
+    &:hover:not(:disabled) { color: vars.$text-primary; background: vars.$bg-hover; }
+    &:focus-visible { @include vars.focus-ring; }
+    &:disabled { opacity: 0.5; cursor: default; }
+  }
+
   // The plans for this computer (PlanCard.tsx): three choices, the open one's models, and putting it to use.
   .kt-plan__corner {
     display: inline-flex;

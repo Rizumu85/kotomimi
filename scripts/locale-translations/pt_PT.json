@@ -47,6 +47,14 @@
     "en": "Text",
     "text": "Texto"
   },
+  "fork.apart.merge": {
+    "en": "Hear both sides in one place",
+    "text": "Voltar a ouvir os dois lados no mesmo sítio"
+  },
+  "fork.apart.split": {
+    "en": "Hear my side somewhere else",
+    "text": "Ouvir o meu lado noutro sítio"
+  },
   "fork.audio.echoAction": {
     "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
     "text": "Use auscultadores para interromper o ciclo de áudio ou aumente o limiar de ativação do microfone em Definições → Microfone."
@@ -1918,6 +1926,10 @@
   "providers.localai.noteNativeSenseVoice": {
     "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
     "text": "O mais leve e rápido: ocupa cerca de 0.4 GB de memória gráfica. Em testes com conversas informais em japonês, foi tão preciso como o Qwen3-ASR 0.6B, mas usa pouca pontuação. Só suporta chinês, cantonês, inglês, japonês e coreano."
+  },
+  "providers.localai.noteNativeSenseVoiceCpu": {
+    "en": "On the processor, with no video memory taken. About as right as SenseVoice on the graphics card: Chinese, Cantonese, English, Japanese and Korean. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",
+    "text": "Usa apenas o processador, sem ocupar memória gráfica. Tem uma precisão semelhante à do SenseVoice na placa gráfica e reconhece chinês, cantonês, inglês, japonês e coreano. As palavras do dicionário personalizado não lhe são fornecidas de antemão, mas são corrigidas pela pronúncia após o reconhecimento."
   },
   "providers.localai.noteNativeXAsr": {
     "en": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",

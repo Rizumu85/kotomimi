@@ -89,7 +89,7 @@ describe('the OpenAI Realtime definition', () => {
 
   it("lets the participant speak when its switch is on, with Other's prompt and the user's own detection (rulings 4, 15), and refuses Both for Auto-detect (D20)", () => {
     const participant = contextsFor(both({ source: 'ja', target: 'en' }, { participantSpeech: true })).participant!;
-    expect(participant).toEqual({ direction: { source: 'en', target: 'ja' }, speech: true, turns: 'auto' });
+    expect(participant).toEqual({ leg: 'participant', direction: { source: 'en', target: 'ja' }, speech: true, turns: 'auto' });
     const s: RealtimeSettings = { ...REALTIME_DEFAULTS, useTemplateMode: false, systemInstructions: 'Mine.', participantSystemInstructions: "Other's.", turnDetectionMode: 'Semantic' };
     const shared = { ...SHARED, reversed: (d: { source: string; target: string }) => d.source === 'en' && d.target === 'ja' };
     expect(openaiProvider.build(participant, s, shared)).toMatchObject({ instructions: "Other's.", modalities: ['audio'], turnDetection: { type: 'semantic_vad', eagerness: 'auto' } });

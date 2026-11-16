@@ -72,7 +72,7 @@ describe('the Doubao AST 2.0 definition', () => {
   it('lets the participant speak when its switch is on, speech to speech on the reversed pair (ruling 4)', () => {
     const shape = { provider: volcengineAst2Provider, pair: { source: 'zh', target: 'en' }, legs: ['speaker', 'participant'], textOnly: false, participantSpeech: true, turnMode: 'auto' } as unknown as RunShape;
     const participant = contextsFor(shape).participant!;
-    expect(participant).toEqual({ direction: { source: 'en', target: 'zh' }, speech: true, turns: 'auto' });
+    expect(participant).toEqual({ leg: 'participant', direction: { source: 'en', target: 'zh' }, speech: true, turns: 'auto' });
     expect((volcengineAst2Provider.build(participant, AST2_DEFAULTS, SHARED) as Ast2Config).mode).toBe('s2s');
     expect(contextsFor({ ...shape, participantSpeech: false }).participant!.speech).toBe(false);
   });

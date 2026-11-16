@@ -55,7 +55,8 @@ export async function applySetupDraft(draft: SetupDraft, deps: ApplySetupDeps): 
   const shares = kotomimi && choice.value === 'share';
   if (kotomimi) {
     const place = shares ? 'device' : choice.value;
-    Object.assign(settings, { asrVia: place, translateAt: place, coachAt: place });
+    // Everything in one place: the user's own side with it.
+    Object.assign(settings, { asrVia: place, asrMine: null, translateAt: place, coachAt: place });
     // The other device's access key, given in the step: it is asked for from then on (the setting shows its field).
     if (place === 'server' && credentials.serverKey?.trim()) settings.serverNeedsKey = true;
   }

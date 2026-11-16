@@ -132,6 +132,23 @@ describe('pending native plan application', () => {
     expect(t.read().asrNativeByLanguage).toEqual({ zh: small, ja: small });
     expect(t.store.getState().pending).toBeNull();
   });
+  it('moves one side alone where the two are heard apart, and brings them together for a whole plan (fork)', () => {
+    const there = { asrVia: 'api' as const, asrModel: '', asrApiBaseUrl: 'https://api.example.com/v1', asrApiModel: 'm', asrApiNeedsKey: true, asrOther: '', asrOtherModel: '' };
+    // The other side on an API, the user's own on this computer: their model put right stays theirs alone.
+    const t = setup([x, small, index]);
+    t.edit({ ...there, asrMine: { ...there, asrVia: 'device' } });
+    t.store.getState().applyRecognition('speaker', { model: small, languages: ['zh'], models: [small] });
+    expect(t.read()).toMatchObject({ asrVia: 'api', asrMine: { asrVia: 'device' }, asrNativeByLanguage: { zh: small } });
+    // The user's own on the API, the other side's model chosen here: the user's own stays where it is.
+    const u = setup([x, small, index]);
+    u.edit({ asrVia: 'device', asrMine: there });
+    u.store.getState().applyRecognition('participant', { model: small, languages: ['ja'], models: [small] });
+    expect(u.read()).toMatchObject({ asrVia: 'device', asrMine: { asrVia: 'api' } });
+    // A plan is this computer's for both.
+    u.store.getState().apply(u.plan('balanced'));
+    expect(u.read()).toMatchObject({ asrVia: 'device', asrMine: null });
+  });
+
   it('waits for every Apple language asset', () => {
     const t = setup(['apple-speech:zh']);
     t.store.getState().applyRecognition('speaker', { model: 'apple-speech:zh', languages: ['zh', 'ja'], models: ['apple-speech:zh', 'apple-speech:ja'] });

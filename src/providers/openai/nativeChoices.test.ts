@@ -3,6 +3,7 @@ import { LOCALAI_DEFAULTS, runSideHearing, type LocalAISettings } from './locala
 import { chooseNativeRow, nativeChoiceFix, nativeChoiceRows, nativeRowChoice } from './nativeChoices';
 import { NATIVE_MODELS, chooseNative, nativeChoice, nativeEngineOf, nativeGap, nativePicked, isApple } from './localaiNative';
 import { NO_NATIVE_ENGINE } from '../../lib/native/nativeEngine';
+import { hearingOf } from './localaiDevice';
 
 const QWEN = 'qwen3-asr-1.7b-q8';
 const R2T2 = 'r2t2-q8';
@@ -17,7 +18,9 @@ describe('native row choices', () => {
   it('keeps R2T2 visible but refuses Chinese-or-Cantonese, including the user\'s saved conflict', async () => {
     const s = settings({ speakAlso: ['yue'], asrNativeByLanguage: { zh: R2T2, yue: QWEN } });
     const rows = nativeChoiceRows(s, pair, legs, here);
-    expect(rows[0]).toMatchObject({ languages: ['zh', 'yue'], detecting: true, model: { id: R2T2 } });
+    // R2T2 is the user's own language's: the Cantonese they also speak steps aside for it (`alsoSpoken`). The other
+    // side's row, on the same engine, still has to be heard.
+    expect(rows[0]).toMatchObject({ languages: ['zh'], detecting: false, model: { id: R2T2 } });
     expect(nativeRowChoice(rows, 'speaker', R2T2, here)).toEqual({ ok: false, unheard: 'yue' });
     expect(chooseNativeRow(s, rows, 'speaker', R2T2, here)).toBeNull();
     expect(nativeRowChoice(rows, 'participant', QWEN, here)).toEqual({ ok: true, moves: ['speaker'] });
@@ -28,6 +31,22 @@ describe('native row choices', () => {
     const selections = legs.map((leg) => ({ pick: runSideHearing(repaired, pair, leg), language: leg === 'speaker' ? 'auto' : 'yue' }));
     expect(selections.map((side) => nativePicked(side.pick, side.language, here)?.id)).toEqual([QWEN, QWEN]);
     expect(await nativeGap({ model: QWEN, selections }, ['auto', 'yue'], { status: async () => ({ ...NO_NATIVE_ENGINE, supported: true, engine: 'ready', models: { [QWEN]: { state: 'downloaded', received: 1, total: 1 } } }) })).toBeNull();
+  });
+
+  it('hears the user’s own side, alone on this computer, by its own row’s model whatever language it hears (fork)', () => {
+    // Coached, the speaker is heard in the other side's Japanese; the model chosen for Japanese is the other side's,
+    // who are heard elsewhere. Their row's menu wrote the Chinese slot and showed the Japanese one (the user, 2026-11-15).
+    const apart = settings({ asrVia: 'server', coach: true, asrNativeByLanguage: { ja: 'qwen3-asr-0.6b-q8', zh: SENSE }, asrMine: { asrVia: 'device', asrModel: '', asrApiBaseUrl: '', asrApiModel: '', asrApiNeedsKey: true, asrOther: '', asrOtherModel: '' } });
+    const mine = hearingOf(apart, 'speaker');
+    const jaPair = { source: 'zh-CN', target: 'ja' };
+    const rows = nativeChoiceRows(mine, jaPair, ['speaker'], here);
+    expect(rows[0]).toMatchObject({ languages: ['ja'], model: { id: SENSE } });
+    const chosen = { ...mine, ...chooseNativeRow(mine, rows, 'speaker', QWEN, here)! };
+    expect(nativeChoiceRows(chosen, jaPair, ['speaker'], here)[0].model?.id).toBe(QWEN);
+    expect(nativePicked(runSideHearing(chosen, jaPair, 'speaker'), 'ja', here)?.id).toBe(QWEN);
+    // Both sides here are one engine's rows: the language heard has the one model, as ever.
+    const together = settings({ coach: true, asrNativeByLanguage: { ja: 'qwen3-asr-0.6b-q8', zh: SENSE } });
+    expect(nativeChoiceRows(together, jaPair, ['speaker'], here)[0].model?.id).toBe('qwen3-asr-0.6b-q8');
   });
 
   it('refuses a narrower model when another row on its engine needs Russian', () => {
@@ -105,10 +124,17 @@ describe('native row choices', () => {
     expect(nativeRowChoice(any, 'participant', QWEN, here).ok).toBe(true);
   });
 
-  it('checks every extra spoken language, and reports normalized codes', () => {
+  it('lets a model that hears the user’s own language be theirs: the others they speak step aside for it (fork)', () => {
     const s = settings({ speakAlso: ['en', 'YUE_HK'], asrDetectOther: true });
-    const rows = nativeChoiceRows(s, { source: 'ZH_cn', target: 'en' }, ['speaker'], here);
-    expect(nativeRowChoice(rows, 'speaker', R2T2, here)).toEqual({ ok: false, unheard: 'yue' });
+    const mixed = { source: 'ZH_cn', target: 'en' };
+    const rows = nativeChoiceRows(s, mixed, ['speaker'], here);
+    expect(rows[0].languages).toEqual(['zh', 'en', 'yue']);
+    expect(nativeRowChoice(rows, 'speaker', R2T2, here)).toEqual({ ok: true, moves: [] });
+    // Chosen, it hears their Chinese and English, and Cantonese is not asked of it.
+    const chosen = { ...s, ...chooseNativeRow(s, rows, 'speaker', R2T2, here)! };
+    expect(nativeChoiceRows(chosen, mixed, ['speaker'], here)[0]).toMatchObject({ languages: ['zh', 'en'], model: { id: R2T2 } });
+    // Not one that misses their own language.
+    expect(nativeRowChoice(nativeChoiceRows(s, { source: 'yue', target: 'en' }, ['speaker'], here), 'speaker', R2T2, here)).toEqual({ ok: false, unheard: 'yue' });
   });
 
   it('does not propose an unavailable model or a repair that still leaves a conflict', () => {

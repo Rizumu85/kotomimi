@@ -773,7 +773,8 @@
       "tag_cpu": "Tylko CPU",
       "tagHint_cpu": "Działa na procesorze, zostawiając kartę graficzną grze. Ładuje się przy rozpoczęciu sesji.",
       "noteNativeXAsr": "Zapisuje tekst na bieżąco, gdy mówisz. Korzysta tylko z procesora, bez zajmowania pamięci karty graficznej: zużywa około jednej piątej mocy jednego rdzenia. Obsługuje tylko chiński i angielski. Nie otrzymuje wcześniej słów z osobistego słownika, ale po rozpoznaniu mowy poprawia je na podstawie brzmienia.",
-      "noteStreamRevise": "Tłumaczy, gdy rozmówca jeszcze mówi, a po zakończeniu zdania tłumaczy je ponownie w całości. Obsługuje tylko chiński, angielski i japoński."
+      "noteStreamRevise": "Tłumaczy, gdy rozmówca jeszcze mówi, a po zakończeniu zdania tłumaczy je ponownie w całości. Obsługuje tylko chiński, angielski i japoński.",
+      "noteNativeSenseVoiceCpu": "Korzysta tylko z procesora, nie zajmuje pamięci karty graficznej. Rozpoznaje mowę z podobną dokładnością jak SenseVoice na karcie graficznej. Obsługuje chiński, kantoński, angielski, japoński i koreański. Nie otrzymuje wcześniej słów z własnego słownika, ale po rozpoznaniu mowy nadal koryguje je na podstawie brzmienia."
     }
   },
   "logsPanel": {
@@ -2108,6 +2109,10 @@
       "mark": "Oznacz błąd w tym zdaniu",
       "marked": "Oznaczono",
       "notRecorded": "To zdanie nie ma nagrania"
+    },
+    "apart": {
+      "split": "Słuchaj moich wypowiedzi w innym miejscu",
+      "merge": "Słuchaj obu stron w jednym miejscu"
     }
   }
 }

@@ -51,6 +51,14 @@
     "en": "Text",
     "text": "טקסט"
   },
+  "fork.apart.merge": {
+    "en": "Hear both sides in one place",
+    "text": "לשמוע את שני הצדדים באותו מקום"
+  },
+  "fork.apart.split": {
+    "en": "Hear my side somewhere else",
+    "text": "לשמוע את הצד שלי במקום אחר"
+  },
   "fork.audio.echoAction": {
     "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
     "text": "שימוש באוזניות יפסיק את הלולאה. אפשר גם להעלות את סף הפעלת המיקרופון בהגדרות → מיקרופון."
@@ -1906,6 +1914,10 @@
   "providers.localai.noteNativeSenseVoice": {
     "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
     "text": "הקל והמהיר ביותר: צורך כ-0.4 GB מזיכרון כרטיס המסך. בבדיקת שיחה ביפנית: מדויק כמו Qwen3-ASR 0.6B, אך כמעט ללא סימני פיסוק. תומך רק בסינית, קנטונזית, אנגלית, יפנית וקוריאנית."
+  },
+  "providers.localai.noteNativeSenseVoiceCpu": {
+    "en": "On the processor, with no video memory taken. About as right as SenseVoice on the graphics card: Chinese, Cantonese, English, Japanese and Korean. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",
+    "text": "משתמש רק במעבד, בלי לתפוס זיכרון בכרטיס המסך. רמת הדיוק דומה לזו של SenseVoice בכרטיס המסך, עם תמיכה בסינית, קנטונזית, אנגלית, יפנית וקוריאנית. המילים מהמילון האישי לא נמסרות לו מראש, אבל אחרי הזיהוי הן עדיין מתוקנות לפי הצליל."
   },
   "providers.localai.noteNativeXAsr": {
     "en": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",

@@ -43,7 +43,7 @@ export function createNativePlanStore(deps: NativePlanApplyDeps) {
     const { settings: s, pair } = ctx;
     if (stage === 'translation') return JSON.stringify([s.translateAt, s.translateHere, s.translateNativeModel, s.translateOther, s.translateOtherModel, s.translateModel, s.translateBaseUrl, s.translateServerModel]);
     const key = stage === 'speaker' ? base(pair.source) : s.asrDetectOther ? 'auto' : base(pair.target);
-    return JSON.stringify([s.asrVia, s.asrHere, s.asrOther, s.asrOtherModel, s.asrModel, s.asrApiModel, s.asrApiBaseUrl,
+    return JSON.stringify([s.asrVia, s.asrMine, s.asrHere, s.asrOther, s.asrOtherModel, s.asrModel, s.asrApiModel, s.asrApiBaseUrl,
       s.asrNativeByLanguage[key] ?? s.asrNativeModel, pair, s.speakAlso, s.speakBoth, s.theyLit, s.theyAlso, s.asrDetectOther]);
   };
   const stopWatching = () => { for (const off of offs.splice(0)) off(); };
@@ -73,7 +73,7 @@ export function createNativePlanStore(deps: NativePlanApplyDeps) {
     const canApply = (job: Job) => {
       if (job.stage === 'translation') return true;
       // Placement is shared by both recognizers; move it only when both requested sides are ready.
-      if (ctx.settings.asrVia !== 'device' && jobs.some((j) => j.stage !== 'translation' && !ready.includes(j))) return false;
+      if ((ctx.settings.asrVia !== 'device' || ctx.settings.asrMine) && jobs.some((j) => j.stage !== 'translation' && !ready.includes(j))) return false;
       if (isApple(job.model)) return true;
       const other = job.stage === 'speaker' ? 'participant' : 'speaker';
       const next = ready.find((j) => j.stage === other)?.model ?? current[other];
@@ -93,7 +93,12 @@ export function createNativePlanStore(deps: NativePlanApplyDeps) {
         else {
           const key = job.stage === 'speaker' ? base(ctx.pair.source) : ctx.settings.asrDetectOther ? 'auto' : base(ctx.pair.target);
           byLanguage[key] = job.model;
-          Object.assign(patch, { asrVia: 'device', asrHere: 'native', asrNativeByLanguage: byLanguage });
+          const mine = ctx.settings.asrMine;
+          // A plan is for this computer: both sides are heard here, in one place again. One side's model put right
+          // (`applyRecognition`) moves that side alone, where the two are heard apart.
+          const place = plan !== null || !mine ? { asrVia: 'device' as const, asrMine: null }
+            : job.stage === 'speaker' ? { asrMine: { ...mine, asrVia: 'device' as const } } : { asrVia: 'device' as const };
+          Object.assign(patch, { ...place, asrHere: 'native', asrNativeByLanguage: byLanguage });
         }
       }
       jobs = jobs.filter((job) => !applying.includes(job));

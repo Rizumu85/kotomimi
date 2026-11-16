@@ -81,7 +81,7 @@ describe('the Gemini definition', () => {
     expect(geminiProvider.participantSpeech).toBeUndefined();
     const shape = { provider: geminiProvider, pair: { source: 'en', target: 'ja' }, legs: ['speaker', 'participant'], textOnly: false, participantSpeech: true, turnMode: 'auto' } as unknown as RunShape;
     const participant = contextsFor(shape).participant!;
-    expect(participant).toEqual({ direction: { source: 'ja', target: 'en' }, speech: true, turns: 'auto' });
+    expect(participant).toEqual({ leg: 'participant', direction: { source: 'ja', target: 'en' }, speech: true, turns: 'auto' });
     expect(contextsFor({ ...shape, participantSpeech: false }).participant!.speech).toBe(false);
     // A dialogue model's voice: Live Translate, the default when listed, speaks in the speaker's own (Gemini/AST2 follow-up, ruling 3).
     expect((geminiProvider.build(participant, { ...GEMINI_DEFAULTS, model: DIALOGUE }, SHARED) as GeminiConfig).voice).toBe('Aoede');

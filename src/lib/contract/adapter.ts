@@ -25,6 +25,11 @@ export interface SegmentTiming { startMs: number; endMs: number }
 
 export interface SessionContext {
   direction: { source: Lang; target: Lang };
+  /**
+   * Fork: which leg this is, where whoever builds the request says: a pair of one language runs both legs in one
+   * direction, and a provider that hears the two sides in different places cannot tell them apart by it.
+   */
+  leg?: 'speaker' | 'participant';
   /** Produce translated audio at all. */
   speech: boolean;
   /** Always 'auto' on the participant leg. */

@@ -773,7 +773,8 @@
       "tag_cpu": "Yalnızca CPU",
       "tagHint_cpu": "İşlemcide çalışır, ekran kartını oyuna bırakır. Oturum başladığında yüklenir.",
       "noteNativeXAsr": "Konuştukça yazıya döker. Yalnızca işlemciyi kullanır, ekran kartı belleğinde yer kaplamaz: tek bir çekirdeğin yaklaşık beşte birini kullanır. Yalnızca Çince ve İngilizce desteklenir. Kişisel sözlüğünüzdeki kelimeler önceden verilmez; tanıma sonrasında telaffuza göre düzeltilir.",
-      "noteStreamRevise": "Karşı taraf konuşurken çeviri başlar, cümle bitince tamamı yeniden çevrilir. Yalnızca Çince, İngilizce ve Japonca desteklenir."
+      "noteStreamRevise": "Karşı taraf konuşurken çeviri başlar, cümle bitince tamamı yeniden çevrilir. Yalnızca Çince, İngilizce ve Japonca desteklenir.",
+      "noteNativeSenseVoiceCpu": "Yalnızca işlemciyi kullanır, ekran kartı belleğinde yer kaplamaz. Ekran kartında çalışan SenseVoice kadar doğruya yakın sonuçlar verir; Çince, Kantonca, İngilizce, Japonca ve Koreceyi destekler. Kişisel sözlüğünüzdeki kelimeler önceden modele verilmez; tanıma sonrasında telaffuza göre düzeltilir."
     }
   },
   "logsPanel": {
@@ -2108,6 +2109,10 @@
       "mark": "Bu cümleyi sorunlu olarak işaretle",
       "marked": "İşaretlendi",
       "notRecorded": "Bu cümlenin ses kaydı yok"
+    },
+    "apart": {
+      "split": "Benim sesimi başka bir yerden dinle",
+      "merge": "İki tarafı da aynı yerden dinle"
     }
   }
 }

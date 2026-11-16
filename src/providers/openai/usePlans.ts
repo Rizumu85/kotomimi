@@ -8,7 +8,9 @@ import type { LanguagePair } from '../../lib/provider/types';
 import { isMacOS, isWindows } from '../../utils/environment';
 import { useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
 import { LOCALAI_DEFAULTS, type LocalAISettings } from './localai';
+import { hearingOf } from './localaiDevice';
 import { NATIVE_MODELS, nativeDownloaded } from './localaiNative';
+import { nativeChoiceRows } from './nativeChoices';
 import { NATIVE_TRANSLATORS } from './nativeTranslators';
 import { currentNativeModels, nativeLanguageGap, nativePlans, type NativePlan, type NativePlanId, type NativePlanInputs, type NativePlatform, type NativeSide, type PlanRecognition } from './nativePlans';
 import { useNativeRecommendationInputs } from './useNativeRecommendationInputs';
@@ -51,7 +53,12 @@ export function useHearingGaps(settings: LocalAISettings | null, pair: LanguageP
     const current = currentNativeModels(settings, pair);
     const of = (side: NativeSide): HearingGapOf | null => {
       const { unsupported, replacement } = nativeLanguageGap(inputs, side);
-      return unsupported.length && replacement?.model && current[side] ? { codes: unsupported, by: current[side]!, to: replacement.model, replacement } : null;
+      if (!unsupported.length || !replacement?.model || !current[side]) return null;
+      // Fork: no model was chosen for this side's language, and the run hears it by another that does (the row beside
+      // names that one, `nativeChoiceRows`): the model kept as the default is not what leaves it unheard.
+      const hears = nativeChoiceRows(hearingOf(settings, side), pair, [side], (id) => inputs.downloaded.includes(id))[0]?.model;
+      if (hears && hears.id !== current[side] && unsupported.every((code) => code !== 'auto' && hears.languages.includes(code))) return null;
+      return { codes: unsupported, by: current[side]!, to: replacement.model, replacement };
     };
     return { speaker: of('speaker'), participant: of('participant') };
   }, [inputs, settings, pair]);

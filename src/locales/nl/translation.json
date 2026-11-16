@@ -773,7 +773,8 @@
       "tag_cpu": "Alleen CPU",
       "tagHint_cpu": "Draait op de processor en laat de grafische kaart vrij voor je game. Wordt geladen zodra een sessie begint.",
       "noteNativeXAsr": "Zet spraak direct om in tekst, alleen op de processor en zonder videogeheugen te gebruiken: ongeveer een vijfde van één processorkern. Ondersteunt alleen Chinees en Engels. Woorden uit je persoonlijke woordenlijst worden niet vooraf doorgegeven; na de herkenning worden ze op basis van hun klank gecorrigeerd.",
-      "noteStreamRevise": "Vertaalt al terwijl de ander nog praat en vertaalt de hele zin opnieuw zodra die klaar is. Alleen voor Chinees, Engels en Japans."
+      "noteStreamRevise": "Vertaalt al terwijl de ander nog praat en vertaalt de hele zin opnieuw zodra die klaar is. Alleen voor Chinees, Engels en Japans.",
+      "noteNativeSenseVoiceCpu": "Gebruikt alleen de processor, geen videogeheugen. Ongeveer even nauwkeurig als SenseVoice op de grafische kaart. Ondersteunt Chinees, Kantonees, Engels, Japans en Koreaans. Woorden uit je persoonlijke woordenlijst worden niet vooraf doorgegeven, maar na de herkenning wel op basis van de uitspraak gecorrigeerd."
     }
   },
   "logsPanel": {
@@ -2108,6 +2109,10 @@
       "mark": "Probleem met deze zin markeren",
       "marked": "Gemarkeerd",
       "notRecorded": "Van deze zin is geen geluidsopname"
+    },
+    "apart": {
+      "split": "Mijn kant ergens anders beluisteren",
+      "merge": "Beide kanten op één plek beluisteren"
     }
   }
 }

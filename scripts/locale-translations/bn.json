@@ -51,6 +51,14 @@
     "en": "Text",
     "text": "লেখা"
   },
+  "fork.apart.merge": {
+    "en": "Hear both sides in one place",
+    "text": "দুই পক্ষের কথা এক জায়গায় শুনুন"
+  },
+  "fork.apart.split": {
+    "en": "Hear my side somewhere else",
+    "text": "আমার কথা অন্য জায়গায় শুনুন"
+  },
   "fork.audio.echoAction": {
     "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
     "text": "হেডফোন ব্যবহার করলে শব্দের এই চক্র থামবে। অথবা সেটিংস → মাইক্রোফোন থেকে মাইক চালু হওয়ার শব্দসীমা বাড়ান।"
@@ -1906,6 +1914,10 @@
   "providers.localai.noteNativeSenseVoice": {
     "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
     "text": "সবচেয়ে হালকা ও দ্রুত: প্রায় 0.4 GB গ্রাফিক্স মেমরি লাগে। জাপানি আড্ডায় পরীক্ষায় Qwen3-ASR 0.6B-এর মতোই নির্ভুল, তবে যতিচিহ্ন খুব কম দেয়। শুধু চীনা, ক্যান্টনিজ, ইংরেজি, জাপানি ও কোরীয় সমর্থন করে।"
+  },
+  "providers.localai.noteNativeSenseVoiceCpu": {
+    "en": "On the processor, with no video memory taken. About as right as SenseVoice on the graphics card: Chinese, Cantonese, English, Japanese and Korean. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",
+    "text": "শুধু প্রসেসর ব্যবহার করে, ভিডিও মেমরি নেয় না। গ্রাফিক্স কার্ডে চলা SenseVoice-এর মতোই প্রায় নির্ভুল। চীনা, ক্যান্টনিজ, ইংরেজি, জাপানি ও কোরিয়ান সমর্থন করে। ব্যক্তিগত অভিধানের শব্দগুলো একে আগে থেকে জানানো হয় না; কথা শনাক্ত করার পর উচ্চারণ মিলিয়ে সংশোধন করা হয়।"
   },
   "providers.localai.noteNativeXAsr": {
     "en": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",

@@ -51,6 +51,14 @@
     "en": "Text",
     "text": "텍스트"
   },
+  "fork.apart.merge": {
+    "en": "Hear both sides in one place",
+    "text": "양쪽 말을 한곳에서 듣기"
+  },
+  "fork.apart.split": {
+    "en": "Hear my side somewhere else",
+    "text": "내가 하는 말은 다른 곳에서 듣기"
+  },
   "fork.audio.echoAction": {
     "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
     "text": "헤드폰을 사용하면 소리가 되풀이되는 현상을 막을 수 있어요. 또는 설정 → 마이크에서 마이크 활성화 기준을 높여 주세요."
@@ -1902,6 +1910,10 @@
   "providers.localai.noteNativeSenseVoice": {
     "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
     "text": "가장 가볍고 빨라요. 그래픽 메모리 약 0.4 GB를 사용해요. 일본어 일상 대화 실측 정확도는 Qwen3-ASR 0.6B와 같고, 문장 부호를 거의 넣지 않아요. 중국어, 광둥어, 영어, 일본어, 한국어만 지원해요."
+  },
+  "providers.localai.noteNativeSenseVoiceCpu": {
+    "en": "On the processor, with no video memory taken. About as right as SenseVoice on the graphics card: Chinese, Cantonese, English, Japanese and Korean. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",
+    "text": "프로세서만 사용하며 그래픽 메모리는 차지하지 않아요. 그래픽 카드에서 실행하는 SenseVoice와 정확도가 비슷하고, 중국어, 광둥어, 영어, 일본어, 한국어를 지원해요. 개인 사전의 단어를 미리 알려 주지는 않지만, 인식 후 발음을 기준으로 교정해요."
   },
   "providers.localai.noteNativeXAsr": {
     "en": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",

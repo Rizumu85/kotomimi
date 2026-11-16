@@ -30,13 +30,13 @@ describe('the Kotomimi step\'s answer (fork)', () => {
   it('places every stage where the card said', async () => {
     const d = deps();
     await applySetupDraft(kotomimi('server'), d);
-    expect(d.applyProvider).toHaveBeenCalledWith('localai', { source: 'en', target: 'ja' }, {}, { asrVia: 'server', translateAt: 'server', coachAt: 'server' });
+    expect(d.applyProvider).toHaveBeenCalledWith('localai', { source: 'en', target: 'ja' }, {}, { asrVia: 'server', asrMine: null, translateAt: 'server', coachAt: 'server' });
   });
 
   it('is this computer for every stage, and turns the sharing on, for the third card — after the settings, before the record', async () => {
     const d = deps({ shareModels: vi.fn(async () => {}) });
     await applySetupDraft(kotomimi('share'), d);
-    expect(d.applyProvider).toHaveBeenCalledWith('localai', { source: 'en', target: 'ja' }, {}, { asrVia: 'device', translateAt: 'device', coachAt: 'device' });
+    expect(d.applyProvider).toHaveBeenCalledWith('localai', { source: 'en', target: 'ja' }, {}, { asrVia: 'device', asrMine: null, translateAt: 'device', coachAt: 'device' });
     expect(d.shareModels).toHaveBeenCalledTimes(1);
     const seq = order([d.applyProvider, d.shareModels, d.completeSetup] as any);
     expect([...seq].sort((a, b) => a - b)).toEqual(seq);
@@ -72,10 +72,10 @@ describe('the Kotomimi step\'s answer (fork)', () => {
   it('asks the other device for the access key the step was given, and for none where none was', async () => {
     const keyed = deps();
     await applySetupDraft(draft({ provider: 'localai' as Provider, credentials: { endpoint: '192.168.1.20:8790', serverKey: 's3cret' }, credentialChoice: { setting: 'asrVia', value: 'server' } }), keyed);
-    expect(keyed.applyProvider).toHaveBeenCalledWith('localai', { source: 'en', target: 'ja' }, { endpoint: '192.168.1.20:8790', serverKey: 's3cret' }, { asrVia: 'server', translateAt: 'server', coachAt: 'server', serverNeedsKey: true });
+    expect(keyed.applyProvider).toHaveBeenCalledWith('localai', { source: 'en', target: 'ja' }, { endpoint: '192.168.1.20:8790', serverKey: 's3cret' }, { asrVia: 'server', asrMine: null, translateAt: 'server', coachAt: 'server', serverNeedsKey: true });
     const open = deps();
     await applySetupDraft(draft({ provider: 'localai' as Provider, credentials: { endpoint: '192.168.1.20:8790', serverKey: ' ' }, credentialChoice: { setting: 'asrVia', value: 'server' } }), open);
-    expect(open.applyProvider).toHaveBeenCalledWith('localai', { source: 'en', target: 'ja' }, expect.anything(), { asrVia: 'server', translateAt: 'server', coachAt: 'server' });
+    expect(open.applyProvider).toHaveBeenCalledWith('localai', { source: 'en', target: 'ja' }, expect.anything(), { asrVia: 'server', asrMine: null, translateAt: 'server', coachAt: 'server' });
   });
 
   it('shares nothing for the other cards, and is not undone by a sharing that would not start', async () => {

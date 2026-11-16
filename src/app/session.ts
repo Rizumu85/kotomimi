@@ -9,7 +9,7 @@ import { createSessionRecording } from './sessionRecording';
 import { driveSessionLags, type LagModels, type LagPlanned, type LagStage } from './sessionLags';
 import { asrApiModelOf, runSideHearing, type LocalAISettings } from '../providers/openai/localai';
 import { nativePicked } from '../providers/openai/localaiNative';
-import { heardBy } from '../providers/openai/localaiDevice';
+import { heardBy, hearingOf } from '../providers/openai/localaiDevice';
 import { getAppAudio, type AppAudio } from '../lib/audio/appAudio';
 import { createAppCapture, type AppCapture } from '../lib/audio/appCapture';
 import type { Playback } from '../lib/audio/playback';
@@ -143,12 +143,16 @@ export function createAppSession(options: AppSessionOptions = {}): AppSession {
       if (shape) {
         const s = shape.settings as LocalAISettings;
         if (shape.provider.id === 'localai') {
-          const hearing = (leg: 'speaker' | 'participant') => s.asrVia === 'device'
-            ? nativePicked(runSideHearing(s, shape.pair, leg), heardBy(s, shape.pair, leg))?.id ?? null
-            : s.asrVia === 'api' ? asrApiModelOf(s) : s.asrOther.trim() ? s.asrOtherModel : s.asrModel;
+          // Fork: each side as its own hearing reads the settings (`hearingOf`).
+          const hearing = (leg: 'speaker' | 'participant') => {
+            const one = hearingOf(s, leg);
+            return one.asrVia === 'device'
+              ? nativePicked(runSideHearing(one, shape.pair, leg), heardBy(one, shape.pair, leg))?.id ?? null
+              : one.asrVia === 'api' ? asrApiModelOf(one) : one.asrOther.trim() ? one.asrOtherModel : one.asrModel;
+          };
           lagModels = { speaker: hearing('speaker'), participant: hearing('participant'), translation: s.translateAt === 'device' ? s.translateNativeModel
             : s.translateAt === 'api' ? s.translateModel : s.translateOther.trim() ? s.translateOtherModel : s.translateServerModel };
-          lagPlanned = new Set<LagStage>([...(s.asrVia === 'device' ? ['speaker', 'participant'] as const : []), ...(s.translateAt === 'device' ? ['translation'] as const : [])]);
+          lagPlanned = new Set<LagStage>([...(['speaker', 'participant'] as const).filter((leg) => hearingOf(s, leg).asrVia === 'device'), ...(s.translateAt === 'device' ? ['translation'] as const : [])]);
         } else {
           const model = typeof s.model === 'string' && s.model ? s.model : shape.provider.id;
           lagModels = { speaker: model, participant: model, translation: model };
@@ -158,7 +162,7 @@ export function createAppSession(options: AppSessionOptions = {}): AppSession {
       if (shape) {
         const settings = shape.settings as LocalAISettings;
         recordingMetadata = { provider: shape.provider.id, languages: shape.pair,
-          stages: { speaker: { location: settings.asrVia, model: lagModels.speaker },
+          stages: { speaker: { location: shape.provider.id === 'localai' ? hearingOf(settings, 'speaker').asrVia : settings.asrVia, model: lagModels.speaker },
             participant: { location: settings.asrVia, model: lagModels.participant },
             translation: { location: settings.translateAt, model: lagModels.translation } } };
       }

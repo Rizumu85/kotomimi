@@ -51,6 +51,14 @@
     "en": "Text",
     "text": "ข้อความ"
   },
+  "fork.apart.merge": {
+    "en": "Hear both sides in one place",
+    "text": "ฟังทั้งสองฝั่งรวมกัน"
+  },
+  "fork.apart.split": {
+    "en": "Hear my side somewhere else",
+    "text": "ฟังฝั่งฉันแยกอีกที่"
+  },
   "fork.audio.echoAction": {
     "en": "Using headphones will break the loop; or raise the mic activation threshold under Settings → Microphone.",
     "text": "ใช้หูฟังเพื่อตัดเสียงวนกลับ หรือเพิ่มเกณฑ์เปิดใช้งานไมโครโฟนใน การตั้งค่า → ไมโครโฟน"
@@ -1906,6 +1914,10 @@
   "providers.localai.noteNativeSenseVoice": {
     "en": "The lightest and quickest: about 0.4 GB of video memory. Japanese talk, measured: as right as the small Qwen3-ASR, with little punctuation. Chinese, Cantonese, English, Japanese and Korean only.",
     "text": "เบาและเร็วที่สุด ใช้หน่วยความจำการ์ดจอประมาณ 0.4 GB ทดสอบบทสนทนาภาษาญี่ปุ่น: แม่นยำเท่า Qwen3-ASR 0.6B แต่แทบไม่ใส่เครื่องหมายวรรคตอน รองรับเฉพาะภาษาจีน กวางตุ้ง อังกฤษ ญี่ปุ่น และเกาหลี"
+  },
+  "providers.localai.noteNativeSenseVoiceCpu": {
+    "en": "On the processor, with no video memory taken. About as right as SenseVoice on the graphics card: Chinese, Cantonese, English, Japanese and Korean. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",
+    "text": "ใช้เฉพาะหน่วยประมวลผล ไม่ใช้หน่วยความจำการ์ดจอ แม่นยำใกล้เคียงกับ SenseVoice ที่ใช้การ์ดจอ รองรับภาษาจีน กวางตุ้ง อังกฤษ ญี่ปุ่น และเกาหลี ระบบจะไม่ส่งคำในพจนานุกรมส่วนตัวให้ล่วงหน้า แต่ยังแก้คำตามเสียงอ่านหลังถอดเสียง"
   },
   "providers.localai.noteNativeXAsr": {
     "en": "Writes as you speak, on the processor, with no video memory taken: about a fifth of one core. Chinese and English only. Glossary words are not told to it beforehand; it puts them right by sound afterwards.",
