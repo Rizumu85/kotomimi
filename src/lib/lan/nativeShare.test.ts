@@ -179,11 +179,34 @@ describe('the translator a device gets', () => {
     expect(stop).not.toHaveBeenCalled();
     expect(await translator.translate('こんにちは。', 'ignored', true)).toEqual({ translatedText: '你好。' });
     expect(sent[0].url).toBe('http://127.0.0.1:6000/v1/chat/completions');
-    expect(sent[0].body).toMatchObject({ model: 'index-translate-2b', stream: false, temperature: 0 });
+    // Streamed, with its tokens bounded by the sentence: six letters, so 84 of the model's 512.
+    expect(sent[0].body).toMatchObject({ model: 'index-translate-2b', stream: true, temperature: 0, max_tokens: 84 });
     expect(sent[0].body.messages).toEqual([{ role: 'user', content: '请将以下日语文本翻译为中文，直接输出翻译结果，不要进行任何解释。\n\nこんにちは。' }]);
     translator.dispose();
     translatorIdle({ stop });
     expect(stop).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops its model where the answer repeats itself without end, and answers with what was kept (fork)', async () => {
+    const ready: NativeEngineStatus = { ...TRANSLATORS, run: { state: 'ready', model: 'index-translate-2b', port: 6000, tail: '' } };
+    useNativeTranslatorStore.setState({ status: ready, start: async () => ready });
+    let aborted = false;
+    const fetch = vi.fn(async (_url: RequestInfo | URL, init?: RequestInit) => {
+      const encoder = new TextEncoder();
+      // A model that would write on to its last token: the stream does not close by itself.
+      const body = new ReadableStream<Uint8Array>({
+        start(controller) {
+          for (let i = 0; i < 60; i += 1) controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: 'ゴロ' } }] })}\n\n`));
+          init?.signal?.addEventListener('abort', () => { aborted = true; controller.error(new DOMException('aborted', 'AbortError')); });
+        },
+      });
+      return new Response(body, { status: 200, headers: { 'Content-Type': 'text/event-stream' } });
+    });
+    const translator = nativeTranslator(fetch as unknown as typeof globalThis.fetch);
+    await translator.init('zh', 'ja', 'index-translate-2b');
+    expect(await translator.translate('咕噜咕噜咕噜噜咕噜咕噜噜噜咕噜咕噜咕噜', 'ignored', true)).toEqual({ translatedText: 'ゴロ'.repeat(9) });
+    expect(aborted).toBe(true);
+    translator.dispose();
   });
 
   it('words the Traditional Chinese a client asks for, and the sentence it said before, into the request as this computer would', async () => {

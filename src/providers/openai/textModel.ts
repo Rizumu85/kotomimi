@@ -59,6 +59,11 @@ export interface TextDeps {
   signal: AbortSignal;
   /** The answer so far, each time it grows: what is shown, reasoning already taken out. */
   onText?(text: string): void;
+  /**
+   * Fork: where the answer so far is to be cut and the request ended, as a count of its UTF-16 units; -1 to go on.
+   * For a model that has lost its way (`runaway.ts`): what it would still write is not waited for.
+   */
+  cutAt?(text: string): number;
 }
 
 export interface TextAnswer {
@@ -135,13 +140,18 @@ export async function completeText(request: TextRequest, deps: TextDeps): Promis
   let raw = '';
   let shown = '';
   let firstMs: number | undefined;
+  /** Cut by `cutAt`: the answer is what was kept, and the request is over. */
+  let cut = false;
   const grow = (piece: string) => {
+    if (cut) return;
     raw += piece;
     const now = visibleText(raw);
     if (now === shown) return;
-    shown = now;
+    const at = deps.cutAt?.(now) ?? -1;
+    shown = at < 0 ? now : now.slice(0, at).trimEnd();
     if (firstMs === undefined && shown) firstMs = clock.now() - started;
     deps.onText?.(shown);
+    if (at >= 0) { cut = true; controller.abort(); }
   };
   const body = JSON.stringify({
     ...(request.extra ?? {}),
@@ -209,6 +219,8 @@ export async function completeText(request: TextRequest, deps: TextDeps): Promis
     }
     return { text: shown, ...(firstMs !== undefined ? { firstMs } : {}), totalMs: clock.now() - started, ...(served ? { model: served } : {}) };
   } catch (error) {
+    // Ended here on purpose: the reading that the abort broke off is not a failure.
+    if (cut) return { text: shown, ...(firstMs !== undefined ? { firstMs } : {}), totalMs: clock.now() - started };
     if (timedOut) throw new Error(`The model did not finish within ${limit / 1000} s.`);
     throw error;
   } finally {

@@ -222,6 +222,21 @@ describe('a leg whose translation runs on a text model', () => {
     expect(update).not.toHaveProperty('output_modalities');
   });
 
+  it('cuts a translation that repeats itself without end, and bounds its tokens by the sentence (fork)', async () => {
+    const said = '咕噜咕噜咕噜噜咕噜咕噜噜噜咕噜咕噜咕噜';
+    const h = await live(SPEAKER, VIA_MODEL, [sse(...Array.from({ length: 200 }, () => 'ゴロ'))], K, (config) => {
+      const stages = config.stages as { speech: { extra?: Record<string, unknown> } };
+      stages.speech.extra = { temperature: 0, max_tokens: 512 };
+    });
+    h.receive(...heard('item_1', said));
+    await h.settled();
+    expect(h.calls[0].body).toMatchObject({ max_tokens: 162, temperature: 0 });
+    const answer = h.of('segmentText').map((e) => e.payload).filter((p) => p.ref === FIRST_REF + 1).pop();
+    expect(answer?.text).toBe('ゴロ'.repeat(9));
+    expect(h.calls[0].signal?.aborted).toBe(true);
+    expect(h.of('degraded')).toEqual([]);
+  });
+
   it('hands each finished source to the text model on the Realtime server, and pairs the answer with it', async () => {
     const h = await live(PARTICIPANT, VIA_MODEL, [sse('今天', '天气很好。')]);
     h.receive(...heard('item_1', '今日は天気がいいですね。'));

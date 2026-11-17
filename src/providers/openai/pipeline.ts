@@ -43,6 +43,7 @@ import type { RealtimeConfig } from './config';
 import type { RealtimeCredentials } from './settings';
 import type { OpenSocket } from './socket';
 import { chatUrl, completeText, httpBaseOf } from './textModel';
+import { boundedFor, runawayAt } from './runaway';
 import { PHONE_BUSY_RETRIES, PHONE_TEXT_TIMEOUT_MS } from './phoneText';
 import { watchPhones, type PhoneWatch } from './phoneWatch';
 import { phoneKey } from '../../lib/lan/phoneKeys';
@@ -1146,6 +1147,7 @@ class PipelineLeg implements AdapterSession {
     // user's mistake.
     const { glossary } = this.request.config;
     const text = glossary ? normalizeRecognitionText(heard, glossary) : heard;
+    const translating = stage.kind === 'translate';
     return completeText(
       {
         url: chatUrl(base),
@@ -1154,14 +1156,16 @@ class PipelineLeg implements AdapterSession {
         system: stage.wrap ? '' : stage.system,
         ...(stage.shots?.length ? { shots: stage.shots } : {}),
         ...(stage.pair ? { pair: stage.pair, ...(before ? { previous: before } : {}) } : {}),
-        ...(stage.extra ? { extra: stage.extra } : {}),
+        // A translation's tokens are bounded by its sentence, where its model is given a bound (`boundedFor`).
+        ...(stage.extra ? { extra: translating ? boundedFor(stage.extra, text) : stage.extra } : {}),
         ...(stage.phone || stage.loads ? { timeoutMs: PHONE_TEXT_TIMEOUT_MS, busyRetries: PHONE_BUSY_RETRIES } : {}),
         // A function, so that nothing in the sentence is read as a pattern.
         user: stage.wrapAfter && before
           ? stage.wrapAfter.replace(BEFORE_SLOT, () => before).replace(TEXT_SLOT, () => text)
           : stage.wrap ? stage.wrap.replace(TEXT_SLOT, () => text) : text,
       },
-      { fetch: this.doFetch, clock, signal, onText: (shown) => show(tidyAnswer(stage.kind, shown)) },
+      // A translation that has lost its way is cut there, and what it would still write is not waited for.
+      { fetch: this.doFetch, clock, signal, onText: (shown) => show(tidyAnswer(stage.kind, shown)), ...(translating ? { cutAt: (shown: string) => runawayAt(shown, text) } : {}) },
     );
   }
 

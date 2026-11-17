@@ -23,6 +23,9 @@ import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } f
 import type { SharedModel } from './protocol';
 import type { Recognizer } from './transcriber';
 import type { Translator } from './translator';
+import { realClock } from '../contract/clock';
+import { completeText } from '../../providers/openai/textModel';
+import { boundedFor, runawayAt } from '../../providers/openai/runaway';
 
 const isNativeRecognizer = (id: string): boolean => NATIVE_MODELS.some((m) => m.id === id);
 const isNativeTranslator = (id: string): boolean => NATIVE_TRANSLATORS.some((m) => m.id === id);
@@ -260,16 +263,13 @@ export function nativeTranslator(doFetch: typeof fetch = (input, init) => fetch(
     async translate(text, _system, _wrap, previous) {
       if (!native) throw new Error('The translator was not told its model.');
       const request = translatorRequest(NATIVE_TRANSLATORS.find((m) => m.id === native!.id)!, native.source, native.target);
-      const response = await doFetch(`${translatorBaseUrl()}/chat/completions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${translatorKey() || 'no-key'}` },
-        body: JSON.stringify({ ...request.extra, model: native.id, stream: false, messages: [{ role: 'user', content: userOf(request, text, previous) }] }),
-      });
-      if (!response.ok) throw new Error(`The translation engine answered HTTP ${response.status}.`);
-      const body = (await response.json()) as { choices?: Array<{ message?: { content?: unknown } }> } | null;
-      const content = body?.choices?.[0]?.message?.content;
-      // A thinking model's thoughts are not the translation.
-      return { translatedText: typeof content === 'string' ? content.replace(/<think>[\s\S]*?<\/think>/g, '').trim() : '' };
+      // Read as it is written, so that a model that has lost its way is stopped there (`runaway.ts`): the device that
+      // asked waits for this one sentence, and its next ones behind it.
+      const answer = await completeText(
+        { url: `${translatorBaseUrl()}/chat/completions`, model: native.id, key: translatorKey(), system: '', extra: boundedFor(request.extra, text), user: userOf(request, text, previous) },
+        { fetch: doFetch, clock: realClock, signal: new AbortController().signal, cutAt: (shown) => runawayAt(shown, text) },
+      );
+      return { translatedText: answer.text };
     },
     dispose() {
       native = null;

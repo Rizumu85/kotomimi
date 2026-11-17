@@ -79,6 +79,28 @@ describe('one answer from a text model', () => {
     expect(said).toEqual(['こん', 'こんにちは']);
   });
 
+  it('ends the request where it is told the answer is to be cut, and waits for no more of it (fork)', async () => {
+    let aborted = false;
+    const fetch = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      const encoder = new TextEncoder();
+      // A model that would go on: the stream never closes by itself.
+      const body = new ReadableStream<Uint8Array>({
+        start(controller) {
+          for (const piece of ['ゴロ', 'ゴロ', 'ゴロ', 'ゴロ']) controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: piece } }] })}\n\n`));
+          init?.signal?.addEventListener('abort', () => { aborted = true; controller.error(new DOMException('aborted', 'AbortError')); });
+        },
+      });
+      return new Response(body, { headers: { 'Content-Type': 'text/event-stream' } });
+    });
+    const seen: string[] = [];
+    const answer = await completeText(REQUEST, deps(fetch, { onText: (text) => seen.push(text), cutAt: (text) => (text.length >= 6 ? 4 : -1) }));
+    expect(answer.text).toBe('ゴロゴロ');
+    expect(seen).toEqual(['ゴロ', 'ゴロゴロ', 'ゴロゴロ']);
+    expect(aborted).toBe(true);
+    // One that answers whole is cut the same.
+    expect((await completeText(REQUEST, deps(vi.fn(async () => whole('ゴロゴロゴロ')), { cutAt: () => 2 }))).text).toBe('ゴロ');
+  });
+
   it('reads a server that does not stream whole', async () => {
     const said: string[] = [];
     const answer = await completeText(REQUEST, deps(async () => whole('こんにちは'), { onText: (t) => said.push(t) }));
