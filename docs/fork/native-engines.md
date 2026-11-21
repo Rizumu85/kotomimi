@@ -1,16 +1,17 @@
 # Native engines
 
-Kotomimi downloads a native runtime and a model, runs the engine on this computer and streams audio to it. Numbers behind the conclusions here are in [measurements](measurements.md).
+Kotomimi downloads a native runtime and a model and runs the engine on this computer. Numbers are in [measurements](measurements.md).
 
 ## Runtime and where it lives
 
-One manager, `createNativeEngine` in `electron/native-engine.js`, runs three engines, each with its catalog and runtime.
+One manager, `createNativeEngine` in `electron/native-engine.js`, runs four engines, each with its catalog and runtime.
 
 | Engine | Runtime | Catalog | Folder in userData |
 |---|---|---|---|
 | Recognition | audio.cpp | `MODELS` | `native-engine` |
 | Translation | llama.cpp | `TRANSLATORS` | `native-translator` |
 | Feedback | llama.cpp | `COACHES` | `native-coach` |
+| Voice | audio.cpp | `VOICES` | `native-voice` |
 
 - Runtimes are the projects' release archives: Vulkan on Windows x64, Metal on Apple silicon.
 - Address, size and SHA-256 of every file are fixed in code. The page names a model by id and nothing else.
@@ -109,7 +110,7 @@ The system lets an app reserve only `AssetInventory.maximumReservedLocales` lang
 
 `native/apple-speech/build.sh` builds the helper as a small `.app`, because recognition is granted only to a bundle. Without the macOS 26 SDK it skips, and that build lacks the recognizer.
 
-Apple Speech can compare two installed candidates per audio source: a selected pair, not open detection. Only the final transcript's language routes translation and feedback, and a pair that cannot be met fails rather than falling back. See `docs/apple-speech-lan.md`.
+Apple Speech runs a recognizer for each language of a leg, three at once on a Mac and two on an iPad: chosen languages, not open detection. The recognizer that wins names a sentence's language, never its writing, and a language it lacks fails the start. See `docs/apple-speech-lan.md`.
 
 ## Native translation
 
@@ -129,7 +130,7 @@ Feedback runs in its own llama.cpp process, because one run can need it and tran
 
 ## Language identification
 
-Qwen3-ASR and SenseVoice, told no language, report the one they heard (audio.cpp's `/v1/audio/transcriptions/details`; the phone app's answer); the pipeline keeps it when it is one the leg may be in. The selected recognizer stays selected even when it cannot report the language. The pipeline then infers it from the text, by script and then a small detector (`src/lib/language/script.ts`, `src/lib/language/identify.ts`), and the language menu calls this a best effort. No installed model silently replaces the selection. Short or uncertain text stays unlabelled while translation continues.
+Qwen3-ASR and SenseVoice, told no language, report the one they heard (audio.cpp's `/v1/audio/transcriptions/details`; the phone app's answer); the pipeline keeps it when it is one the leg may be in. A recognizer that neither reports nor pairs stays selected: the pipeline infers the language from the text, by script and then a small detector (`src/lib/language/script.ts`, `src/lib/language/identify.ts`). No installed model silently replaces the selection. Short or uncertain text stays unlabelled while translation continues.
 
 ## Sharing
 

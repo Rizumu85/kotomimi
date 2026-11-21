@@ -10,7 +10,7 @@ import { PROVIDERS } from '../registry';
 import { createRealtimeAdapter } from './adapter';
 import type { RealtimeConfig } from './config';
 import {
-  buildLocalAI, createLocalAICheck, effectiveLocalAIModel, LOCALAI_DEFAULTS, localaiCredentials, localaiEndpoint, localaiModelsUrl, localaiProvider, settled,
+  buildLocalAI, checkLocalAIWithNative, createLocalAICheck, effectiveLocalAIModel, LOCALAI_DEFAULTS, localaiCredentials, localaiEndpoint, localaiModelsUrl, localaiProvider, prepareLocalAI, settled,
   migrateLocalAISettings, type LocalAICredentials, type LocalAISettings,
 } from './localai';
 import { REALTIME_WS_URL, realtimeProtocols, realtimeUrl } from './wire';
@@ -84,7 +84,7 @@ describe("LocalAI Realtime's endpoint", () => {
   });
 
   it('is the one credential while every stage is the server\'s, and carries no Realtime key', () => {
-    expect(localaiCredentials.keys).toEqual(['endpoint', 'serverKey', 'asrKey', 'translateKey', 'coachKey']);
+    expect(localaiCredentials.keys).toEqual(['endpoint', 'serverKey', 'asrKey', 'translateKey', 'coachKey', 'speakKey']);
     expect(localaiCredentials.fields(LOCALAI_DEFAULTS).map((f) => [f.key, f.secret])).toEqual([['endpoint', false]]);
     expect(localaiCredentials.read({ endpoint: 'http://192.168.1.10:8080' }, noAuth)).toEqual(K);
     expect(localaiCredentials.read({ endpoint: '' }, noAuth)).toHaveProperty('missing');
@@ -106,6 +106,38 @@ describe("LocalAI Realtime's endpoint", () => {
 });
 
 describe("LocalAI Realtime's stage keys", () => {
+  it('requires a voice key only for a run that uses the keyed voice', async () => {
+    const s = { ...LOCALAI_DEFAULTS, speak: { ...LOCALAI_DEFAULTS.speak, on: true, at: 'api' as const, apiBaseUrl: 'https://example.test/v1', apiModel: 'tts', apiNeedsKey: true } };
+    const ok = async () => ({ ok: true as const });
+    expect(localaiCredentials.read({ endpoint: K.endpoint, speakKey: ' ' }, noAuth)).toEqual(K);
+    expect(await checkLocalAIWithNative(K, s, ctx(), ok)).toEqual({ ok: false, reason: 'Enter the API key of the voice.' });
+    expect(await checkLocalAIWithNative({ ...K, speakKey: 'key' }, s, ctx(), ok)).toEqual({ ok: true });
+    expect(await checkLocalAIWithNative(K, s, { ...ctx(), legs: ['participant'] }, ok)).toEqual({ ok: true });
+    expect(await checkLocalAIWithNative(K, { ...s, speak: { ...s.speak, auto: false } }, ctx(), ok)).toEqual({ ok: true });
+  });
+
+  it('neither checks nor loads a native voice that cannot speak the target', async () => {
+    const s = { ...LOCALAI_DEFAULTS, speak: { ...LOCALAI_DEFAULTS.speak, on: true, nativeModel: 'irodori-tts-v4.1-small-mf-q8' } };
+    const voiceGap = vi.fn(async () => null);
+    const speaks = vi.fn(async () => {});
+    expect(await checkLocalAIWithNative(K, s, ctx(), async () => ({ ok: true }), { gap: vi.fn(), idle: vi.fn(), voiceGap })).toEqual({ ok: true });
+    await prepareLocalAI(ctx(), s, { hears: vi.fn(), translates: vi.fn(), coaches: vi.fn(), speaks, rest: vi.fn() });
+    expect(voiceGap).not.toHaveBeenCalled();
+    expect(speaks).not.toHaveBeenCalled();
+    const built = buildLocalAI({ ...AUTO, leg: 'speaker', speech: true }, s, SERVER_MODELS);
+    expect(built).not.toHaveProperty('refused');
+    expect(built).not.toHaveProperty('stages.voice');
+  });
+
+  it('attaches the voice by the named leg when both directions are identical', () => {
+    const direction = { source: 'zh-CN', target: 'zh-CN' };
+    const shared = { ...SERVER_MODELS, reversed: () => true };
+    const s = { ...LOCALAI_DEFAULTS, speak: { ...LOCALAI_DEFAULTS.speak, on: true, at: 'api' as const } };
+    const voiceOf = (leg: 'speaker' | 'participant') => buildLocalAI({ ...AUTO, direction, leg, speech: true }, s, shared);
+    expect(voiceOf('speaker')).toHaveProperty('stages.voice.via', 'edge');
+    expect(voiceOf('participant')).not.toHaveProperty('stages.voice');
+  });
+
   const fields = (patch: Partial<LocalAISettings>) => localaiCredentials.fields({ ...LOCALAI_DEFAULTS, ...patch }).map((f) => [f.key, f.secret]);
 
   it('asks for an API\'s key only while a stage runs there and the API wants one', () => {
@@ -131,7 +163,7 @@ describe("LocalAI Realtime's stage keys", () => {
   });
 
   it('declares every setting that decides a field, an endpoint the check reaches, or a model a start needs named', () => {
-    expect(localaiProvider.checkReads).toEqual(['asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'asrOther', 'asrOtherModel', 'asrMine', 'translateOther', 'translateOtherModel', 'coachOther', 'coachOtherModel', 'asrDetectOther', 'speakBoth', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'serverNeedsKey', 'model', 'translateModel', 'translateServerModel', 'coachModel', 'coachServerModel', 'asrHere', 'translateHere', 'coachHere', 'asrNativeModel', 'asrNativeByLanguage', 'translateNativeModel', 'coachNativeModel']);
+    expect(localaiProvider.checkReads).toEqual(['asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'asrOther', 'asrOtherModel', 'asrMine', 'translateOther', 'translateOtherModel', 'coachOther', 'coachOtherModel', 'asrDetectOther', 'speakBoth', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'serverNeedsKey', 'model', 'asrModel', 'speakAlso', 'theyAlso', 'theyLit', 'translateModel', 'translateServerModel', 'coachModel', 'coachServerModel', 'asrHere', 'translateHere', 'coachHere', 'asrNativeModel', 'asrNativeByLanguage', 'translateNativeModel', 'coachNativeModel', 'speak']);
   });
 });
 
@@ -430,9 +462,11 @@ describe('a LocalAI leg', () => {
 });
 
 describe('the LocalAI Realtime definition', () => {
-  it('is registered once, last, on the desktop app alone, text only, with both turn modes', () => {
+  it('is registered once, last, on the desktop app alone, speaking only where its voice stage is on, with both turn modes', () => {
     expect(PROVIDERS.filter((p) => p.id === 'localai')).toEqual([localaiProvider]);
-    expect(localaiProvider).toMatchObject({ id: 'localai', kind: 'own-key', platforms: ['electron'], speech: 'never', settings: { key: 'localai', defaults: LOCALAI_DEFAULTS } });
+    expect(localaiProvider).toMatchObject({ id: 'localai', kind: 'own-key', platforms: ['electron'], speech: 'optional', participantSpeech: false, settings: { key: 'localai', defaults: LOCALAI_DEFAULTS } });
+    expect(localaiProvider.speaks?.(LOCALAI_DEFAULTS)).toBe(false);
+    expect(localaiProvider.speaks?.({ ...LOCALAI_DEFAULTS, speak: { ...LOCALAI_DEFAULTS.speak, on: true } })).toBe(true);
     expect(localaiProvider.turns(LOCALAI_DEFAULTS)).toEqual(['auto', 'manual']);
     expect(localaiProvider.textInput(LOCALAI_DEFAULTS)).toBe(true);
     const env = (platform: 'electron' | 'extension' | 'web') => ({ platform, dev: false, enabled: new Set<string>(), kizuna: false, switchOn: () => false });

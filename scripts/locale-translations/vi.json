@@ -207,6 +207,26 @@
     "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
     "text": "Chỉ Kotomimi — chỉ khử âm thanh do Kotomimi phát, giúp thu giọng bạn rõ nhất. Phù hợp khi đeo tai nghe hoặc kính VR; nếu dùng loa, bạn cũng có thể chọn chế độ \"Cả hai\". Chọn mục này khi dùng thiết bị âm thanh ảo (VB-Cable, BlackHole) làm micrô."
   },
+  "fork.echoCancellationGate": {
+    "en": "By loudness",
+    "text": "Theo âm lượng"
+  },
+  "fork.echoCancellationGateTooltip": {
+    "en": "By loudness — for loudspeakers: what they play comes back into the microphone far quieter than your voice, so it is kept out by its loudness and your voice is left as it is.",
+    "text": "Theo âm lượng — khi dùng loa: âm thanh từ loa lọt vào mic nhỏ hơn nhiều so với giọng bạn, nên được chặn theo âm lượng và giọng bạn không bị ảnh hưởng."
+  },
+  "fork.echoCancellationOff": {
+    "en": "Off",
+    "text": "Tắt"
+  },
+  "fork.echoCancellationOffTooltip": {
+    "en": "Off — the microphone as it is. For headphones: nothing plays into it.",
+    "text": "Tắt — gửi nguyên âm thanh từ mic đi nhận dạng. Dùng khi đeo tai nghe: không có âm thanh nào lọt vào mic."
+  },
+  "fork.echoCancellationPassthrough": {
+    "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
+    "text": "Khi bật Truyền âm thanh gốc, chỉ chế độ Theo âm lượng hoạt động: các chế độ khác sẽ coi giọng của bạn là tiếng vọng và loại bỏ nó."
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Tìm lại"
@@ -995,6 +1015,134 @@
     "en": "What you want to say — Enter translates",
     "text": "Nhập điều muốn nói, nhấn Enter để dịch"
   },
+  "fork.voice.auto": {
+    "en": "Read my translations as they come",
+    "text": "Tự đọc bản dịch sau khi tôi nói xong"
+  },
+  "fork.voice.cannotSpeak": {
+    "en": "{{name}} cannot speak {{language}}.",
+    "text": "{{name}} không nói được {{language}}."
+  },
+  "fork.voice.hearBoth": {
+    "en": "To both",
+    "text": "Cho cả hai nghe"
+  },
+  "fork.voice.hearers": {
+    "en": "Read my translations aloud",
+    "text": "Tự động đọc bản dịch"
+  },
+  "fork.voice.hearMe": {
+    "en": "To me",
+    "text": "Cho tôi nghe"
+  },
+  "fork.voice.hearNone": {
+    "en": "Off",
+    "text": "Tắt"
+  },
+  "fork.voice.hearThem": {
+    "en": "To them",
+    "text": "Cho người kia nghe"
+  },
+  "fork.voice.lineFailed": {
+    "en": "This line could not be read aloud",
+    "text": "Không thể đọc dòng này"
+  },
+  "fork.voice.man": {
+    "en": "Male voice",
+    "text": "Giọng nam"
+  },
+  "fork.voice.meetingDevice": {
+    "en": "Output for the other side",
+    "text": "Đầu ra âm thanh cho bên kia"
+  },
+  "fork.voice.meetingDeviceAuto": {
+    "en": "Virtual microphone (automatic)",
+    "text": "Micrô ảo (tự động)"
+  },
+  "fork.voice.meetingDeviceTooltip": {
+    "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
+    "text": "Bản dịch được đọc qua thiết bị này để bên kia nghe như qua micrô. Nếu card âm thanh có sẵn chức năng trộn âm, hãy chọn một kênh phát của card rồi trộn âm từ kênh đó với tiếng micrô ngay trên card. Như vậy, giọng gốc của bạn không đi qua phần mềm."
+  },
+  "fork.voice.modelPlaceholder": {
+    "en": "The model's name, e.g. tts-1",
+    "text": "Tên mô hình, ví dụ tts-1"
+  },
+  "fork.voice.myVoiceToo": {
+    "en": "My own voice goes too",
+    "text": "Gửi cả giọng thật của tôi"
+  },
+  "fork.voice.myVoiceTooTooltip": {
+    "en": "Off: they hear only the voice reading your translation.",
+    "text": "Khi tắt, bên kia chỉ nghe thấy giọng đọc bản dịch."
+  },
+  "fork.voice.needsSpeaker": {
+    "en": "It reads what you say or type. Switch the mode to \"Me\" or \"Both\".",
+    "text": "Tính năng này đọc lời bạn nói và nội dung bạn gõ. Hãy chuyển chế độ sang \"Tôi\" hoặc \"Cả hai\"."
+  },
+  "fork.voice.on": {
+    "en": "Read aloud",
+    "text": "Bật đọc thành tiếng"
+  },
+  "fork.voice.sample": {
+    "en": "Play a sample",
+    "text": "Nghe thử"
+  },
+  "fork.voice.sayLine": {
+    "en": "Read this line aloud",
+    "text": "Đọc dòng này"
+  },
+  "fork.voice.stage": {
+    "en": "Voice",
+    "text": "Đọc thành tiếng"
+  },
+  "fork.voice.stageTooltip": {
+    "en": "Reads your translations aloud. Any line of the conversation can be heard too: press its speaker button.",
+    "text": "Đọc bản dịch của bạn thành tiếng. Bạn cũng có thể nghe bất kỳ dòng nào trong cuộc trò chuyện bằng cách nhấn nút loa bên cạnh."
+  },
+  "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "Dừng"
+  },
+  "fork.voice.toMe": {
+    "en": "I hear it",
+    "text": "Tôi nghe"
+  },
+  "fork.voice.toMeFix": {
+    "en": "Choose",
+    "text": "Chọn"
+  },
+  "fork.voice.toMeLocked": {
+    "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
+    "text": "Chưa dùng được mục «Tôi nghe». Âm thanh của người bên kia đang được thu từ toàn bộ hệ thống, nên ứng dụng sẽ nhầm giọng đọc bản dịch với lời họ nói. Hãy chọn một ứng dụng cụ thể làm nguồn âm thanh, ví dụ VRChat."
+  },
+  "fork.voice.toThem": {
+    "en": "The other side hears it",
+    "text": "Bên kia nghe"
+  },
+  "fork.voice.toThemTooltip": {
+    "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
+    "text": "Khi đọc cho bên kia nghe, âm thanh sẽ được gửi vào micrô ảo. Trong VRChat hoặc ứng dụng họp, hãy chọn micrô đó (trên Windows có tên là CABLE Output)."
+  },
+  "fork.voice.voice": {
+    "en": "Voice",
+    "text": "Giọng đọc"
+  },
+  "fork.voice.voiceOf": {
+    "en": "{{language}} voice",
+    "text": "Giọng đọc {{language}}"
+  },
+  "fork.voice.volumeMine": {
+    "en": "Volume for me",
+    "text": "Âm lượng cho bạn"
+  },
+  "fork.voice.volumeTheirs": {
+    "en": "Volume for them",
+    "text": "Âm lượng cho đối phương"
+  },
+  "fork.voice.woman": {
+    "en": "Female voice",
+    "text": "Giọng nữ"
+  },
   "fork.vr.back": {
     "en": "Back",
     "text": "Quay lại"
@@ -1463,6 +1611,10 @@
     "en": "Custom address",
     "text": "Địa chỉ tùy chỉnh"
   },
+  "providers.localai.apiServiceEdge": {
+    "en": "Edge online voices (free)",
+    "text": "Giọng đọc trực tuyến Edge (miễn phí)"
+  },
   "providers.localai.apiServiceModel": {
     "en": "Choose from the list on the right, or type a name",
     "text": "Chọn trong danh sách bên phải hoặc nhập tên"
@@ -1855,6 +2007,34 @@
     "en": "Updating the speech recognition engine. You can start once it is done.",
     "text": "Đang cập nhật công cụ nhận dạng giọng nói. Bạn có thể bắt đầu khi hoàn tất."
   },
+  "providers.localai.nativeVoiceFailed": {
+    "en": "The voice engine could not start. In the Voice card, press \"Try again\" — or choose another model.",
+    "text": "Không thể khởi động bộ đọc. Hãy nhấn \"Thử lại\" trong mục \"Đọc thành tiếng\" hoặc chọn mô hình khác."
+  },
+  "providers.localai.nativeVoiceFailedShort": {
+    "en": "The voice engine could not start.",
+    "text": "Không thể khởi động bộ đọc."
+  },
+  "providers.localai.nativeVoiceMissing": {
+    "en": "The voice model is not downloaded yet. Download it to start.",
+    "text": "Chưa tải mô hình đọc. Tải xuống để bắt đầu."
+  },
+  "providers.localai.nativeVoiceReady": {
+    "en": "The voice engine is ready.",
+    "text": "Bộ đọc đã sẵn sàng."
+  },
+  "providers.localai.nativeVoiceUnsupported": {
+    "en": "The native voice engine is not available for this system. In the Voice card, switch to \"API model\".",
+    "text": "Hệ thống này hiện chưa hỗ trợ bộ đọc tích hợp. Hãy chuyển sang \"Mô hình API\" trong mục \"Đọc thành tiếng\"."
+  },
+  "providers.localai.nativeVoiceUpdating": {
+    "en": "Updating the voice engine. You can start once it is done.",
+    "text": "Đang cập nhật bộ đọc. Bạn có thể bắt đầu khi cập nhật xong."
+  },
+  "providers.localai.nativeVoiceWarmingShort": {
+    "en": "Starting the voice engine…",
+    "text": "Đang khởi động bộ đọc…"
+  },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
     "text": "Bộ máy nhận dạng vẫn đang khởi động, lần đầu sau khi bật máy mất khoảng nửa phút. Bạn có thể bắt đầu khi bộ máy sẵn sàng."
@@ -1894,6 +2074,14 @@
   "providers.localai.noteIndexTranslate": {
     "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
     "text": "Thử dịch tiếng Nhật sang tiếng Trung: khoảng 3 trên 30 câu có lỗi nghiêm trọng, tốt nhất trong các mô hình đã thử; khoảng 0.1 giây mỗi câu. Dùng khoảng 2 GB bộ nhớ đồ họa, hỗ trợ hơn 100 ngôn ngữ."
+  },
+  "providers.localai.noteIrodori": {
+    "en": "Japanese only. Measured: nothing misread, about half a second a sentence. About 1.7 GB of video memory.",
+    "text": "Chỉ hỗ trợ tiếng Nhật. Thử nghiệm không đọc sai, mỗi câu mất khoảng nửa giây. Dùng khoảng 1.7 GB bộ nhớ đồ họa."
+  },
+  "providers.localai.noteKokoro": {
+    "en": "Light: runs on the processor and takes no video memory. Less natural, Japanese most of all.",
+    "text": "Nhẹ: chỉ dùng bộ xử lý, không chiếm bộ nhớ đồ họa. Giọng đọc kém tự nhiên hơn, nhất là tiếng Nhật."
   },
   "providers.localai.noteMoonshineJa": {
     "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
@@ -1942,6 +2130,10 @@
   "providers.localai.noteQwen17": {
     "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
     "text": "Thử với hội thoại tiếng Nhật: khoảng 19% ký tự sai. Chỉ hiện chữ sau khi nói xong câu (trễ khoảng 10 giây); bản GGUF ở trên hiện chữ ngay khi nói."
+  },
+  "providers.localai.noteQwen3Tts": {
+    "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
+    "text": "Tự nhiên nhất, phát giọng ngay khi bắt đầu. Thử nghiệm với tiếng Nhật, tiếng Trung và tiếng Anh đều không đọc sai. Dùng khoảng 3 GB bộ nhớ đồ họa, hỗ trợ 10 ngôn ngữ."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
@@ -2118,6 +2310,10 @@
   "providers.localai.sourceAuto": {
     "en": "The language cannot be detected with this setup. Choose the language you speak.",
     "text": "Cấu hình này không thể tự nhận biết ngôn ngữ. Hãy chọn ngôn ngữ bạn nói."
+  },
+  "providers.localai.speakKey": {
+    "en": "API key of the voice",
+    "text": "Khóa API của mô hình đọc"
   },
   "providers.localai.speedAbout": {
     "en": "About {{seconds}} s",
@@ -2327,6 +2523,10 @@
     "en": "API model",
     "text": "Mô hình API"
   },
+  "providers.localai.voiceUnnamed": {
+    "en": "The voice has no model to run yet. Name one in the Voice card.",
+    "text": "Chưa nhập mô hình đọc. Hãy nhập trong mục \"Đọc thành tiếng\"."
+  },
   "providers.openai_live.name": {
     "en": "OpenAI Live",
     "text": "OpenAI Live"
@@ -2438,6 +2638,10 @@
   "settings.glossaryWritten": {
     "en": "Word",
     "text": "Từ ngữ"
+  },
+  "settings.noiseSuppressionTooltip.off": {
+    "en": "Off — no noise suppression: the microphone as it is. Best in a quiet room.",
+    "text": "Tắt — không khử tiếng ồn: giữ nguyên âm thanh từ micrô. Phù hợp nhất trong phòng yên tĩnh."
   },
   "settings.transcriptKeywordsPlaceholder": {
     "en": "Sokuji, Kizuna AI, PulseAudio",

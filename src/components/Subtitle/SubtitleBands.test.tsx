@@ -1,9 +1,10 @@
 import { useCoachingStore } from '../../stores/coachingStore';
-import { describe, it, expect, vi } from 'vitest';
+import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { act, render } from '@testing-library/react';
 import { TRANSIENT_NOTICE_MS } from '../../lib/view/filter';
 import type { Entry, Row } from '../../lib/projection/types';
 import { SubtitleBody, type SubtitleBodyProps } from './SubtitleBands';
+import { lastLineBare } from './SubtitleLanes';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -177,15 +178,18 @@ describe('SubtitleBody — compact: the fork\u2019s lanes', () => {
     expect(view.container.querySelector('.subtitle-lane__answer')?.textContent).toBe(translated.text);
   });
 
-  it('leaves the newest row and its translation intact when an older sentence receives feedback', () => {
+  it('leaves the newest row and its translation intact when an older sentence receives feedback, which has its own line', () => {
     const first = { ...exchange('first', [{ ...row('s-first', 0, 0, 'I goes.'), language: 'en' }], [{ ...row('t-first', 0, 0, 'Je vais.', 'translation'), purpose: 'translation' as const }]), languages: { source: 'fr', target: 'en' } };
     const second = { ...exchange('second', [{ ...row('s-second', 0, 0, 'We arrive tomorrow.'), language: 'en' }], [{ ...row('t-second', 0, 0, 'Nous arrivons demain.', 'translation'), purpose: 'translation' as const }]), languages: first.languages };
     const other = theirs('other', 'はい。', 'Yes.');
     const view = render(<SubtitleBody {...props({ entries: [first, second, other] })} />);
-    const before = view.container.querySelector('[data-lane="speaker"]')?.textContent;
+    const before = view.container.querySelector('[data-lane="speaker"] .subtitle-lane__row')?.textContent;
     view.rerender(<SubtitleBody {...props({ entries: [{ ...first, feedback: [{ ...row('f-first', 0, 0, 'I go.', 'translation'), purpose: 'feedback' as const }] }, second, other] })} />);
-    expect(view.container.querySelector('[data-lane="speaker"]')?.textContent).toBe(before);
-    expect(view.container.querySelector('[data-lane="speaker"] .subtitle-lane__feedback')).toBeNull();
+    expect(view.container.querySelector('[data-lane="speaker"] .subtitle-lane__row')?.textContent).toBe(before);
+    // Fork: kept in the feedback's line, with the sentence it is on, until the next comes.
+    const feedback = view.container.querySelector('[data-lane="speaker"] .subtitle-lane__feedback');
+    expect(feedback?.textContent).toContain('I go');
+    expect(feedback?.textContent).toContain('I goes.');
   });
 
   it('draws the newest sentence alone, whatever was said before: a higher window is room for it, not for those', () => {
@@ -240,6 +244,75 @@ describe('SubtitleBody — compact: the fork\u2019s lanes', () => {
     const { rerender } = render(<SubtitleBody {...props({ ...heard, entries: [] })} />);
     rerender(<SubtitleBody {...props(heard)} />);
     expect(onHeight).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the room planned for a romanization while the first sentence waits for its answer (fork)', async () => {
+    // With romaji on, the user's own row had its line of romanization until their first word, lost it (their Chinese
+    // has none) and had it again when the Japanese answer came: the window went a line down and up (2026-11-18).
+    const { useAnnotationStore } = await import('../../stores/annotationStore');
+    const heard = { pair: { source: 'zh-CN', target: 'ja' }, legs: ['speaker', 'participant'] } as const;
+    // Grammar feedback off (an earlier test leaves it on): under it the row has no romanization, and nothing to lose.
+    act(() => { useCoachingStore.setState({ coached: false }); });
+    const plain = vi.fn();
+    render(<SubtitleBody {...props({ ...heard, onHeight: plain, entries: [] })} />).unmount();
+    act(() => { useAnnotationStore.setState({ romanization: true, romanizationOff: [] }); });
+    try {
+      const onHeight = vi.fn();
+      const said = (answer: Row[]): Entry => ({ ...exchange('a', [{ ...row('s1', 0, 0, '我想去咖啡店。'), language: 'zh' }], answer), languages: { source: 'zh-CN', target: 'ja' } });
+      const { rerender } = render(<SubtitleBody {...props({ ...heard, onHeight, entries: [] })} />);
+      rerender(<SubtitleBody {...props({ ...heard, onHeight, entries: [said([])] })} />);
+      rerender(<SubtitleBody {...props({ ...heard, onHeight, entries: [said([row('t1', 0, 0, 'カフェに行きたいです。', 'translation')])] })} />);
+      expect(onHeight).toHaveBeenCalledTimes(1);
+      // The room is there: the strip is higher than one with no romanization to keep room for.
+      expect((onHeight.mock.calls[0] as [number, number])[0]).toBeGreaterThan((plain.mock.calls[0] as [number, number])[0]);
+    } finally {
+      act(() => { useAnnotationStore.setState({ romanization: false, romanizationOff: [] }); });
+    }
+  });
+});
+
+describe('the room for a second language\u2019s reading aids (fork)', () => {
+  const said = (answers: Row[]): Entry => ({ ...exchange('a', [{ ...row('s1', 0, 0, '好啊，我们去吃烤肉吧。'), language: 'zh' }], answers), languages: { source: 'zh-CN', target: 'ja' } });
+  const korean: Row = { ...row('t2', 0, 0, '좋아요, 우리 고기 먹으러 가요.', 'translation'), language: 'ko' };
+  const japanese: Row = { ...row('t1', 0, 0, 'いいですね、焼肉を食べに行きましょう。', 'translation'), language: 'ja' };
+  const run = async (beside: SubtitleBodyProps['beside']) => {
+    const { useAnnotationStore } = await import('../../stores/annotationStore');
+    // Romanization under Korean, none under Japanese: the pair alone asks for no room.
+    // (An earlier test leaves grammar feedback on, under which the user's row has no romanization at all.)
+    act(() => { useCoachingStore.setState({ coached: false }); useAnnotationStore.setState({ romanization: true, romanizationOff: ['ja'] }); });
+    try {
+      const onHeight = vi.fn();
+      const heard = { onHeight, pair: { source: 'zh-CN', target: 'ja' }, legs: ['speaker', 'participant'], also: 1, beside } as const;
+      const { rerender, unmount } = render(<SubtitleBody {...props({ ...heard, entries: [] })} />);
+      rerender(<SubtitleBody {...props({ ...heard, entries: [said([japanese])] })} />);
+      rerender(<SubtitleBody {...props({ ...heard, entries: [said([japanese, korean])] })} />);
+      unmount();
+      return onHeight.mock.calls.map((call) => call[0] as number);
+    } finally {
+      act(() => { useAnnotationStore.setState({ romanization: false, romanizationOff: [] }); });
+    }
+  };
+
+  it('is there from the start where the run says which language is lit: the window is not made higher at the first translation into it', async () => {
+    const told = await run({ mine: [], theirs: ['ko'] });
+    expect(told).toHaveLength(1);
+    // Not told, the strip finds out with the first Korean line, and grows then.
+    const untold = await run(undefined);
+    expect(untold).toHaveLength(2);
+    expect(untold[1]).toBeGreaterThan(untold[0]);
+    // Told, it has that room and the other side's own (they may speak the language lit): nothing is left to grow by.
+    expect(told[0]).toBeGreaterThanOrEqual(untold[1]);
+  });
+});
+
+describe('a small line whose last line has no romanization (fork)', () => {
+  it('is told by where its romanized stretches end: none on the last line', () => {
+    // One line of 34 px ending at 100: a stretch that ends there has its romanization on it.
+    expect(lastLineBare(100, 34, [])).toBe(true);
+    expect(lastLineBare(100, 34, [100])).toBe(false);
+    // Wrapped: the stretch ended a line up, and the last line is plain.
+    expect(lastLineBare(100, 34, [50])).toBe(true);
+    expect(lastLineBare(100, 34, [50, 99.6])).toBe(false);
   });
 });
 
@@ -345,6 +418,8 @@ describe('SubtitleBody — independent coaching feedback turns', () => {
     feedback: [{ ...row(`f-${id}`, 0, 0, 'I go to school.\nPresent tense.', 'translation'), language: 'fr', purpose: 'feedback', ...(combined ? { accompaniesTranslation: true as const } : {}) }],
   });
   const answer = (container: HTMLElement) => container.querySelector('[data-lane="speaker"] .subtitle-lane__answer')?.textContent;
+  // Without the line kept under grammar feedback: what is asked here is when feedback is written, not where.
+  beforeEach(() => { useCoachingStore.setState({ coached: false }); });
 
   it.each([true, false])('shows standalone feedback with its own original sentence (compact: %s)', (compact) => {
     const { container } = render(<SubtitleBody {...props({ entries: [practiced('practice')], legs: ['speaker'], compact })} />);
@@ -374,7 +449,8 @@ describe('SubtitleBody — independent coaching feedback turns', () => {
       expect(view.container.querySelector('.subtitle-lane__feedback')).not.toBeNull();
       act(() => { vi.advanceTimersByTime(2600); });
       expect(answer(view.container)).toBe('We leave.');
-      expect(view.container.querySelector('.subtitle-lane__feedback')).toBeNull();
+      // Fork: the feedback stays in its line until the next comes.
+      expect(view.container.querySelector('.subtitle-lane__feedback .kt-fix__gone')?.textContent).toBe('goes');
     } finally {
       vi.useRealTimers();
     }
@@ -400,7 +476,7 @@ describe('SubtitleBody — independent coaching feedback turns', () => {
     }
   });
 
-  it('does not restart a translation dwell when its feedback arrives late, or carry that feedback onto the next sentence', () => {
+  it('does not restart a translation dwell when its feedback arrives late, and keeps that feedback in its line when the next sentence comes', () => {
     vi.useFakeTimers();
     try {
       const first = native('first', 'I goes.', 'Je vais.');
@@ -414,7 +490,7 @@ describe('SubtitleBody — independent coaching feedback turns', () => {
       expect(answer(view.container)).toBe('Je vais.');
       act(() => { vi.advanceTimersByTime(120); });
       expect(answer(view.container)).toBe('We leave.');
-      expect(view.container.querySelector('.subtitle-lane__feedback')).toBeNull();
+      expect(view.container.querySelector('.subtitle-lane__feedback .kt-fix__gone')?.textContent).toBe('goes');
     } finally {
       vi.useRealTimers();
     }

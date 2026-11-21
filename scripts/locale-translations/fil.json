@@ -255,6 +255,26 @@
     "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
     "text": "Kotomimi lang — inaalis lang ang tunog na pinapatugtog ng Kotomimi para pinakamalinaw na makuha ang boses mo. Angkop kapag naka-headphone o VR headset; puwede rin sa speaker kung \"Pareho\" ang mode. Piliin ito kung virtual sound card (VB-Cable, BlackHole) ang gamit bilang mikropono."
   },
+  "fork.echoCancellationGate": {
+    "en": "By loudness",
+    "text": "Batay sa lakas ng tunog"
+  },
+  "fork.echoCancellationGateTooltip": {
+    "en": "By loudness — for loudspeakers: what they play comes back into the microphone far quieter than your voice, so it is kept out by its loudness and your voice is left as it is.",
+    "text": "Ayon sa lakas ng tunog — para sa mga speaker: ang pinapatugtog ng mga ito ay mas mahina pagbalik sa mikropono kaysa sa boses mo, kaya hinaharangan ito batay sa lakas at hindi naaapektuhan ang boses mo."
+  },
+  "fork.echoCancellationOff": {
+    "en": "Off",
+    "text": "Naka-off"
+  },
+  "fork.echoCancellationOffTooltip": {
+    "en": "Off — the microphone as it is. For headphones: nothing plays into it.",
+    "text": "Naka-off — ipinapadala ang mikropono nang walang pagbabago. Para sa mga headphone: walang tunog na pumapasok dito."
+  },
+  "fork.echoCancellationPassthrough": {
+    "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
+    "text": "Kapag naka-on ang Original Audio Passthrough, tanging By loudness lang ang gumagana: ituturing ng ibang paraan na echo ang sarili mong boses at aalisin ito."
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Maghanap muli"
@@ -1043,6 +1063,134 @@
     "en": "What you want to say — Enter translates",
     "text": "Ang gusto mong sabihin. Enter para isalin"
   },
+  "fork.voice.auto": {
+    "en": "Read my translations as they come",
+    "text": "Awtomatikong basahin ang salin pagkasalita ko"
+  },
+  "fork.voice.cannotSpeak": {
+    "en": "{{name}} cannot speak {{language}}.",
+    "text": "Hindi nakapagsasalita ng {{language}} ang {{name}}."
+  },
+  "fork.voice.hearBoth": {
+    "en": "To both",
+    "text": "Sa pareho"
+  },
+  "fork.voice.hearers": {
+    "en": "Read my translations aloud",
+    "text": "Awtomatikong basahin ang salin"
+  },
+  "fork.voice.hearMe": {
+    "en": "To me",
+    "text": "Sa akin"
+  },
+  "fork.voice.hearNone": {
+    "en": "Off",
+    "text": "Naka-off"
+  },
+  "fork.voice.hearThem": {
+    "en": "To them",
+    "text": "Sa kausap"
+  },
+  "fork.voice.lineFailed": {
+    "en": "This line could not be read aloud",
+    "text": "Hindi mabasa nang malakas ang linyang ito"
+  },
+  "fork.voice.man": {
+    "en": "Male voice",
+    "text": "Boses lalaki"
+  },
+  "fork.voice.meetingDevice": {
+    "en": "Output for the other side",
+    "text": "Ipadala ang tunog para sa kausap sa"
+  },
+  "fork.voice.meetingDeviceAuto": {
+    "en": "Virtual microphone (automatic)",
+    "text": "Birtuwal na mikropono (awtomatiko)"
+  },
+  "fork.voice.meetingDeviceTooltip": {
+    "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
+    "text": "Dito pinapatugtog ang binibigkas na salin. Naririnig ito ng kausap mo na parang galing sa mikropono. Kung kayang pagsamahin ng sound card mo mismo ang mga tunog, pumili ng isa sa mga playback channel nito at doon ihalo ang tunog mula sa mikropono mo. Sa ganitong paraan, hindi na dadaan sa software ang boses mo."
+  },
+  "fork.voice.modelPlaceholder": {
+    "en": "The model's name, e.g. tts-1",
+    "text": "Pangalan ng modelo, hal. tts-1"
+  },
+  "fork.voice.myVoiceToo": {
+    "en": "My own voice goes too",
+    "text": "Isama ang sarili kong boses"
+  },
+  "fork.voice.myVoiceTooTooltip": {
+    "en": "Off: they hear only the voice reading your translation.",
+    "text": "Kapag naka-off, ang binabasang salin lang ang maririnig ng kausap."
+  },
+  "fork.voice.needsSpeaker": {
+    "en": "It reads what you say or type. Switch the mode to \"Me\" or \"Both\".",
+    "text": "Binabasa nito ang sinasabi o tina-type mo. Lumipat sa mode na \"Ako\" o \"Pareho\"."
+  },
+  "fork.voice.on": {
+    "en": "Read aloud",
+    "text": "Basahin nang malakas"
+  },
+  "fork.voice.sample": {
+    "en": "Play a sample",
+    "text": "Pakinggan ang sample"
+  },
+  "fork.voice.sayLine": {
+    "en": "Read this line aloud",
+    "text": "Basahin nang malakas ang linyang ito"
+  },
+  "fork.voice.stage": {
+    "en": "Voice",
+    "text": "Pagbasa"
+  },
+  "fork.voice.stageTooltip": {
+    "en": "Reads your translations aloud. Any line of the conversation can be heard too: press its speaker button.",
+    "text": "Binabasa nang malakas ang iyong mga salin. Puwede ring pakinggan ang anumang linya sa usapan: pindutin ang icon ng speaker nito."
+  },
+  "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "Ihinto"
+  },
+  "fork.voice.toMe": {
+    "en": "I hear it",
+    "text": "Ako ang makaririnig"
+  },
+  "fork.voice.toMeFix": {
+    "en": "Choose",
+    "text": "Pumili"
+  },
+  "fork.voice.toMeLocked": {
+    "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
+    "text": "Hindi magagamit ngayon ang \"Pakinggan ko\". Kinukuha ang tunog ng kausap sa buong sistema, kaya mapagkakamalang boses niya ang binabasang salin. Pumili ng isang app bilang pinagmulan ng tunog ng kausap (hal. VRChat)."
+  },
+  "fork.voice.toThem": {
+    "en": "The other side hears it",
+    "text": "Kausap ang makaririnig"
+  },
+  "fork.voice.toThemTooltip": {
+    "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
+    "text": "Kapag binabasa para sa kausap, ipinapadala ang tunog sa virtual na mikropono. Piliin ito bilang mikropono sa VRChat o sa app para sa pulong (CABLE Output ang tawag dito sa Windows)."
+  },
+  "fork.voice.voice": {
+    "en": "Voice",
+    "text": "Boses"
+  },
+  "fork.voice.voiceOf": {
+    "en": "{{language}} voice",
+    "text": "Boses sa {{language}}"
+  },
+  "fork.voice.volumeMine": {
+    "en": "Volume for me",
+    "text": "Lakas ng tunog para sa akin"
+  },
+  "fork.voice.volumeTheirs": {
+    "en": "Volume for them",
+    "text": "Lakas ng tunog para sa kausap"
+  },
+  "fork.voice.woman": {
+    "en": "Female voice",
+    "text": "Boses babae"
+  },
   "fork.vr.back": {
     "en": "Back",
     "text": "Bumalik"
@@ -1587,6 +1735,10 @@
     "en": "Custom address",
     "text": "Sariling address"
   },
+  "providers.localai.apiServiceEdge": {
+    "en": "Edge online voices (free)",
+    "text": "Mga online na boses ng Edge (libre)"
+  },
   "providers.localai.apiServiceModel": {
     "en": "Choose from the list on the right, or type a name",
     "text": "Pumili sa listahan sa kanan, o maglagay ng pangalan"
@@ -1979,6 +2131,34 @@
     "en": "Updating the speech recognition engine. You can start once it is done.",
     "text": "Ina-update ang engine ng pagkilala sa pagsasalita. Maaari ka nang magsimula kapag tapos na."
   },
+  "providers.localai.nativeVoiceFailed": {
+    "en": "The voice engine could not start. In the Voice card, press \"Try again\" — or choose another model.",
+    "text": "Hindi masimulan ang makina sa pagbasa. Sa seksyong \"Pagbasa\", pindutin ang \"Subukan muli\" o pumili ng ibang modelo."
+  },
+  "providers.localai.nativeVoiceFailedShort": {
+    "en": "The voice engine could not start.",
+    "text": "Hindi masimulan ang makina sa pagbasa."
+  },
+  "providers.localai.nativeVoiceMissing": {
+    "en": "The voice model is not downloaded yet. Download it to start.",
+    "text": "Hindi pa na-download ang modelo sa pagbasa. I-download ito para makapagsimula."
+  },
+  "providers.localai.nativeVoiceReady": {
+    "en": "The voice engine is ready.",
+    "text": "Handa na ang makina sa pagbasa."
+  },
+  "providers.localai.nativeVoiceUnsupported": {
+    "en": "The native voice engine is not available for this system. In the Voice card, switch to \"API model\".",
+    "text": "Hindi pa suportado ng sistemang ito ang katutubong makina sa pagbasa. Sa seksyong \"Pagbasa\", lumipat sa \"Modelo ng API\"."
+  },
+  "providers.localai.nativeVoiceUpdating": {
+    "en": "Updating the voice engine. You can start once it is done.",
+    "text": "Ina-update ang makina sa pagbasa. Makakapagsimula ka kapag tapos na."
+  },
+  "providers.localai.nativeVoiceWarmingShort": {
+    "en": "Starting the voice engine…",
+    "text": "Sinisimulan ang makina sa pagbasa…"
+  },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
     "text": "Sinisimulan pa ang makina sa pagkilala ng pananalita. Mga kalahating minuto ito sa unang paggamit matapos buksan ang computer. Puwede ka nang magsimula kapag handa na."
@@ -2018,6 +2198,14 @@
   "providers.localai.noteIndexTranslate": {
     "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
     "text": "Sa pagsubok mula Hapones patungong Tsino: may malubhang mali sa humigit-kumulang 3 sa 30 pangungusap, ang pinakamahusay sa mga nasubukan; mga 0.1 segundo bawat pangungusap. Gumagamit ng mga 2 GB ng memorya ng graphics card at sumusuporta sa mahigit isang daang wika."
+  },
+  "providers.localai.noteIrodori": {
+    "en": "Japanese only. Measured: nothing misread, about half a second a sentence. About 1.7 GB of video memory.",
+    "text": "Japanese lang. Sa pagsubok, walang maling bigkas at humigit-kumulang kalahating segundo bawat pangungusap. Gumagamit ng humigit-kumulang 1.7 GB ng video memory."
+  },
+  "providers.localai.noteKokoro": {
+    "en": "Light: runs on the processor and takes no video memory. Less natural, Japanese most of all.",
+    "text": "Magaan: processor lang ang gamit, walang kinakain na memorya ng video card. Hindi gaanong natural, lalo na sa Japanese."
   },
   "providers.localai.noteMoonshineJa": {
     "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
@@ -2066,6 +2254,10 @@
   "providers.localai.noteQwen17": {
     "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
     "text": "Sa pagsubok sa usapang Hapones: mga 19% ng mga karakter ang mali. Lalabas lang ang teksto kapag tapos na ang pangungusap, na mga 10 segundo ang huli; ang bersyong GGUF sa itaas ay nagpapakita ng teksto habang nagsasalita ka."
+  },
+  "providers.localai.noteQwen3Tts": {
+    "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
+    "text": "Pinakanatural, at agad nagsasalita. Sa pagsubok sa Japanese, Chinese at English, walang maling bigkas. Gumagamit ng humigit-kumulang 3 GB ng video memory at may suporta sa 10 wika."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
@@ -2242,6 +2434,10 @@
   "providers.localai.sourceAuto": {
     "en": "The language cannot be detected with this setup. Choose the language you speak.",
     "text": "Hindi awtomatikong matukoy ang wika sa ganitong pagsasaayos. Piliin ang wikang sinasalita mo."
+  },
+  "providers.localai.speakKey": {
+    "en": "API key of the voice",
+    "text": "API key ng modelo sa pagbasa"
   },
   "providers.localai.speedAbout": {
     "en": "About {{seconds}} s",
@@ -2451,6 +2647,10 @@
     "en": "API model",
     "text": "Modelo sa API"
   },
+  "providers.localai.voiceUnnamed": {
+    "en": "The voice has no model to run yet. Name one in the Voice card.",
+    "text": "Wala pang nakalagay na modelo sa pagbasa. Ilagay ito sa seksyong \"Pagbasa\"."
+  },
   "providers.openai_live.name": {
     "en": "OpenAI Live",
     "text": "OpenAI Live"
@@ -2582,6 +2782,10 @@
   "settings.glossaryWritten": {
     "en": "Word",
     "text": "Salita"
+  },
+  "settings.noiseSuppressionTooltip.off": {
+    "en": "Off — no noise suppression: the microphone as it is. Best in a quiet room.",
+    "text": "Naka-off — walang pagbawas ng ingay: ang mikropono ay ipinapadala kung ano ito para sa pagkilala. Pinakamainam sa tahimik na kuwarto."
   },
   "settings.normal": {
     "en": "Normal",

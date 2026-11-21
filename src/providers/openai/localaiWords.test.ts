@@ -200,17 +200,18 @@ describe('the other side\u2019s language left to be detected, heard by another K
   it('keeps the chosen Apple recognizer when an unrelated detector is also available', () => {
     const built = buildLocalAI(THEIRS, s, { ...SHARED, reversed, models: listing(['ja', 'zh', 'auto']) });
     if ('refused' in built) throw new Error(built.refused);
-    // The selected family remains selected; the client handles language identification as a best effort.
+    // Only the selected family's Japanese recognizer hears this leg.
     expect(built.transcription).toEqual({ model: 'apple-speech:ja', language: 'ja' });
-    expect(built.stages).toMatchObject({ heard: 'auto' });
+    expect(built.stages?.heard).not.toBe('auto');
+    expect(built.stages?.named).toBe('recognizer');
   });
 
   it('is the pair\u2019s own language where it lists none: a Kotomimi not yet updated, or with no such model', () => {
     const built = buildLocalAI(THEIRS, s, { ...SHARED, reversed, models: listing(['ja', 'zh']) });
     if ('refused' in built) throw new Error(built.refused);
     expect(built.transcription).toEqual({ model: 'apple-speech:ja', language: 'ja' });
-    // Another Kotomimi that lists no "auto" is still a best effort: the client names each sentence.
-    expect(built.stages?.heard).toBe('auto');
+    expect(built.stages?.heard).not.toBe('auto');
+    expect(built.stages?.named).toBe('recognizer');
   });
 });
 

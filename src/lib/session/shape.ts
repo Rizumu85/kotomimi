@@ -20,17 +20,31 @@ export interface Refusal extends RunNotice {
  */
 export interface SpeechInputs { textOnly: boolean; participantSpeech: boolean }
 
-type Speaking = Pick<AnyProvider, 'speech' | 'participantSpeech'>;
+type Speaking = Pick<AnyProvider, 'speech' | 'participantSpeech' | 'speaks'>;
 
-/** Whether a leg speaks: the one rule `contextsFor`, the gate and the language offer read. */
-function legSpeaks(p: Speaking, leg: LegName, inputs: SpeechInputs): boolean {
+/**
+ * Whether a leg speaks: the one rule `contextsFor`, the gate and the language offer read. Fork: a provider with a
+ * switch of its own (`speaks`) is asked that of its settings, in place of the shared text-only one; where no settings
+ * are at hand (the language offer), it does not speak.
+ */
+function legSpeaks(p: Speaking, leg: LegName, inputs: SpeechInputs, settings?: unknown): boolean {
   const speaks = (wanted: boolean) => p.speech === 'always' || (p.speech === 'optional' && wanted);
-  if (leg === 'speaker') return speaks(!inputs.textOnly);
+  if (leg === 'speaker') return speaks(p.speaks ? settings !== undefined && p.speaks(settings) : !inputs.textOnly);
   // While its provider's participant-speech flag is off (Kizuna Soniox
   // until the backend mints a participant speech key, Stage 2 ruling 2)
   // the participant stays text-only whatever the switch says.
   return p.participantSpeech === false ? false : speaks(inputs.participantSpeech);
 }
+
+/**
+ * Fork: a provider's speech as the shared text-only switch and the wording around it see it. One with a switch of its
+ * own (`speaks`: Kotomimi's voice stage) never answers to that switch, so to them it is as a provider that never
+ * speaks: the toggle is not offered for it, and nothing words it as "optional".
+ */
+export const sharedSpeech = (p: Pick<AnyProvider, 'speech' | 'speaks'>): AnyProvider['speech'] => (p.speaks ? 'never' : p.speech);
+
+/** Fork: whether a provider speaks at all under these settings: by its own switch where it has one. */
+export const speaksNow = (p: Pick<AnyProvider, 'speech' | 'speaks'>, settings: unknown): boolean => (p.speaks ? p.speech !== 'never' && settings !== undefined && p.speaks(settings) : p.speech !== 'never');
 
 /** The language context of a run over these legs (Stage 2 Volcengine AST2, choice 1): it speaks when any leg it opens does. */
 export function languageContext(p: Speaking, legs: readonly LegName[], inputs: SpeechInputs): LanguageContext {
@@ -49,7 +63,7 @@ export function contextsFor(shape: RunShape): Partial<Record<LegName, SessionCon
     contexts.speaker = {
       leg: 'speaker',
       direction: { source: pair.source, target: pair.target },
-      speech: legSpeaks(p, 'speaker', shape),
+      speech: legSpeaks(p, 'speaker', shape, shape.settings),
       turns: shape.turnMode === 'auto' ? 'auto' : 'manual',
     };
   }

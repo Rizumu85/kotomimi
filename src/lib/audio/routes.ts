@@ -1,8 +1,6 @@
 /**
- * The route table (spec: "Playback" → "Routing"). Three things, three
- * natures: a route is a switch; the one mix gain is passthrough's ratio (only
- * the virtual device carries a deliberate mix, translation with the original
- * voice underneath); nothing else has a volume.
+ * The route table (spec: "Playback" → "Routing"). Each side has its own
+ * translated-speech volume; the original voice has a separate mix gain.
  */
 
 /** What plays. The test tone is a preview. */
@@ -24,6 +22,7 @@ export interface RoutingSettings {
   monitor: boolean;
   /** Participant translation → the real device: the participant-TTS opt-in, off by default. */
   participantSpeech: boolean;
+  speechVolume: { mine: number; theirs: number };
   /**
    * The microphone → the virtual device, under the translation, at `ratio` (0–1).
    * `gate`, under a manual turn mode, ties the route to the key: `'idle'` opens it
@@ -39,12 +38,12 @@ export interface RoutingSettings {
 export function routesFor(s: RoutingSettings, held: boolean): Edge[] {
   // Replay and preview are fixed routes to the real device, never into the meeting.
   const edges: Edge[] = [
-    { from: 'replay', to: 'real', gain: 1 },
+    { from: 'replay', to: 'real', gain: s.speechVolume.mine },
     { from: 'preview', to: 'real', gain: 1 },
   ];
-  if (s.meeting) edges.push({ from: 'speaker', to: 'virtual', gain: 1 });
-  if (s.monitor) edges.push({ from: 'speaker', to: 'real', gain: 1 });
-  if (s.participantSpeech) edges.push({ from: 'participant', to: 'real', gain: 1 });
+  if (s.meeting) edges.push({ from: 'speaker', to: 'virtual', gain: s.speechVolume.theirs });
+  if (s.monitor) edges.push({ from: 'speaker', to: 'real', gain: s.speechVolume.mine });
+  if (s.participantSpeech) edges.push({ from: 'participant', to: 'real', gain: s.speechVolume.mine });
   const { gate } = s.passthrough;
   if (s.passthrough.on && s.passthrough.ratio > 0 && (gate === undefined || held === (gate === 'held'))) {
     edges.push({ from: 'passthrough', to: 'virtual', gain: Math.min(1, s.passthrough.ratio) });

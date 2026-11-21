@@ -4,11 +4,12 @@
  * the route table kept live from the routing settings, and the tts tap.
  */
 import { realClock, type Clock } from '../contract/clock';
+import { describeCause, reportWarning } from '../diagnostics/report';
 import type { LegName, Segment } from '../conversation/types';
 import type { PlaybackPort } from '../session/ports';
+import type { Source } from '../session/source';
 import { ClipQueue, type QueueView } from './clipQueue';
 import type { AudioGraph, BusMeter, OneShot } from './graph';
-import { LiveStream } from './liveStream';
 import type { PcmTap } from './pcmTap';
 import { routesFor, type RoutingSettings, type Bus } from './routes';
 
@@ -45,14 +46,22 @@ export interface Playback extends PlaybackPort {
   /** Plays a segment's kept speech on the real device, replacing any replay in progress. */
   replay(leg: LegName, segment: Segment): void;
   stopReplay(): void;
+  /**
+   * Fork: a line said on demand, piece by piece as its voice is made (`src/app/lineVoice.ts`): on the replay route,
+   * so on the real device alone and never into the meeting. The pieces of one line play back to back; whoever
+   * starts a line stops what was replaying first (`stopReplay`).
+   */
+  line(pcm: Int16Array): void;
   /** Plays a clip on the real device, stopping the previous one; resolves when it ends or is stopped. */
   preview(clip: PreviewClip): Promise<void>;
   stopPreview(): void;
-  /** The microphone's chunk, processed: the original voice under the translation. The passthrough route and its ratio decide whether the meeting hears it. */
-  passthrough(pcm: Int16Array): void;
+  /** The microphone as spoken, before the recorder's chunk processing. */
+  passthrough(stream: MediaStream | null): void;
+  /** Listen to a capture source only while the run's passthrough route is open. */
+  passthrough(listen: NonNullable<Source['onStream']>): () => void;
   /** The translated speech as played, before any route: the echo monitor's reference. */
   readonly ttsTap: PcmTap;
-  /** What a bus carries, for a meter: the virtual one is what the meeting hears. */
+  /** What a bus carries. Direct desktop microphone output bypasses the virtual bus. */
   meter(bus: Bus): BusMeter | null;
   dispose(): Promise<void>;
 }
@@ -63,12 +72,13 @@ export function createPlayback(graph: AudioGraph, routing: RoutingSource, clock:
     participant: new ClipQueue<ClipKey>(graph.timeline('participant')),
   };
   const replayQueue = new ClipQueue<ClipKey>(graph.timeline('replay'));
-  const passthroughStream = new LiveStream(graph.timeline('passthrough'));
   /**
    * Per `${leg}:${ref}`, how many clips have arrived: the next one's speech
    * entry index, since L1 appends one entry per `audio` event, in order.
    */
   const counts = new Map<string, number>();
+  /** The pieces of lines said on demand so far: each is a clip of its own on the replay queue. */
+  let linePieces = 0;
   let held = false;
   let current: OneShot | null = null;
   let live = false;
@@ -87,24 +97,59 @@ export function createPlayback(graph: AudioGraph, routing: RoutingSource, clock:
     }, QUIET_MS);
   };
 
-  /**
-   * Whether the original-voice route is open. While it is closed nothing is
-   * scheduled: a stream queued behind a closed route would be let out when the
-   * key opens it — push-to-talk's press the voice from before it,
-   * push-to-translate's release the held voice. Closing it stops what is
-   * already scheduled too: the route only disconnects the feed, so a quick
-   * reopen would otherwise play that late.
-   */
   let passthroughOpen = false;
+  let microphone: MediaStream | null = null;
+  let disconnectMic: (() => void) | undefined;
+  let followMic: ((active: boolean) => void) | undefined;
+  const syncMic = () => {
+    disconnectMic?.();
+    disconnectMic = undefined;
+    if (!microphone || !live || !passthroughOpen) return;
+    try {
+      disconnectMic = graph.connectMicrophone(microphone);
+      void graph.resume();
+    } catch (error) {
+      reportWarning('Playback', `Could not connect microphone passthrough: ${describeCause(error)}`, { cause: error, dedupeKey: 'playback:mic' });
+    }
+  };
+
+  function passthrough(stream: MediaStream | null): void;
+  function passthrough(listen: NonNullable<Source['onStream']>): () => void;
+  function passthrough(input: MediaStream | null | NonNullable<Source['onStream']>) {
+    if (typeof input === 'function') {
+      followMic?.(false);
+      let off: (() => void) | undefined;
+      const follow = (active: boolean) => {
+        if (active) {
+          off ??= input(passthrough);
+        } else {
+          off?.();
+          off = undefined;
+        }
+      };
+      followMic = follow;
+      follow(live && passthroughOpen);
+      return () => {
+        if (followMic === follow) followMic = undefined;
+        follow(false);
+      };
+    }
+    if (microphone === input) return;
+    microphone = input;
+    syncMic();
+  }
 
   const apply = () => {
     const settings = routing.get();
     const edges = routesFor(settings, held);
     const open = edges.some((e) => e.from === 'passthrough');
-    if (passthroughOpen && !open) passthroughStream.clear();
-    passthroughOpen = open;
-    graph.route(edges);
     void graph.setSinks(settings.sinks);
+    graph.route(edges);
+    if (passthroughOpen !== open) {
+      passthroughOpen = open;
+      syncMic();
+      followMic?.(live && open);
+    }
   };
   apply();
   const unsubscribeRouting = routing.subscribe(apply);
@@ -125,7 +170,7 @@ export function createPlayback(graph: AudioGraph, routing: RoutingSource, clock:
     queues.speaker.clear();
     queues.participant.clear();
     replayQueue.clear();
-    passthroughStream.clear();
+    syncMic();
     stopPreview();
   });
 
@@ -147,13 +192,11 @@ export function createPlayback(graph: AudioGraph, routing: RoutingSource, clock:
     },
 
     live(on) {
+      if (live === on) return;
       live = on;
-      if (!on) {
-        // A manual turn's key already gates this route (the routing's `gate`);
-        // ending a run must drop whatever the microphone still had in flight too.
-        passthroughStream.clear();
-        restLater();
-      }
+      syncMic();
+      followMic?.(live && passthroughOpen);
+      if (!on) restLater();
     },
 
     clear() {
@@ -174,6 +217,13 @@ export function createPlayback(graph: AudioGraph, routing: RoutingSource, clock:
     },
 
     stopReplay: () => replayQueue.clear(),
+
+    line(pcm) {
+      void graph.resume();
+      // It names no segment: the karaoke of the conversation's rows never takes it for one of theirs.
+      replayQueue.enqueue(clipKey('speaker', undefined, linePieces), pcm);
+      linePieces += 1;
+    },
 
     preview(clip) {
       stopPreview();
@@ -196,11 +246,7 @@ export function createPlayback(graph: AudioGraph, routing: RoutingSource, clock:
 
     stopPreview,
 
-    passthrough(pcm) {
-      if (!live || !passthroughOpen) return;
-      void graph.resume();
-      passthroughStream.push(pcm);
-    },
+    passthrough,
 
     ttsTap: graph.ttsTap,
 
@@ -215,7 +261,11 @@ export function createPlayback(graph: AudioGraph, routing: RoutingSource, clock:
         queues.speaker.clear();
         queues.participant.clear();
         replayQueue.clear();
-        passthroughStream.clear();
+        live = false;
+        followMic?.(false);
+        followMic = undefined;
+        microphone = null;
+        syncMic();
         stopPreview();
         await graph.close();
       })();

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Entry, Row } from '../projection/types';
-import { answeredOf, HOLD_LEAST_MS, HOLD_MOST_MS, holdMs, nextShown, readMs } from './dwell';
+import { ANSWER_WAIT_MS, answeredOf, answerTurn, fedOf, HOLD_LEAST_MS, HOLD_MOST_MS, holdMs, nextShown, readMs, rowSentences, rowTurn, type RowShown } from './dwell';
 
 describe('how long a caption stays before the next takes its place', () => {
   it('is its length at the pace its language is read at', () => {
@@ -76,5 +76,95 @@ describe('a leg’s answered sentences', () => {
     ]);
     const translated = { ...combined, translation: [row('translation', 'Je vais.', 'translation', 'fr')] };
     expect(answeredOf([translated], 'speaker')).toEqual([{ id: 'combined', text: 'Je vais.', language: 'fr' }]);
+  });
+});
+
+describe("the user's own row takes their sentences in turn (fork)", () => {
+  const row = (segmentId: string, text: string, side: 'source' | 'translation', extra: Partial<Row> = {}): Row =>
+    ({ key: `${segmentId}:0`, segmentId, side, start: 0, end: text.length, text, final: true, ...extra });
+  const mine = (id: string, source: string, answer = '', extra: Partial<Row> = {}): Entry => ({
+    kind: 'exchange', id, leg: 'speaker', languages: { source: 'zh-CN', target: 'ja' }, pairing: 'stated', t: 0,
+    source: [row(`s-${id}`, source, 'source', extra)], translation: answer ? [row(`t-${id}`, answer, 'translation')] : [],
+  });
+  const theirs: Entry = { kind: 'exchange', id: 'p', leg: 'participant', languages: { source: 'ja', target: 'zh-CN' }, pairing: 'stated', t: 0, source: [row('s-p', 'はい。', 'source')], translation: [row('t-p', '好的。', 'translation')] };
+  const turn = (entries: Entry[], before: RowShown | undefined, now: number) => rowTurn(rowSentences(entries, 'speaker'), before, now);
+
+  it('shows the newest sentence at once while nobody has gone on, and holds nothing', () => {
+    expect(turn([], undefined, 0)).toEqual({ shown: undefined, due: Infinity });
+    const first = turn([theirs, mine('a', '我想去咖啡店。')], undefined, 1000);
+    expect(first).toEqual({ shown: { id: 'a' }, due: Infinity });
+    // Its answer comes: on screen from then.
+    expect(turn([theirs, mine('a', '我想去咖啡店。', 'カフェに行きたいです。')], first.shown, 1300)).toEqual({ shown: { id: 'a', since: 1300 }, due: Infinity });
+  });
+
+  it('keeps a sentence whose answer has just come while the user goes on, for as long as the answer takes to read', () => {
+    const answered = mine('a', '我想去咖啡店。', 'カフェに行きたいです。');
+    const next = mine('b', '听说');
+    const held = turn([answered, next], { id: 'a', since: 1300 }, 1400);
+    const until = 1300 + holdMs('カフェに行きたいです。', 'ja', 1);
+    expect(held).toEqual({ shown: { id: 'a', since: 1300 }, due: until });
+    expect(turn([answered, next], held.shown, until - 1).shown).toEqual({ id: 'a', since: 1300 });
+    expect(turn([answered, next], held.shown, until)).toEqual({ shown: { id: 'b' }, due: Infinity });
+    // Read long ago: the next sentence takes its place with its first word.
+    expect(turn([answered, next], { id: 'a', since: 1300 }, 60_000).shown).toEqual({ id: 'b' });
+  });
+
+  it('waits a moment for an answer on its way, and no longer', () => {
+    const first = mine('a', '我想去咖啡店。');
+    const waiting = turn([mine('z', '你好。', 'こんにちは。'), first, mine('b', '听说')], { id: 'a' }, 2000);
+    expect(waiting).toEqual({ shown: { id: 'a', behind: 2000 }, due: 2000 + ANSWER_WAIT_MS });
+    // It comes: read from then.
+    const came = turn([mine('z', '你好。', 'こんにちは。'), mine('a', '我想去咖啡店。', 'カフェに行きたいです。'), mine('b', '听说')], waiting.shown, 2300);
+    expect(came.shown).toEqual({ id: 'a', behind: 2000, since: 2300 });
+    // It does not: the next.
+    expect(turn([mine('z', '你好。', 'こんにちは。'), first, mine('b', '听说')], waiting.shown, 2000 + ANSWER_WAIT_MS).shown).toEqual({ id: 'b' });
+  });
+
+  it('waits for nothing that will not come: a mishearing, or a side that is answered nothing', () => {
+    // Three sentences and no answer to any: a run that only transcribes.
+    expect(turn([mine('y', '你好。'), mine('z', '在吗？'), mine('a', '我想去咖啡店。'), mine('b', '听说')], { id: 'a' }, 2000).shown).toEqual({ id: 'b' });
+    // The first sentences of a run are waited on: nothing says yet that no answer comes.
+    expect(turn([mine('a', '我想去咖啡店。'), mine('b', '听说')], { id: 'a' }, 2000)).toEqual({ shown: { id: 'a', behind: 2000 }, due: 2000 + ANSWER_WAIT_MS });
+    const misheard = mine('a', 'Kir Kirhum.', '', { misheard: true });
+    expect(turn([mine('z', '你好。', 'こんにちは。'), misheard, mine('b', '听说')], { id: 'a' }, 2000).shown).toEqual({ id: 'b' });
+  });
+
+  it('gives each the least with more than one waiting, and passes over the oldest when far behind', () => {
+    const said = ['a', 'b', 'c', 'd', 'e'].map((id) => mine(id, `第${id}句话说完了。`, `${id}の文を言い終わりました。長い文です。`));
+    expect(turn(said.slice(0, 3), { id: 'a', since: 0 }, 100).due).toBe(HOLD_LEAST_MS);
+    // Four behind: to the one before the newest, shown from now.
+    expect(turn(said, { id: 'a', since: 0 }, HOLD_LEAST_MS).shown).toEqual({ id: 'd', since: HOLD_LEAST_MS });
+  });
+
+  it('starts again at the newest when what it showed is gone', () => {
+    expect(turn([mine('x', '好的。', 'はい。')], { id: 'a', since: 0 }, 500).shown).toEqual({ id: 'x', since: 500 });
+  });
+});
+
+describe('the line grammar feedback is written in takes it in turn (fork)', () => {
+  const row = (segmentId: string, text: string, side: 'source' | 'translation'): Row => ({ key: `${segmentId}:0`, segmentId, side, start: 0, end: text.length, text, final: true });
+  const said = (id: string, feedback = ''): Entry => ({
+    kind: 'exchange', id, leg: 'speaker', languages: { source: 'zh-CN', target: 'ja' }, pairing: 'stated', t: 0,
+    source: [row(`s-${id}`, '明日映画を見ります。', 'source')], translation: [row(`t-${id}`, '明天看电影。', 'translation')],
+    ...(feedback ? { feedback: [{ ...row(`f-${id}`, feedback, 'translation'), purpose: 'feedback', accompaniesTranslation: true }] } : {}),
+  });
+
+  it('lists the sentences that have feedback, read at the pace of the user\u2019s own language', () => {
+    expect(fedOf([said('a'), said('b', '明日映画を見ます。'), said('c', '✓')], 'speaker')).toEqual([
+      { id: 'b', text: '明日映画を見ます。', language: 'zh-CN' }, { id: 'c', text: '✓', language: 'zh-CN' },
+    ]);
+    expect(fedOf([said('b', '✓')], 'participant')).toEqual([]);
+  });
+
+  it('keeps a correction until it has been read, though the next sentence\u2019s tick has come', () => {
+    const list = fedOf([said('a', '明日映画を見ます。\n“見ります”应为“見ます”。'), said('b', '✓')], 'speaker');
+    expect(answerTurn([], undefined, 0)).toEqual({ shown: undefined, due: Infinity });
+    const first = answerTurn(list.slice(0, 1), undefined, 1000);
+    expect(first).toEqual({ shown: { id: 'a', since: 1000 }, due: Infinity });
+    const until = 1000 + holdMs(list[0].text, 'zh-CN', 1);
+    expect(answerTurn(list, first.shown, 1500)).toEqual({ shown: { id: 'a', since: 1000 }, due: until });
+    expect(answerTurn(list, first.shown, until)).toEqual({ shown: { id: 'b', since: until }, due: Infinity });
+    // What it showed is gone: the newest.
+    expect(answerTurn(list.slice(1), first.shown, 1200).shown).toEqual({ id: 'b', since: 1200 });
   });
 });

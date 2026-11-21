@@ -15,11 +15,11 @@ export const TARGET_RATE = 16000;
 
 const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
 
-/** A rate → 16 kHz as "up by `up`, down by `down`"; null for a rate this does not handle. */
-export function ratioFor(rate: number): { up: number; down: number } | null {
-  if (!Number.isInteger(rate) || rate <= TARGET_RATE) return null;
-  const g = gcd(TARGET_RATE, rate);
-  const up = TARGET_RATE / g;
+/** A rate → 16 kHz (or `target`) as "up by `up`, down by `down`"; null for a rate this does not handle. */
+export function ratioFor(rate: number, target: number = TARGET_RATE): { up: number; down: number } | null {
+  if (!Number.isInteger(rate) || rate <= target) return null;
+  const g = gcd(target, rate);
+  const up = target / g;
   const down = rate / g;
   return up <= 4 && down <= 6 ? { up, down } : null;
 }
@@ -53,8 +53,9 @@ export interface Resampler {
   process(samples: Int16Array): Int16Array;
 }
 
-export function createResampler(rate: number): Resampler | null {
-  const ratio = ratioFor(rate);
+/** `target`: the rate brought down to, where it is not a recognizer's: the 24 kHz the app plays at, for a voice made at 48 (`voice.ts`). */
+export function createResampler(rate: number, target: number = TARGET_RATE): Resampler | null {
+  const ratio = ratioFor(rate, target);
   if (!ratio) return null;
   const { up, down } = ratio;
   const taps = lowPass(up, down);

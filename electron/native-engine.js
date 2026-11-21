@@ -325,6 +325,58 @@ const COACHES = {
   },
 };
 
+/**
+ * Fork: the voices — audio.cpp once more, with a model that speaks. A process of its own, since the recognition
+ * engine runs one model and a run needs both. `mode`: `streaming`, its sound comes while it is made; `offline`, a
+ * sentence comes whole. `sampleRate` is what a streamed sound comes at (a whole one says its own). `speech` is how a
+ * request is worded for its family (`speechRequest`), and `voice` what speaks where none is named.
+ *
+ * Measured 2026-11-17 on an RTX 5070 Ti beside a running game: 36 everyday sentences in Japanese, Chinese and
+ * English, read back with Qwen3-ASR 1.7B and compared by reading (kana, pinyin, words). Wrong readings ja/zh/en:
+ * Qwen3-TTS 1.7B 0/0/0 %, about 3.1 GB of video memory; Irodori v4.1 Small 0 % (Japanese), about 1.7 GB; Edge's
+ * online voices, for comparison, 0.7/0/0.8 %. Not offered: VoxCPM2 (19.5/0.6/0 %, and no voice of its own),
+ * MOSS-TTS-Nano (31.5/4.2/0 %), and Kokoro, whose Japanese and English need libraries the runtime does not carry
+ * (MeCab, eSpeak-ng) and whose Chinese took 59 s for a 3 s sentence on the processor.
+ */
+const VOICES = {
+  'qwen3-tts-1.7b-customvoice-q8': {
+    file: 'qwen3-tts-12hz-1.7b-customvoice-q8_0.gguf',
+    url: 'https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/7a103b33f04120535bdfe97b5f65b79d3c90d708/Qwen3-TTS-12Hz-1.7B-CustomVoice-GGUF/qwen3-tts-12hz-1.7b-customvoice-q8_0.gguf',
+    mirror: 'https://modelscope.cn/models/audio-cpp/audio.cpp-gguf/resolve/master/Qwen3-TTS-12Hz-1.7B-CustomVoice-GGUF/qwen3-tts-12hz-1.7b-customvoice-q8_0.gguf',
+    bytes: 2817055200,
+    sha256: 'c8ac3f94b6e73f137c0e7ecc9270bc8faec7a476ff799b87e48844d1d0987ac3',
+    family: 'qwen3_tts',
+    // Its first sound comes 40 ms after the request on an RTX 5070 Ti, and a sentence three times faster than it is said.
+    mode: 'streaming',
+    sampleRate: 24000,
+    languages: ['zh', 'en', 'ja', 'ko', 'de', 'fr', 'ru', 'pt', 'es', 'it'],
+    // A packaged voice by its name.
+    speech: { voiceAs: 'voice_id', languageAs: 'language' },
+    voice: 'vivian',
+  },
+  'irodori-tts-v4.1-small-mf-q8': {
+    file: 'irodori-tts-v4.1-small-mf-q8_0.gguf',
+    url: 'https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/7a103b33f04120535bdfe97b5f65b79d3c90d708/Irodori-TTS-v4-Small-GGUF/irodori-tts-v4.1-small-mf-q8_0.gguf',
+    mirror: 'https://modelscope.cn/models/audio-cpp/audio.cpp-gguf/resolve/master/Irodori-TTS-v4-Small-GGUF/irodori-tts-v4.1-small-mf-q8_0.gguf',
+    bytes: 1368276320,
+    sha256: 'a450c277a29b771bde3ceb21fd753bfb9a61c93aef952e0a3b20ad8d3facbbcd',
+    family: 'irodori_tts',
+    // A sentence comes whole, in about half a second.
+    mode: 'offline',
+    sampleRate: 48000,
+    languages: ['ja'],
+    // It has no packaged voices: asked with none, every sentence came in another voice. A voice is a description it
+    // is told with each sentence, which keeps it the same one.
+    speech: {
+      voiceAs: 'instruct',
+      languageAs: 'language',
+      options: { no_ref: true },
+      voices: { woman: '落ち着いた若い女性。やさしく自然に話している。', man: '落ち着いた大人の男性。穏やかに自然に話している。' },
+    },
+    voice: 'woman',
+  },
+};
+
 /** The model the runtime is told the language by: its name in English, as R2T2 was trained to read it. Any other is left to detection. */
 const LANGUAGE_NAMES = {
   ja: 'Japanese', zh: 'Chinese', en: 'English', ko: 'Korean', fr: 'French', de: 'German', it: 'Italian', pt: 'Portuguese', ru: 'Russian', es: 'Spanish', ar: 'Arabic',
@@ -514,6 +566,144 @@ const LLAMA_RUNTIME = {
   async warm({ port, post, timeoutMs, key }) {
     const answer = await post(port, '/v1/chat/completions', { messages: [{ role: 'user', content: 'Hello' }], max_tokens: 4, temperature: 0, chat_template_kwargs: { enable_thinking: false } }, timeoutMs, key);
     return answer?.status === 200;
+  },
+};
+
+/**
+ * Fork: the sound of a WAV the runtime answered with, and its rate: 16-bit mono, as every voice model here writes.
+ * Null for anything else.
+ */
+function wavSound(bytes) {
+  if (bytes.length < 44 || bytes.toString('latin1', 0, 4) !== 'RIFF' || bytes.toString('latin1', 8, 12) !== 'WAVE') return null;
+  let rate = 0;
+  let channels = 1;
+  let bits = 16;
+  for (let at = 12; at + 8 <= bytes.length;) {
+    const id = bytes.toString('latin1', at, at + 4);
+    const size = bytes.readUInt32LE(at + 4);
+    if (id === 'fmt ') {
+      if (size < 16 || at + 8 + size > bytes.length) return null;
+      channels = bytes.readUInt16LE(at + 10); rate = bytes.readUInt32LE(at + 12); bits = bytes.readUInt16LE(at + 22);
+    }
+    if (id === 'data') {
+      if (bits !== 16 || channels !== 1 || rate < 8000 || rate > 96000) return null;
+      const sound = bytes.subarray(at + 8, Math.min(bytes.length, at + 8 + size));
+      return { pcm: sound.subarray(0, sound.length - (sound.length % 2)), sampleRate: rate };
+    }
+    at += 8 + size + (size % 2);
+  }
+  return null;
+}
+
+/**
+ * Fork: one sentence spoken by the runtime: the request, and its sound — raw 16-bit mono, handed to `onPcm` with its
+ * rate. A model that speaks as it goes (`whole` unset) is asked for its sound as it is made, in the pieces the
+ * runtime sends, each an even number of bytes; one that answers a sentence at once (`whole`) is asked for a WAV,
+ * handed on in one piece. `done` resolves with the rate when it is over, and rejects with what the runtime said when
+ * it refuses; `abort` drops the request.
+ */
+function speakLive({ host = LOOPBACK, port, model, input, voice, options = {}, sampleRate, whole = false, timeoutMs = 60_000 }, onPcm) {
+  let request = null;
+  let aborted = false;
+  const done = new Promise((resolve, reject) => {
+    const payload = Buffer.from(JSON.stringify({
+      model, input, ...(voice ? { voice } : {}),
+      ...(whole ? { response_format: 'wav' } : { stream: true, stream_format: 'audio', response_format: 'pcm' }),
+      ...(Object.keys(options).length > 0 ? { options } : {}),
+    }));
+    request = http.request({ host, port, method: 'POST', path: '/v1/audio/speech', timeout: timeoutMs, headers: { 'Content-Type': 'application/json', 'Content-Length': payload.length } }, (response) => {
+      if (response.statusCode !== 200) {
+        let body = '';
+        response.setEncoding('utf8');
+        response.on('data', (chunk) => { if (body.length < 2000) body += chunk; });
+        response.on('end', () => reject(new Error(`The voice engine answered ${response.statusCode}: ${body.replace(/\s+/g, ' ').slice(0, 300)}`)));
+        response.on('error', reject);
+        return;
+      }
+      if (whole) {
+        const parts = [];
+        response.on('data', (chunk) => { parts.push(chunk); });
+        response.on('end', () => {
+          if (aborted) { reject(new Error('The voice was stopped.')); return; }
+          const sound = wavSound(Buffer.concat(parts));
+          if (!sound) { reject(new Error('The voice engine answered with no sound that can be read.')); return; }
+          if (sound.pcm.length > 0) onPcm(sound.pcm, sound.sampleRate);
+          resolve({ sampleRate: sound.sampleRate });
+        });
+        response.on('error', reject);
+        return;
+      }
+      // The rate, where the answer names it (`audio/pcm;rate=24000`); else the model's own.
+      const named = /rate=(\d+)/.exec(String(response.headers['content-type'] ?? ''))?.[1] ?? response.headers['x-sample-rate'];
+      const rate = Number(named) >= 8000 && Number(named) <= 96000 ? Number(named) : sampleRate;
+      /** A byte left over from a piece that ended in the middle of a sample. */
+      let odd = null;
+      response.on('data', (chunk) => {
+        const bytes = odd ? Buffer.concat([odd, chunk]) : chunk;
+        const even = bytes.length - (bytes.length % 2);
+        odd = even < bytes.length ? bytes.subarray(even) : null;
+        if (even > 0 && !aborted) onPcm(bytes.subarray(0, even), rate);
+      });
+      response.on('end', () => (aborted ? reject(new Error('The voice was stopped.')) : resolve({ sampleRate: rate })));
+      response.on('error', reject);
+    });
+    request.on('timeout', () => request.destroy(new Error('The voice engine did not answer in time.')));
+    request.on('error', (error) => reject(aborted ? new Error('The voice was stopped.') : error));
+    request.end(payload);
+  });
+  return { done, abort() { aborted = true; request?.destroy(); } };
+}
+
+/**
+ * What a voice model is asked with (`speech` in `VOICES`): the voice — a packaged one by its name (`voiceAs:
+ * 'voice_id'`, also the request's own `voice`), or one of the model's described ones (`voices`: a name of ours → the
+ * words that describe it, under the option `voiceAs` names) — the language's code under `languageAs`, and whatever
+ * its family is always told (`options`). A voice that is none of the model's is its first.
+ */
+function speechRequest(model, voice, language) {
+  const { voiceAs, languageAs, voices, options } = model?.speech ?? {};
+  const code = languageCode(language);
+  const named = voices ? (Object.hasOwn(voices, voice ?? '') ? voice : model.voice) : voice || model?.voice;
+  const told = voices ? voices[named] : named;
+  return {
+    ...(voiceAs === 'voice_id' && told ? { voice: told } : {}),
+    options: { ...(options ?? {}), ...(voiceAs && told ? { [voiceAs]: told } : {}), ...(languageAs && code ? { [languageAs]: code } : {}) },
+    whole: model?.mode === 'offline',
+  };
+}
+
+/** One short sentence in a language the model speaks, for its warm-up: English where it has it, else its first. */
+const WARM_WORDS = { en: 'Hello.', ja: 'こんにちは。', zh: '你好。' };
+function warmWords(model) {
+  const language = (model?.languages ?? ['en']).find((code) => code === 'en') ?? (model?.languages ?? []).find((code) => WARM_WORDS[code]) ?? 'en';
+  return { language, text: WARM_WORDS[language] ?? WARM_WORDS.en };
+}
+
+/**
+ * audio.cpp with a voice: the same config beside the model, its task the speaking one, and warmed by one short
+ * sentence in the model's own voice.
+ */
+const VOICE_RUNTIME = {
+  launch({ id, model, port, build, modelsDir, files }) {
+    files.writeFileSync(path.join(modelsDir, 'server.json'), JSON.stringify({
+      host: LOOPBACK,
+      port,
+      backend: build.backend,
+      device: 0,
+      lazy_load: false,
+      models: [{ id, family: model.family, path: model.file, task: 'tts', mode: model.mode, session_options: model.options ?? {}, ...(model.requestOptions ? { default_request_options: model.requestOptions } : {}) }],
+    }, null, 1));
+    return ['--config', 'server.json', '--no-ui'];
+  },
+  async warm({ port, id, model, say = speakLive, timeoutMs }) {
+    let heard = 0;
+    const { language, text } = warmWords(model);
+    try {
+      await say({ port, model: id, input: text, ...speechRequest(model, model.voice, language), sampleRate: model.sampleRate, timeoutMs }, (pcm) => { heard += pcm.length; }).done;
+    } catch {
+      return false;
+    }
+    return heard > 0;
   },
 };
 
@@ -1101,6 +1291,8 @@ function createNativeEngine(deps = {}) {
     post = loopPost,
     live = openLive,
     window = openWindow,
+    /** Fork: how a voice runtime is asked for a sentence. */
+    say = speakLive,
     /** How the runtime is started and warmed: audio.cpp's way, unless another is handed in. */
     runtime = AUDIO_RUNTIME,
     setPriority = (pid, priority) => { try { os.setPriority(pid, priority); } catch { /* a courtesy to the rest of the computer, never a condition */ } },
@@ -1450,6 +1642,8 @@ function createNativeEngine(deps = {}) {
     // Told, as when the runtime goes by itself: the page otherwise sends sound into nothing and waits for last words that never come.
     for (const [streamId, stream] of streams) { stream.abort(); undump(streamId); onStream({ id: streamId, type: 'error', message: 'The recognition engine was stopped.' }); }
     streams.clear();
+    for (const one of speaking.values()) one.abort();
+    speaking.clear();
     // Whatever is still on its way out is waited for too: a stop and a start asked at once are two halts, and the second finds nothing to end.
     if (mine) leaving = Promise.all([leaving, letGo(mine)]).then(() => {});
     if (run.state !== 'stopped') setRun({ state: 'stopped', model: null, port: 0, key: null });
@@ -1520,7 +1714,7 @@ function createNativeEngine(deps = {}) {
     }
     setRun({ state: 'warming' });
     // One short piece of work through the model: what makes the first real sentence as quick as the rest.
-    const warmed = await Promise.resolve(runtime.warm({ port, id, model, key, live, window, post, timeoutMs: warmTimeoutMs })).catch(() => false);
+    const warmed = await Promise.resolve(runtime.warm({ port, id, model, key, live, window, post, say, timeoutMs: warmTimeoutMs })).catch(() => false);
     if (child !== mine) return status();
     if (yields) setPriority(mine.pid, os.constants.priority.PRIORITY_NORMAL);
     // A warm-up that did not come back is not a reason to refuse: the first sentence will be the slow one.
@@ -1581,9 +1775,34 @@ function createNativeEngine(deps = {}) {
   function endStream(id) { streams.get(id)?.end(); undump(id); return true; }
   function abortStream(id) { streams.get(id)?.abort(); streams.delete(id); undump(id); return true; }
 
+  /**
+   * Fork: a sentence spoken by a voice runtime, for the page: its sound to `onPcm` as it is made. Resolves `{ ok }`
+   * when it is over, `{ error }` with why not: the runtime is not up with this model, it refused, or it was stopped
+   * (`stopSpeaking`, by the id the page gave). Never rejects.
+   */
+  const speaking = new Map();
+  async function speak({ id, model: asked, text, voice, language } = {}, onPcm = () => {}) {
+    if (run.state !== 'ready' || !run.model || (typeof asked === 'string' && asked && asked !== run.model)) return { error: 'The voice engine is not up with this model.' };
+    const input = typeof text === 'string' ? text.trim().slice(0, 2000) : '';
+    if (!input) return { error: 'There is nothing to say.' };
+    const model = MODELS_[run.model];
+    const named = typeof voice === 'string' && /^[\w.()+-]{1,80}$/.test(voice) ? voice : model.voice;
+    const one = say({ port: run.port, model: run.model, input, ...speechRequest(model, named, language), sampleRate: model.sampleRate }, onPcm);
+    speaking.set(id, one);
+    try {
+      await one.done;
+      return { ok: true };
+    } catch (error) {
+      return { error: String(error?.message ?? error).slice(0, 300) };
+    } finally {
+      if (speaking.get(id) === one) speaking.delete(id);
+    }
+  }
+  function stopSpeaking(id) { speaking.get(id)?.abort(); return true; }
+
   // Fork: the runtime of a new version fetched for the models an earlier one left (`updateRuntime`), when asked to.
   if (autoUpdate) setTimeout(() => { void updateRuntime(); }, 0);
-  return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream, updateRuntime };
+  return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream, updateRuntime, speak, stopSpeaking };
 }
 
-module.exports = { createNativeEngine, openLive, openWindow, readWhole, wavOf, loopAt, unloop, unspaced, echoOf, endless, hintChecked, tidied, CONTEXT_LEAD, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, translatorFits, systemTar, untar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, AUDIO_RUNTIME, LLAMA_RUNTIME, LOOPBACK };
+module.exports = { createNativeEngine, openLive, openWindow, readWhole, wavOf, loopAt, unloop, unspaced, echoOf, endless, hintChecked, tidied, CONTEXT_LEAD, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, translatorFits, systemTar, untar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, VOICES, AUDIO_RUNTIME, LLAMA_RUNTIME, VOICE_RUNTIME, speakLive, speechRequest, wavSound, LOOPBACK };

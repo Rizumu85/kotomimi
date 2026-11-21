@@ -1,6 +1,6 @@
 import type { AnnotatedLanguage } from './types';
 
-const KANA = /[ぁ-ゖァ-ヺーｦ-ﾟ]/;
+export const KANA = /[ぁ-ゖァ-ヺーｦ-ﾟ]/;
 const HANGUL = /[가-힣ᄀ-ᇿ㄰-㆏]/;
 const CYRILLIC = /[Ѐ-ӿ]/;
 /** CJK ideographs, and the marks that stand for one in Japanese (々 〆 ヵ ヶ). */
@@ -23,8 +23,76 @@ export function scriptLanguage(line: string): AnnotatedLanguage | null {
   return null;
 }
 
-/** Characters a Chinese sentence is full of and a Japanese one never writes: particles, and forms only Chinese uses. */
-const CHINESE_ONLY = /[这這吗嗎呢吧们們没沒还還对對应應该說说请請让讓给給从從发發现样樣错錯误誤读讀写寫为后动词关么个时问题过语]/;
+/**
+ * Characters a Chinese sentence is full of and a Japanese one never writes: particles, and forms only Chinese uses.
+ * Fork: without 写 給 錯 誤 該 請 還 没, which Japanese writes (写真, 給料, 誤解, 請求…): a Japanese sentence with one
+ * of them was taken for a Chinese explanation, and alone of its neighbours had no readings (seen 2026-11-16).
+ */
+const CHINESE_ONLY = /[这這吗嗎呢吧们們沒还对對应應该說说请让讓给从從发發现样樣错误读讀寫为后动词关么个时问题过语]/;
+
+const HAN = /[一-鿿㐀-䶿]/;
+/** In the 2010 everyday-use list, and outside the old character set the rest is read from. */
+const JAPANESE_BESIDES = '塡剝頰';
+
+/**
+ * Fork: the Han characters Japanese writes: its own character set's (JIS X 0208 with the makers' additions, as the
+ * platform decodes Shift_JIS), some 6,700. The simplified forms of Chinese are not among them (这 们 吗 选 你 另), which
+ * tells a Chinese sentence from a Japanese one by its writing: of 461 Chinese sentences the user said, 380 had one,
+ * and of 468 Japanese ones none (2026-11-16). Null where the platform cannot decode it: the short list above stands.
+ */
+let japaneseHan: ReadonlySet<string> | null | undefined;
+function japaneseWrites(): ReadonlySet<string> | null {
+  if (japaneseHan !== undefined) return japaneseHan;
+  try {
+    const decoder = new TextDecoder('shift_jis');
+    const set = new Set<string>(JAPANESE_BESIDES);
+    const pair = new Uint8Array(2);
+    for (let lead = 0x81; lead <= 0xfc; lead += 1) {
+      if (lead > 0x9f && lead < 0xe0) continue;
+      for (let trail = 0x40; trail <= 0xfc; trail += 1) {
+        if (trail === 0x7f) continue;
+        pair[0] = lead;
+        pair[1] = trail;
+        const ch = decoder.decode(pair);
+        if (ch.length === 1 && HAN.test(ch)) set.add(ch);
+      }
+    }
+    // A decoder that knows none of it (a stand-in) is no witness.
+    japaneseHan = set.size > 6000 ? set : null;
+  } catch {
+    japaneseHan = null;
+  }
+  return japaneseHan;
+}
+
+/** Fork: the text has a character Chinese writes and Japanese does not. */
+export function chineseOnly(text: string): boolean {
+  if (CHINESE_ONLY.test(text)) return true;
+  const japanese = japaneseWrites();
+  if (!japanese) return false;
+  for (const ch of text) if (HAN.test(ch) && !japanese.has(ch)) return true;
+  return false;
+}
+
+/** Words a Chinese sentence is held together by, in characters Japanese writes too, but seldom two of in one clause. */
+const CHINESE_WORDS = new Set('的是了我你她很也都就吧呢吗啊么什怎这那们个');
+
+/**
+ * Fork: Han characters alone, and a Chinese sentence by its writing: a character Japanese does not write, or two of
+ * the words Chinese is held together by among four characters or more (我不知道是谁). A row's language says the rest:
+ * 大丈夫 is Japanese in a Japanese row.
+ */
+export function writtenInChinese(text: string): boolean {
+  if (chineseOnly(text)) return true;
+  let han = 0;
+  const words = new Set<string>();
+  for (const ch of text) {
+    if (!HAN.test(ch)) continue;
+    han += 1;
+    if (CHINESE_WORDS.has(ch)) words.add(ch);
+  }
+  return han >= 4 && words.size >= 2;
+}
 
 /** What a sentence quotes, in the marks Chinese and Japanese quote with. */
 const QUOTED = /“[^”]*”|「[^」]*」|『[^』]*』|"[^"]*"|‘[^’]*’/g;
@@ -36,7 +104,7 @@ const QUOTED = /“[^”]*”|「[^」]*」|『[^』]*』|"[^"]*"|‘[^’]*’/
  * no Japanese sentence holds, or by kana being a small part of it.
  */
 export function quotesJapanese(line: string): boolean {
-  if (CHINESE_ONLY.test(line)) return true;
+  if (chineseOnly(line)) return true;
   let kana = 0;
   let han = 0;
   for (const ch of line) {
@@ -54,12 +122,17 @@ export function quotesJapanese(line: string): boolean {
  * than `quotesJapanese`, which a Chinese row may afford.
  */
 export function explainsInChinese(line: string): boolean {
-  if (CHINESE_ONLY.test(line)) return true;
+  if (chineseOnly(line)) return true;
   const outside = line.replace(QUOTED, '');
   if (KANA.test(outside)) return false;
   let han = 0;
   for (const ch of outside) if (KANJI.test(ch)) han += 1;
   return han >= 4;
+}
+
+/** Fork: the line has kana inside quotation marks: an explanation that quotes, not something said. */
+export function quotesKana(line: string): boolean {
+  return (line.match(QUOTED) ?? []).some((quoted) => KANA.test(quoted));
 }
 
 /** The row's language is Chinese: `zh`, `zh-CN`, `zh-TW`, `yue`. */

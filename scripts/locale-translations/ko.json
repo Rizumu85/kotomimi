@@ -203,6 +203,26 @@
     "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
     "text": "Kotomimi만 — Kotomimi가 재생하는 소리만 제거해 내 목소리가 가장 또렷하게 전달됩니다. 헤드폰이나 VR 헤드셋을 쓸 때 적합하며, 스피커를 쓸 때도 모드를 '둘 다'로 선택하면 사용할 수 있습니다. 가상 오디오 장치(VB-Cable, BlackHole 등)를 마이크로 쓸 때는 이 옵션을 선택하세요."
   },
+  "fork.echoCancellationGate": {
+    "en": "By loudness",
+    "text": "음량 기준"
+  },
+  "fork.echoCancellationGateTooltip": {
+    "en": "By loudness — for loudspeakers: what they play comes back into the microphone far quieter than your voice, so it is kept out by its loudness and your voice is left as it is.",
+    "text": "음량 기준 — 스피커 사용 시: 스피커 소리가 마이크에 새어 들어와도 내 목소리보다 훨씬 작으므로 음량으로 걸러 내고 내 목소리는 그대로 둡니다."
+  },
+  "fork.echoCancellationOff": {
+    "en": "Off",
+    "text": "끔"
+  },
+  "fork.echoCancellationOffTooltip": {
+    "en": "Off — the microphone as it is. For headphones: nothing plays into it.",
+    "text": "끔 — 마이크 소리를 그대로 인식에 보냅니다. 헤드폰 사용 시: 마이크로 들어오는 소리가 없습니다."
+  },
+  "fork.echoCancellationPassthrough": {
+    "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
+    "text": "원본 오디오 패스스루가 켜져 있으면 음량 기준만 작동합니다. 다른 방식은 내 목소리를 에코로 인식해 제거합니다."
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "다시 검색"
@@ -991,6 +1011,134 @@
     "en": "What you want to say — Enter translates",
     "text": "하고 싶은 말을 입력하고 Enter로 번역"
   },
+  "fork.voice.auto": {
+    "en": "Read my translations as they come",
+    "text": "내 말이 끝나면 번역문 자동으로 읽기"
+  },
+  "fork.voice.cannotSpeak": {
+    "en": "{{name}} cannot speak {{language}}.",
+    "text": "{{name}} 모델은 {{language}} 음성을 지원하지 않아요."
+  },
+  "fork.voice.hearBoth": {
+    "en": "To both",
+    "text": "모두에게"
+  },
+  "fork.voice.hearers": {
+    "en": "Read my translations aloud",
+    "text": "번역 자동으로 읽어주기"
+  },
+  "fork.voice.hearMe": {
+    "en": "To me",
+    "text": "나에게"
+  },
+  "fork.voice.hearNone": {
+    "en": "Off",
+    "text": "끄기"
+  },
+  "fork.voice.hearThem": {
+    "en": "To them",
+    "text": "상대방에게"
+  },
+  "fork.voice.lineFailed": {
+    "en": "This line could not be read aloud",
+    "text": "이 줄을 읽지 못했어요"
+  },
+  "fork.voice.man": {
+    "en": "Male voice",
+    "text": "남성 음성"
+  },
+  "fork.voice.meetingDevice": {
+    "en": "Output for the other side",
+    "text": "상대방에게 보낼 소리의 출력 장치"
+  },
+  "fork.voice.meetingDeviceAuto": {
+    "en": "Virtual microphone (automatic)",
+    "text": "가상 마이크 (자동)"
+  },
+  "fork.voice.meetingDeviceTooltip": {
+    "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
+    "text": "번역 음성은 이 장치에서 재생되며, 상대방에게는 마이크 소리로 전달됩니다. 사운드 카드에 믹싱 기능이 내장되어 있다면 재생 채널 하나를 선택하고 사운드 카드에서 마이크 소리와 섞으세요. 이렇게 하면 내 목소리는 소프트웨어를 거치지 않습니다."
+  },
+  "fork.voice.modelPlaceholder": {
+    "en": "The model's name, e.g. tts-1",
+    "text": "모델 이름, 예: tts-1"
+  },
+  "fork.voice.myVoiceToo": {
+    "en": "My own voice goes too",
+    "text": "내 실제 목소리도 보내기"
+  },
+  "fork.voice.myVoiceTooTooltip": {
+    "en": "Off: they hear only the voice reading your translation.",
+    "text": "끄면 상대방에게는 번역문을 읽는 소리만 들려요."
+  },
+  "fork.voice.needsSpeaker": {
+    "en": "It reads what you say or type. Switch the mode to \"Me\" or \"Both\".",
+    "text": "내가 말하거나 입력한 내용을 읽어요. 모드를 \"나\" 또는 \"둘 다\"로 바꿔 주세요."
+  },
+  "fork.voice.on": {
+    "en": "Read aloud",
+    "text": "음성 읽기 켜기"
+  },
+  "fork.voice.sample": {
+    "en": "Play a sample",
+    "text": "미리 듣기"
+  },
+  "fork.voice.sayLine": {
+    "en": "Read this line aloud",
+    "text": "이 줄 읽기"
+  },
+  "fork.voice.stage": {
+    "en": "Voice",
+    "text": "음성 읽기"
+  },
+  "fork.voice.stageTooltip": {
+    "en": "Reads your translations aloud. Any line of the conversation can be heard too: press its speaker button.",
+    "text": "내 번역문을 소리 내어 읽어요. 대화의 어느 줄이든 스피커 버튼을 누르면 들을 수 있어요."
+  },
+  "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "중지"
+  },
+  "fork.voice.toMe": {
+    "en": "I hear it",
+    "text": "내가 듣기"
+  },
+  "fork.voice.toMeFix": {
+    "en": "Choose",
+    "text": "앱 선택"
+  },
+  "fork.voice.toMeLocked": {
+    "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
+    "text": "지금은 ‘내가 듣기’를 사용할 수 없어요. 시스템 전체 소리를 가져오면 앱이 번역을 읽어 주는 소리도 상대방 말로 인식해요. 상대방 소리를 가져올 앱을 하나만 선택하세요(예: VRChat)."
+  },
+  "fork.voice.toThem": {
+    "en": "The other side hears it",
+    "text": "상대방에게 들려주기"
+  },
+  "fork.voice.toThemTooltip": {
+    "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
+    "text": "상대에게 읽어 줄 때는 소리가 가상 마이크로 전달돼요. VRChat이나 회의 앱에서 해당 마이크를 선택하세요(Windows에서는 CABLE Output)."
+  },
+  "fork.voice.voice": {
+    "en": "Voice",
+    "text": "목소리"
+  },
+  "fork.voice.voiceOf": {
+    "en": "{{language}} voice",
+    "text": "{{language}} 목소리"
+  },
+  "fork.voice.volumeMine": {
+    "en": "Volume for me",
+    "text": "내가 듣는 음량"
+  },
+  "fork.voice.volumeTheirs": {
+    "en": "Volume for them",
+    "text": "상대가 듣는 음량"
+  },
+  "fork.voice.woman": {
+    "en": "Female voice",
+    "text": "여성 음성"
+  },
   "fork.vr.back": {
     "en": "Back",
     "text": "뒤로"
@@ -1455,6 +1603,10 @@
     "en": "Custom address",
     "text": "직접 입력한 주소"
   },
+  "providers.localai.apiServiceEdge": {
+    "en": "Edge online voices (free)",
+    "text": "Edge 온라인 음성 (무료)"
+  },
   "providers.localai.apiServiceModel": {
     "en": "Choose from the list on the right, or type a name",
     "text": "오른쪽 목록에서 선택하거나 이름을 입력하세요"
@@ -1847,6 +1999,34 @@
     "en": "Updating the speech recognition engine. You can start once it is done.",
     "text": "음성 인식 엔진을 업데이트하는 중입니다. 완료되면 시작할 수 있습니다."
   },
+  "providers.localai.nativeVoiceFailed": {
+    "en": "The voice engine could not start. In the Voice card, press \"Try again\" — or choose another model.",
+    "text": "음성 읽기 엔진을 시작하지 못했어요. \"음성 읽기\" 카드에서 \"다시 시도\"를 누르거나 다른 모델을 선택해 주세요."
+  },
+  "providers.localai.nativeVoiceFailedShort": {
+    "en": "The voice engine could not start.",
+    "text": "음성 읽기 엔진을 시작하지 못했어요."
+  },
+  "providers.localai.nativeVoiceMissing": {
+    "en": "The voice model is not downloaded yet. Download it to start.",
+    "text": "아직 음성 모델을 다운로드하지 않았어요. 다운로드하면 시작할 수 있어요."
+  },
+  "providers.localai.nativeVoiceReady": {
+    "en": "The voice engine is ready.",
+    "text": "음성 읽기 엔진이 준비됐어요."
+  },
+  "providers.localai.nativeVoiceUnsupported": {
+    "en": "The native voice engine is not available for this system. In the Voice card, switch to \"API model\".",
+    "text": "이 시스템은 아직 기본 음성 읽기 엔진을 지원하지 않아요. \"음성 읽기\" 카드에서 \"API 모델\"로 전환해 주세요."
+  },
+  "providers.localai.nativeVoiceUpdating": {
+    "en": "Updating the voice engine. You can start once it is done.",
+    "text": "음성 읽기 엔진을 업데이트하고 있어요. 완료되면 시작할 수 있어요."
+  },
+  "providers.localai.nativeVoiceWarmingShort": {
+    "en": "Starting the voice engine…",
+    "text": "음성 읽기 엔진 시작 중…"
+  },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
     "text": "음성 인식 엔진을 시작하는 중이에요. 컴퓨터를 켠 뒤 처음에는 약 30초가 걸려요. 준비되면 바로 시작할 수 있어요."
@@ -1886,6 +2066,14 @@
   "providers.localai.noteIndexTranslate": {
     "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
     "text": "일본어→중국어 번역 실측: 30문장 중 약 3문장에 심각한 오류가 있었으며, 테스트한 모델 중 가장 좋았어요. 문장당 약 0.1초가 걸려요. 그래픽 메모리 약 2 GB를 사용하고 100개 이상의 언어를 지원해요."
+  },
+  "providers.localai.noteIrodori": {
+    "en": "Japanese only. Measured: nothing misread, about half a second a sentence. About 1.7 GB of video memory.",
+    "text": "일본어만 지원해요. 직접 테스트했을 때 잘못 읽는 부분이 없었고, 문장당 약 0.5초가 걸렸어요. 비디오 메모리 약 1.7 GB를 사용해요."
+  },
+  "providers.localai.noteKokoro": {
+    "en": "Light: runs on the processor and takes no video memory. Less natural, Japanese most of all.",
+    "text": "가벼워요. 프로세서만 사용하고 그래픽 메모리는 쓰지 않아요. 덜 자연스러운 편이고, 특히 일본어에서 두드러져요."
   },
   "providers.localai.noteMoonshineJa": {
     "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
@@ -1934,6 +2122,10 @@
   "providers.localai.noteQwen17": {
     "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
     "text": "일본어 일상 대화 실측: 문자 오류율 약 19%. 문장이 끝나야 글을 표시해요(약 10초 지연). 위의 GGUF 버전은 말하는 동안 글을 표시해요."
+  },
+  "providers.localai.noteQwen3Tts": {
+    "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
+    "text": "가장 자연스럽고 바로 말하기 시작해요. 일본어, 중국어, 영어로 직접 테스트했을 때 잘못 읽는 부분이 없었어요. 비디오 메모리 약 3 GB를 사용하며, 10개 언어를 지원해요."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
@@ -2110,6 +2302,10 @@
   "providers.localai.sourceAuto": {
     "en": "The language cannot be detected with this setup. Choose the language you speak.",
     "text": "이 조합으로는 언어를 자동으로 감지할 수 없어요. 내가 말할 언어를 선택하세요."
+  },
+  "providers.localai.speakKey": {
+    "en": "API key of the voice",
+    "text": "음성 모델 API 키"
   },
   "providers.localai.speedAbout": {
     "en": "About {{seconds}} s",
@@ -2319,6 +2515,10 @@
     "en": "API model",
     "text": "API 모델"
   },
+  "providers.localai.voiceUnnamed": {
+    "en": "The voice has no model to run yet. Name one in the Voice card.",
+    "text": "아직 음성 모델을 입력하지 않았어요. \"음성 읽기\" 카드에서 입력해 주세요."
+  },
   "providers.openai_live.name": {
     "en": "OpenAI Live",
     "text": "OpenAI Live"
@@ -2422,6 +2622,10 @@
   "settings.glossaryWritten": {
     "en": "Word",
     "text": "단어"
+  },
+  "settings.noiseSuppressionTooltip.off": {
+    "en": "Off — no noise suppression: the microphone as it is. Best in a quiet room.",
+    "text": "꺼짐 — 소음 억제 없음: 마이크 입력을 그대로 사용합니다. 조용한 방에서 가장 잘 작동합니다."
   },
   "settings.transcriptKeywordsPlaceholder": {
     "en": "Sokuji, Kizuna AI, PulseAudio",

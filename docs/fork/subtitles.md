@@ -15,18 +15,18 @@ Subtitle view is the default (`compactMode`); list view is the conversation list
 `buildLanes` gives each side heard one lane, the other side's first. A lane changes only when its own side says the next sentence, so talk never pushes feedback away.
 
 - Pair: the sentence small over its answer large. The other side's lane, or the user's when alone.
-- Row: the user's lane under the other side's. Sentence, arrow, answer on one small line; approval is a tick, a correction is the sentence marked in place. Feedback beside a translation has its own line.
+- Row: the user's lane under the other side's. Sentence, arrow, answer on one small line; approval is a tick, a correction is the sentence marked in place. Feedback has its own line, kept till the next is read.
 - A pair's small line is the answered sentence plus all said since, at most `STREAM_MOST` sentences, ending at the word being heard. When a newer sentence is answered the line restarts at it.
-- A row shows its newest sentence at once; "…" means an answer is coming, only on a side answered before.
+- A row shows its newest sentence once the one before is read; "…": an answer is coming, or more was said.
 - A sentence in the reader's language is its own answer (`answersItself`). In a same-language run, speech takes the answer's place.
 
 ## What stays fixed
 
 Layout computed from live text jumped every second, so nothing is sized by content.
 
-- Text is always the chosen size. Too long, it loses its oldest whole line (`Slot`, `wholeLinesFrom`).
-- Each text but feedback has a fixed slot, written in or not; feedback adds its row when it comes. A silent lane keeps its room.
-- Lanes are centred in the box. Small lines stand on the foot of their slot, so a reading grows into kept room and the words stay put.
+- Text is always the chosen size. Too long, a row drops its sentence, then any text its oldest whole line (`Slot`).
+- Each text has a fixed slot, written in or not; feedback's is kept while grammar feedback is on. A silent lane keeps its room.
+- Lanes are centred in the box. Small lines stand on their slot's foot, above any line kept for a romanization, so the words stay put.
 
 ## Window height
 
@@ -62,7 +62,7 @@ Each side shows source, translation, both or off.
 
 ## Reading aids
 
-- Slots keep room for aids. `plannedRoom` plans it from the language pair, so the first answer does not raise the window; `useRoom` keeps it while the switch is on.
+- Slots keep room for aids. `plannedRoom` plans it from the run's languages, so the first answer does not raise the window; `useRoom` keeps it while the switch is on.
 - Each sentence uses its own language. Romanization sits under stretches split at spaces and between Japanese words (`romanStretches`).
 - `romanization` is the master switch; `romanizationOff` turns off ja, ko, ru or uk.
 
@@ -91,7 +91,7 @@ A request carries only its sentence, except Hunyuan MT's Chinese form (`wrapAfte
 
 ## How long a translation stays
 
-`src/lib/subtitle/dwell.ts`, clock in `useHeld`. A pair's answer stays until read, by its length and language, within 1.2 to 2.5 s. A hold only delays the next caption, so it is bounded: with more than one waiting each gets 1.2 s, and three or more behind jumps to the one before the newest. The small line and the row are not held.
+`src/lib/subtitle/dwell.ts`, clock in `useHeld`. A pair's answer, and a row's sentence (`rowTurn`), stay until read, by length and language, within 1.2 to 2.5 s. A hold only delays the next caption, so it is bounded: with more than one waiting each gets 1.2 s, and three or more behind jumps to the one before the newest. The small line is not held.
 
 ## Glossary
 

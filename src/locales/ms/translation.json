@@ -48,7 +48,7 @@
     "noiseReduction": "Pengurangan bunyi bising",
     "noiseSuppression": "Penindasan Bunyi Bising",
     "noiseSuppressionTooltip": {
-      "off": "Mati — Hanya pengendalian bunyi bising terbina dalam pelayar.",
+      "off": "Mati — tiada penyingkiran hingar: mikrofon seadanya. Paling sesuai dalam bilik yang sunyi.",
       "standard": "Standard (RNNoise) — Penindasan bunyi bising AI ringan dengan kependaman rendah.",
       "enhanced": "Dipertingkat (GTCRN) — Penindasan bunyi bising AI berkualiti tinggi, terbaik untuk persekitaran bunyi bising kompleks."
     },
@@ -774,7 +774,19 @@
       "tagHint_cpu": "Berjalan pada pemproses, jadi kad grafik boleh digunakan untuk permainan. Dimuatkan apabila sesi bermula.",
       "noteNativeXAsr": "Memaparkan teks semasa anda bercakap, hanya menggunakan pemproses tanpa menggunakan memori grafik: kira-kira satu perlima daripada satu teras. Hanya menyokong bahasa Cina dan Inggeris. Perkataan dalam kamus peribadi tidak diberikan terlebih dahulu; selepas pengecaman, perkataan tetap dibetulkan mengikut sebutan.",
       "noteStreamRevise": "Terjemahan mula dipaparkan semasa orang lain masih bercakap, kemudian seluruh ayat diterjemahkan semula apabila selesai. Hanya menyokong bahasa Cina, Inggeris dan Jepun.",
-      "noteNativeSenseVoiceCpu": "Hanya guna pemproses, tanpa menggunakan memori grafik. Ketepatan hampir sama dengan SenseVoice pada kad grafik. Menyokong bahasa Cina, Kantonis, Inggeris, Jepun dan Korea. Perkataan dalam kamus peribadi tidak diberikan terlebih dahulu, tetapi hasil pengecaman tetap dibetulkan mengikut sebutan."
+      "noteNativeSenseVoiceCpu": "Hanya guna pemproses, tanpa menggunakan memori grafik. Ketepatan hampir sama dengan SenseVoice pada kad grafik. Menyokong bahasa Cina, Kantonis, Inggeris, Jepun dan Korea. Perkataan dalam kamus peribadi tidak diberikan terlebih dahulu, tetapi hasil pengecaman tetap dibetulkan mengikut sebutan.",
+      "apiServiceEdge": "Suara dalam talian Edge (percuma)",
+      "speakKey": "Kunci API model bacaan",
+      "nativeVoiceReady": "Enjin bacaan sudah sedia.",
+      "nativeVoiceWarmingShort": "Memulakan enjin bacaan…",
+      "nativeVoiceFailedShort": "Enjin bacaan gagal dimulakan.",
+      "nativeVoiceUnsupported": "Sistem ini belum menyokong enjin bacaan natif. Tukar kepada \"Model API\" dalam kad Bacaan.",
+      "nativeVoiceMissing": "Model bacaan belum dimuat turun. Muat turun untuk bermula.",
+      "nativeVoiceUpdating": "Mengemas kini enjin bacaan. Anda boleh bermula setelah selesai.",
+      "nativeVoiceFailed": "Enjin bacaan gagal dimulakan. Tekan \"Cuba lagi\" dalam kad Bacaan, atau pilih model lain.",
+      "voiceUnnamed": "Model bacaan belum diisi. Masukkan namanya dalam kad Bacaan.",
+      "noteQwen3Tts": "Paling semula jadi, terus bersuara tanpa menunggu. Diuji dalam bahasa Jepun, Cina dan Inggeris: tiada kesilapan sebutan. Menggunakan kira-kira 3 GB memori video, menyokong 10 bahasa.",
+      "noteIrodori": "Bahasa Jepun sahaja. Diuji tanpa kesilapan sebutan, kira-kira setengah saat setiap ayat. Menggunakan kira-kira 1.7 GB memori video."
     }
   },
   "logsPanel": {
@@ -1739,8 +1751,6 @@
     "furigana": "Furigana di atas kanji (Jepun)",
     "romanization": "Paparkan perumian",
     "pinyin": "Pinyin di atas teks Cina",
-    "echoCancellationApp": "Kotomimi sahaja",
-    "echoCancellationAppTooltip": "Kotomimi sahaja — hanya menyingkirkan bunyi yang dimainkan oleh Kotomimi, supaya suara anda dirakam paling jelas. Sesuai jika anda memakai fon kepala atau set kepala VR; dengan pembesar suara, mod \"Kedua-duanya\" juga boleh digunakan. Pilih ini jika mikrofon anda ialah kad bunyi maya (VB-Cable, BlackHole).",
     "speechDetection": {
       "title": "Pengesanan pertuturan"
     },
@@ -2113,6 +2123,40 @@
     "apart": {
       "split": "Dengar suara saya di tempat lain",
       "merge": "Dengar kedua-dua pihak di satu tempat"
-    }
+    },
+    "voice": {
+      "stage": "Bacaan",
+      "stageTooltip": "Membaca terjemahan anda dengan kuat. Anda juga boleh mendengar mana-mana baris perbualan: tekan butang pembesar suaranya.",
+      "on": "Aktifkan bacaan",
+      "toMeLocked": "\"Saya dengar\" belum boleh digunakan. Kotomimi mengambil audio daripada seluruh sistem, jadi bacaan terjemahan akan disangka suara orang yang anda dengar. Pilih satu aplikasi seperti VRChat sebagai sumber audio mereka.",
+      "toThemTooltip": "Apabila dibacakan kepada pihak sana, suara dihantar ke mikrofon maya. Pilih mikrofon itu dalam VRChat atau aplikasi mesyuarat anda (namanya CABLE Output pada Windows).",
+      "myVoiceToo": "Hantar suara asal saya juga",
+      "myVoiceTooTooltip": "Apabila dimatikan, pihak satu lagi hanya mendengar terjemahan yang dibacakan.",
+      "needsSpeaker": "Bacaan menyuarakan apa yang anda cakap atau taip. Tukar mod kepada \"Saya\" atau \"Kedua-duanya\".",
+      "modelPlaceholder": "Nama model, contohnya tts-1",
+      "voice": "Suara",
+      "voiceOf": "Suara {{language}}",
+      "sample": "Dengar sampel",
+      "cannotSpeak": "{{name}} tidak boleh bertutur dalam {{language}}.",
+      "sayLine": "Baca baris ini",
+      "stopLine": "Hentikan",
+      "lineFailed": "Baris ini gagal dibacakan",
+      "woman": "Suara wanita",
+      "man": "Suara lelaki",
+      "hearers": "Baca terjemahan secara automatik",
+      "hearNone": "Mati",
+      "hearMe": "Untuk saya",
+      "hearThem": "Untuk mereka",
+      "hearBoth": "Untuk kedua-dua pihak",
+      "volumeMine": "Kelantangan untuk saya",
+      "volumeTheirs": "Kelantangan untuk orang lain",
+      "meetingDevice": "Salurkan audio untuk pihak satu lagi ke",
+      "meetingDeviceAuto": "Mikrofon maya (automatik)",
+      "meetingDeviceTooltip": "Bacaan terjemahan dimainkan melalui peranti ini, yang digunakan sebagai mikrofon untuk didengar oleh pihak satu lagi. Jika kad bunyi anda boleh mencampurkan audio, pilih salah satu saluran main baliknya dan campurkan audio saluran itu dengan audio mikrofon anda pada kad bunyi. Dengan cara ini, suara asal anda tidak melalui perisian."
+    },
+    "echoCancellationGate": "Ikut kelantangan",
+    "echoCancellationGateTooltip": "Mengikut kelantangan — untuk pembesar suara: bunyi yang dimainkan masuk semula ke mikrofon jauh lebih perlahan daripada suara anda, jadi ia ditapis berdasarkan kelantangan tanpa menjejaskan suara anda.",
+    "echoCancellationOff": "Mati",
+    "echoCancellationOffTooltip": "Mati — mikrofon dihantar untuk pengecaman tanpa perubahan. Untuk fon kepala: tiada bunyi bocor ke mikrofon."
   }
 }

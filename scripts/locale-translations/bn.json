@@ -203,6 +203,26 @@
     "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
     "text": "শুধু Kotomimi — শুধু Kotomimi নিজে যে শব্দ বাজায় তা সরিয়ে দেয়, ফলে আপনার আওয়াজ সবচেয়ে পরিষ্কারভাবে ধরা পড়ে। হেডফোন বা VR হেডসেটের জন্য উপযোগী; স্পিকার ব্যবহার করলেও \"উভয়\" মোডে কাজ করে। মাইক্রোফোন হিসেবে ভার্চুয়াল সাউন্ড কার্ড (VB-Cable, BlackHole ইত্যাদি) ব্যবহার করলে এটি বেছে নিন।"
   },
+  "fork.echoCancellationGate": {
+    "en": "By loudness",
+    "text": "ভলিউম অনুযায়ী"
+  },
+  "fork.echoCancellationGateTooltip": {
+    "en": "By loudness — for loudspeakers: what they play comes back into the microphone far quieter than your voice, so it is kept out by its loudness and your voice is left as it is.",
+    "text": "শব্দের জোর অনুযায়ী — স্পিকার ব্যবহারে: স্পিকার থেকে মাইক্রোফোনে ঢোকা শব্দ আপনার কণ্ঠের চেয়ে অনেক কম জোরে হয়, তাই শব্দের জোর মেপে তা বাদ দেওয়া হয়, আর আপনার কণ্ঠ অপরিবর্তিত থাকে।"
+  },
+  "fork.echoCancellationOff": {
+    "en": "Off",
+    "text": "বন্ধ"
+  },
+  "fork.echoCancellationOffTooltip": {
+    "en": "Off — the microphone as it is. For headphones: nothing plays into it.",
+    "text": "বন্ধ — মাইক্রোফোনের শব্দ 그대로 শনাক্তকরণে পাঠানো হয়। হেডফোনে ব্যবহার করুন: কোনো শব্দ মাইক্রোফোনে ঢুকবে না।"
+  },
+  "fork.echoCancellationPassthrough": {
+    "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
+    "text": "মূল অডিও পাসথ্রু চালু থাকলে শুধু শব্দের মাত্রা পদ্ধতিই কাজ করে: অন্যগুলো আপনার নিজের কণ্ঠকে প্রতিধ্বনি ভেবে মুছে দেয়।"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "আবার খুঁজুন"
@@ -991,6 +1011,134 @@
     "en": "What you want to say — Enter translates",
     "text": "যা বলতে চান লিখুন, অনুবাদ করতে Enter চাপুন"
   },
+  "fork.voice.auto": {
+    "en": "Read my translations as they come",
+    "text": "আমার কথা শেষ হলে অনুবাদ পড়ে শোনান"
+  },
+  "fork.voice.cannotSpeak": {
+    "en": "{{name}} cannot speak {{language}}.",
+    "text": "{{name}} {{language}} বলতে পারে না।"
+  },
+  "fork.voice.hearBoth": {
+    "en": "To both",
+    "text": "উভয় পক্ষ শুনবে"
+  },
+  "fork.voice.hearers": {
+    "en": "Read my translations aloud",
+    "text": "অনুবাদ স্বয়ংক্রিয়ভাবে পড়ে শোনান"
+  },
+  "fork.voice.hearMe": {
+    "en": "To me",
+    "text": "আমি শুনব"
+  },
+  "fork.voice.hearNone": {
+    "en": "Off",
+    "text": "বন্ধ"
+  },
+  "fork.voice.hearThem": {
+    "en": "To them",
+    "text": "অপর পক্ষ শুনবে"
+  },
+  "fork.voice.lineFailed": {
+    "en": "This line could not be read aloud",
+    "text": "এই লাইন পড়ে শোনানো যায়নি"
+  },
+  "fork.voice.man": {
+    "en": "Male voice",
+    "text": "পুরুষ কণ্ঠ"
+  },
+  "fork.voice.meetingDevice": {
+    "en": "Output for the other side",
+    "text": "ওপাশের শব্দ পাঠানোর ডিভাইস"
+  },
+  "fork.voice.meetingDeviceAuto": {
+    "en": "Virtual microphone (automatic)",
+    "text": "ভার্চুয়াল মাইক্রোফোন (স্বয়ংক্রিয়)"
+  },
+  "fork.voice.meetingDeviceTooltip": {
+    "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
+    "text": "অনুবাদটি এই ডিভাইসে পড়ে শোনানো হয়। ওপাশে এই ডিভাইসের শব্দ মাইক্রোফোনের ইনপুট হিসেবে পৌঁছায়। আপনার সাউন্ড কার্ডে সরাসরি শব্দ মেশানোর সুবিধা থাকলে, তার একটি প্লেব্যাক চ্যানেল বেছে নিন। তারপর সাউন্ড কার্ডেই ওই চ্যানেলের শব্দের সঙ্গে আপনার মাইক্রোফোনের শব্দ মেশান। এতে আপনার নিজের কণ্ঠস্বর সফটওয়্যারের মধ্য দিয়ে যাবে না।"
+  },
+  "fork.voice.modelPlaceholder": {
+    "en": "The model's name, e.g. tts-1",
+    "text": "মডেলের নাম, যেমন tts-1"
+  },
+  "fork.voice.myVoiceToo": {
+    "en": "My own voice goes too",
+    "text": "আমার নিজের কণ্ঠও পাঠান"
+  },
+  "fork.voice.myVoiceTooTooltip": {
+    "en": "Off: they hear only the voice reading your translation.",
+    "text": "বন্ধ থাকলে অপর পক্ষ শুধু পড়ে শোনানো অনুবাদ শুনবে।"
+  },
+  "fork.voice.needsSpeaker": {
+    "en": "It reads what you say or type. Switch the mode to \"Me\" or \"Both\".",
+    "text": "আপনার বলা বা লেখা কথাই পড়ে শোনানো হয়। মোড \"আমি\" বা \"উভয়\" করুন।"
+  },
+  "fork.voice.on": {
+    "en": "Read aloud",
+    "text": "পড়ে শোনানো চালু করুন"
+  },
+  "fork.voice.sample": {
+    "en": "Play a sample",
+    "text": "নমুনা শুনুন"
+  },
+  "fork.voice.sayLine": {
+    "en": "Read this line aloud",
+    "text": "এই লাইন পড়ে শোনান"
+  },
+  "fork.voice.stage": {
+    "en": "Voice",
+    "text": "পড়ে শোনানো"
+  },
+  "fork.voice.stageTooltip": {
+    "en": "Reads your translations aloud. Any line of the conversation can be heard too: press its speaker button.",
+    "text": "আপনার অনুবাদ পড়ে শোনায়। কথোপকথনের যেকোনো লাইনও শুনতে পারবেন: সেটির স্পিকার বোতাম চাপুন।"
+  },
+  "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "থামান"
+  },
+  "fork.voice.toMe": {
+    "en": "I hear it",
+    "text": "আমি শুনব"
+  },
+  "fork.voice.toMeFix": {
+    "en": "Choose",
+    "text": "বেছে নিন"
+  },
+  "fork.voice.toMeLocked": {
+    "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
+    "text": "‘আমি শুনি’ এখন ব্যবহার করা যাচ্ছে না। পুরো সিস্টেম থেকে শব্দ নেওয়ায় অ্যাপের পড়ে শোনানো কথাও অপর পক্ষের কথা হিসেবে ধরা পড়বে। অপর পক্ষের শব্দের উৎস হিসেবে একটি অ্যাপ বেছে নিন (যেমন VRChat)।"
+  },
+  "fork.voice.toThem": {
+    "en": "The other side hears it",
+    "text": "অপর পক্ষ শুনবে"
+  },
+  "fork.voice.toThemTooltip": {
+    "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
+    "text": "অপর পক্ষকে পড়ে শোনানোর সময় শব্দ ভার্চুয়াল মাইক্রোফোনে পাঠানো হয়। VRChat বা মিটিং অ্যাপে সেটিকে মাইক্রোফোন হিসেবে বেছে নিন (Windows-এ এর নাম CABLE Output)।"
+  },
+  "fork.voice.voice": {
+    "en": "Voice",
+    "text": "কণ্ঠ"
+  },
+  "fork.voice.voiceOf": {
+    "en": "{{language}} voice",
+    "text": "{{language}} কণ্ঠ"
+  },
+  "fork.voice.volumeMine": {
+    "en": "Volume for me",
+    "text": "আমি যে ভলিউমে শুনি"
+  },
+  "fork.voice.volumeTheirs": {
+    "en": "Volume for them",
+    "text": "ওপাশে যে ভলিউমে শোনা যায়"
+  },
+  "fork.voice.woman": {
+    "en": "Female voice",
+    "text": "নারী কণ্ঠ"
+  },
   "fork.vr.back": {
     "en": "Back",
     "text": "ফিরে যান"
@@ -1459,6 +1607,10 @@
     "en": "Custom address",
     "text": "নিজস্ব ঠিকানা"
   },
+  "providers.localai.apiServiceEdge": {
+    "en": "Edge online voices (free)",
+    "text": "Edge অনলাইন কণ্ঠ (বিনামূল্যে)"
+  },
   "providers.localai.apiServiceModel": {
     "en": "Choose from the list on the right, or type a name",
     "text": "ডানদিকের তালিকা থেকে বেছে নিন বা নাম লিখুন"
@@ -1851,6 +2003,34 @@
     "en": "Updating the speech recognition engine. You can start once it is done.",
     "text": "ভয়েস শনাক্তকরণ ইঞ্জিন আপডেট হচ্ছে। শেষ হলে শুরু করতে পারবেন।"
   },
+  "providers.localai.nativeVoiceFailed": {
+    "en": "The voice engine could not start. In the Voice card, press \"Try again\" — or choose another model.",
+    "text": "পড়ে শোনানোর ইঞ্জিন চালু করা যায়নি। \"পড়ে শোনানো\" কার্ডে \"আবার চেষ্টা করুন\" চাপুন, অথবা অন্য মডেল বেছে নিন।"
+  },
+  "providers.localai.nativeVoiceFailedShort": {
+    "en": "The voice engine could not start.",
+    "text": "পড়ে শোনানোর ইঞ্জিন চালু করা যায়নি।"
+  },
+  "providers.localai.nativeVoiceMissing": {
+    "en": "The voice model is not downloaded yet. Download it to start.",
+    "text": "পড়ে শোনানোর মডেল এখনো ডাউনলোড করা হয়নি। ডাউনলোড করলেই শুরু করতে পারবেন।"
+  },
+  "providers.localai.nativeVoiceReady": {
+    "en": "The voice engine is ready.",
+    "text": "পড়ে শোনানোর ইঞ্জিন প্রস্তুত।"
+  },
+  "providers.localai.nativeVoiceUnsupported": {
+    "en": "The native voice engine is not available for this system. In the Voice card, switch to \"API model\".",
+    "text": "এই সিস্টেমে নিজস্ব পড়ে শোনানোর ইঞ্জিন এখনো চলে না। \"পড়ে শোনানো\" কার্ডে \"API মডেল\" বেছে নিন।"
+  },
+  "providers.localai.nativeVoiceUpdating": {
+    "en": "Updating the voice engine. You can start once it is done.",
+    "text": "পড়ে শোনানোর ইঞ্জিন আপডেট হচ্ছে। শেষ হলেই শুরু করতে পারবেন।"
+  },
+  "providers.localai.nativeVoiceWarmingShort": {
+    "en": "Starting the voice engine…",
+    "text": "পড়ে শোনানোর ইঞ্জিন চালু হচ্ছে…"
+  },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
     "text": "শনাক্তকরণ ইঞ্জিন এখনও চালু হচ্ছে। কম্পিউটার চালু করার পর প্রথমবার প্রায় আধা মিনিট লাগে। প্রস্তুত হলেই শুরু করতে পারবেন।"
@@ -1890,6 +2070,14 @@
   "providers.localai.noteIndexTranslate": {
     "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
     "text": "জাপানি থেকে চীনা অনুবাদের পরীক্ষায়: 30টি বাক্যের মধ্যে প্রায় 3টিতে বড় ভুল হয়েছে, পরীক্ষা করা মডেলগুলোর মধ্যে সেরা। প্রতি বাক্যে প্রায় 0.1 সেকেন্ড লাগে। প্রায় 2 GB গ্রাফিক্স মেমরি লাগে, একশোর বেশি ভাষা সমর্থন করে।"
+  },
+  "providers.localai.noteIrodori": {
+    "en": "Japanese only. Measured: nothing misread, about half a second a sentence. About 1.7 GB of video memory.",
+    "text": "শুধু জাপানি বলে। পরীক্ষায় কোনো উচ্চারণ ভুল হয়নি, প্রতি বাক্যে প্রায় আধা সেকেন্ড লাগে। প্রায় 1.7 GB ভিডিও মেমরি লাগে।"
+  },
+  "providers.localai.noteKokoro": {
+    "en": "Light: runs on the processor and takes no video memory. Less natural, Japanese most of all.",
+    "text": "হালকা: শুধু প্রসেসর ব্যবহার করে, ভিডিও মেমরি লাগে না। কণ্ঠ ততটা স্বাভাবিক নয়, বিশেষ করে জাপানিতে।"
   },
   "providers.localai.noteMoonshineJa": {
     "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
@@ -1938,6 +2126,10 @@
   "providers.localai.noteQwen17": {
     "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
     "text": "জাপানি আড্ডায় পরীক্ষায় প্রায় 19% অক্ষর ভুল হয়েছে। বাক্য বলা শেষ হলে তবেই লেখে (প্রায় 10 সেকেন্ড দেরিতে)। ওপরের GGUF সংস্করণ কথা বলার সঙ্গে সঙ্গেই লেখে।"
+  },
+  "providers.localai.noteQwen3Tts": {
+    "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
+    "text": "সবচেয়ে স্বাভাবিক শোনায়, সঙ্গে সঙ্গেই কথা বলা শুরু করে। পরীক্ষায় জাপানি, চীনা ও ইংরেজিতে কোনো উচ্চারণ ভুল হয়নি। প্রায় 3 GB ভিডিও মেমরি লাগে, 10টি ভাষা সমর্থন করে।"
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
@@ -2114,6 +2306,10 @@
   "providers.localai.sourceAuto": {
     "en": "The language cannot be detected with this setup. Choose the language you speak.",
     "text": "এই সমন্বয়ে ভাষা স্বয়ংক্রিয়ভাবে চেনা যায় না। আপনি যে ভাষায় বলবেন তা বেছে নিন।"
+  },
+  "providers.localai.speakKey": {
+    "en": "API key of the voice",
+    "text": "পড়ে শোনানোর মডেলের API কী"
   },
   "providers.localai.speedAbout": {
     "en": "About {{seconds}} s",
@@ -2323,6 +2519,10 @@
     "en": "API model",
     "text": "API মডেল"
   },
+  "providers.localai.voiceUnnamed": {
+    "en": "The voice has no model to run yet. Name one in the Voice card.",
+    "text": "পড়ে শোনানোর মডেলের নাম দেওয়া হয়নি। \"পড়ে শোনানো\" কার্ডে নাম লিখুন।"
+  },
   "providers.openai_live.name": {
     "en": "OpenAI Live",
     "text": "OpenAI Live"
@@ -2426,6 +2626,10 @@
   "settings.glossaryWritten": {
     "en": "Word",
     "text": "শব্দ"
+  },
+  "settings.noiseSuppressionTooltip.off": {
+    "en": "Off — no noise suppression: the microphone as it is. Best in a quiet room.",
+    "text": "বন্ধ — কোনো শব্দ দমন নয়, মাইক্রোফোনের শব্দ অপরিবর্তিতভাবে পাঠানো হবে। শান্ত ঘরে সবচেয়ে ভালো কাজ করে।"
   },
   "settings.transcriptKeywordsPlaceholder": {
     "en": "Sokuji, Kizuna AI, PulseAudio",

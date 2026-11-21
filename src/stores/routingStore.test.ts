@@ -22,6 +22,47 @@ beforeEach(() => {
 });
 
 describe('routingStore', () => {
+  it('loads only non-empty meeting device ids without rewriting storage', async () => {
+    expect(useRoutingStore.getInitialState().meetingDevice).toBeNull();
+    for (const value of ['hardware', '', null, undefined, 42, {}]) {
+      stored.set('settings.routing.meetingDevice', value);
+      await useRoutingStore.getState().load();
+      expect(useRoutingStore.getState().meetingDevice).toBe(value === 'hardware' ? value : null);
+    }
+    expect(setSetting).not.toHaveBeenCalled();
+  });
+
+  it('persists choosing a meeting device and returning to automatic selection', async () => {
+    for (const id of ['hardware', null]) {
+      useRoutingStore.getState().setMeetingDevice(id);
+      expect(useRoutingStore.getState().meetingDevice).toBe(id);
+      await vi.waitFor(() => expect(setSetting).toHaveBeenLastCalledWith('settings.routing.meetingDevice', id));
+    }
+  });
+
+  it('loads finite speech volumes in range, with a separate default for each side', async () => {
+    for (const [mine, theirs, expectedMine, expectedTheirs] of [
+      [undefined, undefined, 0.5, 1], ['0.3', NaN, 0.5, 1], [Infinity, -Infinity, 0.5, 1],
+      [-1, 2, 0, 1], [0.7, 0, 0.7, 0],
+    ]) {
+      stored.set('settings.routing.speechVolumeMine', mine);
+      stored.set('settings.routing.speechVolumeTheirs', theirs);
+      await useRoutingStore.getState().load();
+      expect(useRoutingStore.getState()).toMatchObject({ speechVolumeMine: expectedMine, speechVolumeTheirs: expectedTheirs });
+    }
+    expect(setSetting).not.toHaveBeenCalled();
+  });
+
+  it('applies and persists the clamped volume on each side', async () => {
+    useRoutingStore.getState().setSpeechVolumeMine(2);
+    useRoutingStore.getState().setSpeechVolumeTheirs(-1);
+    expect(useRoutingStore.getState()).toMatchObject({ speechVolumeMine: 1, speechVolumeTheirs: 0 });
+    await vi.waitFor(() => {
+      expect(setSetting).toHaveBeenCalledWith('settings.routing.speechVolumeMine', 1);
+      expect(setSetting).toHaveBeenCalledWith('settings.routing.speechVolumeTheirs', 0);
+    });
+  });
+
   it('lets the meeting hear the translation and keeps participant speech off, until something was saved', async () => {
     await useRoutingStore.getState().load();
     expect(useRoutingStore.getState()).toMatchObject({ meeting: true, participantSpeech: false });

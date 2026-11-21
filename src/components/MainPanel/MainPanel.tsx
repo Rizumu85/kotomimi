@@ -17,7 +17,7 @@ import { useAnalytics } from '../../lib/analytics';
 import type { LegName } from '../../lib/conversation/types';
 import { describeCause, reportError, reportWarning } from '../../lib/diagnostics/report';
 import { participantSpeechHeard } from '../../lib/modern-audio/participantSource';
-import { NO_MICROPHONE } from '../../lib/session/shape';
+import { NO_MICROPHONE, speaksNow } from '../../lib/session/shape';
 import type { RunEnd, RunState } from '../../lib/session/types';
 import { displayItems, type DisplayItem, type NoticeEntry } from '../../lib/view/filter';
 import { actionLabel, type NoticeActionSpec } from '../../lib/view/noticeActions';
@@ -316,7 +316,7 @@ export default function MainPanel() {
   return (
     <div className="main-panel-wrapper" style={{ '--conversation-bg-color': colours.bgColor, '--conversation-source-color': colours.sourceTextColor, '--conversation-translation-color': colours.translationTextColor } as CSSProperties}>
       {/* Fork: nothing about a missing virtual microphone to a provider that never speaks. */}
-      <Banners speaks={provider?.speech !== 'never'} />
+      <Banners speaks={provider ? speaksNow(provider, providerSettings) : true} />
       <UpdateDialog />
       <div className="main-panel">
         {(!takeover || run.phase !== 'idle' || hasConversation) && (

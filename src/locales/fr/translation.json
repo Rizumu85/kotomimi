@@ -48,7 +48,7 @@
     "noiseReduction": "Réduction du bruit",
     "noiseSuppression": "Suppression du bruit",
     "noiseSuppressionTooltip": {
-      "off": "Désactivé — Uniquement le traitement du bruit intégré au navigateur.",
+      "off": "Désactivée — aucune réduction du bruit : le microphone tel quel. Idéal dans une pièce calme.",
       "standard": "Standard (RNNoise) — Suppression légère du bruit par IA avec faible latence.",
       "enhanced": "Amélioré (GTCRN) — Suppression de haute qualité du bruit par IA, idéale pour les environnements bruyants complexes."
     },
@@ -774,7 +774,19 @@
       "tagHint_cpu": "Fonctionne sur le processeur et laisse la carte graphique au jeu. Se charge au début de la session.",
       "noteNativeXAsr": "Transcrit au fil de la parole, sur le processeur, sans utiliser de mémoire vidéo : environ un cinquième d’un cœur. Chinois et anglais uniquement. Les mots du dictionnaire personnalisé ne lui sont pas fournis à l’avance ; ils sont corrigés après la reconnaissance selon leur prononciation.",
       "noteStreamRevise": "Traduit pendant que l’autre personne parle, puis retraduit toute la phrase une fois terminée. Uniquement en chinois, anglais et japonais.",
-      "noteNativeSenseVoiceCpu": "Utilise uniquement le processeur, sans occuper de mémoire vidéo. Presque aussi précis que SenseVoice sur carte graphique, pour le chinois, le cantonais, l’anglais, le japonais et le coréen. Les mots du dictionnaire personnalisé ne lui sont pas fournis à l’avance, mais sont corrigés après la reconnaissance selon leur prononciation."
+      "noteNativeSenseVoiceCpu": "Utilise uniquement le processeur, sans occuper de mémoire vidéo. Presque aussi précis que SenseVoice sur carte graphique, pour le chinois, le cantonais, l’anglais, le japonais et le coréen. Les mots du dictionnaire personnalisé ne lui sont pas fournis à l’avance, mais sont corrigés après la reconnaissance selon leur prononciation.",
+      "apiServiceEdge": "Voix en ligne Edge (gratuites)",
+      "speakKey": "Clé API du modèle vocal",
+      "nativeVoiceReady": "Le moteur vocal est prêt.",
+      "nativeVoiceWarmingShort": "Démarrage du moteur vocal…",
+      "nativeVoiceFailedShort": "Le moteur vocal n’a pas pu démarrer.",
+      "nativeVoiceUnsupported": "Le moteur vocal natif n’est pas disponible sur ce système. Dans le panneau « Lecture à voix haute », passez à « Modèle API ».",
+      "nativeVoiceMissing": "Le modèle vocal n’est pas encore téléchargé. Téléchargez-le pour commencer.",
+      "nativeVoiceUpdating": "Mise à jour du moteur vocal. Vous pourrez commencer une fois la mise à jour terminée.",
+      "nativeVoiceFailed": "Le moteur vocal n’a pas pu démarrer. Dans le panneau « Lecture à voix haute », cliquez sur « Réessayer » ou choisissez un autre modèle.",
+      "voiceUnnamed": "Aucun modèle vocal n’est renseigné. Indiquez-en un dans le panneau « Lecture à voix haute ».",
+      "noteQwen3Tts": "Le plus naturel, avec une voix qui démarre immédiatement. Aucun mot mal lu lors des essais en japonais, chinois et anglais. Environ 3 GB de mémoire vidéo, 10 langues prises en charge.",
+      "noteIrodori": "Uniquement en japonais. Aucun mot mal lu lors des essais, environ une demi-seconde par phrase. Environ 1.7 GB de mémoire vidéo."
     }
   },
   "logsPanel": {
@@ -1739,8 +1751,6 @@
     "furigana": "Furigana au-dessus des kanji (japonais)",
     "romanization": "Afficher la romanisation",
     "pinyin": "Pinyin au-dessus du chinois",
-    "echoCancellationApp": "Kotomimi uniquement",
-    "echoCancellationAppTooltip": "Kotomimi uniquement — supprime seulement le son diffusé par Kotomimi, pour capter votre voix le plus clairement possible. Idéal avec un casque audio ou VR ; fonctionne aussi avec des haut-parleurs en mode « Les deux ». Choisissez cette option si votre microphone est une carte son virtuelle (VB-Cable, BlackHole).",
     "speechDetection": {
       "title": "Détection de la parole"
     },
@@ -2113,6 +2123,40 @@
     "apart": {
       "split": "Écouter « Je parle » ailleurs",
       "merge": "Écouter les deux côtés au même endroit"
-    }
+    },
+    "voice": {
+      "stage": "Lecture à voix haute",
+      "stageTooltip": "Lit vos traductions à voix haute. Vous pouvez aussi écouter n’importe quelle ligne de la conversation en cliquant sur son haut-parleur.",
+      "on": "Activer la lecture",
+      "toMeLocked": "« Pour moi » est indisponible. Kotomimi capte tout le son du système et prendrait la voix de synthèse pour celle de votre interlocuteur. Choisissez une seule application comme source audio, par exemple VRChat.",
+      "toThemTooltip": "Lors de la lecture pour l’autre personne, le son est envoyé au microphone virtuel. Dans VRChat ou votre application de réunion, sélectionnez ce microphone (sous Windows : CABLE Output).",
+      "myVoiceToo": "Transmettre aussi ma propre voix",
+      "myVoiceTooTooltip": "Si cette option est désactivée, votre interlocuteur entend uniquement la traduction lue à voix haute.",
+      "needsSpeaker": "La lecture porte sur ce que vous dites ou écrivez. Passez au mode « Moi » ou « Les deux ».",
+      "modelPlaceholder": "Nom du modèle, par exemple tts-1",
+      "voice": "Voix",
+      "voiceOf": "Voix pour {{language}}",
+      "sample": "Écouter un extrait",
+      "cannotSpeak": "{{name}} ne parle pas la langue suivante : {{language}}.",
+      "sayLine": "Lire cette ligne à voix haute",
+      "stopLine": "Arrêter",
+      "lineFailed": "Cette ligne n’a pas pu être lue à voix haute",
+      "woman": "Voix féminine",
+      "man": "Voix masculine",
+      "hearers": "Lire les traductions à voix haute",
+      "hearNone": "Désactivé",
+      "hearMe": "Pour moi",
+      "hearThem": "Pour les autres",
+      "hearBoth": "Pour tout le monde",
+      "volumeMine": "Volume pour moi",
+      "volumeTheirs": "Volume pour l’autre personne",
+      "meetingDevice": "Sortie audio pour les interlocuteurs",
+      "meetingDeviceAuto": "Microphone virtuel (automatique)",
+      "meetingDeviceTooltip": "Les traductions sont lues à voix haute sur ce périphérique, qui sert de micro pour vos interlocuteurs. Si votre carte son permet le mixage matériel, choisissez l’un de ses canaux de lecture et mixez-le avec votre micro directement sur la carte. Ainsi, votre voix ne passe pas par le logiciel."
+    },
+    "echoCancellationGate": "Par volume",
+    "echoCancellationGateTooltip": "Selon le volume — avec des haut-parleurs : le son qui revient dans le micro est bien moins fort que votre voix, il est donc écarté selon son volume, sans modifier votre voix.",
+    "echoCancellationOff": "Désactivée",
+    "echoCancellationOffTooltip": "Désactivée — le microphone tel quel. Avec un casque : aucun son n’y entre."
   }
 }

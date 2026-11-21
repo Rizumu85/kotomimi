@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useSessionLocked } from '../../../app/useRun';
-import { useMode } from '../../../stores/audioStore';
+import { useIsMonitorChannelInScope, useMode } from '../../../stores/audioStore';
 import { useTurnModeStore } from '../../../stores/turnModeStore';
 import { useProviderStore } from '../../../stores/providerStore';
 import WarningModal from '../shared/WarningModal';
@@ -17,6 +17,7 @@ import {
 } from '../sections';
 import { SessionSettingsGeneral, SessionSettingsProvider } from '../ProviderArea';
 import { SpeechSection } from '../sections/SpeechSection';
+import MeetingDeviceSection from '../sections/MeetingDeviceSection';
 import { FontSection } from '../../Fonts/FontSection';
 import { AutostartSection } from '../../Autostart/AutostartSection';
 import './AdvancedSettings.scss';
@@ -30,8 +31,9 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({ toggleSettings, act
   const { t } = useTranslation();
   const locked = useSessionLocked();
   const mode = useMode();
-  // Restore these controls when Kotomimi supports translated speech output.
-  // This presentation gate preserves capture behavior and saved preferences.
+  // Fork: Kotomimi has the original-voice switch in one place, its voice stage's card, beside who hears the spoken
+  // translation (`VoiceHearers`): shown here too it was one setting in two places under two names. A presentation
+  // gate: saved preferences are untouched.
   const showVoiceOutputControls = useProviderStore((state) => state.selected !== 'localai');
   // The global turn mode — used to disable VoicePassthroughSection when
   // Push-to-Translate is in effect (mutual exclusion, 1e-3 ruling 4).
@@ -43,7 +45,8 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({ toggleSettings, act
   // with participant) — locked in Both/Participant before and during a run so
   // it can't be enabled where it would violate the mutex.
   const lockMic = locked && mode === 'participant';
-  const lockMonitor = mode !== 'speaker';
+  // Fork: also beside the other side's sound, while that is captured from one application (`monitorHeard`).
+  const lockMonitor = !useIsMonitorChannelInScope();
   const lockParticipant = mode === 'speaker';
 
   // The monitor lock survives restarts (mode is persisted), so without a stated
@@ -138,6 +141,9 @@ const AdvancedSettings: React.FC<AdvancedSettingsProps> = ({ toggleSettings, act
                 showMicrophone={false}
                 showSpeaker={true}
               />
+
+              {/* Fork: where the other side's sound is played (desktop only). */}
+              <MeetingDeviceSection />
             </div>
           </>
         )}

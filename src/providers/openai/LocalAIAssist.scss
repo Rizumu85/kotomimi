@@ -360,7 +360,7 @@
       border-right: 1px solid vars.$border-default;
     }
 
-    &:hover:not(.is-active):not(:disabled) {
+    &:hover:not(.is-active):not(:disabled):not([aria-disabled='true']) {
       background: vars.$bg-hover;
     }
 
@@ -368,7 +368,9 @@
       @include vars.state-selected-fill;
     }
 
-    &:disabled {
+    // `aria-disabled`: an option that cannot be chosen and says why when the pointer rests on it.
+    &:disabled,
+    &[aria-disabled='true'] {
       cursor: not-allowed;
       opacity: vars.$disabled-opacity;
     }
@@ -631,6 +633,110 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+  }
+
+  // Fork: the voice stage — a row for each language's voice, its sample button at the row's end; then who hears it.
+  .kt-voice {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .kt-voice__row {
+    display: flex;
+    align-items: center;
+    gap: vars.$space-2;
+    min-width: 0;
+
+    > .select-dropdown,
+    > .kt-input {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  .kt-voice__sample {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    color: vars.$text-secondary;
+    background: transparent;
+    border: 1px solid vars.$border-default;
+    border-radius: vars.$radius-sm;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      color: vars.$text-primary;
+      border-color: vars.$text-muted;
+    }
+
+    &[aria-pressed='true'] {
+      color: vars.$text-primary;
+      border-color: vars.$text-muted;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    &:focus-visible {
+      outline: vars.$focus-ring-width solid vars.$focus-ring-color;
+      outline-offset: 1px;
+    }
+  }
+
+  .kt-voice__hearers {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .kt-field__label {
+      align-items: center;
+    }
+  }
+
+  // A volume: its name and percentage on one line, the slider under it. The look of the settings' own `.slider`,
+  // whose rule (under `.setting-item`) does not reach into a stage's card.
+  .kt-voice__volume {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    .kt-field__aside {
+      font-variant-numeric: tabular-nums;
+      color: vars.$text-secondary;
+    }
+
+    input[type='range'] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      margin: 4px 0;
+      border-radius: 2px;
+      background: vars.$bg-elevated;
+      outline: none;
+
+      &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: vars.$color-control-accent;
+        cursor: pointer;
+      }
+
+      &:focus-visible {
+        outline: vars.$focus-ring-width solid vars.$focus-ring-color;
+        outline-offset: 4px;
+      }
+    }
   }
 
   .kt-here__row {

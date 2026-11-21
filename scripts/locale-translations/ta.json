@@ -203,6 +203,26 @@
     "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
     "text": "Kotomimi மட்டும் — Kotomimi இயக்கும் ஒலியை மட்டும் நீக்கும். இதனால் உங்கள் குரல் மிகத் தெளிவாகப் பதிவாகும். ஹெட்ஃபோன் அல்லது VR ஹெட்செட் பயன்படுத்தும்போது ஏற்றது. ஒலிபெருக்கியைப் பயன்படுத்தினால் \"இரண்டும்\" பயன்முறையிலும் வேலை செய்யும். மைக்ரோஃபோனாக மெய்நிகர் ஒலி அட்டையை (VB-Cable, BlackHole போன்றவை) பயன்படுத்தினால் இதைத் தேர்ந்தெடுக்கவும்."
   },
+  "fork.echoCancellationGate": {
+    "en": "By loudness",
+    "text": "ஒலியளவின் அடிப்படையில்"
+  },
+  "fork.echoCancellationGateTooltip": {
+    "en": "By loudness — for loudspeakers: what they play comes back into the microphone far quieter than your voice, so it is kept out by its loudness and your voice is left as it is.",
+    "text": "ஒலி அளவின்படி — ஸ்பீக்கர்களுக்கு: ஸ்பீக்கரில் ஒலிக்கும் சத்தம் உங்கள் குரலைவிட மிகவும் குறைந்த ஒலியுடன் மைக்ரோஃபோனுக்குள் திரும்பி வரும். அதனால் ஒலி அளவைப் பயன்படுத்தி அதைத் தடுத்து, உங்கள் குரலை அப்படியே விடுகிறது."
+  },
+  "fork.echoCancellationOff": {
+    "en": "Off",
+    "text": "அணை"
+  },
+  "fork.echoCancellationOffTooltip": {
+    "en": "Off — the microphone as it is. For headphones: nothing plays into it.",
+    "text": "அணை — மைக்ரோஃபோன் ஒலி அப்படியே அடையாளம் காணப்படும். ஹெட்ஃபோன் பயன்படுத்தும்போது: எந்த ஒலியும் மைக்ரோஃபோனில் கசியாது."
+  },
+  "fork.echoCancellationPassthrough": {
+    "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
+    "text": "அசல் ஆடியோ பாஸ்த்ரூ இயக்கத்தில் இருக்கும்போது, ஒலி அளவு முறையே மட்டும் செயல்படும்: மற்ற முறைகள் உங்கள் குரலை எதிரொலியாகக் கருதி நீக்கிவிடும்."
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "மீண்டும் தேடு"
@@ -991,6 +1011,134 @@
     "en": "What you want to say — Enter translates",
     "text": "சொல்ல விரும்புவதை உள்ளிட்டு, மொழிபெயர்க்க Enter அழுத்தவும்"
   },
+  "fork.voice.auto": {
+    "en": "Read my translations as they come",
+    "text": "நான் பேசி முடித்ததும் மொழிபெயர்ப்பை வாசி"
+  },
+  "fork.voice.cannotSpeak": {
+    "en": "{{name}} cannot speak {{language}}.",
+    "text": "{{name}} குரலால் {{language}} பேச முடியாது."
+  },
+  "fork.voice.hearBoth": {
+    "en": "To both",
+    "text": "இரு தரப்புக்கும்"
+  },
+  "fork.voice.hearers": {
+    "en": "Read my translations aloud",
+    "text": "மொழிபெயர்ப்பைத் தானாக வாசி"
+  },
+  "fork.voice.hearMe": {
+    "en": "To me",
+    "text": "எனக்கு"
+  },
+  "fork.voice.hearNone": {
+    "en": "Off",
+    "text": "வேண்டாம்"
+  },
+  "fork.voice.hearThem": {
+    "en": "To them",
+    "text": "மற்றவர்களுக்கு"
+  },
+  "fork.voice.lineFailed": {
+    "en": "This line could not be read aloud",
+    "text": "இந்த வரியை வாசிக்க முடியவில்லை"
+  },
+  "fork.voice.man": {
+    "en": "Male voice",
+    "text": "ஆண் குரல்"
+  },
+  "fork.voice.meetingDevice": {
+    "en": "Output for the other side",
+    "text": "மறுமுனைக்கு ஒலி அனுப்பும் சாதனம்"
+  },
+  "fork.voice.meetingDeviceAuto": {
+    "en": "Virtual microphone (automatic)",
+    "text": "மெய்நிகர் மைக்ரோஃபோன் (தானாக)"
+  },
+  "fork.voice.meetingDeviceTooltip": {
+    "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
+    "text": "மொழிபெயர்ப்பு இந்தச் சாதனத்தில் குரலாக ஒலிக்கும். மறுமுனையில் அது மைக்ரோஃபோன் ஒலியாகக் கேட்கும். உங்கள் ஒலி அட்டையிலேயே ஒலிகளைக் கலக்கும் வசதி இருந்தால், அதன் ஒலி வெளியீட்டுச் சேனல் ஒன்றைத் தேர்ந்தெடுத்து, அட்டையிலேயே அதை உங்கள் மைக்ரோஃபோன் ஒலியுடன் கலக்கவும். அப்போது உங்கள் குரல் மென்பொருள் வழியாகச் செல்லாது."
+  },
+  "fork.voice.modelPlaceholder": {
+    "en": "The model's name, e.g. tts-1",
+    "text": "மாதிரியின் பெயர், எ.கா. tts-1"
+  },
+  "fork.voice.myVoiceToo": {
+    "en": "My own voice goes too",
+    "text": "என் சொந்தக் குரலையும் அனுப்பு"
+  },
+  "fork.voice.myVoiceTooTooltip": {
+    "en": "Off: they hear only the voice reading your translation.",
+    "text": "இதை அணைத்தால், எதிர்தரப்புக்கு வாசிக்கப்படும் மொழிபெயர்ப்பு மட்டுமே கேட்கும்."
+  },
+  "fork.voice.needsSpeaker": {
+    "en": "It reads what you say or type. Switch the mode to \"Me\" or \"Both\".",
+    "text": "நீங்கள் பேசுவதும் தட்டச்சு செய்வதும் வாசிக்கப்படும். பயன்முறையை “நான்” அல்லது “இருவரும்” என மாற்றவும்."
+  },
+  "fork.voice.on": {
+    "en": "Read aloud",
+    "text": "வாசிப்பை இயக்கு"
+  },
+  "fork.voice.sample": {
+    "en": "Play a sample",
+    "text": "மாதிரியைக் கேள்"
+  },
+  "fork.voice.sayLine": {
+    "en": "Read this line aloud",
+    "text": "இந்த வரியை வாசி"
+  },
+  "fork.voice.stage": {
+    "en": "Voice",
+    "text": "வாசிப்பு"
+  },
+  "fork.voice.stageTooltip": {
+    "en": "Reads your translations aloud. Any line of the conversation can be heard too: press its speaker button.",
+    "text": "உங்கள் மொழிபெயர்ப்புகளை வாசிக்கும். உரையாடலில் எந்த வரியையும் கேட்கலாம்: அதன் ஒலிபெருக்கி பொத்தானை அழுத்தவும்."
+  },
+  "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "நிறுத்து"
+  },
+  "fork.voice.toMe": {
+    "en": "I hear it",
+    "text": "நான் கேட்க"
+  },
+  "fork.voice.toMeFix": {
+    "en": "Choose",
+    "text": "தேர்வு செய்"
+  },
+  "fork.voice.toMeLocked": {
+    "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
+    "text": "«நான் கேட்க» இப்போது கிடைக்காது. கணினியின் எல்லா ஒலியும் பிடிக்கப்படுவதால், செயலி வாசிப்பதையும் மறுமுனையில் இருப்பவர் பேசுவதாக எடுத்துக்கொள்ளும். இதைப் பயன்படுத்த, மறுமுனை ஒலிக்கு ஒரே ஒரு செயலியைத் தேர்வு செய்யுங்கள் (எ.கா. VRChat)."
+  },
+  "fork.voice.toThem": {
+    "en": "The other side hears it",
+    "text": "எதிர்தரப்பு கேட்க"
+  },
+  "fork.voice.toThemTooltip": {
+    "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
+    "text": "மற்றவருக்கு வாசிக்கும்போது, ஒலி மெய்நிகர் மைக்ரோஃபோனுக்கு அனுப்பப்படும். VRChat அல்லது உங்கள் சந்திப்புச் செயலியில் அதையே மைக்ரோஃபோனாகத் தேர்ந்தெடுக்கவும் (Windows இல்: CABLE Output)."
+  },
+  "fork.voice.voice": {
+    "en": "Voice",
+    "text": "குரல்"
+  },
+  "fork.voice.voiceOf": {
+    "en": "{{language}} voice",
+    "text": "{{language}} குரல்"
+  },
+  "fork.voice.volumeMine": {
+    "en": "Volume for me",
+    "text": "எனக்குக் கேட்கும் ஒலியளவு"
+  },
+  "fork.voice.volumeTheirs": {
+    "en": "Volume for them",
+    "text": "மறுமுனையில் கேட்கும் ஒலியளவு"
+  },
+  "fork.voice.woman": {
+    "en": "Female voice",
+    "text": "பெண் குரல்"
+  },
   "fork.vr.back": {
     "en": "Back",
     "text": "பின்செல்"
@@ -1459,6 +1607,10 @@
     "en": "Custom address",
     "text": "தனிப்பயன் முகவரி"
   },
+  "providers.localai.apiServiceEdge": {
+    "en": "Edge online voices (free)",
+    "text": "Edge இணையக் குரல்கள் (இலவசம்)"
+  },
   "providers.localai.apiServiceModel": {
     "en": "Choose from the list on the right, or type a name",
     "text": "வலப்புறப் பட்டியலில் தேர்ந்தெடுங்கள் அல்லது பெயரை உள்ளிடுங்கள்"
@@ -1851,6 +2003,34 @@
     "en": "Updating the speech recognition engine. You can start once it is done.",
     "text": "பேச்சு அறிதல் இயந்திரம் புதுப்பிக்கப்படுகிறது. முடிந்ததும் தொடங்கலாம்."
   },
+  "providers.localai.nativeVoiceFailed": {
+    "en": "The voice engine could not start. In the Voice card, press \"Try again\" — or choose another model.",
+    "text": "வாசிப்பு இயந்திரத்தைத் தொடங்க முடியவில்லை. “வாசிப்பு” பகுதியில் “மீண்டும் முயல்க” என்பதை அழுத்தவும் அல்லது வேறு மாதிரியைத் தேர்ந்தெடுக்கவும்."
+  },
+  "providers.localai.nativeVoiceFailedShort": {
+    "en": "The voice engine could not start.",
+    "text": "வாசிப்பு இயந்திரத்தைத் தொடங்க முடியவில்லை."
+  },
+  "providers.localai.nativeVoiceMissing": {
+    "en": "The voice model is not downloaded yet. Download it to start.",
+    "text": "வாசிப்பு மாதிரி இன்னும் பதிவிறக்கப்படவில்லை. பதிவிறக்கிய பின் தொடங்கலாம்."
+  },
+  "providers.localai.nativeVoiceReady": {
+    "en": "The voice engine is ready.",
+    "text": "வாசிப்பு இயந்திரம் தயார்."
+  },
+  "providers.localai.nativeVoiceUnsupported": {
+    "en": "The native voice engine is not available for this system. In the Voice card, switch to \"API model\".",
+    "text": "இந்தக் கணினியில் உள்ளமைந்த வாசிப்பு இயந்திரம் இன்னும் ஆதரிக்கப்படவில்லை. “வாசிப்பு” பகுதியில் “API மாதிரி” என்பதைத் தேர்ந்தெடுக்கவும்."
+  },
+  "providers.localai.nativeVoiceUpdating": {
+    "en": "Updating the voice engine. You can start once it is done.",
+    "text": "வாசிப்பு இயந்திரம் புதுப்பிக்கப்படுகிறது. முடிந்ததும் தொடங்கலாம்."
+  },
+  "providers.localai.nativeVoiceWarmingShort": {
+    "en": "Starting the voice engine…",
+    "text": "வாசிப்பு இயந்திரம் தொடங்குகிறது…"
+  },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
     "text": "பேச்சறிதல் இயந்திரம் இன்னும் தொடங்குகிறது. கணினியை இயக்கிய பின் முதல் முறை சுமார் அரை நிமிடம் ஆகும். தயாரானதும் தொடங்கலாம்."
@@ -1890,6 +2070,14 @@
   "providers.localai.noteIndexTranslate": {
     "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
     "text": "ஜப்பானியத்திலிருந்து சீனத்துக்கு மொழிபெயர்த்த சோதனையில்: 30 வாக்கியங்களில் சுமார் 3 இல் பெரிய பிழைகள்; சோதித்தவற்றில் இதுவே சிறந்தது. ஒரு வாக்கியத்திற்குச் சுமார் 0.1 வினாடி. சுமார் 2 GB வரைகலை நினைவகம் தேவை; 100 க்கும் மேற்பட்ட மொழிகளை ஆதரிக்கும்."
+  },
+  "providers.localai.noteIrodori": {
+    "en": "Japanese only. Measured: nothing misread, about half a second a sentence. About 1.7 GB of video memory.",
+    "text": "ஜப்பானியத்தில் மட்டுமே பேசும். சோதித்தபோது வாசிப்புப் பிழைகள் இல்லை. ஒரு வாக்கியத்துக்கு சுமார் அரை நொடி. சுமார் 1.7 GB கிராபிக்ஸ் நினைவகம் தேவை."
+  },
+  "providers.localai.noteKokoro": {
+    "en": "Light: runs on the processor and takes no video memory. Less natural, Japanese most of all.",
+    "text": "குறைந்த வளங்களே போதும்: செயலியை மட்டுமே பயன்படுத்தும், வரைகலை நினைவகம் தேவையில்லை. இயல்புத்தன்மை சற்று குறைவு; குறிப்பாக ஜப்பானியத்தில்."
   },
   "providers.localai.noteMoonshineJa": {
     "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
@@ -1938,6 +2126,10 @@
   "providers.localai.noteQwen17": {
     "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
     "text": "ஜப்பானிய இயல்புப் பேச்சுச் சோதனையில் சுமார் 19% எழுத்துப் பிழைகள். வாக்கியம் முடிந்த பிறகே எழுதும் (சுமார் 10 வினாடிகள் தாமதம்); மேலுள்ள GGUF பதிப்பு பேசும்போதே எழுதும்."
+  },
+  "providers.localai.noteQwen3Tts": {
+    "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
+    "text": "மிகவும் இயல்பான குரல். உடனே பேசத் தொடங்கும். ஜப்பானியம், சீனம், ஆங்கிலத்தில் சோதித்தபோது வாசிப்புப் பிழைகள் இல்லை. சுமார் 3 GB கிராபிக்ஸ் நினைவகம் தேவை. 10 மொழிகளை ஆதரிக்கிறது."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
@@ -2114,6 +2306,10 @@
   "providers.localai.sourceAuto": {
     "en": "The language cannot be detected with this setup. Choose the language you speak.",
     "text": "இந்த அமைப்பில் மொழியைத் தானாகக் கண்டறிய முடியாது. நீங்கள் பேசும் மொழியைத் தேர்ந்தெடுங்கள்."
+  },
+  "providers.localai.speakKey": {
+    "en": "API key of the voice",
+    "text": "வாசிப்பு மாதிரியின் API சாவி"
   },
   "providers.localai.speedAbout": {
     "en": "About {{seconds}} s",
@@ -2323,6 +2519,10 @@
     "en": "API model",
     "text": "API மாதிரி"
   },
+  "providers.localai.voiceUnnamed": {
+    "en": "The voice has no model to run yet. Name one in the Voice card.",
+    "text": "வாசிப்புக்கான மாதிரி இன்னும் குறிப்பிடப்படவில்லை. “வாசிப்பு” பகுதியில் அதன் பெயரை உள்ளிடவும்."
+  },
   "providers.openai_live.name": {
     "en": "OpenAI Live",
     "text": "OpenAI Live"
@@ -2426,6 +2626,10 @@
   "settings.glossaryWritten": {
     "en": "Word",
     "text": "சொல்"
+  },
+  "settings.noiseSuppressionTooltip.off": {
+    "en": "Off — no noise suppression: the microphone as it is. Best in a quiet room.",
+    "text": "முடக்கு — சத்தக் குறைப்பு இல்லை; மைக்ரோஃபோன் ஒலி அப்படியே அடையாளம் காண அனுப்பப்படும். அமைதியான அறையில் சிறந்தது."
   },
   "settings.transcriptKeywordsPlaceholder": {
     "en": "Sokuji, Kizuna AI, PulseAudio",

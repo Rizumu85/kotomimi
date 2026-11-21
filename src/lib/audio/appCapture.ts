@@ -7,11 +7,13 @@
 import type { LegName } from '../conversation/types';
 import type { Platform } from '../provider/types';
 import type { OpenSource, Source } from '../session/source';
-import { vrchatHolds } from '../../stores/vrchatStore';
+import { useVRChatStore, vrchatHolds } from '../../stores/vrchatStore';
 import useAudioStore from '../../stores/audioStore';
 import { getEnvironment } from '../../utils/environment';
 import { createEchoWatch, type EchoWatch } from './capture/echoWatch';
+import { createEchoFollower } from './capture/echoFollow';
 import { openMic, type MicSettings } from './capture/mic';
+import { createPlayoutReference } from './capture/playoutReference';
 import { openSystemAudio, type SystemAudioSettings } from './capture/systemAudio';
 import { openTab, type TabSettings } from './capture/tab';
 import { createLevelMeter, type LevelMeter } from './levelMeter';
@@ -41,9 +43,9 @@ async function appsUsing(label: string): Promise<string[] | null> {
   }
 }
 
+const windowsDesktop = () => (window as { electron?: { osInfo?: { platform?: unknown } } }).electron?.osInfo?.platform === 'win32';
+
 export function micSettings(): MicSettings {
-  // Windows desktop: the preload's `osInfo` says so (it is absent in the extension and on the web).
-  const windowsDesktop = (window as { electron?: { osInfo?: { platform?: unknown } } }).electron?.osInfo?.platform === 'win32';
   return {
     deviceId: () => audio().selectedInputDevice?.deviceId,
     deviceLabel: () => audio().selectedInputDevice?.label,
@@ -59,8 +61,12 @@ export function micSettings(): MicSettings {
     level: (level) => micLevel.set(level),
     // Fork: muted in VRChat, the user's own leg hears silence (`src/app/vrchat.ts`).
     held: () => vrchatHolds(),
-    subscribe: onAudioChange,
-    ...(windowsDesktop ? { appsUsing } : {}),
+    subscribe(listener) {
+      const offAudio = onAudioChange(listener);
+      const offHold = useVRChatStore.subscribe(vrchatHolds, listener);
+      return () => { offAudio(); offHold(); };
+    },
+    ...(windowsDesktop() ? { appsUsing } : {}),
   };
 }
 
@@ -83,18 +89,15 @@ export function tabSettings(): TabSettings {
 }
 
 /** The source, with `cleanup` run once before it stops. */
-function withCleanup(source: Source, cleanup: () => void): Source {
-  let cleaned = false;
+function withCleanup(source: Source, cleanup: () => Promise<void> | void): Source {
+  let stopping: Promise<unknown> | undefined;
   return {
     onPcm: (listener) => source.onPcm(listener),
     onEnded: (listener) => source.onEnded(listener),
     onDegraded: (listener) => source.onDegraded(listener),
     async stop() {
-      if (!cleaned) {
-        cleaned = true;
-        cleanup();
-      }
-      await source.stop();
+      stopping ??= Promise.all([cleanup(), source.stop()]);
+      await stopping;
     },
   };
 }
@@ -109,11 +112,32 @@ export interface AppCaptureOptions {
 export function createAppCapture(playback: Playback, platform: Platform = getEnvironment(), options: AppCaptureOptions = {}): AppCapture {
   const { meterGate } = options;
   const echo = createEchoWatch(playback.ttsTap);
+  const follower = createEchoFollower();
+  const reference = createPlayoutReference(follower);
+  let participantWhole = false;
+  let micSignal: AbortSignal | null = null;
+  // macOS shares one Core Audio helper and Linux manages a PipeWire tap and monitor
+  // volume. Those platforms follow the participant chunks with an application selected.
+  const separateLoopback = platform === 'electron' && windowsDesktop();
+  const syncReference = () => reference.setNeeded(separateLoopback && micSignal !== null && !micSignal.aborted &&
+    !participantWhole && audio().echoCancellationMode === 'gate');
   const levels: Record<LegName, LevelMeter> = { speaker: createLevelMeter(), participant: createLevelMeter() };
 
   const open = (leg: LegName, signal: AbortSignal): Promise<Source> => {
-    if (leg === 'speaker') return openMic({ ...micSettings(), trackOpened: options.onMicTrack }, signal);
-    if (platform === 'electron') return openSystemAudio(systemAudioSettings(), signal);
+    if (leg === 'speaker') return openMic({
+      ...micSettings(),
+      trackOpened: options.onMicTrack,
+      voiced: (pcm) => audio().echoCancellationMode === 'gate' ? follower.voiced(pcm) : null,
+    }, signal);
+    if (platform === 'electron') return openSystemAudio({
+      ...systemAudioSettings(),
+      wholeSystem(inUse) {
+        participantWhole = inUse;
+        const handoff = syncReference();
+        if (inUse) return handoff;
+      },
+      playout: (pcm) => follower.played(pcm),
+    }, signal);
     if (platform === 'extension') return openTab(tabSettings(), signal);
     return Promise.reject(new Error('This build has no participant source.'));
   };
@@ -123,12 +147,26 @@ export function createAppCapture(playback: Playback, platform: Platform = getEnv
     levels,
     async openSource(leg, signal) {
       const source = await open(leg, signal);
-      // The processed microphone is the original voice under the translation.
-      const offPassthrough = leg === 'speaker' ? source.onPcm((pcm) => playback.passthrough(pcm)) : () => {};
+      let closeMicReference: (() => Promise<void>) | undefined;
+      if (leg === 'speaker' && separateLoopback) {
+        micSignal = signal;
+        const offMode = useAudioStore.subscribe((s) => s.echoCancellationMode, syncReference);
+        const micEnded = () => {
+          offMode();
+          micSignal = null;
+          return syncReference();
+        };
+        const offEnd = source.onEnded(micEnded);
+        closeMicReference = () => { offEnd(); return micEnded(); };
+        void syncReference();
+      }
+      const offPassthrough = source.onStream && platform !== 'web' ? playback.passthrough(source.onStream) : undefined;
       // A gate that shuts flattens the meter at its next chunk, not a stale
       // spell later: reset once on the way in, never per chunk.
       let metering = true;
       const offLevel = source.onPcm((pcm) => {
+        // The delivered leg is the fallback. Whole-system audio feeds the follower before mute and split.
+        if (leg === 'participant' && !participantWhole && !reference.active) follower.played(pcm);
         options.onPcm?.(leg, pcm);
         if (!meterGate || meterGate(leg)) {
           metering = true;
@@ -140,10 +178,12 @@ export function createAppCapture(playback: Playback, platform: Platform = getEnv
       });
       const detach = echo.attach(leg, source);
       return withCleanup(source, () => {
-        offPassthrough();
+        offPassthrough?.();
         offLevel();
+        if (leg === 'participant' && !reference.active) follower.reset();
         levels[leg].reset();
         detach();
+        return closeMicReference?.();
       });
     },
   };

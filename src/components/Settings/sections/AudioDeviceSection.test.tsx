@@ -15,7 +15,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import AudioDeviceSection from './AudioDeviceSection';
 import type { NoiseSuppressionState } from '../../../lib/modern-audio/noiseSuppression';
 
-const echo = vi.hoisted(() => ({ mode: 'all' as 'app' | 'all', set: vi.fn(), os: 'macos', electron: true }));
+const echo = vi.hoisted(() => ({ mode: 'gate' as 'off' | 'gate', set: vi.fn(), os: 'macos', electron: true }));
 const noise = vi.hoisted(() => ({ mode: 'off', state: null as NoiseSuppressionState | null }));
 beforeEach(() => { noise.mode = 'off'; noise.state = null; });
 
@@ -222,55 +222,44 @@ describe('AudioDeviceSection renders no participant UI', () => {
   });
 });
 
-// 'all' cancels every sound the system plays, which silences a loopback
-// microphone such as BlackHole; the user can ask for what this app plays only.
-// Chromium on Linux has no 'all', so there is nothing to choose there.
+// Fork: no echo handling (headphones), or the playout gate; the browser's echo cancellation is never offered.
 describe('AudioDeviceSection echo cancellation', () => {
   beforeEach(() => {
-    echo.mode = 'all';
+    echo.mode = 'gate';
     echo.set.mockReset();
     echo.os = 'macos';
     echo.electron = true;
   });
 
-  const options = () => screen.getAllByRole('button').filter((b) => /^(settings\.echoCancellationMode\.|fork\.echoCancellationApp$)/.test(b.textContent ?? ''));
+  const options = () => screen.getAllByRole('button').filter((b) => /^fork\.echoCancellation(Off|Gate)$/.test(b.textContent ?? ''));
 
-  it('offers this app or all sounds on the desktop, below noise suppression', () => {
-    const { container } = renderMic();
-    expect(screen.getByText('settings.echoCancellation')).toBeInTheDocument();
-    expect(options().map((b) => b.textContent)).toEqual(['fork.echoCancellationApp', 'settings.echoCancellationMode.all']);
-    const labels = [...container.querySelectorAll('.noise-suppression-label')].map((l) => l.textContent);
-    expect(labels).toEqual(['settings.noiseSuppression', 'settings.echoCancellation']);
-  });
-
-  it('names the browser instead of Sokuji outside the desktop app', () => {
-    echo.electron = false;
-    echo.os = 'windows';
-    renderMic();
-    expect(options().map((b) => b.textContent)).toEqual(['settings.echoCancellationMode.browser', 'settings.echoCancellationMode.all']);
-  });
-
-  it('is not shown on Linux', () => {
-    echo.os = 'linux';
-    renderMic();
-    expect(screen.queryByText('settings.echoCancellation')).not.toBeInTheDocument();
+  it('offers off or by loudness, below noise suppression, on every system', () => {
+    for (const os of ['macos', 'windows', 'linux']) {
+      echo.os = os;
+      const { container, unmount } = renderMic();
+      expect(screen.getByText('settings.echoCancellation')).toBeInTheDocument();
+      expect(options().map((b) => b.textContent)).toEqual(['fork.echoCancellationOff', 'fork.echoCancellationGate']);
+      const labels = [...container.querySelectorAll('.noise-suppression-label')].map((l) => l.textContent);
+      expect(labels).toEqual(['settings.noiseSuppression', 'settings.echoCancellation']);
+      unmount();
+    }
   });
 
   it('marks the chosen mode, to the eye and to assistive technology, and stores a new choice', () => {
-    echo.mode = 'app';
+    echo.mode = 'off';
     renderMic();
-    const [app, all] = options();
-    expect(app).toHaveClass('active');
-    expect(all).not.toHaveClass('active');
-    expect(app).toHaveAttribute('aria-pressed', 'true');
-    expect(all).toHaveAttribute('aria-pressed', 'false');
-    fireEvent.click(all);
-    expect(echo.set).toHaveBeenCalledWith('all');
+    const [off, gate] = options();
+    expect(off).toHaveClass('active');
+    expect(gate).not.toHaveClass('active');
+    expect(off).toHaveAttribute('aria-pressed', 'true');
+    expect(gate).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(gate);
+    expect(echo.set).toHaveBeenCalledWith('gate');
   });
 
   it('tells assistive technology which noise suppression mode is on, as it does for echo cancellation', () => {
     renderMic();
     const pressed = screen.getAllByRole('button', { pressed: true }).map((b) => b.textContent);
-    expect(pressed).toEqual(['settings.noiseSuppressionMode.off', 'settings.echoCancellationMode.all']);
+    expect(pressed).toEqual(['settings.noiseSuppressionMode.off', 'fork.echoCancellationGate']);
   });
 });

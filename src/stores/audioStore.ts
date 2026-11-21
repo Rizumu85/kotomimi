@@ -8,13 +8,14 @@ import { listAudioDevices, listSystemAudioSources } from '../lib/audio/devices';
 import { isVirtualDevice } from '../components/Settings/shared/hooks';
 import { isLoopbackInput } from '../utils/audioDevices';
 import { pickDefaultInputDevice, chooseInput, chooseOutput } from '../lib/audio/deviceChoice';
+import { monitorHeard } from '../lib/modern-audio/participantSource';
+import { getEnvironment } from '../utils/environment';
 import type { NoiseSuppressionMode, NoiseSuppressionState } from '../lib/modern-audio/noiseSuppression';
 
 export { pickDefaultInputDevice };
 
 export type { NoiseSuppressionMode } from '../lib/modern-audio/noiseSuppression';
-/** What the microphone's echo cancellation removes: what this app plays, or every sound the system plays. */
-export type EchoCancellationMode = 'app' | 'all';
+export type EchoCancellationMode = import('../lib/audio/capture/mic').EchoCancellation;
 export type AudioMode = 'speaker' | 'participant' | 'both';
 
 // Storage keys for persisting audio device preferences
@@ -52,6 +53,8 @@ export interface AudioDevice {
   deviceId: string;
   label: string;
   isVirtual?: boolean;
+  /** Fork: the output the system plays on now (`systemDefaultOutputId`). Absent on every other device, and on inputs. */
+  isDefault?: boolean;
   /**
    * Restart-stable identity of a per-application capture source (executable
    * name, bundle id, or binary name). Absent on ordinary devices and on
@@ -187,7 +190,7 @@ interface AudioStore {
 /** The same devices, in the same order, with the same names: `syncDevices` keeps the array it has. */
 const sameDevices = (current: readonly AudioDevice[], next: readonly AudioDevice[]) =>
   current.length === next.length &&
-  current.every((device, i) => device.deviceId === next[i].deviceId && device.label === next[i].label && device.isVirtual === next[i].isVirtual);
+  current.every((device, i) => device.deviceId === next[i].deviceId && device.label === next[i].label && device.isVirtual === next[i].isVirtual && device.isDefault === next[i].isDefault);
 
 const useAudioStore = create<AudioStore>()(
   subscribeWithSelector((set, get) => ({
@@ -212,7 +215,7 @@ const useAudioStore = create<AudioStore>()(
     // Fork: what Kotomimi plays alone, by default. Kotomimi speaks no translation, so 'all' only took the other
     // players' voices out of the microphone — and while they spoke, the user's own with them (the user, 2026-11-05:
     // "my speech stops while the other side talks"). A loudspeaker user chooses 'all' in the settings.
-    echoCancellationMode: 'app' as EchoCancellationMode,
+    echoCancellationMode: 'gate' as EchoCancellationMode,
 
     // Mode + per-channel mute flags
     mode: 'speaker' as AudioMode,
@@ -313,8 +316,9 @@ const useAudioStore = create<AudioStore>()(
     },
 
     setRealVoicePassthroughVolume: (volume) => {
-      // Clamp volume between 0 and 0.6 (60%)
-      const clampedVolume = Math.max(0, Math.min(0.6, volume));
+      // Clamp volume between 0 and 1. Fork: to the full level, not upstream's 60 %: a translation spoken after one's
+      // own voice (Kotomimi's voice stage) wants that voice as loud as it was said.
+      const clampedVolume = Math.max(0, Math.min(1, volume));
       console.info('[Sokuji] [AudioStore] Setting real voice passthrough volume:', clampedVolume);
       set({ realVoicePassthroughVolume: clampedVolume });
       void persistSetting(STORAGE_KEYS.REAL_VOICE_PASSTHROUGH_VOLUME, clampedVolume);
@@ -521,7 +525,8 @@ const useAudioStore = create<AudioStore>()(
         }
 
         const savedEchoCancellation = await settingsService.getSetting<string | null>(STORAGE_KEYS.ECHO_CANCELLATION_MODE, null);
-        set({ echoCancellationMode: savedEchoCancellation === 'all' ? 'all' : 'app' });
+        // An older build's "Kotomimi only" ('app') is what headphones asked for: off now. Its "all sounds" ('all') is the gate.
+        set({ echoCancellationMode: savedEchoCancellation === 'off' || savedEchoCancellation === 'app' ? 'off' : 'gate' });
 
         const savedIsMicMuted = await settingsService.getSetting<boolean | null>(STORAGE_KEYS.IS_MIC_MUTED, null);
         if (typeof savedIsMicMuted === 'boolean') {
@@ -729,12 +734,12 @@ export const useIsParticipantChannelInScope = () =>
 export const speakerChannelInScope = (mode: AudioMode) => mode === 'speaker' || mode === 'both';
 export const useIsSpeakerChannelInScope = () =>
   useAudioStore((state) => speakerChannelInScope(state.mode));
-// Monitor channel is in scope only in pure 'speaker' mode.
-// In 'both' mode it's mutex-excluded from participant to prevent
-// audio feedback (the popover hides the monitor row entirely).
-// This is intentional asymmetry with useIsSpeakerChannelInScope.
+// Monitor channel is in scope in pure 'speaker' mode, and — fork — in 'both'
+// while the other side's sound is captured from one application
+// (`monitorHeard`): a whole-system capture would hear the monitor and
+// translate it again as the other side.
 export const useIsMonitorChannelInScope = () =>
-  useAudioStore((state) => state.mode === 'speaker');
+  useAudioStore((state) => monitorHeard(state.mode, getEnvironment(), state.selectedParticipantSource?.deviceId));
 
 // Export actions with memoization to prevent recreating objects.
 // Grouped by channel (matches useAudioContext ordering).

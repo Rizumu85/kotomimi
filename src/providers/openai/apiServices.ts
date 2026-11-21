@@ -15,7 +15,9 @@
  * and "custom" is simply an address none of these has.
  */
 
-export type ApiKind = 'asr' | 'text';
+import { EDGE_BASE } from '../../lib/voice/edgeVoices';
+
+export type ApiKind = 'asr' | 'text' | 'voice';
 
 export interface ApiService {
   id: string;
@@ -41,16 +43,34 @@ export interface ApiService {
    * else. There is no model to pick, and no language it can be told.
    */
   hears?: { path: string };
+  /**
+   * Fork: its voices, where they are not asked for the way OpenAI's are (`POST /audio/speech`): Microsoft Edge's
+   * online ones, asked in their own way (`src/lib/edge-tts`). There is no model to pick, and no address to type.
+   */
+  speaks?: 'edge';
+  /** A voice of its own to start from, where one must be named (`voice` in the request). */
+  voice?: string;
 }
 
 export const API_SERVICES: readonly ApiService[] = [
+  {
+    // First of the voices: nothing to type, nothing to download.
+    id: 'edge',
+    name: 'Microsoft Edge',
+    nameKey: 'providers.localai.apiServiceEdge',
+    baseUrl: EDGE_BASE,
+    needsKey: false,
+    prefer: { voice: [] },
+    speaks: 'edge',
+  },
   {
     id: 'openai',
     name: 'OpenAI',
     baseUrl: 'https://api.openai.com/v1',
     needsKey: true,
-    prefer: { asr: [/^gpt-4o-mini-transcribe$/, /^gpt-4o-transcribe$/, /^whisper-1$/], text: [/^gpt-[\d.]+-mini$/, /^gpt-[\d.]+-nano$/] },
+    prefer: { asr: [/^gpt-4o-mini-transcribe$/, /^gpt-4o-transcribe$/, /^whisper-1$/], text: [/^gpt-[\d.]+-mini$/, /^gpt-[\d.]+-nano$/], voice: [/^gpt-[\w.]*-mini-tts$/, /^tts-1$/] },
     keyOf: 'openai',
+    voice: 'alloy',
   },
   {
     id: 'gemini',
@@ -96,7 +116,7 @@ export const API_SERVICES: readonly ApiService[] = [
     nameKey: 'providers.localai.apiServiceSiliconFlow',
     baseUrl: 'https://api.siliconflow.cn/v1',
     needsKey: true,
-    prefer: { asr: [/SenseVoiceSmall$/], text: [] },
+    prefer: { asr: [/SenseVoiceSmall$/], text: [], voice: [/CosyVoice2/] },
   },
   {
     id: 'openrouter',

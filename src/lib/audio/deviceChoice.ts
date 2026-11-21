@@ -5,7 +5,7 @@
  * is what switches back to the user's own device when it returns.
  */
 import type { AudioDevice } from '../../stores/audioStore';
-import { isLoopbackInput } from '../../utils/audioDevices';
+import { isLoopbackInput, isLoopbackOutput } from '../../utils/audioDevices';
 
 export interface DeviceChoice {
   devices: readonly AudioDevice[];
@@ -45,8 +45,14 @@ export function chooseInput({ devices, savedId, currentId, unusable = new Set() 
   return saved ?? current ?? pickDefaultInputDevice(usable);
 }
 
-/** The monitor output to use: the saved one, else the current one, else the first non-virtual, else any. */
+/**
+ * The monitor output to use: the saved one; else — fork — the one the system plays on, which is where the user is
+ * listening (the first in the list may be a monitor's or a capture card's HDMI sound: nothing was heard, 2026-11-17),
+ * and which is followed when the system moves to another; else the current one, the first non-virtual, any. A
+ * virtual device the system plays on is passed over: what is monitored there would go back into the meeting.
+ */
 export function chooseOutput({ devices, savedId, currentId }: DeviceChoice): AudioDevice | null {
   const byId = (id: string | null) => (id ? devices.find((device) => device.deviceId === id) : undefined);
-  return byId(savedId) ?? byId(currentId) ?? devices.find((device) => !device.isVirtual) ?? devices[0] ?? null;
+  const eligible = devices.filter((device) => !isLoopbackOutput(device));
+  return byId(savedId) ?? eligible.find((device) => device.isDefault && !device.isVirtual) ?? eligible.find((device) => device.deviceId === currentId) ?? eligible.find((device) => !device.isVirtual) ?? eligible[0] ?? null;
 }

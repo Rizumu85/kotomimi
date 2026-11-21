@@ -36,7 +36,7 @@ vi.mock('../../../stores/audioStore', () => ({
   useSetNoiseSuppressionMode: () => vi.fn(),
   useMicGateThreshold: () => 0,
   useSetMicGateThreshold: () => vi.fn(),
-  useEchoCancellationMode: () => 'all',
+  useEchoCancellationMode: () => 'gate',
   useSetEchoCancellationMode: () => vi.fn(),
   useAudioContext: () => ({
     audioInputDevices: inputDevices,

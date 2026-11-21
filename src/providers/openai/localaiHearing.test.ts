@@ -7,6 +7,7 @@ import { buildLocalAI, LOCALAI_DEFAULTS, localaiLanguages, type LocalAIModel } f
 import { pressTheirs } from '../../lib/language/theirLanguages';
 import { LAN_PIPELINE } from '../../lib/lan/protocol';
 import { SHARED } from './testing';
+import { alsoSpoken, deviceNeeds } from './localaiDevice';
 
 const PAIR = { source: 'zh-CN', target: 'ja' };
 /** Another Kotomimi on a Mac, as it lists itself (`/v1/models/capabilities`): its recognition a language at a time, and its models. */
@@ -21,9 +22,16 @@ const MAC: LocalAIModel[] = [
 const more = (settings: Record<string, unknown>) => localaiLanguages.more!({ ...LOCALAI_DEFAULTS, ...settings } as never, MAC, PAIR);
 
 describe('the languages beside each side’s main one', () => {
+  it('uses the same extra language for translation and hearing when the host supplies the recognizer', () => {
+    const models = MAC.map((m) => ({ ...m, host: 'kotomimi' as const }));
+    const s = { ...LOCALAI_DEFAULTS, translateAt: 'device' as const, speakAlso: ['en', 'ja'], asrDetectOther: true, theyAlso: ['en'], theyLit: 'en' };
+    expect(alsoSpoken(s, PAIR, models)).toEqual(['ja']);
+    expect(localaiLanguages.more!(s, models, PAIR).mine?.using).toEqual(['ja']);
+    expect(deviceNeeds(s, PAIR, ['speaker'], models).map(({ source }) => source)).not.toContain('en');
+  });
   it('has the Mac’s recognition on another device hear one beside each side’s main language', () => {
     const { mine, theirs } = more({ asrVia: 'server', asrModel: 'apple-speech', speakAlso: ['ja', 'en', 'es'] });
-    expect(mine).toMatchObject({ hearer: { name: 'Apple Speech' }, offered: ['ja'], most: 1, chosen: ['ja'] });
+    expect(mine).toMatchObject({ hearer: { name: 'Apple Speech' }, offered: ['ja', 'en', 'zh'], most: 1, chosen: ['ja', 'en', 'es'] });
     expect(theirs).toMatchObject({ most: 1, any: false });
     expect(mine!.set(['ja'])).toEqual({ speakAlso: ['ja'], speakBoth: false });
   });

@@ -24,6 +24,7 @@ import { observeSize } from './surfaces/childDocument';
 import { usePushToTalk } from '../MainPanel/panel/usePushToTalk';
 import { SubtitleBody } from './SubtitleBands';
 import { restingHeights } from './SubtitleLanes';
+import { useCoached } from '../Feedback/useCoached';
 import { useAnnotationStore } from '../../stores/annotationStore';
 import SubtitleIdle from './SubtitleIdle';
 import type { SubtitleIdleState } from './subtitleIdleState';
@@ -263,12 +264,17 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
   const pinyin = useAnnotationStore((state) => state.pinyin);
   const jyutping = useAnnotationStore((state) => state.jyutping);
   const pair = session?.pair ?? undefined;
+  // Fork: the lines the strip has from the start for a sentence's further translations (`SubtitleSession.also`).
+  const also = session?.also ?? 0;
+  const beside = session?.beside;
+  // Fork: under grammar feedback the user's lane has a line more (`withFeedbackRoom`).
+  const coached = useCoached();
   useEffect(() => {
     if (surface !== 'electron' || lanesShown) return;
-    const resting = !running && subtitle.compactMode && fitsWindow ? restingHeights(laneLegs, filters, subtitle.fontSize, { romanization, romanOff, furigana, pinyin, jyutping }, pair) : null;
+    const resting = !running && subtitle.compactMode && fitsWindow ? restingHeights(laneLegs, filters, subtitle.fontSize, { romanization, romanOff, furigana, pinyin, jyutping }, pair, also, beside, coached) : null;
     if (resting) fitWindow(resting.height, resting.least);
     else void window.electron?.invoke?.('subtitle:fit-height', { least: 0 })?.catch?.(() => {});
-  }, [surface, lanesShown, running, subtitle.compactMode, subtitle.fontSize, fitsWindow, fitWindow, laneLegs, filters, romanization, romanOff, furigana, pinyin, jyutping, pair]);
+  }, [surface, lanesShown, running, subtitle.compactMode, subtitle.fontSize, fitsWindow, fitWindow, laneLegs, filters, romanization, romanOff, furigana, pinyin, jyutping, pair, also, beside, coached]);
 
   return (
     <div ref={chrome.rootRef} {...rootProps}>
@@ -321,6 +327,8 @@ export function SubtitleView({ surface, model, controls, exporter, statusLine, n
             legs={laneLegs}
             onHeight={fitWindow}
             pair={pair}
+            also={also}
+            beside={beside}
             {...(model.held ? { held: model.held } : {})}
           />
         )

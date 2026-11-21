@@ -199,6 +199,26 @@
     "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
     "text": "Vain Kotomimi — poistaa vain Kotomimin oman toistoäänen, jolloin oma äänesi kuuluu selkeimmin. Sopii kuulokkeille tai VR-laseille. Kaiuttimien kanssa tätä voi käyttää Molemmat-tilassa. Valitse tämä, jos mikrofonina on virtuaalinen äänikortti (VB-Cable, BlackHole)."
   },
+  "fork.echoCancellationGate": {
+    "en": "By loudness",
+    "text": "Äänenvoimakkuuden mukaan"
+  },
+  "fork.echoCancellationGateTooltip": {
+    "en": "By loudness — for loudspeakers: what they play comes back into the microphone far quieter than your voice, so it is kept out by its loudness and your voice is left as it is.",
+    "text": "Äänenvoimakkuuden mukaan — kaiuttimia käytettäessä kaiuttimista mikrofoniin vuotava ääni on paljon hiljaisempi kuin puheesi, joten se suodatetaan pois äänenvoimakkuuden perusteella ilman, että äänesi muuttuu."
+  },
+  "fork.echoCancellationOff": {
+    "en": "Off",
+    "text": "Pois käytöstä"
+  },
+  "fork.echoCancellationOffTooltip": {
+    "en": "Off — the microphone as it is. For headphones: nothing plays into it.",
+    "text": "Pois käytöstä – mikrofoni sellaisenaan tunnistukseen. Käytä kuulokkeilla: mikrofoniin ei vuoda ääntä."
+  },
+  "fork.echoCancellationPassthrough": {
+    "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
+    "text": "Kun alkuperäisen äänen läpivienti on käytössä, vain äänenvoimakkuuden mukaan toimiva menetelmä toimii: muut menetelmät vaimentavat oman äänesi kaikuna."
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Etsi uudelleen"
@@ -987,6 +1007,134 @@
     "en": "What you want to say — Enter translates",
     "text": "Kirjoita, mitä haluat sanoa. Enter kääntää"
   },
+  "fork.voice.auto": {
+    "en": "Read my translations as they come",
+    "text": "Lue käännös automaattisesti puheeni jälkeen"
+  },
+  "fork.voice.cannotSpeak": {
+    "en": "{{name}} cannot speak {{language}}.",
+    "text": "{{name}} ei tue kieltä {{language}}."
+  },
+  "fork.voice.hearBoth": {
+    "en": "To both",
+    "text": "Molemmille"
+  },
+  "fork.voice.hearers": {
+    "en": "Read my translations aloud",
+    "text": "Lue käännökset automaattisesti ääneen"
+  },
+  "fork.voice.hearMe": {
+    "en": "To me",
+    "text": "Minulle"
+  },
+  "fork.voice.hearNone": {
+    "en": "Off",
+    "text": "Pois"
+  },
+  "fork.voice.hearThem": {
+    "en": "To them",
+    "text": "Muille"
+  },
+  "fork.voice.lineFailed": {
+    "en": "This line could not be read aloud",
+    "text": "Tämän rivin ääneenluku epäonnistui"
+  },
+  "fork.voice.man": {
+    "en": "Male voice",
+    "text": "Miesääni"
+  },
+  "fork.voice.meetingDevice": {
+    "en": "Output for the other side",
+    "text": "Lähetä ääni keskustelukumppanille tästä laitteesta"
+  },
+  "fork.voice.meetingDeviceAuto": {
+    "en": "Virtual microphone (automatic)",
+    "text": "Virtuaalimikrofoni (automaattinen)"
+  },
+  "fork.voice.meetingDeviceTooltip": {
+    "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
+    "text": "Kotomimi toistaa käännökset ääneen tällä laitteella, ja puhelusovellus käyttää sitä mikrofonina. Jos äänikorttisi osaa miksata ääntä itse, valitse yksi sen toistokanavista ja yhdistä sen ääni mikrofonisi ääneen äänikortilla. Näin oma äänesi ei kulje ohjelmiston kautta."
+  },
+  "fork.voice.modelPlaceholder": {
+    "en": "The model's name, e.g. tts-1",
+    "text": "Mallin nimi, esim. tts-1"
+  },
+  "fork.voice.myVoiceToo": {
+    "en": "My own voice goes too",
+    "text": "Lähetä myös oma ääneni"
+  },
+  "fork.voice.myVoiceTooTooltip": {
+    "en": "Off: they hear only the voice reading your translation.",
+    "text": "Kun tämä on pois päältä, toinen osapuoli kuulee vain ääneen luetun käännöksen."
+  },
+  "fork.voice.needsSpeaker": {
+    "en": "It reads what you say or type. Switch the mode to \"Me\" or \"Both\".",
+    "text": "Ääneenluku lukee sen, mitä sanot tai kirjoitat. Vaihda tilaksi \"Minä\" tai \"Molemmat\"."
+  },
+  "fork.voice.on": {
+    "en": "Read aloud",
+    "text": "Lue ääneen"
+  },
+  "fork.voice.sample": {
+    "en": "Play a sample",
+    "text": "Kuuntele näyte"
+  },
+  "fork.voice.sayLine": {
+    "en": "Read this line aloud",
+    "text": "Lue tämä rivi ääneen"
+  },
+  "fork.voice.stage": {
+    "en": "Voice",
+    "text": "Ääneenluku"
+  },
+  "fork.voice.stageTooltip": {
+    "en": "Reads your translations aloud. Any line of the conversation can be heard too: press its speaker button.",
+    "text": "Lukee käännöksesi ääneen. Voit myös kuunnella minkä tahansa keskustelurivin painamalla sen kaiutinpainiketta."
+  },
+  "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "Pysäytä"
+  },
+  "fork.voice.toMe": {
+    "en": "I hear it",
+    "text": "Minä kuulen"
+  },
+  "fork.voice.toMeFix": {
+    "en": "Choose",
+    "text": "Valitse"
+  },
+  "fork.voice.toMeLocked": {
+    "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
+    "text": "”Minulle” ei ole nyt käytettävissä. Kun ääni otetaan koko järjestelmästä, Kotomimi tulkitsee ääneen luetun käännöksen toisen osapuolen puheeksi. Valitse äänilähteeksi yksi sovellus, kuten VRChat."
+  },
+  "fork.voice.toThem": {
+    "en": "The other side hears it",
+    "text": "Toinen osapuoli kuulee"
+  },
+  "fork.voice.toThemTooltip": {
+    "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
+    "text": "Kun käännös luetaan toiselle osapuolelle, ääni ohjataan virtuaalimikrofoniin. Valitse se mikrofoniksi VRChatissa tai kokoussovelluksessa (Windowsissa nimellä CABLE Output)."
+  },
+  "fork.voice.voice": {
+    "en": "Voice",
+    "text": "Ääni"
+  },
+  "fork.voice.voiceOf": {
+    "en": "{{language}} voice",
+    "text": "Ääni: {{language}}"
+  },
+  "fork.voice.volumeMine": {
+    "en": "Volume for me",
+    "text": "Äänenvoimakkuus itselle"
+  },
+  "fork.voice.volumeTheirs": {
+    "en": "Volume for them",
+    "text": "Äänenvoimakkuus toiselle osapuolelle"
+  },
+  "fork.voice.woman": {
+    "en": "Female voice",
+    "text": "Naisääni"
+  },
   "fork.vr.back": {
     "en": "Back",
     "text": "Takaisin"
@@ -1463,6 +1611,10 @@
     "en": "Custom address",
     "text": "Oma osoite"
   },
+  "providers.localai.apiServiceEdge": {
+    "en": "Edge online voices (free)",
+    "text": "Edgen verkkoäänet (ilmainen)"
+  },
   "providers.localai.apiServiceModel": {
     "en": "Choose from the list on the right, or type a name",
     "text": "Valitse oikeanpuoleisesta luettelosta tai kirjoita nimi"
@@ -1855,6 +2007,34 @@
     "en": "Updating the speech recognition engine. You can start once it is done.",
     "text": "Puheentunnistusmoottoria päivitetään. Voit aloittaa, kun päivitys on valmis."
   },
+  "providers.localai.nativeVoiceFailed": {
+    "en": "The voice engine could not start. In the Voice card, press \"Try again\" — or choose another model.",
+    "text": "Puhemoottorin käynnistys epäonnistui. Paina ääneenluvun kortissa \"Yritä uudelleen\" tai valitse toinen malli."
+  },
+  "providers.localai.nativeVoiceFailedShort": {
+    "en": "The voice engine could not start.",
+    "text": "Puhemoottorin käynnistys epäonnistui."
+  },
+  "providers.localai.nativeVoiceMissing": {
+    "en": "The voice model is not downloaded yet. Download it to start.",
+    "text": "Puhemallia ei ole vielä ladattu. Lataa se, niin voit aloittaa."
+  },
+  "providers.localai.nativeVoiceReady": {
+    "en": "The voice engine is ready.",
+    "text": "Puhemoottori on valmis."
+  },
+  "providers.localai.nativeVoiceUnsupported": {
+    "en": "The native voice engine is not available for this system. In the Voice card, switch to \"API model\".",
+    "text": "Tämä järjestelmä ei vielä tue paikallista puhemoottoria. Vaihda ääneenluvun kortissa valinnaksi \"API-malli\"."
+  },
+  "providers.localai.nativeVoiceUpdating": {
+    "en": "Updating the voice engine. You can start once it is done.",
+    "text": "Puhemoottoria päivitetään. Voit aloittaa päivityksen valmistuttua."
+  },
+  "providers.localai.nativeVoiceWarmingShort": {
+    "en": "Starting the voice engine…",
+    "text": "Käynnistetään puhemoottoria…"
+  },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
     "text": "Puheentunnistusmoottori käynnistyy vielä. Ensimmäisellä kerralla tietokoneen käynnistämisen jälkeen tähän menee noin puoli minuuttia. Voit aloittaa heti, kun se on valmis."
@@ -1894,6 +2074,14 @@
   "providers.localai.noteIndexTranslate": {
     "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
     "text": "Japanista kiinaksi käännettäessä vakavia virheitä oli noin 3 lauseessa 30 lauseesta, vähiten testatuista malleista. Käännös kestää noin 0.1 s lausetta kohti. Käyttää noin 2 GB näytönohjaimen muistia ja tukee yli 100 kieltä."
+  },
+  "providers.localai.noteIrodori": {
+    "en": "Japanese only. Measured: nothing misread, about half a second a sentence. About 1.7 GB of video memory.",
+    "text": "Vain japaniksi. Testeissä ei lukuvirheitä, noin puoli sekuntia lausetta kohti. Käyttää noin 1.7 GB näyttömuistia."
+  },
+  "providers.localai.noteKokoro": {
+    "en": "Light: runs on the processor and takes no video memory. Less natural, Japanese most of all.",
+    "text": "Kevyt: käyttää vain suoritinta, ei näytönohjaimen muistia. Ääni on vähemmän luonnollinen, etenkin japaniksi."
   },
   "providers.localai.noteMoonshineJa": {
     "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
@@ -1942,6 +2130,10 @@
   "providers.localai.noteQwen17": {
     "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
     "text": "Japaninkielisessä arkikeskustelussa mitattu merkkivirheiden osuus on noin 19%. Teksti ilmestyy vasta lauseen päätyttyä noin 10 s viiveellä. Yllä oleva GGUF-versio tuottaa tekstiä jo puheen aikana."
+  },
+  "providers.localai.noteQwen3Tts": {
+    "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
+    "text": "Luonnollisin ääni, ja puhe alkaa heti. Testattu japaniksi, kiinaksi ja englanniksi ilman lukuvirheitä. Käyttää noin 3 GB näyttömuistia ja tukee 10 kieltä."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
@@ -2118,6 +2310,10 @@
   "providers.localai.sourceAuto": {
     "en": "The language cannot be detected with this setup. Choose the language you speak.",
     "text": "Tällä kokoonpanolla kieltä ei voi tunnistaa automaattisesti. Valitse puhumasi kieli."
+  },
+  "providers.localai.speakKey": {
+    "en": "API key of the voice",
+    "text": "Puhemallin API-avain"
   },
   "providers.localai.speedAbout": {
     "en": "About {{seconds}} s",
@@ -2327,6 +2523,10 @@
     "en": "API model",
     "text": "API-malli"
   },
+  "providers.localai.voiceUnnamed": {
+    "en": "The voice has no model to run yet. Name one in the Voice card.",
+    "text": "Puhemallia ei ole vielä määritetty. Anna mallin nimi ääneenluvun kortissa."
+  },
   "providers.openai_live.name": {
     "en": "OpenAI Live",
     "text": "OpenAI Live"
@@ -2434,6 +2634,10 @@
   "settings.glossaryWritten": {
     "en": "Word",
     "text": "Sana"
+  },
+  "settings.noiseSuppressionTooltip.off": {
+    "en": "Off — no noise suppression: the microphone as it is. Best in a quiet room.",
+    "text": "Pois — ei melunvaimennusta: mikrofoni sellaisenaan. Toimii parhaiten hiljaisessa huoneessa."
   },
   "settings.sentenceSegmentationChunkAuto": {
     "en": "Auto",

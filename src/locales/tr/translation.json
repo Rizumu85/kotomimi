@@ -48,7 +48,7 @@
     "noiseReduction": "Gürültü azaltma",
     "noiseSuppression": "Gürültü Bastırma",
     "noiseSuppressionTooltip": {
-      "off": "Kapalı — Yalnızca tarayıcının yerleşik gürültü işleme özelliği.",
+      "off": "Kapalı — gürültü azaltma uygulanmaz, mikrofon sesi olduğu gibi tanımaya gönderilir. Sessiz bir odada en iyi sonucu verir.",
       "standard": "Standart (RNNoise) — Düşük gecikmeli hafif yapay zeka gürültü bastırma.",
       "enhanced": "Gelişmiş (GTCRN) — Karmaşık gürültü ortamları için en iyi yüksek kaliteli yapay zeka gürültü bastırma."
     },
@@ -774,7 +774,19 @@
       "tagHint_cpu": "İşlemcide çalışır, ekran kartını oyuna bırakır. Oturum başladığında yüklenir.",
       "noteNativeXAsr": "Konuştukça yazıya döker. Yalnızca işlemciyi kullanır, ekran kartı belleğinde yer kaplamaz: tek bir çekirdeğin yaklaşık beşte birini kullanır. Yalnızca Çince ve İngilizce desteklenir. Kişisel sözlüğünüzdeki kelimeler önceden verilmez; tanıma sonrasında telaffuza göre düzeltilir.",
       "noteStreamRevise": "Karşı taraf konuşurken çeviri başlar, cümle bitince tamamı yeniden çevrilir. Yalnızca Çince, İngilizce ve Japonca desteklenir.",
-      "noteNativeSenseVoiceCpu": "Yalnızca işlemciyi kullanır, ekran kartı belleğinde yer kaplamaz. Ekran kartında çalışan SenseVoice kadar doğruya yakın sonuçlar verir; Çince, Kantonca, İngilizce, Japonca ve Koreceyi destekler. Kişisel sözlüğünüzdeki kelimeler önceden modele verilmez; tanıma sonrasında telaffuza göre düzeltilir."
+      "noteNativeSenseVoiceCpu": "Yalnızca işlemciyi kullanır, ekran kartı belleğinde yer kaplamaz. Ekran kartında çalışan SenseVoice kadar doğruya yakın sonuçlar verir; Çince, Kantonca, İngilizce, Japonca ve Koreceyi destekler. Kişisel sözlüğünüzdeki kelimeler önceden modele verilmez; tanıma sonrasında telaffuza göre düzeltilir.",
+      "apiServiceEdge": "Edge çevrimiçi sesleri (ücretsiz)",
+      "speakKey": "Seslendirme modelinin API anahtarı",
+      "nativeVoiceReady": "Seslendirme motoru hazır.",
+      "nativeVoiceWarmingShort": "Seslendirme motoru başlatılıyor…",
+      "nativeVoiceFailedShort": "Seslendirme motoru başlatılamadı.",
+      "nativeVoiceUnsupported": "Bu sistem henüz yerel seslendirme motorunu desteklemiyor. \"Seslendirme\" kartında \"API modeli\" seçeneğine geçin.",
+      "nativeVoiceMissing": "Seslendirme modeli henüz indirilmedi. Başlamak için modeli indirin.",
+      "nativeVoiceUpdating": "Seslendirme motoru güncelleniyor. Tamamlandığında başlayabilirsiniz.",
+      "nativeVoiceFailed": "Seslendirme motoru başlatılamadı. \"Seslendirme\" kartında \"Yeniden dene\" düğmesine basın veya başka bir model seçin.",
+      "voiceUnnamed": "Seslendirme modeli henüz girilmedi. \"Seslendirme\" kartına model adını girin.",
+      "noteQwen3Tts": "En doğal ses, anında konuşmaya başlar. Japonca, Çince ve İngilizce testlerinde hiç okuma hatası yapmadı. Yaklaşık 3 GB ekran kartı belleği kullanır, 10 dili destekler.",
+      "noteIrodori": "Yalnızca Japonca konuşur. Testlerde hiç okuma hatası yapmadı, cümle başına yaklaşık yarım saniye sürdü. Yaklaşık 1.7 GB ekran kartı belleği kullanır."
     }
   },
   "logsPanel": {
@@ -1739,8 +1751,6 @@
     "furigana": "Kanjilerin üzerinde furigana (Japonca)",
     "romanization": "Latinleştirme",
     "pinyin": "Çince metnin üzerinde pinyin",
-    "echoCancellationApp": "Yalnızca Kotomimi",
-    "echoCancellationAppTooltip": "Yalnızca Kotomimi — Sadece Kotomimi'nin çaldığı sesleri giderir, böylece sesiniz en net şekilde alınır. Kulaklık veya VR başlığı için uygundur. Hoparlör kullanırken \"Her ikisi\" modunda da çalışır. Mikrofon olarak sanal ses kartı (VB-Cable, BlackHole vb.) kullanıyorsanız bunu seçin.",
     "speechDetection": {
       "title": "Konuşma algılama"
     },
@@ -2113,6 +2123,40 @@
     "apart": {
       "split": "Benim sesimi başka bir yerden dinle",
       "merge": "İki tarafı da aynı yerden dinle"
-    }
+    },
+    "voice": {
+      "stage": "Seslendirme",
+      "stageTooltip": "Çevirilerinizi sesli okur. Konuşmadaki herhangi bir satırı dinlemek için yanındaki hoparlör düğmesine basın.",
+      "on": "Seslendirmeyi aç",
+      "toMeLocked": "“Ben dinleyeyim” şu anda kullanılamıyor. Karşı tarafın sesi tüm sistemden alındığı için uygulama sesli okumayı da karşı tarafın konuşması sanır. Ses kaynağı olarak tek bir uygulama seç (örneğin VRChat).",
+      "toThemTooltip": "Karşı tarafa okunurken ses sanal mikrofona gönderilir. VRChat veya toplantı uygulamanda mikrofon olarak bunu seç (Windows'ta CABLE Output).",
+      "myVoiceToo": "Kendi sesim de iletilsin",
+      "myVoiceTooTooltip": "Kapalıyken karşı taraf yalnızca seslendirilen çeviriyi duyar.",
+      "needsSpeaker": "Söylediklerinizi ve yazdıklarınızı seslendirir. Modu \"Ben\" veya \"Her ikisi\" olarak değiştirin.",
+      "modelPlaceholder": "Model adı, ör. tts-1",
+      "voice": "Ses",
+      "voiceOf": "{{language}} sesi",
+      "sample": "Örneği dinle",
+      "cannotSpeak": "{{name}}, {{language}} konuşamıyor.",
+      "sayLine": "Bu satırı sesli oku",
+      "stopLine": "Durdur",
+      "lineFailed": "Bu satır sesli okunamadı",
+      "woman": "Kadın sesi",
+      "man": "Erkek sesi",
+      "hearers": "Çevirileri sesli oku",
+      "hearNone": "Kapalı",
+      "hearMe": "Ben duyayım",
+      "hearThem": "Karşı taraf duysun",
+      "hearBoth": "İkimiz de duyalım",
+      "volumeMine": "Duyduğum ses düzeyi",
+      "volumeTheirs": "Karşı tarafın duyduğu ses düzeyi",
+      "meetingDevice": "Karşı tarafa giden sesin çıkışı",
+      "meetingDeviceAuto": "Sanal mikrofon (otomatik)",
+      "meetingDeviceTooltip": "Seslendirilen çeviri bu cihazda çalınır ve karşı tarafa mikrofon sesi olarak gider. Ses kartınız donanımsal mikslemeyi destekliyorsa kartın ses çıkış kanallarından birini seçin ve bu kanalın sesini mikrofonunuzla ses kartında birleştirin. Böylece kendi sesiniz yazılımdan geçmez."
+    },
+    "echoCancellationGate": "Ses düzeyine göre",
+    "echoCancellationGateTooltip": "Ses yüksekliğine göre — hoparlörler için: çaldıkları ses mikrofona sesinizden çok daha kısık döner; bu nedenle ses yüksekliğine göre engellenir ve sesiniz olduğu gibi kalır.",
+    "echoCancellationOff": "Kapalı",
+    "echoCancellationOffTooltip": "Kapalı — mikrofon olduğu gibi tanınmaya gönderilir. Kulaklık kullanırken mikrofona ses sızmaz."
   }
 }

@@ -48,7 +48,7 @@
     "noiseReduction": "노이즈 감소",
     "noiseSuppression": "노이즈 억제",
     "noiseSuppressionTooltip": {
-      "off": "끄기 — 브라우저 내장 노이즈 처리만 사용합니다.",
+      "off": "꺼짐 — 소음 억제 없음: 마이크 입력을 그대로 사용합니다. 조용한 방에서 가장 잘 작동합니다.",
       "standard": "표준 (RNNoise) — 저지연 경량 AI 노이즈 억제.",
       "enhanced": "향상 (GTCRN) — 복잡한 노이즈 환경에 최적화된 고품질 AI 노이즈 억제."
     },
@@ -774,7 +774,19 @@
       "tagHint_cpu": "CPU에서 실행되어 그래픽 카드를 게임에 온전히 쓸 수 있어요. 세션을 시작할 때 불러와요.",
       "noteNativeXAsr": "말하는 대로 글자가 표시돼요. CPU만 사용하고 그래픽 메모리는 쓰지 않아요. 코어 하나의 약 20%를 사용해요. 중국어와 영어만 지원해요. 개인 사전의 단어를 미리 알려 주지는 않지만, 인식 후 발음에 맞춰 교정해요.",
       "noteStreamRevise": "상대방이 말하는 중에 번역을 시작하고, 문장이 끝나면 문장 전체를 다시 번역해요. 중국어, 영어, 일본어만 지원해요.",
-      "noteNativeSenseVoiceCpu": "프로세서만 사용하며 그래픽 메모리는 차지하지 않아요. 그래픽 카드에서 실행하는 SenseVoice와 정확도가 비슷하고, 중국어, 광둥어, 영어, 일본어, 한국어를 지원해요. 개인 사전의 단어를 미리 알려 주지는 않지만, 인식 후 발음을 기준으로 교정해요."
+      "noteNativeSenseVoiceCpu": "프로세서만 사용하며 그래픽 메모리는 차지하지 않아요. 그래픽 카드에서 실행하는 SenseVoice와 정확도가 비슷하고, 중국어, 광둥어, 영어, 일본어, 한국어를 지원해요. 개인 사전의 단어를 미리 알려 주지는 않지만, 인식 후 발음을 기준으로 교정해요.",
+      "apiServiceEdge": "Edge 온라인 음성 (무료)",
+      "speakKey": "음성 모델 API 키",
+      "nativeVoiceReady": "음성 읽기 엔진이 준비됐어요.",
+      "nativeVoiceWarmingShort": "음성 읽기 엔진 시작 중…",
+      "nativeVoiceFailedShort": "음성 읽기 엔진을 시작하지 못했어요.",
+      "nativeVoiceUnsupported": "이 시스템은 아직 기본 음성 읽기 엔진을 지원하지 않아요. \"음성 읽기\" 카드에서 \"API 모델\"로 전환해 주세요.",
+      "nativeVoiceMissing": "아직 음성 모델을 다운로드하지 않았어요. 다운로드하면 시작할 수 있어요.",
+      "nativeVoiceUpdating": "음성 읽기 엔진을 업데이트하고 있어요. 완료되면 시작할 수 있어요.",
+      "nativeVoiceFailed": "음성 읽기 엔진을 시작하지 못했어요. \"음성 읽기\" 카드에서 \"다시 시도\"를 누르거나 다른 모델을 선택해 주세요.",
+      "voiceUnnamed": "아직 음성 모델을 입력하지 않았어요. \"음성 읽기\" 카드에서 입력해 주세요.",
+      "noteQwen3Tts": "가장 자연스럽고 바로 말하기 시작해요. 일본어, 중국어, 영어로 직접 테스트했을 때 잘못 읽는 부분이 없었어요. 비디오 메모리 약 3 GB를 사용하며, 10개 언어를 지원해요.",
+      "noteIrodori": "일본어만 지원해요. 직접 테스트했을 때 잘못 읽는 부분이 없었고, 문장당 약 0.5초가 걸렸어요. 비디오 메모리 약 1.7 GB를 사용해요."
     }
   },
   "logsPanel": {
@@ -1739,8 +1751,6 @@
     "furigana": "한자 위에 후리가나 표시(일본어)",
     "romanization": "로마자 발음 표시",
     "pinyin": "중국어 위에 병음 표시",
-    "echoCancellationApp": "Kotomimi만",
-    "echoCancellationAppTooltip": "Kotomimi만 — Kotomimi가 재생하는 소리만 제거해 내 목소리가 가장 또렷하게 전달됩니다. 헤드폰이나 VR 헤드셋을 쓸 때 적합하며, 스피커를 쓸 때도 모드를 '둘 다'로 선택하면 사용할 수 있습니다. 가상 오디오 장치(VB-Cable, BlackHole 등)를 마이크로 쓸 때는 이 옵션을 선택하세요.",
     "speechDetection": {
       "title": "음성 감지"
     },
@@ -2113,6 +2123,40 @@
     "apart": {
       "split": "내가 하는 말은 다른 곳에서 듣기",
       "merge": "양쪽 말을 한곳에서 듣기"
-    }
+    },
+    "voice": {
+      "stage": "음성 읽기",
+      "stageTooltip": "내 번역문을 소리 내어 읽어요. 대화의 어느 줄이든 스피커 버튼을 누르면 들을 수 있어요.",
+      "on": "음성 읽기 켜기",
+      "toMeLocked": "지금은 ‘내가 듣기’를 사용할 수 없어요. 시스템 전체 소리를 가져오면 앱이 번역을 읽어 주는 소리도 상대방 말로 인식해요. 상대방 소리를 가져올 앱을 하나만 선택하세요(예: VRChat).",
+      "toThemTooltip": "상대에게 읽어 줄 때는 소리가 가상 마이크로 전달돼요. VRChat이나 회의 앱에서 해당 마이크를 선택하세요(Windows에서는 CABLE Output).",
+      "myVoiceToo": "내 실제 목소리도 보내기",
+      "myVoiceTooTooltip": "끄면 상대방에게는 번역문을 읽는 소리만 들려요.",
+      "needsSpeaker": "내가 말하거나 입력한 내용을 읽어요. 모드를 \"나\" 또는 \"둘 다\"로 바꿔 주세요.",
+      "modelPlaceholder": "모델 이름, 예: tts-1",
+      "voice": "목소리",
+      "voiceOf": "{{language}} 목소리",
+      "sample": "미리 듣기",
+      "cannotSpeak": "{{name}} 모델은 {{language}} 음성을 지원하지 않아요.",
+      "sayLine": "이 줄 읽기",
+      "stopLine": "중지",
+      "lineFailed": "이 줄을 읽지 못했어요",
+      "woman": "여성 음성",
+      "man": "남성 음성",
+      "hearers": "번역 자동으로 읽어주기",
+      "hearNone": "끄기",
+      "hearMe": "나에게",
+      "hearThem": "상대방에게",
+      "hearBoth": "모두에게",
+      "volumeMine": "내가 듣는 음량",
+      "volumeTheirs": "상대가 듣는 음량",
+      "meetingDevice": "상대방에게 보낼 소리의 출력 장치",
+      "meetingDeviceAuto": "가상 마이크 (자동)",
+      "meetingDeviceTooltip": "번역 음성은 이 장치에서 재생되며, 상대방에게는 마이크 소리로 전달됩니다. 사운드 카드에 믹싱 기능이 내장되어 있다면 재생 채널 하나를 선택하고 사운드 카드에서 마이크 소리와 섞으세요. 이렇게 하면 내 목소리는 소프트웨어를 거치지 않습니다."
+    },
+    "echoCancellationGate": "음량 기준",
+    "echoCancellationGateTooltip": "음량 기준 — 스피커 사용 시: 스피커 소리가 마이크에 새어 들어와도 내 목소리보다 훨씬 작으므로 음량으로 걸러 내고 내 목소리는 그대로 둡니다.",
+    "echoCancellationOff": "끔",
+    "echoCancellationOffTooltip": "끔 — 마이크 소리를 그대로 인식에 보냅니다. 헤드폰 사용 시: 마이크로 들어오는 소리가 없습니다."
   }
 }

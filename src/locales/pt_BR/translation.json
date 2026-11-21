@@ -48,7 +48,7 @@
     "noiseReduction": "Redução de ruído",
     "noiseSuppression": "Supressão de Ruído",
     "noiseSuppressionTooltip": {
-      "off": "Desativado — Apenas o tratamento de ruído integrado do navegador.",
+      "off": "Desativado — sem redução de ruído: o microfone é enviado como está. Melhor em um ambiente silencioso.",
       "standard": "Padrão (RNNoise) — Supressão leve de ruído com IA e baixa latência.",
       "enhanced": "Aprimorado (GTCRN) — Supressão de alta qualidade de ruído com IA, ideal para ambientes de ruído complexo."
     },
@@ -774,7 +774,19 @@
       "tagHint_cpu": "Roda no processador e deixa a placa de vídeo livre para o jogo. É carregado ao iniciar uma sessão.",
       "noteNativeXAsr": "Transcreve enquanto você fala, usando só o processador, sem ocupar memória de vídeo: cerca de um quinto de um núcleo. Só oferece suporte a chinês e inglês. As palavras do dicionário personalizado não são fornecidas antes do reconhecimento, mas o texto é corrigido depois com base na pronúncia.",
       "noteStreamRevise": "Começa a traduzir enquanto a outra pessoa ainda fala e traduz a frase inteira de novo quando ela termina. Apenas chinês, inglês e japonês.",
-      "noteNativeSenseVoiceCpu": "Usa só o processador, sem ocupar a memória da placa de vídeo. Tem precisão parecida com a do SenseVoice na placa de vídeo e reconhece chinês, cantonês, inglês, japonês e coreano. As palavras do dicionário personalizado não são fornecidas antes do reconhecimento, mas são corrigidas pela pronúncia depois."
+      "noteNativeSenseVoiceCpu": "Usa só o processador, sem ocupar a memória da placa de vídeo. Tem precisão parecida com a do SenseVoice na placa de vídeo e reconhece chinês, cantonês, inglês, japonês e coreano. As palavras do dicionário personalizado não são fornecidas antes do reconhecimento, mas são corrigidas pela pronúncia depois.",
+      "apiServiceEdge": "Vozes online do Edge (grátis)",
+      "speakKey": "Chave de API do modelo de voz",
+      "nativeVoiceReady": "O mecanismo de voz está pronto.",
+      "nativeVoiceWarmingShort": "Iniciando o mecanismo de voz…",
+      "nativeVoiceFailedShort": "Não foi possível iniciar o mecanismo de voz.",
+      "nativeVoiceUnsupported": "O mecanismo de voz nativo ainda não está disponível neste sistema. No painel \"Leitura em voz alta\", selecione \"Modelo de API\".",
+      "nativeVoiceMissing": "O modelo de voz ainda não foi baixado. Baixe para começar.",
+      "nativeVoiceUpdating": "Atualizando o mecanismo de voz. Você poderá começar quando terminar.",
+      "nativeVoiceFailed": "Não foi possível iniciar o mecanismo de voz. No painel \"Leitura em voz alta\", clique em \"Tentar novamente\" ou escolha outro modelo.",
+      "voiceUnnamed": "Nenhum modelo de voz foi informado. Preencha o nome no painel \"Leitura em voz alta\".",
+      "noteQwen3Tts": "A voz mais natural, com fala imediata. Nos testes em japonês, chinês e inglês, não houve erros de leitura. Usa cerca de 3 GB de memória de vídeo e oferece 10 idiomas.",
+      "noteIrodori": "Somente japonês. Nos testes, não houve erros de leitura: cerca de meio segundo por frase. Usa cerca de 1.7 GB de memória de vídeo."
     }
   },
   "logsPanel": {
@@ -1739,8 +1751,6 @@
     "furigana": "Furigana acima dos kanji (japonês)",
     "romanization": "Mostrar romanização",
     "pinyin": "Pinyin acima do chinês",
-    "echoCancellationApp": "Somente Kotomimi",
-    "echoCancellationAppTooltip": "Só Kotomimi — elimina apenas o som reproduzido pelo próprio Kotomimi, captando sua voz com mais clareza. Ideal para fones de ouvido ou um headset de VR; com alto-falantes, também funciona no modo \"Ambos\". Escolha esta opção se o microfone for um cabo de áudio virtual (VB-Cable, BlackHole).",
     "speechDetection": {
       "title": "Detecção de fala"
     },
@@ -2113,6 +2123,40 @@
     "apart": {
       "split": "Ouvir minha fala em outro lugar",
       "merge": "Ouvir os dois lados no mesmo lugar"
-    }
+    },
+    "voice": {
+      "stage": "Leitura em voz alta",
+      "stageTooltip": "Lê suas traduções em voz alta. Você também pode ouvir qualquer fala da conversa: clique no botão de alto-falante dela.",
+      "on": "Ativar leitura em voz alta",
+      "toMeLocked": "\"Para mim\" está indisponível porque o áudio da outra pessoa vem de todo o sistema. Assim, o app confunde a leitura em voz alta com a fala dela. Para ativar a opção, escolha um único app como fonte de áudio, como o VRChat.",
+      "toThemTooltip": "Ao ler para a outra pessoa, o áudio é enviado ao microfone virtual. No VRChat ou no aplicativo de reuniões, selecione esse microfone (no Windows, ele se chama CABLE Output).",
+      "myVoiceToo": "Enviar minha voz original também",
+      "myVoiceTooTooltip": "Desativado: a outra pessoa ouve apenas a leitura da tradução.",
+      "needsSpeaker": "A leitura usa o que você fala ou digita. Mude o modo para \"Eu\" ou \"Ambos\".",
+      "modelPlaceholder": "Nome do modelo, por exemplo, tts-1",
+      "voice": "Voz",
+      "voiceOf": "Voz em {{language}}",
+      "sample": "Ouvir amostra",
+      "cannotSpeak": "{{name}} não fala {{language}}.",
+      "sayLine": "Ler esta fala em voz alta",
+      "stopLine": "Parar",
+      "lineFailed": "Não foi possível ler esta fala em voz alta",
+      "woman": "Voz feminina",
+      "man": "Voz masculina",
+      "hearers": "Ler traduções em voz alta",
+      "hearNone": "Desativado",
+      "hearMe": "Para mim",
+      "hearThem": "Para os outros",
+      "hearBoth": "Para ambos",
+      "volumeMine": "Volume para mim",
+      "volumeTheirs": "Volume para a outra pessoa",
+      "meetingDevice": "Enviar áudio para a outra pessoa via",
+      "meetingDeviceAuto": "Microfone virtual (automático)",
+      "meetingDeviceTooltip": "A tradução falada toca neste dispositivo, que funciona como microfone para a outra pessoa ouvir. Se sua placa de som tiver mixagem integrada, escolha um dos canais de reprodução da placa e misture o áudio desse canal com o do microfone na própria placa. Assim, sua voz original não passa pelo software."
+    },
+    "echoCancellationGate": "Por volume",
+    "echoCancellationGateTooltip": "Por volume — para alto-falantes: o som que eles reproduzem chega ao microfone muito mais baixo que a sua voz, então é bloqueado pelo volume e sua voz permanece intacta.",
+    "echoCancellationOff": "Desligado",
+    "echoCancellationOffTooltip": "Desligado — o microfone é enviado como está para o reconhecimento. Use com fones de ouvido: nenhum som vaza para o microfone."
   }
 }

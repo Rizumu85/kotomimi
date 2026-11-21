@@ -37,27 +37,28 @@ export const PERFORMANCE_CONFIG = {
 };
 
 // Audio constraints profiles.
-// echoCancellation 'all' asks for every sound the system plays to be cancelled,
-// a meeting app's far end included; `true` leaves the choice to the browser,
-// and Chrome then cancels only what Chrome plays. Chromium 152 grants 'all' on
-// Windows and macOS and falls back to `true` on Linux; an older browser reads
-// the string as `true`. The value that took effect is what track.getSettings()
-// reports (logged at begin()). The microphone's Echo Cancellation setting can
-// ask for `true` instead (ModernAudioRecorder.setEchoCancellation): 'all'
-// silences a loopback input such as BlackHole, whose signal is system playout.
+// Fork: their echo cancellation is overridden: the microphone never asks the
+// browser for it (ModernAudioRecorder.getAudioConstraints, the playout gate in
+// its place).
+//
+// Fork: the browser's own noise suppression is never asked for. The app's
+// (RNNoise, GTCRN, or none: the Noise Suppression setting) is the only one, so
+// "Off" is off. Stacked on the app's, it pushed the quiet parts of speech to
+// silence: a reading of known sentences came out with two to four times the
+// errors of the unprocessed microphone (2026-11-20).
 export const AUDIO_CONSTRAINT_PROFILES = {
   // High quality mode (default)
   HIGH_QUALITY: {
     echoCancellation: 'all',
     echoCancellationType: 'system',
-    noiseSuppression: true,
+    noiseSuppression: false,
     autoGainControl: true,
     suppressLocalAudioPlayback: true,
     googEchoCancellation: true,
-    googNoiseSuppression: true,
+    googNoiseSuppression: false,
     googAutoGainControl: true,
     googHighpassFilter: true,
-    googTypingNoiseDetection: true,
+    googTypingNoiseDetection: false,
     googAudioMirroring: false,
   },
   

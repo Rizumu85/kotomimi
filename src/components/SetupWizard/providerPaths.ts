@@ -11,6 +11,7 @@ import { presentProviders } from '../../providers/registry';
 import type { ProviderPath, ScenarioId } from '../../lib/setup/types';
 import { getScenario, providerFitForScenario } from '../../lib/setup/scenarios';
 import type { ProviderFit } from '../../lib/setup/scenarios';
+import { sharedSpeech } from '../../lib/session/shape';
 
 export interface ProviderOption {
   id: ProviderType;
@@ -24,8 +25,9 @@ export function managedProvider(): ProviderType | null {
 }
 
 /** A definition's speech as the old descriptor's `textOnlyCapability`: the word the scenario fit and the pair sentence read. */
-export function textOnlyCapabilityOf(p: Pick<AnyProvider, 'speech'>): 'always' | 'optional' | 'never' {
-  return p.speech === 'always' ? 'never' : p.speech === 'never' ? 'always' : 'optional';
+export function textOnlyCapabilityOf(p: Pick<AnyProvider, 'speech' | 'speaks'>): 'always' | 'optional' | 'never' {
+  const speech = sharedSpeech(p);
+  return speech === 'always' ? 'never' : speech === 'never' ? 'always' : 'optional';
 }
 
 /** The registered provider a draft names — drafts and records keep the old enum's spelling — or undefined. */

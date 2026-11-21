@@ -1,4 +1,5 @@
 import { BaseAudioRecorder } from './BaseAudioRecorder';
+import type { EchoCancellation } from '../audio/capture/mic';
 import { MicrophoneCaptureError } from './microphoneCaptureError';
 import type { NoiseSuppressionMode, NoiseSuppressionState } from './noiseSuppression';
 import { DEBUG_CONFIG, AUDIO_CONSTRAINT_PROFILES } from '../config/performance.js';
@@ -68,8 +69,7 @@ export class ModernAudioRecorder extends BaseAudioRecorder {
 
   // Performance
   private performanceMode: PerformanceMode;
-  /** What echo cancellation removes: what this app plays (`true`) or every sound the system plays ('all'). */
-  private _echoCancellation: 'app' | 'all' = 'all';
+  private _echoCancellation: EchoCancellation = 'gate';
 
   // Device management
   private _deviceChangeCallback: (() => void) | null = null;
@@ -126,15 +126,13 @@ export class ModernAudioRecorder extends BaseAudioRecorder {
     const profileName = this.performanceMode.toUpperCase().replace(' ', '_') as keyof typeof AUDIO_CONSTRAINT_PROFILES;
     const profile = AUDIO_CONSTRAINT_PROFILES[profileName] || AUDIO_CONSTRAINT_PROFILES.HIGH_QUALITY;
 
-    // 'all' cancels every sound the system plays, which silences a loopback
-    // input such as BlackHole: its signal is that sound (-20 → -63 dBFS on macOS,
-    // Chromium 152). Choosing 'app' asks for `true`, which cancels only what this
-    // app plays.
-    const echoCancellation = profile.echoCancellation === 'all' && this._echoCancellation === 'app' ? true : profile.echoCancellation;
-
-    // lib.dom (TS 5.9) still types echoCancellation as a boolean constraint;
-    // the profiles use the 'all' mode of Media Capture and Streams (Chrome 141).
-    return { ...baseConstraints, ...profile, echoCancellation } as unknown as MediaTrackConstraints;
+    // Fork: the browser's echo cancellation is never asked for. It cancels what the app plays, and the app plays the
+    // user's own voice where passthrough is on: in sessions with it on, 17-31 % of their speech was turned down by
+    // 30 dB or more, against 1-3 % without (2026-11-20). The loudspeakers are kept out by the playout gate instead
+    // (`echoFollow.ts`), which needs a fixed gain to learn the room's echo level: no automatic gain in that mode.
+    const gate = this._echoCancellation === 'gate' ? { autoGainControl: false, googAutoGainControl: false } : {};
+    // lib.dom types none of the goog* constraints the profiles carry.
+    return { ...baseConstraints, ...profile, echoCancellation: false, googEchoCancellation: false, ...gate } as unknown as MediaTrackConstraints;
   }
 
   /**
@@ -649,7 +647,7 @@ export class ModernAudioRecorder extends BaseAudioRecorder {
   // ==================== Echo Cancellation ====================
 
   /** Recorded now and applied at the next `begin()`: the browser fixes echo cancellation when it opens the device. */
-  setEchoCancellation(mode: 'app' | 'all'): void {
+  setEchoCancellation(mode: EchoCancellation): void {
     this._echoCancellation = mode;
   }
 

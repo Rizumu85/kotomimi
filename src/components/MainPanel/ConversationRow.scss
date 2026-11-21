@@ -221,6 +221,41 @@
   }
 }
 
+// Fork: "read this line aloud" — the play button's look, quiet until the row is pointed at or its line is on.
+.row-say-btn {
+  opacity: 0;
+  background: transparent;
+
+  .conversation-row:hover &,
+  &:focus-visible,
+  &.is-loading,
+  &.is-playing,
+  &.is-failed {
+    opacity: 1;
+  }
+
+  &.is-playing {
+    background: color-mix(in srgb, tk.$color-speaker 45%, transparent);
+    color: vars.$text-primary;
+  }
+
+  &.is-failed {
+    color: tk.$color-warning;
+  }
+
+  &__spin {
+    animation: row-say-spin 1s linear infinite;
+  }
+}
+
+@keyframes row-say-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row-say-btn__spin { animation: none; }
+}
+
 .row-role-dot {
   position: absolute;
   left: 2px;

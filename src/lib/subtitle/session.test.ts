@@ -124,4 +124,20 @@ describe('sameSession', () => {
     const withCode = (code: string, params: Record<string, string>) => subtitleSession({ ...input, readiness: { state: 'not-ready', reason: 'r', code, params } });
     expect(sameSession(withCode('no_asr', { source: 'en' }), withCode('no_asr', { source: 'en' }))).toBe(true);
   });
+
+  it('says how many translations a sentence of the user’s has beyond the first, where there are any (fork)', () => {
+    expect('also' in subtitleSession(input)).toBe(false);
+    expect(subtitleSession({ ...input, also: 1 }).also).toBe(1);
+    expect(sameSession(subtitleSession({ ...input, also: 1 }), subtitleSession(input))).toBe(false);
+    expect(sameSession(subtitleSession({ ...input, also: 0 }), subtitleSession(input))).toBe(true);
+  });
+
+  it('says what each side may speak beside the pair’s languages, where either may (fork)', () => {
+    expect('beside' in subtitleSession({ ...input, beside: { mine: [], theirs: [] } })).toBe(false);
+    const lit = subtitleSession({ ...input, beside: { mine: ['ja'], theirs: ['ko'] } });
+    expect(lit.beside).toEqual({ mine: ['ja'], theirs: ['ko'] });
+    expect(sameSession(lit, subtitleSession({ ...input, beside: { mine: ['ja'], theirs: ['ko'] } }))).toBe(true);
+    expect(sameSession(lit, subtitleSession({ ...input, beside: { mine: ['ja'], theirs: ['en'] } }))).toBe(false);
+    expect(sameSession(lit, subtitleSession(input))).toBe(false);
+  });
 });

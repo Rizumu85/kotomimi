@@ -18,6 +18,7 @@ Kotomimi is a separate application with its own name, install folder and profile
 | Other side's language | A switch leaves the other side's language to be identified | `src/providers/openai/localaiDevice.ts`, `src/lib/language/identify.ts` |
 | Model notes | A note on each native model card; the library on web and extension ranks recognizers as measured | `src/providers/openai/NativeEngineCard.tsx`, `src/lib/local-inference/selection/measuredRank.ts` |
 | Grammar feedback | A sentence in the practiced language gets ✓, or a correction and its reason | `src/providers/openai/coachPrompt.ts` |
+| Voice | Translations read aloud, and any line on demand | `src/providers/openai/voice.ts`, `src/app/lineVoice.ts` |
 | Typed lookup | Ctrl+K (Cmd+K) puts the cursor in a box that translates what you type | `src/components/MainPanel/panel/TypedText.tsx` |
 | Mic activation threshold | Sound below a level is heard as silence | `src/lib/audio/capture/micGate.ts`, `src/components/Settings/sections/MicGateControl.tsx` |
 | Reading aids | Furigana, romanization (Japanese, Korean, Russian, Ukrainian), pinyin, Jyutping and source italics, at the foot of the display popover | `src/lib/annotate/annotate.ts`, `src/components/Annotated/ReadingAidToggles.tsx` |
@@ -31,21 +32,22 @@ Kotomimi is a separate application with its own name, install folder and profile
 
 ## Stages
 
-Speech recognition, translation and optional grammar feedback are independent. Each runs on **This computer**, **API model** or **Another device**.
+Speech recognition, translation, optional grammar feedback and an optional voice are independent. Each runs on **This computer**, **API model** or **Another device**.
 
 | Stage | This computer | API model | Another device |
 | --- | --- | --- | --- |
 | Speech recognition | Downloaded native recognizer, or installed Apple Speech language assets | An OpenAI-compatible transcription endpoint | A sharing Kotomimi, a compatible phone, or an external LocalAI Realtime server |
 | Translation | Downloaded native translation model | An OpenAI-compatible chat endpoint | A compatible shared translation or text model |
 | Grammar feedback | Downloaded native feedback model | An OpenAI-compatible chat endpoint | A shared feedback or chat model |
+| Voice | Downloaded native voice model | An OpenAI-compatible speech endpoint, or Edge's online voices | Not offered |
 
-This computer always means the native engines: `migrateLocalAISettings` (`localai.ts`) reads the local-runner fields of any older settings as `native`. External LocalAI services are reached through the API and Another device choices; Kotomimi does not install, start, stop or proxy one. Kotomimi's pipeline produces text, not synthesized speech.
+This computer always means the native engines: `migrateLocalAISettings` (`localai.ts`) reads the local-runner fields of any older settings as `native`. External LocalAI services are reached through the API and Another device choices; Kotomimi does not install, start, stop or proxy one. The voice speaks the speaker's translations into the other side's language (`speaker.ts`).
 
 ### Settings
 
 Settings has three categories: General, Audio and Provider. The stage cards are in Provider. Audio starts with Speech mode; under Auto, a collapsed Speech detection disclosure holds the provider's tuning, which appears nowhere else. A running session keeps its parameters locked.
 
-With Kotomimi (`localai`) selected, controls that serve translated speech output are hidden: the echo-cancellation picker and Original Audio Passthrough (`showVoiceOutputControls` in `src/components/Settings/AdvancedSettings/AdvancedSettings.tsx`) and the Text Only / Keep audio for replay block (`OutputToggles` in `src/components/Settings/sections/SpeechSection.tsx`). Only the controls are hidden: saved preferences, audio processing and other providers are untouched. Restore them at those two guards once speech output is supported and validated.
+With Kotomimi (`localai`), the voice stage's own switch decides whether a run speaks (`Provider.speaks`): Text Only stays hidden (`OutputToggles`), and Original Audio Passthrough is one switch in the stage's card (`VoiceHearers`), not in Audio.
 
 ### Choosing models
 
@@ -74,7 +76,7 @@ Prompts follow the native and practiced languages: the native language picks the
 
 ### Mic activation threshold
 
-`src/lib/audio/capture/mic.ts` puts the gate between the recorder and every listener. Loudness is the one difference between the user and a loudspeaker's leak that holds in every mode; comparing the two legs' text (`heardLately` in `pipeline.ts`) works only while both are heard, and stays beside it. Below the threshold the gate delivers zeros of the same length, never nothing: the VAD counts its pause in frames it receives (`redemptionMs`), and the echo monitor, meters and passthrough keep time on this stream. `GATE_LOOKAHEAD_MS` delays the microphone so a soft onset passes whole; `GATE_HOLD_MS` bridges dips between words at the cost of some leak. `levelOf` scales RMS in dBFS to 0–100. Threshold 0 is off, the default. The microphone test ends when a run starts: some drivers refuse to open one device twice.
+`src/lib/audio/capture/mic.ts` puts the gate between the recorder and every listener. Loudness is the one difference between the user and a loudspeaker's leak that holds in every mode; comparing the two legs' text (`heardLately` in `pipeline.ts`) works only while both are heard, and stays beside it. Below the threshold the gate delivers zeros of the same length, never nothing: the VAD counts its pause in frames it receives (`redemptionMs`), and the echo monitor and meters keep time on this stream (passthrough is the live track, ungated). `GATE_LOOKAHEAD_MS` delays the microphone so a soft onset passes whole; `GATE_HOLD_MS` bridges dips between words at the cost of some leak. `levelOf` scales RMS in dBFS to 0–100. Threshold 0 is off, the default. The microphone test ends when a run starts: some drivers refuse to open one device twice.
 
 ### Model lists in the API column
 

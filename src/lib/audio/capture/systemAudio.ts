@@ -30,6 +30,10 @@ export interface SystemAudioSettings {
   subscribe(listener: () => void): () => void;
   /** The helper heard audible audio: remembered, so a later silence reads as a permission problem (#492). */
   audioSeen(): void;
+  /** Hand the whole-system loopback between this leg and the microphone's reference. */
+  wholeSystem?(inUse: boolean): Promise<void> | void;
+  /** The whole-system mix before the participant's channel split or mute. */
+  playout?(pcm: Int16Array): void;
 }
 
 /** The part of a participant recorder this source drives. */
@@ -136,6 +140,7 @@ export async function openSystemAudio(
       unsubscribe();
       await chain;
       await close();
+      settings.wholeSystem?.(false);
     },
   });
 
@@ -164,7 +169,7 @@ export async function openSystemAudio(
     return { mode: 'loopback' };
   };
 
-  const record = async (connection: Connection) => {
+  const record = async (connection: Connection, id: string) => {
     // Waited for: the source stays open and silent; the application found, the source follows it (`subscribe`).
     if (connection.mode === 'waiting') return;
     // Today's `requestLoopbackAudioStream` denial (MainPanel's Screen Recording
@@ -187,14 +192,17 @@ export async function openSystemAudio(
       };
     }
     recorder = next;
-    const options = connection.mode === 'app' ? { deviceId: sourceId } : connection.mode === 'device' ? { deviceId: connection.monitorId } : undefined;
+    const options = connection.mode === 'app' ? { deviceId: id } : connection.mode === 'device' ? { deviceId: connection.monitorId } : undefined;
     if (!(await next.begin(options))) {
       recorder = null;
       throw new Error('The system audio capture did not start.');
     }
     unwatch = core.watch(next.getStream?.() ?? null);
     const split = deps.split;
-    await next.record((data) => core.deliver(split ? split.take(data) : data.mono));
+    await next.record((data) => {
+      if (id === 'desktop-audio-loopback' && !core.stopped && !core.ended) settings.playout?.(data.mono);
+      core.deliver(split ? split.take(data) : data.mono);
+    });
   };
 
   /**
@@ -213,13 +221,20 @@ export async function openSystemAudio(
     }
     core.degrade({ code: APP_CAPTURE_LOST, message: 'The application capture stopped, so all system audio is being translated instead.' });
     await stopRecorder();
-    await record({ mode: 'loopback' });
+    await settings.wholeSystem?.(true);
+    await record({ mode: 'loopback' }, 'desktop-audio-loopback');
+  };
+
+  const start = async (id: string) => {
+    await settings.wholeSystem?.(id === 'desktop-audio-loopback');
+    await record(await connect(id), id);
   };
 
   try {
-    await record(await connect(sourceId));
+    await start(sourceId);
   } catch (error) {
     await close();
+    settings.wholeSystem?.(false);
     throw error;
   }
   if (signal.aborted) {
@@ -227,7 +242,7 @@ export async function openSystemAudio(
     throw signal.reason ?? new Error('aborted');
   }
 
-  unsubscribe = settings.subscribe(() => {
+  const follow = () => {
     const next = settings.sourceId();
     if (next === sourceId) return;
     sourceId = next;
@@ -235,9 +250,11 @@ export async function openSystemAudio(
       .then(async () => {
         if (core.stopped || core.ended) return;
         await close();
-        await record(await connect(sourceId));
+        await start(sourceId);
       })
       .catch((error: unknown) => core.end(`The participant source could not switch: ${describeCause(error)}`));
-  });
+  };
+  unsubscribe = settings.subscribe(follow);
+  follow();
   return core;
 }

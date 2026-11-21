@@ -8,11 +8,13 @@ vi.mock('react-i18next', async (importOriginal) => ({ ...(await importOriginal<t
 import useAudioStore from '../../stores/audioStore';
 import { useVRChatStore } from '../../stores/vrchatStore';
 import { useProviderStore } from '../../stores/providerStore';
+import { getProvider } from '../../providers/registry';
 import { VRChatSection } from './VRChatSection';
 
 beforeEach(() => {
   useVRChatStore.setState({ chatbox: 'off', chatboxTranslationFirst: false, recent: null, viewers: 0 });
-  useProviderStore.setState({ selected: 'localai', entries: { localai: { settings: {}, credentials: {}, pair: { source: 'zh-CN', target: 'ja' } } } as never });
+  // The settings a loaded entry has: every one, at its default (the subtitle session reads the provider's languages from them).
+  useProviderStore.setState({ selected: 'localai', entries: { localai: { settings: { ...getProvider('localai')!.settings.defaults }, credentials: {}, pair: { source: 'zh-CN', target: 'ja' } } } as never });
 });
 
 // The store writes a setting through a module it loads when first needed: waited for, so that the load does not

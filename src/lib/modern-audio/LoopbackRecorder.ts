@@ -53,7 +53,7 @@ export class LoopbackRecorder extends ParticipantRecorder {
       // Video is required to trigger the handler, but we discard it immediately
       const stream = await navigator.mediaDevices.getDisplayMedia({
         video: true, // Required to trigger the handler
-        audio: true  // This will be loopback audio from setDisplayMediaRequestHandler
+        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
       });
 
       // Step 3: Disable loopback audio AFTER getting the stream

@@ -152,7 +152,9 @@ export function createApiAsr(options: ApiAsrOptions): AsrLike {
           } else if (data.type === 'speech_end') {
             const said = speech;
             speech = null;
-            if (said) send(joined(said));
+            // A cut the detector made at its longest stretch (`forced`): the speaker is still talking, and there is no
+            // pause at its end to trim — trimmed, the last second of what they said was never sent.
+            if (said) send(joined(said), data.forced !== true);
           } else if (data.type === 'speech_cancel') {
             // Too short to be speech: what was kept goes back to being the moments before.
             speech = null;

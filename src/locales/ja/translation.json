@@ -48,7 +48,7 @@
     "noiseReduction": "ノイズ低減",
     "noiseSuppression": "ノイズ抑制",
     "noiseSuppressionTooltip": {
-      "off": "オフ — ブラウザ内蔵のノイズ処理のみ使用します。",
+      "off": "オフ — ノイズ抑制なし：マイク音声をそのまま認識に送ります。静かな部屋での使用に最適です。",
       "standard": "スタンダード（RNNoise）— 低遅延の軽量AIノイズ抑制。",
       "enhanced": "エンハンスド（GTCRN）— 複雑なノイズ環境に最適な高品質AIノイズ抑制。"
     },
@@ -774,7 +774,19 @@
       "tagHint_cpu": "CPU で動作するので、ゲーム用のグラフィックボードを使いません。セッション開始時に読み込みます。",
       "noteNativeXAsr": "話しながら文字が表示されます。CPU のみで動作し、ビデオメモリは使いません。CPU 使用量は 1 コアの約 2 割です。中国語と英語のみ対応。個人辞書の単語は事前に渡されませんが、認識後に読み方をもとに修正されます。",
       "noteStreamRevise": "相手が話している途中から翻訳し、文が終わると全文をもう一度翻訳します。中国語・英語・日本語のみ対応。",
-      "noteNativeSenseVoiceCpu": "CPUのみで動作し、ビデオメモリは使いません。認識精度はGPUで動くSenseVoiceとほぼ同じで、中国語、広東語、英語、日本語、韓国語に対応しています。ユーザー辞書の単語は事前に渡されませんが、認識後に読み方をもとに修正されます。"
+      "noteNativeSenseVoiceCpu": "CPUのみで動作し、ビデオメモリは使いません。認識精度はGPUで動くSenseVoiceとほぼ同じで、中国語、広東語、英語、日本語、韓国語に対応しています。ユーザー辞書の単語は事前に渡されませんが、認識後に読み方をもとに修正されます。",
+      "apiServiceEdge": "Edge オンライン音声（無料）",
+      "speakKey": "読み上げモデルの API キー",
+      "nativeVoiceReady": "読み上げエンジンの準備ができました。",
+      "nativeVoiceWarmingShort": "読み上げエンジンを起動中…",
+      "nativeVoiceFailedShort": "読み上げエンジンを起動できませんでした。",
+      "nativeVoiceUnsupported": "このシステムではネイティブ読み上げエンジンを利用できません。「読み上げ」カードで「API モデル」に切り替えてください。",
+      "nativeVoiceMissing": "読み上げモデルがまだダウンロードされていません。ダウンロードすると始められます。",
+      "nativeVoiceUpdating": "読み上げエンジンを更新中です。完了すると始められます。",
+      "nativeVoiceFailed": "読み上げエンジンを起動できませんでした。「読み上げ」カードで「再試行」を押すか、別のモデルを選んでください。",
+      "voiceUnnamed": "読み上げモデルが未入力です。「読み上げ」カードで入力してください。",
+      "noteQwen3Tts": "最も自然で、すぐに話し始めます。日本語・中国語・英語で検証し、読み間違いはありませんでした。ビデオメモリ使用量は約 3 GB、10 言語に対応。",
+      "noteIrodori": "日本語専用。検証では読み間違いがなく、1 文あたり約半秒。ビデオメモリ使用量は約 1.7 GB。"
     }
   },
   "logsPanel": {
@@ -1739,8 +1751,6 @@
     "furigana": "漢字の上にふりがなを表示（日本語）",
     "romanization": "ローマ字を表示",
     "pinyin": "中国語の上にピンインを表示",
-    "echoCancellationApp": "Kotomimi のみ",
-    "echoCancellationAppTooltip": "Kotomimi のみ — Kotomimi 自体が再生する音だけを除去するので、自分の声が最もクリアに拾われます。ヘッドホンや VR ヘッドセットの使用に適しています。スピーカーでも、モードを「両方」にすれば使えます。マイクに仮想オーディオデバイス（VB-Cable、BlackHole など）を使う場合は、こちらを選んでください。",
     "speechDetection": {
       "title": "音声検出"
     },
@@ -2113,6 +2123,40 @@
     "apart": {
       "split": "自分の音声を別の場所で聞く",
       "merge": "両方の音声を同じ場所で聞く"
-    }
+    },
+    "voice": {
+      "stage": "読み上げ",
+      "stageTooltip": "自分の発言の訳文を読み上げます。会話の各行も、スピーカーボタンを押すと聞けます。",
+      "on": "読み上げをオン",
+      "toMeLocked": "「自分に読み上げ」は使えません。システム全体の音を拾う設定では、読み上げ音声も相手の声として拾ってしまいます。相手の音声元に VRChat などのアプリを1つ選ぶと使えます。",
+      "toThemTooltip": "相手に読み上げるときは、音声が仮想マイクに送られます。VRChat や会議アプリで、その仮想マイクをマイクとして選んでください（Windows では CABLE Output）。",
+      "myVoiceToo": "自分の声も送る",
+      "myVoiceTooTooltip": "オフにすると、相手には訳文の読み上げだけが聞こえます。",
+      "needsSpeaker": "自分が話した内容や入力した文字の訳文を読み上げます。モードを「自分」か「両方」に切り替えてください。",
+      "modelPlaceholder": "モデル名（例：tts-1）",
+      "voice": "声の種類",
+      "voiceOf": "{{language}}の声",
+      "sample": "試聴",
+      "cannotSpeak": "{{name}}は{{language}}を話せません。",
+      "sayLine": "この行を読み上げる",
+      "stopLine": "停止",
+      "lineFailed": "この行を読み上げられませんでした",
+      "woman": "女性の声",
+      "man": "男性の声",
+      "hearers": "訳文を自動で読み上げる",
+      "hearNone": "オフ",
+      "hearMe": "自分に",
+      "hearThem": "相手に",
+      "hearBoth": "両方に",
+      "volumeMine": "音量（自分に聞こえる）",
+      "volumeTheirs": "音量（相手に聞こえる）",
+      "meetingDevice": "相手に届く音声の出力先",
+      "meetingDeviceAuto": "仮想マイク（自動）",
+      "meetingDeviceTooltip": "訳文の読み上げは、このデバイスからマイク音声として相手に届きます。サウンドカード本体で音を混ぜられる場合は、そのカードの再生チャンネルを選び、カード側でマイクの音と混ぜてください。自分の声はソフトウェアを通らずに相手に届きます。"
+    },
+    "echoCancellationGate": "音量で判定",
+    "echoCancellationGateTooltip": "音量で判定 — スピーカー使用時：スピーカーからマイクに回り込む音はあなたの声よりはるかに小さいため、音量で除外し、あなたの声はそのままにします。",
+    "echoCancellationOff": "オフ",
+    "echoCancellationOffTooltip": "オフ — マイクの音をそのまま認識に送ります。ヘッドホン使用時向けで、マイクに音が入り込むことはありません。"
   }
 }

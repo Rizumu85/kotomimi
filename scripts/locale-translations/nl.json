@@ -207,6 +207,26 @@
     "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
     "text": "Alleen Kotomimi — onderdrukt alleen geluid dat Kotomimi zelf afspeelt, zodat je stem zo duidelijk mogelijk wordt opgevangen. Geschikt voor een koptelefoon of VR-headset. Met luidsprekers werkt dit ook in de modus \"Beide\". Kies deze optie als je een virtuele geluidskaart (VB-Cable, BlackHole) als microfoon gebruikt."
   },
+  "fork.echoCancellationGate": {
+    "en": "By loudness",
+    "text": "Op volume"
+  },
+  "fork.echoCancellationGateTooltip": {
+    "en": "By loudness — for loudspeakers: what they play comes back into the microphone far quieter than your voice, so it is kept out by its loudness and your voice is left as it is.",
+    "text": "Op volume — voor luidsprekers: wat ze afspelen komt veel zachter terug in de microfoon dan je stem, dus wordt het op volume tegengehouden en blijft je stem zoals die is."
+  },
+  "fork.echoCancellationOff": {
+    "en": "Off",
+    "text": "Uit"
+  },
+  "fork.echoCancellationOffTooltip": {
+    "en": "Off — the microphone as it is. For headphones: nothing plays into it.",
+    "text": "Uit — de microfoon wordt onbewerkt doorgestuurd voor herkenning. Voor koptelefoons: er lekt geen geluid in de microfoon."
+  },
+  "fork.echoCancellationPassthrough": {
+    "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
+    "text": "Wanneer Doorgifte van origineel geluid aanstaat, werkt alleen Op volume: bij de andere opties wordt je eigen stem als echo weggefilterd."
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Opnieuw zoeken"
@@ -995,6 +1015,134 @@
     "en": "What you want to say — Enter translates",
     "text": "Wat je wilt zeggen, Enter om te vertalen"
   },
+  "fork.voice.auto": {
+    "en": "Read my translations as they come",
+    "text": "Mijn vertaling automatisch voorlezen als ik uitgesproken ben"
+  },
+  "fork.voice.cannotSpeak": {
+    "en": "{{name}} cannot speak {{language}}.",
+    "text": "{{name}} spreekt geen {{language}}."
+  },
+  "fork.voice.hearBoth": {
+    "en": "To both",
+    "text": "Voor beiden"
+  },
+  "fork.voice.hearers": {
+    "en": "Read my translations aloud",
+    "text": "Vertalingen automatisch voorlezen"
+  },
+  "fork.voice.hearMe": {
+    "en": "To me",
+    "text": "Voor mij"
+  },
+  "fork.voice.hearNone": {
+    "en": "Off",
+    "text": "Uit"
+  },
+  "fork.voice.hearThem": {
+    "en": "To them",
+    "text": "Voor de ander"
+  },
+  "fork.voice.lineFailed": {
+    "en": "This line could not be read aloud",
+    "text": "Deze regel kon niet worden voorgelezen"
+  },
+  "fork.voice.man": {
+    "en": "Male voice",
+    "text": "Mannenstem"
+  },
+  "fork.voice.meetingDevice": {
+    "en": "Output for the other side",
+    "text": "Audio-uitvoer voor je gesprekspartner"
+  },
+  "fork.voice.meetingDeviceAuto": {
+    "en": "Virtual microphone (automatic)",
+    "text": "Virtuele microfoon (automatisch)"
+  },
+  "fork.voice.meetingDeviceTooltip": {
+    "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
+    "text": "De vertaling wordt via dit apparaat voorgelezen. Het dient als microfoon voor je gesprekspartner. Kan je geluidskaart zelf audio mixen? Kies dan een afspeelkanaal van die kaart en meng het op de kaart met je microfoongeluid. Zo gaat je eigen stem niet door de software."
+  },
+  "fork.voice.modelPlaceholder": {
+    "en": "The model's name, e.g. tts-1",
+    "text": "Modelnaam, bijvoorbeeld tts-1"
+  },
+  "fork.voice.myVoiceToo": {
+    "en": "My own voice goes too",
+    "text": "Mijn eigen stem ook doorgeven"
+  },
+  "fork.voice.myVoiceTooTooltip": {
+    "en": "Off: they hear only the voice reading your translation.",
+    "text": "Uit: de ander hoort alleen de voorgelezen vertaling."
+  },
+  "fork.voice.needsSpeaker": {
+    "en": "It reads what you say or type. Switch the mode to \"Me\" or \"Both\".",
+    "text": "Leest voor wat je zegt of typt. Zet de modus op \"Ik\" of \"Beide\"."
+  },
+  "fork.voice.on": {
+    "en": "Read aloud",
+    "text": "Voorlezen inschakelen"
+  },
+  "fork.voice.sample": {
+    "en": "Play a sample",
+    "text": "Voorbeeld beluisteren"
+  },
+  "fork.voice.sayLine": {
+    "en": "Read this line aloud",
+    "text": "Deze regel voorlezen"
+  },
+  "fork.voice.stage": {
+    "en": "Voice",
+    "text": "Voorlezen"
+  },
+  "fork.voice.stageTooltip": {
+    "en": "Reads your translations aloud. Any line of the conversation can be heard too: press its speaker button.",
+    "text": "Leest je vertalingen voor. Je kunt ook elke regel van het gesprek beluisteren: klik op het luidsprekerknopje ernaast."
+  },
+  "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "Stoppen"
+  },
+  "fork.voice.toMe": {
+    "en": "I hear it",
+    "text": "Ik hoor het"
+  },
+  "fork.voice.toMeFix": {
+    "en": "Choose",
+    "text": "Kiezen"
+  },
+  "fork.voice.toMeLocked": {
+    "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
+    "text": "‘Voor mij’ is niet beschikbaar. Kotomimi neemt al het systeemgeluid op en hoort daardoor de voorgelezen tekst alsof de ander die uitspreekt. Kies één app als geluidsbron, bijvoorbeeld VRChat."
+  },
+  "fork.voice.toThem": {
+    "en": "The other side hears it",
+    "text": "De ander hoort het"
+  },
+  "fork.voice.toThemTooltip": {
+    "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
+    "text": "Bij voorlezen aan de ander gaat het geluid naar de virtuele microfoon. Kies die als microfoon in VRChat of je vergaderapp (in Windows heet die CABLE Output)."
+  },
+  "fork.voice.voice": {
+    "en": "Voice",
+    "text": "Stem"
+  },
+  "fork.voice.voiceOf": {
+    "en": "{{language}} voice",
+    "text": "Stem voor {{language}}"
+  },
+  "fork.voice.volumeMine": {
+    "en": "Volume for me",
+    "text": "Volume voor mij"
+  },
+  "fork.voice.volumeTheirs": {
+    "en": "Volume for them",
+    "text": "Volume voor de ander"
+  },
+  "fork.voice.woman": {
+    "en": "Female voice",
+    "text": "Vrouwenstem"
+  },
   "fork.vr.back": {
     "en": "Back",
     "text": "Terug"
@@ -1499,6 +1647,10 @@
     "en": "Custom address",
     "text": "Eigen adres"
   },
+  "providers.localai.apiServiceEdge": {
+    "en": "Edge online voices (free)",
+    "text": "Online stemmen van Edge (gratis)"
+  },
   "providers.localai.apiServiceModel": {
     "en": "Choose from the list on the right, or type a name",
     "text": "Kies rechts uit de lijst of typ een naam"
@@ -1891,6 +2043,34 @@
     "en": "Updating the speech recognition engine. You can start once it is done.",
     "text": "De spraakherkenningsengine wordt bijgewerkt. Zodra dit klaar is, kun je beginnen."
   },
+  "providers.localai.nativeVoiceFailed": {
+    "en": "The voice engine could not start. In the Voice card, press \"Try again\" — or choose another model.",
+    "text": "De voorleesengine kon niet starten. Klik op \"Opnieuw proberen\" in het paneel \"Voorlezen\" of kies een ander model."
+  },
+  "providers.localai.nativeVoiceFailedShort": {
+    "en": "The voice engine could not start.",
+    "text": "De voorleesengine kon niet starten."
+  },
+  "providers.localai.nativeVoiceMissing": {
+    "en": "The voice model is not downloaded yet. Download it to start.",
+    "text": "Het voorleesmodel is nog niet gedownload. Download het om te beginnen."
+  },
+  "providers.localai.nativeVoiceReady": {
+    "en": "The voice engine is ready.",
+    "text": "De voorleesengine is klaar."
+  },
+  "providers.localai.nativeVoiceUnsupported": {
+    "en": "The native voice engine is not available for this system. In the Voice card, switch to \"API model\".",
+    "text": "Dit systeem ondersteunt de ingebouwde voorleesengine nog niet. Kies \"API-model\" in het paneel \"Voorlezen\"."
+  },
+  "providers.localai.nativeVoiceUpdating": {
+    "en": "Updating the voice engine. You can start once it is done.",
+    "text": "De voorleesengine wordt bijgewerkt. Daarna kun je beginnen."
+  },
+  "providers.localai.nativeVoiceWarmingShort": {
+    "en": "Starting the voice engine…",
+    "text": "Voorleesengine starten…"
+  },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
     "text": "De spraakherkenningsengine start nog op. De eerste keer na het opstarten van de computer duurt dit ongeveer een halve minuut. Zodra de engine klaar is, kun je beginnen."
@@ -1930,6 +2110,14 @@
   "providers.localai.noteIndexTranslate": {
     "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
     "text": "Getest van Japans naar Chinees: ernstige fouten in ongeveer 3 van de 30 zinnen, het beste resultaat van alle geteste modellen. Ongeveer 0.1 s per zin. Gebruikt ongeveer 2 GB videogeheugen en ondersteunt meer dan 100 talen."
+  },
+  "providers.localai.noteIrodori": {
+    "en": "Japanese only. Measured: nothing misread, about half a second a sentence. About 1.7 GB of video memory.",
+    "text": "Spreekt alleen Japans. Getest: alles correct uitgesproken, ongeveer een halve seconde per zin. Gebruikt ongeveer 1.7 GB videogeheugen."
+  },
+  "providers.localai.noteKokoro": {
+    "en": "Light: runs on the processor and takes no video memory. Less natural, Japanese most of all.",
+    "text": "Licht: gebruikt alleen de processor, geen videogeheugen. Klinkt minder natuurlijk, vooral in het Japans."
   },
   "providers.localai.noteMoonshineJa": {
     "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
@@ -1978,6 +2166,10 @@
   "providers.localai.noteQwen17": {
     "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
     "text": "Getest met informele Japanse gesprekken: ongeveer 19% van de tekens fout. De tekst verschijnt pas als een zin klaar is (ongeveer 10 s vertraging). De GGUF-versie hierboven toont al tekst tijdens het spreken."
+  },
+  "providers.localai.noteQwen3Tts": {
+    "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
+    "text": "Klinkt het natuurlijkst en begint meteen te spreken. Getest in het Japans, Chinees en Engels: alles correct uitgesproken. Gebruikt ongeveer 3 GB videogeheugen en ondersteunt 10 talen."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
@@ -2154,6 +2346,10 @@
   "providers.localai.sourceAuto": {
     "en": "The language cannot be detected with this setup. Choose the language you speak.",
     "text": "Met deze combinatie kan de taal niet automatisch worden herkend. Kies de taal die je spreekt."
+  },
+  "providers.localai.speakKey": {
+    "en": "API key of the voice",
+    "text": "API-sleutel voor het voorleesmodel"
   },
   "providers.localai.speedAbout": {
     "en": "About {{seconds}} s",
@@ -2363,6 +2559,10 @@
     "en": "API model",
     "text": "API-model"
   },
+  "providers.localai.voiceUnnamed": {
+    "en": "The voice has no model to run yet. Name one in the Voice card.",
+    "text": "Er is nog geen voorleesmodel ingevuld. Vul er een in bij \"Voorlezen\"."
+  },
   "providers.openai_live.name": {
     "en": "OpenAI Live",
     "text": "OpenAI Live"
@@ -2478,6 +2678,10 @@
   "settings.model": {
     "en": "Model",
     "text": "Model"
+  },
+  "settings.noiseSuppressionTooltip.off": {
+    "en": "Off — no noise suppression: the microphone as it is. Best in a quiet room.",
+    "text": "Uit — geen ruisonderdrukking: de microfoon zoals hij is. Werkt het best in een stille ruimte."
   },
   "settings.pushToTalk": {
     "en": "Push-to-Talk",

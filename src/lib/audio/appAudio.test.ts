@@ -28,7 +28,7 @@ const AUDIO = {
   ],
   selectedParticipantSource: null as { deviceId: string; label: string } | null,
 };
-const SWITCHES = { meeting: true, participantSpeech: false };
+const SWITCHES = { meeting: true, meetingDevice: null, participantSpeech: false, speechVolumeMine: 0.4, speechVolumeTheirs: 0.7 };
 
 describe('readRouting', () => {
   it('maps the stores onto the route settings', () => {
@@ -36,6 +36,7 @@ describe('readRouting', () => {
       meeting: true,
       monitor: true,
       participantSpeech: false,
+      speechVolume: { mine: 0.4, theirs: 0.7 },
       passthrough: { on: true, ratio: 0.3 },
       sinks: { real: 'monitor-1', virtual: 'cable-1' },
     });
@@ -47,10 +48,27 @@ describe('readRouting', () => {
     expect(readRouting({ ...AUDIO, isMonitorMuted: true }, SWITCHES, 'electron', 'auto').monitor).toBe(false);
   });
 
+  it('hears the monitor beside the other side too while that is captured from one application (fork)', () => {
+    const app = { deviceId: 'app:pid:42', label: 'VRChat' };
+    expect(readRouting({ ...AUDIO, mode: 'both', selectedParticipantSource: app }, SWITCHES, 'electron', 'auto').monitor).toBe(true);
+    expect(readRouting({ ...AUDIO, mode: 'both', selectedParticipantSource: app, isMonitorMuted: true }, SWITCHES, 'electron', 'auto').monitor).toBe(false);
+    expect(readRouting({ ...AUDIO, mode: 'both', selectedParticipantSource: { deviceId: 'desktop-audio-loopback', label: 'System' } }, SWITCHES, 'electron', 'auto').monitor).toBe(false);
+  });
+
   it('looks for a virtual speaker device only in Electron', () => {
     expect(readRouting(AUDIO, SWITCHES, 'extension', 'auto').sinks.virtual).toBeUndefined();
     expect(readRouting(AUDIO, SWITCHES, 'web', 'auto').sinks.virtual).toBeUndefined();
     expect(readRouting({ ...AUDIO, audioMonitorDevices: [AUDIO.audioMonitorDevices[0]] }, SWITCHES, 'electron', 'auto').sinks.virtual).toBeUndefined();
+  });
+
+  it('uses the chosen meeting output while listed, even when it is also the monitor', () => {
+    const picked = { ...SWITCHES, meetingDevice: 'monitor-1' };
+    expect(readRouting(AUDIO, picked, 'electron', 'auto').sinks).toEqual({ real: 'monitor-1', virtual: 'monitor-1' });
+    const unplugged = { ...AUDIO, audioMonitorDevices: AUDIO.audioMonitorDevices.slice(1) };
+    expect(readRouting(unplugged, picked, 'electron', 'auto').sinks.virtual).toBe('cable-1');
+    expect(readRouting({ ...AUDIO, audioMonitorDevices: [] }, picked, 'electron', 'auto').sinks.virtual).toBeUndefined();
+    expect(readRouting(AUDIO, picked, 'extension', 'auto').sinks.virtual).toBeUndefined();
+    expect(readRouting(AUDIO, picked, 'web', 'auto').sinks.virtual).toBeUndefined();
   });
 
   it('forces the original voice on at full level under push-to-translate, whatever the toggle says, open while idle (1e-3 ruling 4)', () => {
@@ -72,18 +90,18 @@ describe('readRouting', () => {
   // translate it again as Other, so the switch's "on" is honoured only while
   // the chosen source is one application.
   it("blocks participant speech on Electron under a whole-system participant capture, on or with nothing selected", () => {
-    const withSwitch = { meeting: true, participantSpeech: true };
+    const withSwitch = { ...SWITCHES, participantSpeech: true };
     expect(readRouting({ ...AUDIO, selectedParticipantSource: null }, withSwitch, 'electron', 'auto').participantSpeech).toBe(false);
     expect(readRouting({ ...AUDIO, selectedParticipantSource: { deviceId: 'desktop-audio-loopback', label: 'System' } }, withSwitch, 'electron', 'auto').participantSpeech).toBe(false);
   });
 
   it('allows participant speech on Electron once an application source is chosen', () => {
-    const withSwitch = { meeting: true, participantSpeech: true };
+    const withSwitch = { ...SWITCHES, participantSpeech: true };
     expect(readRouting({ ...AUDIO, selectedParticipantSource: { deviceId: 'app:42', label: 'App' } }, withSwitch, 'electron', 'auto').participantSpeech).toBe(true);
   });
 
   it('is unaffected by the participant source outside Electron', () => {
-    const withSwitch = { meeting: true, participantSpeech: true };
+    const withSwitch = { ...SWITCHES, participantSpeech: true };
     expect(readRouting({ ...AUDIO, selectedParticipantSource: null }, withSwitch, 'extension', 'auto').participantSpeech).toBe(true);
     expect(readRouting({ ...AUDIO, selectedParticipantSource: { deviceId: 'desktop-audio-loopback', label: 'System' } }, withSwitch, 'web', 'auto').participantSpeech).toBe(true);
   });

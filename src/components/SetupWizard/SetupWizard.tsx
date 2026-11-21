@@ -29,6 +29,7 @@ import StepCredentials from './steps/StepCredentials';
 import StepLanguagePair from './steps/StepLanguagePair';
 import StepFinish from './steps/StepFinish';
 import Button from '../Settings/shared/Button';
+import { sharedSpeech } from '../../lib/session/shape';
 import './SetupWizard.scss';
 
 const STEP_IDS = ['language', 'scenario', 'path', 'credentials', 'language-pair', 'finish'] as const;
@@ -99,7 +100,7 @@ const SetupWizard: React.FC<SetupWizardProps> = ({ variant, onClose }) => {
           record: { scenario: draft.scenario },
           provider: draft.provider!,
           // A provider that never speaks is read as text only, whatever the use said (Kotomimi's).
-          mode: preset.mode, textOnly: preset.textOnly || wizardProvider(draft.provider)?.speech === 'never', isSignedIn,
+          mode: preset.mode, textOnly: preset.textOnly || (wizardProvider(draft.provider) ? sharedSpeech(wizardProvider(draft.provider)!) === 'never' : false), isSignedIn,
           apiKeyValid: draft.providerPath === 'own-key' ? !draft.credentialsPending : null,
           // Fork: the Kotomimi provider set to run on this computer has models to download.
           deviceStages: (draft.provider as string | null) === 'localai' && ['device', 'share'].includes(draft.credentialChoice?.value ?? ''),

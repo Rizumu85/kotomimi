@@ -137,54 +137,40 @@ describe('ModernAudioRecorder — the MediaRecorder output is not retained (#531
 // Chrome 141 the constraint also takes "all" (every sound the system plays) and
 // "remote-only"; Chromium 152 grants "all" on Windows and macOS and falls back
 // to `true` on Linux, and an older browser reads the string as `true`.
-describe('ModernAudioRecorder.begin — asks to cancel all system playout', () => {
+describe('ModernAudioRecorder.begin — the microphone it asks for', () => {
   // Stops begin() right after getUserMedia, which is all these cases look at.
   const captureThenStop = () => {
-    const track = { stop: vi.fn(), getSettings: () => ({ echoCancellation: 'all' }) };
+    const track = { stop: vi.fn(), getSettings: () => ({ echoCancellation: false }) };
     getUserMedia.mockResolvedValue({ getAudioTracks: () => [track], getTracks: () => [track] });
     vi.stubGlobal('AudioContext', class {
       constructor() { throw new Error('stop here'); }
     });
   };
 
-  const requestedAudio = async (performanceMode: 'high_quality' | 'performance' | 'minimal') => {
-    captureThenStop();
-    await new ModernAudioRecorder({ performanceMode }).begin('mic-1').catch(() => undefined);
-    return getUserMedia.mock.calls[0][0].audio;
-  };
-
-  it.each(['high_quality', 'performance'] as const)('with the %s profile', async (performanceMode) => {
-    const audio = await requestedAudio(performanceMode);
-    expect(audio.echoCancellation).toBe('all');
-    expect(audio.deviceId).toEqual({ exact: 'mic-1' });
-  });
-
-  it('not with the minimal profile, which turns processing off', async () => {
-    expect((await requestedAudio('minimal')).echoCancellation).toBe(false);
-  });
-
-  // A loopback input such as BlackHole carries what the system plays, so "all"
-  // cancels the very signal it is there to capture: a meeting app speaking into
-  // BlackHole fell from -20 dBFS to -63 dBFS on macOS (Chromium 152), and back
-  // to -19 with `true`. The user picks `true` ('app') in the microphone settings.
-  const echoCancellationWith = async (mode: 'app' | 'all' | undefined, performanceMode?: 'minimal') => {
+  const requested = async (mode: 'off' | 'gate' | undefined, performanceMode: 'high_quality' | 'performance' | 'minimal' = 'high_quality') => {
     captureThenStop();
     const rec = new ModernAudioRecorder({ performanceMode });
     if (mode) rec.setEchoCancellation(mode);
     await rec.begin('mic-1').catch(() => undefined);
-    return getUserMedia.mock.calls[0][0].audio.echoCancellation;
+    return getUserMedia.mock.calls[0][0].audio;
   };
 
-  it('asks for `true` when the user chose to cancel only what this app plays', async () => {
-    expect(await echoCancellationWith('app')).toBe(true);
+  // The browser's cancels what the app plays, and the app plays the user's own voice where passthrough is on: it
+  // turned their speech down. The playout gate keeps the loudspeakers out instead.
+  it.each([['off'], ['gate'], [undefined]] as const)('never asks the browser for echo cancellation or noise suppression (%s)', async (mode) => {
+    for (const performanceMode of ['high_quality', 'performance', 'minimal'] as const) {
+      getUserMedia.mockClear();
+      expect(await requested(mode, performanceMode)).toMatchObject({
+        echoCancellation: false, googEchoCancellation: false, noiseSuppression: false, deviceId: { exact: 'mic-1' },
+      });
+    }
   });
 
-  it('asks for "all" when the user chose all sounds, and by default', async () => {
-    expect(await echoCancellationWith('all')).toBe('all');
-    expect(await echoCancellationWith(undefined)).toBe('all');
-  });
-
-  it('leaves the minimal profile off whatever the choice', async () => {
-    expect(await echoCancellationWith('app', 'minimal')).toBe(false);
+  it('asks for no automatic gain in the gate mode, the default, whose levels must hold still', async () => {
+    expect(await requested('gate')).toMatchObject({ autoGainControl: false, googAutoGainControl: false });
+    getUserMedia.mockClear();
+    expect(await requested(undefined)).toMatchObject({ autoGainControl: false, googAutoGainControl: false });
+    getUserMedia.mockClear();
+    expect((await requested('off')).autoGainControl).toBe(true);
   });
 });

@@ -16,7 +16,7 @@ vi.mock('../stores/settingsStore', () => ({ useSettingsStore: {
 vi.mock('../utils/environment', () => ({ isElectron: () => mocks.electron }));
 vi.mock('../lib/diagnostics/report', () => ({ reportError: (...args: unknown[]) => mocks.report(...args), describeCause: String }));
 vi.mock('../lib/audio/appCapture', () => ({ micSettings: () => ({
-  deviceId: () => 'chosen-mic', deviceLabel: () => 'Headset', echoCancellation: () => 'all',
+  deviceId: () => 'chosen-mic', deviceLabel: () => 'Headset', echoCancellation: () => 'gate',
 }) }));
 vi.mock('../lib/modern-audio/DeviceCaptureRecorder', () => ({ DeviceCaptureRecorder: class {
   begin = mocks.begin; end = mocks.end; record = mocks.record;
@@ -61,6 +61,9 @@ describe('session recorder driver', () => {
     f.state.setState({ phase: 'starting', step: 'checking' });
     await drain();
     expect(mocks.begin).toHaveBeenCalledWith({ deviceId: 'chosen-mic' });
+    expect(mocks.invoke).toHaveBeenCalledWith('session-recording:start', expect.objectContaining({
+      metadata: expect.objectContaining({ echoCancellation: 'gate' }),
+    }));
     expect(writes('track')[0].data).toMatchObject({ kind: 'raw', settings: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
     f.state.setState({ phase: 'running' } as RunState);
     now = 10100;
@@ -78,6 +81,59 @@ describe('session recorder driver', () => {
     expect(mocks.invoke).toHaveBeenLastCalledWith('session-recording:end', { endedAt: 10200, durationMs: 200 });
     expect(mocks.stop).toHaveBeenCalled();
     f.off();
+  });
+
+  it('records final feedback once per entry, alone or alongside a translation', async () => {
+    const f = fixture();
+    f.state.setState({ phase: 'starting', step: 'checking' });
+    await drain();
+    const correction: Row = { ...row('Use "goes" with "she".'), side: 'translation', purpose: 'feedback', language: 'en' };
+    const source = [{ ...row('She go home.'), language: 'en' }];
+    const alone = exchange('alone', { source, feedback: [correction] });
+    const beside = exchange('beside', { source, translation: [{ ...row('Elle rentre.'), language: 'fr' }],
+      feedback: [{ ...correction, accompaniesTranslation: true }] });
+    f.viewState.setState({ entries: [
+      { ...alone, source: [{ ...source[0], final: false }] },
+      { ...beside, feedback: [{ ...beside.feedback![0], final: false }] },
+    ] });
+    await drain();
+    expect(writes('line').map(({ data }) => data.stage)).toEqual(['source', 'translation']);
+    now = 10200;
+    f.viewState.setState({ entries: [alone, beside] });
+    f.viewState.setState({ entries: [alone, beside] });
+    await drain();
+    const feedback = writes('line').map(({ data }) => data).filter((line) => line.stage === 'feedback');
+    const common = { stage: 'feedback', leg: 'speaker', ms: 200, wallTime: 10200, lineWallTime: 10001,
+      sourceText: 'She go home.', sourceLanguage: 'en' };
+    expect(feedback).toStrictEqual([
+      { ...common, entryId: 'alone', translations: [], feedback: [{ text: correction.text, language: 'en' }] },
+      { ...common, entryId: 'beside', translations: [{ text: 'Elle rentre.', language: 'fr' }],
+        feedback: [{ text: correction.text, language: 'en', accompaniesTranslation: true }] },
+    ]);
+    f.off(); await f.recording.settled();
+  });
+
+  it('records both translations when a second segment becomes final', async () => {
+    const f = fixture();
+    f.state.setState({ phase: 'starting', step: 'checking' });
+    await drain();
+    const entry = exchange('dinner', { source: [row('Dinner is ready.')] });
+    const first = { ...row('A tavola!'), language: 'it' };
+    const second = { ...row('A comer!'), language: 'es' };
+    now = 10100;
+    f.viewState.setState({ entries: [{ ...entry, translation: [first] }] });
+    const split = [{ ...first, text: 'A ', end: 2 }, { ...first, key: 'rest', text: 'tavola!', start: 2 }];
+    f.viewState.setState({ entries: [{ ...entry, translation: split }] });
+    f.viewState.setState({ entries: [{ ...entry, translation: [first, { ...second, final: false }] }] });
+    now = 10300;
+    f.viewState.setState({ entries: [{ ...entry, translation: [first, second] }] });
+    await drain();
+    const lines = writes('line').map(({ data }) => data).filter((line) => line.stage === 'translation');
+    expect(lines.map(({ ms, translations }) => ({ ms, translations }))).toEqual([
+      { ms: 100, translations: [{ text: first.text, language: 'it' }] },
+      { ms: 300, translations: [{ text: first.text, language: 'it' }, { text: second.text, language: 'es' }] },
+    ]);
+    f.off(); await f.recording.settled();
   });
 
   it('omits undetected languages and records reported languages independently of the leg pair', async () => {

@@ -65,7 +65,8 @@ export function useNativeEnginesComing(): boolean {
   const hearing = useNativeEngineStore(coming);
   const translating = useNativeTranslatorStore(coming);
   const coaching = useNativeCoachStore(coming);
-  return hearing || translating || coaching;
+  const speaking = useNativeVoiceStore(coming);
+  return hearing || translating || coaching || speaking;
 }
 
 /** The engine that hears: audio.cpp. */
@@ -74,4 +75,6 @@ export const useNativeEngineStore = createNativeEngineStore('native-engine');
 export const useNativeTranslatorStore = createNativeEngineStore('native-translator');
 /** The engine that gives the grammar feedback: llama.cpp's server once more, with a chat model. */
 export const useNativeCoachStore = createNativeEngineStore('native-coach');
+/** The engine that speaks: audio.cpp once more, with a voice model. */
+export const useNativeVoiceStore = createNativeEngineStore('native-voice');
 export type NativeEngineStore = typeof useNativeEngineStore;

@@ -26,6 +26,20 @@ export interface DeviceLists {
 }
 
 /**
+ * Fork: the id of the output the system plays on now. The browser lists it twice: as the device itself, and as a
+ * `default` entry of the same group whose label ends with the device's ("Default - Speakers (…)"). Null where the
+ * list has no such entry, or its labels are still withheld.
+ */
+export function systemDefaultOutputId(devices: readonly Pick<MediaDeviceInfo, 'deviceId' | 'kind' | 'label' | 'groupId'>[]): string | null {
+  const outputs = devices.filter((device) => device.kind === 'audiooutput');
+  const marker = outputs.find((device) => device.deviceId === 'default');
+  if (!marker || !marker.label) return null;
+  const same = outputs.filter((device) => device.deviceId !== 'default' && device.deviceId !== 'communications' && device.groupId === marker.groupId);
+  const named = same.filter((device) => device.label !== '' && marker.label.endsWith(device.label));
+  return (named.length === 1 ? named[0] : same.length === 1 ? same[0] : null)?.deviceId ?? null;
+}
+
+/**
  * Get available audio input and output devices.
  */
 export async function listAudioDevices({ warmUp = true }: { warmUp?: boolean } = {}): Promise<DeviceLists> {
@@ -83,6 +97,7 @@ export async function listAudioDevices({ warmUp = true }: { warmUp?: boolean } =
         isVirtual: device.label ? isVirtualMic(device) : false
       }));
 
+    const systemOutputId = systemDefaultOutputId(devices);
     const outputs = devices
       .filter(device => device.kind === 'audiooutput')
       .filter(device => device.deviceId !== 'default')
@@ -90,7 +105,8 @@ export async function listAudioDevices({ warmUp = true }: { warmUp?: boolean } =
       .map(device => ({
         deviceId: device.deviceId,
         label: device.label || `Speaker ${device.deviceId.substring(0, 5)}...`,
-        isVirtual: device.label ? isVirtualSpeaker(device) : false
+        isVirtual: device.label ? isVirtualSpeaker(device) : false,
+        ...(device.deviceId === systemOutputId ? { isDefault: true } : {})
       }));
 
     const complete = !devices.some((d) => d.kind === 'audioinput' && d.label === '');

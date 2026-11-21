@@ -104,6 +104,15 @@ export const INVOKE_CHANNELS = [
   'native-coach:remove',
   'native-coach:start',
   'native-coach:stop',
+  // Fork: the native voice engine — audio.cpp with a model that speaks, and the sentences asked of it
+  'native-voice:get',
+  'native-voice:download',
+  'native-voice:cancel',
+  'native-voice:remove',
+  'native-voice:start',
+  'native-voice:stop',
+  'native-voice:speak',
+  'native-voice:speak-stop',
   // Fork: this computer's memory for native model recommendations
   'model-memory:get',
   // Fork: where the downloaded models are kept, and moving them (electron/model-storage.js)

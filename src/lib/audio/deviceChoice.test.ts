@@ -38,12 +38,31 @@ describe('chooseInput', () => {
 describe('chooseOutput', () => {
   const virtualSpeaker: AudioDevice = { deviceId: 'vs', label: 'Sokuji_Virtual_Speaker', isVirtual: true };
 
+  it.each(['BlackHole 2ch', 'Soundflower (2ch)', 'Loopback Audio', 'Voicemeeter AUX Input'])('does not monitor %s automatically, but honors an explicit pick', (label) => {
+    const loop = { ...real('loop', label), isDefault: true };
+    const devices = [loop, real('speakers')];
+    expect(chooseOutput({ devices, savedId: null, currentId: 'loop' })).toBe(devices[1]);
+    expect(chooseOutput({ devices, savedId: 'loop', currentId: 'speakers' })).toBe(loop);
+  });
+
   it('picks the saved output, then the current one, then the first non-virtual, then any', () => {
     expect(chooseOutput({ devices: [real('b'), real('a')], savedId: 'a', currentId: 'b' })?.deviceId).toBe('a');
     expect(chooseOutput({ devices: [real('b')], savedId: 'a', currentId: 'b' })?.deviceId).toBe('b');
     expect(chooseOutput({ devices: [virtualSpeaker, real('c')], savedId: 'a', currentId: 'b' })?.deviceId).toBe('c');
     expect(chooseOutput({ devices: [virtualSpeaker], savedId: null, currentId: null })?.deviceId).toBe('vs');
     expect(chooseOutput({ devices: [], savedId: null, currentId: null })).toBeNull();
+  });
+
+  it('with none saved, is the output the system plays on, wherever it stands in the list, and follows it', () => {
+    const hdmi = real('hdmi', 'Capture card (HDMI)');
+    const speakers: AudioDevice = { ...real('spk', 'Speakers'), isDefault: true };
+    expect(chooseOutput({ devices: [hdmi, speakers], savedId: null, currentId: null })?.deviceId).toBe('spk');
+    // The system moved to a headset: so does the monitor, though another device is the current one.
+    expect(chooseOutput({ devices: [hdmi, real('spk'), { ...real('headset'), isDefault: true }], savedId: null, currentId: 'spk' })?.deviceId).toBe('headset');
+    // A device the user picked stays theirs.
+    expect(chooseOutput({ devices: [hdmi, speakers], savedId: 'hdmi', currentId: null })?.deviceId).toBe('hdmi');
+    // The system plays on a virtual cable: monitoring there would go back into the meeting.
+    expect(chooseOutput({ devices: [{ ...virtualSpeaker, isDefault: true }, hdmi], savedId: null, currentId: null })?.deviceId).toBe('hdmi');
   });
 });
 

@@ -13,7 +13,8 @@ import { AdapterStartError } from '../../lib/contract/adapter';
 import type { CheckResult } from '../../lib/provider/types';
 import type { NativeEngineStatus } from '../../lib/native/nativeEngine';
 import type { NativeLimits } from './nativeAsr';
-import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
+import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore, useNativeVoiceStore } from '../../stores/nativeEngineStore';
+import { nativeVoice } from './nativeVoices';
 import { nativeCoach } from './nativeCoaches';
 import { nativeTranslates, nativeTranslator } from './nativeTranslators';
 
@@ -171,6 +172,17 @@ export interface NativePick {
 
 /** A model is on this computer now, as the engine's store has it. */
 const hereNow = (id: string): boolean => nativeDownloaded(useNativeEngineStore.getState().status, id);
+
+/** Whether the system's recognition has this language at all, on any device: one it has not is never asked of it. */
+export const appleOffers = (language: string): boolean => (APPLE_LANGUAGES as readonly string[]).includes(baseOf(language));
+
+export const downloadedAppleLanguages = (): string[] => APPLE_LANGUAGES.filter((language) => hereNow(`${APPLE_PREFIX}${language}`));
+
+export function appleExtraGap(model: NativeModel, required: readonly string[], has = hereNow) {
+  const language = required.find((code) => !has(`${APPLE_PREFIX}${baseOf(code)}`));
+  if (!language) return null;
+  return { ok: false as const, reason: `${model.name} is not downloaded for ${language}.`, code: 'native_missing', params: { name: model.name } };
+}
 
 /**
  * Fork: the Mac's recognition hearing a speaker in several languages (`NativePick.either`): the model of their own
@@ -358,6 +370,14 @@ export async function nativeGap(chosen: NativePick | string, heard: readonly str
   const kept = models.find((one) => nativeUpdating(status, one.id));
   if (kept) return updating(status, kept.id, (id) => store.download(id), 'native_updating', 'recognition');
   const absent = models.find((one) => !nativeDownloaded(status, one.id));
+  for (const { pick: side, language } of pick.selections ?? heard.map((language) => ({ pick, language }))) {
+    if (!side.either) continue;
+    const primary = nativePicked(side, language, has);
+    if (primary && isApple(primary.id) && has(primary.id)) {
+      const gap = appleExtraGap(primary, side.either.others, has);
+      if (gap) return gap;
+    }
+  }
   if (absent) return { ok: false, reason: `${absent.name} is not downloaded.`, code: 'native_missing', params: { name: absent.name } };
   // Each downloaded engine runs one model at a time; models on different engines can hear in one run.
   const run = models.filter((one) => !isApple(one.id));
@@ -371,7 +391,12 @@ export async function nativeGap(chosen: NativePick | string, heard: readonly str
 }
 
 /** The models that hear a run's languages: each once. */
-const hearing = (pick: NativePick, heard: readonly string[], has?: (id: string) => boolean): NativeModel[] => [...new Map((pick.selections ?? heard.map((language) => ({ pick, language }))).flatMap((side) => { const one = nativePicked(side.pick, side.language, has); return one ? [[one.id, one] as const] : []; })).values()];
+const hearing = (pick: NativePick, heard: readonly string[], has?: (id: string) => boolean): NativeModel[] => [...new Map((pick.selections ?? heard.map((language) => ({ pick, language }))).flatMap((side) => {
+  const one = nativePicked(side.pick, side.language, has);
+  if (!one) return [];
+  const extras = side.pick.either?.others.flatMap((language) => nativeModelFor(one.id, language) ?? []) ?? [];
+  return [one, ...extras].map((model) => [model.id, model] as const);
+})).values()];
 
 /** What brings an engine up, and says how it went: the store's by default. */
 export interface NativeUpDeps {
@@ -436,6 +461,13 @@ export async function coachUp(id: string, deps: NativeUpDeps = {}): Promise<void
   if (!nativeReady(status, model.id)) throw notUp('native_coach_failed', status, model.id);
 }
 
+/** And for the native voice engine. */
+export async function voiceUp(id: string, deps: NativeUpDeps = {}): Promise<void> {
+  const model = nativeVoice(id);
+  const status = await (deps.start ?? ((which: string) => useNativeVoiceStore.getState().start(which)))(model.id);
+  if (!nativeReady(status, model.id)) throw notUp('native_voice_failed', status, model.id);
+}
+
 /** How long the engines stay up after the last run or device that used them: a stop and a start a moment later load nothing twice. */
 export const NATIVE_REST_MS = 60_000;
 
@@ -445,15 +477,15 @@ export const NATIVE_REST_MS = 60_000;
  * hear by the engine the app downloads, or translate by the native translator — a run that hears by the Mac's own
  * recognition, or translates elsewhere, keeps the engines up but leaves their model free to switch.
  */
-const using = { runs: 0, asr: 0, translation: 0, coach: 0, runAsr: 0, runTranslation: 0 };
+const using = { runs: 0, asr: 0, translation: 0, coach: 0, voice: 0, runAsr: 0, runTranslation: 0 };
 let resting: ReturnType<typeof setTimeout> | null = null;
 
 export interface NativeRestDeps {
   delayMs?: number;
   setTimer?: (run: () => void, ms: number) => ReturnType<typeof setTimeout>;
   clearTimer?: (timer: ReturnType<typeof setTimeout>) => void;
-  /** The three engines' stops; the stores' by default. */
-  stop?: { asr(): void; translation(): void; coach(): void };
+  /** The engines' stops; the stores' by default. */
+  stop?: { asr(): void; translation(): void; coach(): void; voice?(): void };
 }
 
 /**
@@ -473,10 +505,12 @@ export function restNative(deps: NativeRestDeps = {}): void {
       asr: () => { if (useNativeEngineStore.getState().status.run.state !== 'stopped') void useNativeEngineStore.getState().stop(); },
       translation: () => { if (useNativeTranslatorStore.getState().status.run.state !== 'stopped') void useNativeTranslatorStore.getState().stop(); },
       coach: () => { if (useNativeCoachStore.getState().status.run.state !== 'stopped') void useNativeCoachStore.getState().stop(); },
+      voice: () => { if (useNativeVoiceStore.getState().status.run.state !== 'stopped') void useNativeVoiceStore.getState().stop(); },
     };
     if (using.asr === 0) stop.asr();
     if (using.translation === 0) stop.translation();
     if (using.coach === 0) stop.coach();
+    if (using.voice === 0) stop.voice?.();
   }, deps.delayMs ?? NATIVE_REST_MS);
 }
 
@@ -558,7 +592,7 @@ export function hearsByDownloaded(chosen: NativePick | string, heard: readonly s
  * (`src/lib/lan/nativeShare.ts`): while it does, the engine is not stopped —
  * not for being unused by this computer, and not for not being its choice.
  */
-export function holdNative(kind: 'asr' | 'translation' | 'coach', deps?: NativeRestDeps, model?: string): () => void {
+export function holdNative(kind: 'asr' | 'translation' | 'coach' | 'voice', deps?: NativeRestDeps, model?: string): () => void {
   const done = release(kind, deps);
   const asr = kind === 'asr' ? holdAsr(sharedAsr, model ? [model] : undefined) : null;
   return () => { asr?.(); done(); };
@@ -621,6 +655,28 @@ export function coachIdle(deps: NativeCheckDeps = {}): void {
   (deps.stop ?? (() => { void store.stop(); }))();
 }
 
+/**
+ * The same, for a run whose translations are spoken by the native voice engine: its model downloaded.
+ */
+export async function voiceGap(id: string, deps: NativeCheckDeps = {}): Promise<Extract<CheckResult, { ok: false }> | null> {
+  const store = useNativeVoiceStore.getState();
+  const status = await (deps.status ?? store.refresh)();
+  const model = nativeVoice(id);
+  if (!status.supported) return { ok: false, reason: 'The native voice engine is not available for this system.', code: 'native_voice_unsupported' };
+  if (nativeUpdating(status, model.id)) return updating(status, model.id, (one) => store.download(one), 'native_voice_updating', 'voice');
+  if (!nativeDownloaded(status, model.id)) return { ok: false, reason: `${model.name} is not downloaded.`, code: 'native_voice_missing', params: { name: model.name } };
+  if (!nativeReady(status, model.id) && status.run.state === 'failed' && status.run.model === model.id) return { ok: false, reason: `The native voice engine could not start: ${status.run.tail.trim().split('\n').pop() ?? ''}`, code: 'native_voice_failed' };
+  return null;
+}
+
+/** A run that does not speak by the engine has no use for it — unless a line is being played by it (`holdNative('voice')`). */
+export function voiceIdle(deps: NativeCheckDeps = {}): void {
+  const store = useNativeVoiceStore.getState();
+  if (using.voice > 0 || using.runs > 0) return;
+  if (store.status.run.state === 'stopped') return;
+  (deps.stop ?? (() => { void store.stop(); }))();
+}
+
 /** Where the feedback engine answers now: its chat base URL; a port of 0 while it is not up. */
 export const coachBaseUrl = (): string => `http://127.0.0.1:${useNativeCoachStore.getState().status.run.port}/v1`;
 /** The key the feedback engine's present run answers to; empty while it is not up. */
@@ -635,6 +691,6 @@ const stamp = (state: { status: NativeEngineStatus }): string => `${state.status
 
 /** Calls back when an engine's readiness may have changed: it came up, a download ended, a model was deleted. */
 export function watchNativeEngine(onChange: () => void): () => void {
-  const stops = [useNativeEngineStore.subscribe(stamp, () => onChange()), useNativeTranslatorStore.subscribe(stamp, () => onChange()), useNativeCoachStore.subscribe(stamp, () => onChange())];
+  const stops = [useNativeEngineStore.subscribe(stamp, () => onChange()), useNativeTranslatorStore.subscribe(stamp, () => onChange()), useNativeCoachStore.subscribe(stamp, () => onChange()), useNativeVoiceStore.subscribe(stamp, () => onChange())];
   return () => { for (const stop of stops) stop(); };
 }

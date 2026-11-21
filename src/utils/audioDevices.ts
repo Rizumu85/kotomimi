@@ -90,3 +90,7 @@ export const isVirtualSpeaker = (device: LabeledDevice): boolean => {
          label.includes('sokujivirtualaudio') ||
          label.includes('cable');
 };
+
+/** Software routing outputs remain available to pick, but are not places to monitor automatically. */
+export const isLoopbackOutput = (device: LabeledDevice): boolean =>
+  /blackhole|soundflower|loopback audio|voicemeeter.*input/i.test(device.label);

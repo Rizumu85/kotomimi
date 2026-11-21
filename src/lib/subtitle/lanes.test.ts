@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { LegName } from '../conversation/types';
 import type { Entry, Row } from '../projection/types';
 import type { LegFilters } from '../view/filter';
-import { buildLanes, lanesHeight, linesFor, READ_LINE, ROMAN_LINE, ROOMY, ROW_SCALE, SOURCE_SCALE, spacingAt, squeezeOf, TIGHT, withAnswerAids, withRoman } from './lanes';
+import { buildLanes, furtherIn, lanesHeight, linesFor, READ_LINE, ROMAN_LINE, ROOMY, rowLegOf, ROW_SCALE, SOURCE_SCALE, spacingAt, squeezeOf, TIGHT, withAnswerAids, withFeedbackRoom, withRoman, withSmallReads } from './lanes';
 
 const row = (segmentId: string, text: string, side: 'source' | 'translation' = 'source', language?: string): Row =>
   ({ key: `${segmentId}:0`, segmentId, side, start: 0, end: text.length, text, final: true, ...(language ? { language } : {}) });
@@ -71,14 +71,27 @@ describe('independent feedback beside translated subtitle lanes', () => {
     expect(lanesHeight([lane], 24)).toBeGreaterThan(lanesHeight([without], 24));
   });
 
-  it('does not put late feedback on the newer sentence in a speaker row', () => {
+  it('keeps late feedback in its own line, with its own sentence, and leaves the newer sentence\u2019s row as it is (fork)', () => {
+    // It was not shown at all once the user had gone on (the user, 2026-11-18: keep it until the next comes).
     const first = exchange('first', 'I goes.', 'Je vais.');
     const second = exchange('second', 'We arrive tomorrow.', 'Nous arrivons demain.');
     const before = lanes([first, second]);
     const after = lanes([{ ...first, feedback: exchange('first', 'I goes.', '', 'I go.').feedback }, second]);
-    expect(after[1]).toEqual(before[1]);
+    expect({ ...after[1], feedback: undefined }).toEqual({ ...before[1], feedback: undefined });
     expect(after[1].source?.text).toBe('We arrive tomorrow.');
-    expect(after[1].feedback).toBeUndefined();
+    expect(after[1].feedback).toMatchObject({ origin: 'first', text: 'I go.', said: { text: 'I goes.' } });
+  });
+
+  it('shows the feedback its clock holds, the shown sentence\u2019s own without one, and none from a sentence still waiting its turn (fork)', () => {
+    const first = exchange('first', 'I goes.', 'Je vais.', 'I go.');
+    const second = exchange('second', 'We arrive tomorrow.', 'Nous arrivons demain.', '✓');
+    const row = (fed?: string, held: Record<string, string> = {}) => buildLanes([first, second], LEGS, BOTH, words, held, 0, fed)[1];
+    expect(row().feedback?.origin).toBe('second');
+    // The correction is not read yet: the tick for the next sentence waits.
+    expect(row('first').feedback?.origin).toBe('first');
+    expect(row('gone').feedback?.origin).toBe('second');
+    // The row is still on the first sentence: the second's feedback is not shown before it.
+    expect(row('second', { speaker: 'first' }).feedback?.origin).toBe('first');
   });
 
   it('binds feedback to the held translated exchange while the source line runs into newer speech', () => {
@@ -108,7 +121,8 @@ describe('independent feedback beside translated subtitle lanes', () => {
     expect(held.answer?.text).toBe('');
     const [translated] = buildLanes([first, practice, nextNative], ['speaker'], BOTH, words);
     expect(translated).toMatchObject({ source: { text: 'Nous partons.' }, answer: { text: 'We leave.' }, pending: false });
-    expect(translated.feedback).toBeUndefined();
+    // Fork: the feedback stays in its line, with the sentence it is on, until the next comes.
+    expect(translated.feedback).toMatchObject({ origin: 'practice', said: { text: 'I goes.' } });
   });
 
   it('does not advance a translated pair when combined feedback arrives before its translation', () => {
@@ -353,11 +367,151 @@ describe('a pair that holds the answer it shows', () => {
     expect(build({})).toMatchObject({ answer: { text: '我就是喜欢这个。' } });
   });
 
-  it('holds nothing that is not an answered sentence of the side, and never the user\u2019s own row', () => {
+  it('holds nothing that is not an answered sentence of the side; the user\u2019s own row shows the sentence its clock holds', () => {
     expect(build({ participant: 'gone' })).toMatchObject({ answer: { text: '我就是喜欢这个。' } });
     expect(build({ participant: 'c' })).toMatchObject({ answer: { text: '我就是喜欢这个。' } });
     const both = [...entries, said('m1', 'speaker', '一。', 'いち。'), said('m2', 'speaker', '二。', 'に。')];
-    const row = buildLanes(both, LEGS, BOTH, words, { speaker: 'm1' }).find((lane) => lane.leg === 'speaker');
-    expect(row).toMatchObject({ shape: 'row', source: { text: '二。' }, answer: { text: 'に。' } });
+    const row = (held: Record<string, string>) => buildLanes(both, LEGS, BOTH, words, held).find((lane) => lane.leg === 'speaker');
+    expect(row({})).toMatchObject({ shape: 'row', source: { text: '二。' }, answer: { text: 'に。' } });
+    // Fork: a row's sentences are taken in turn, by a clock of their own (`rowTurn`).
+    expect(row({ speaker: 'm1' })).toMatchObject({ shape: 'row', source: { text: '一。' }, answer: { text: 'いち。' }, behind: true });
+  });
+});
+
+describe('a sentence of the user’s translated into each of their languages (fork)', () => {
+  // The user speaks Chinese; the other side Japanese, with English lit beside it.
+  const spoke = (id: string, source: string, sourceLanguage: string | undefined, answers: Array<[text: string, language?: string]>): Entry => ({
+    kind: 'exchange', id, leg: 'speaker', languages: { source: 'zh-CN', target: 'ja' }, pairing: 'stated',
+    source: [row(`s-${id}`, source, 'source', sourceLanguage)],
+    translation: answers.map(([text, language], i) => row(`t${i}-${id}`, text, 'translation', language)), t: 0,
+  });
+  const built = (entries: Entry[], also = 1, legs = LEGS) => buildLanes(entries, legs, BOTH, words, {}, also);
+  const mine = (entries: Entry[], also = 1, legs = LEGS) => built(entries, also, legs).find((lane) => lane.leg === 'speaker')!;
+  const texts = (lane: { answer?: { text: string }; more?: Array<{ text: string }> }) => [lane.answer?.text, ...(lane.more ?? []).map((text) => text.text)];
+
+  it('has a line for each beyond the first from the start, the user’s own lane alone', () => {
+    const [theirs, own] = built([]);
+    expect(theirs.more).toBeUndefined();
+    expect(own.more).toEqual([{ text: '', pieces: [] }]);
+    expect(built([], 0)[1].more).toBeUndefined();
+  });
+
+  it('shows their main language first and their second after it', () => {
+    const lane = mine([spoke('a', '今天天气真好', undefined, [['今日はいい天気ですね'], ['The weather is nice today', 'en']])]);
+    expect(texts(lane)).toEqual(['今日はいい天気ですね', 'The weather is nice today']);
+    expect(lane.answer!.language).toBe('ja');
+    expect(lane.more![0].language).toBe('en');
+  });
+
+  it('gives each language its place whichever answer came first: said in their second, their main is not moved by the user’s own', () => {
+    const first = mine([spoke('a', 'Nice weather', 'en', [['いい天気ですね', 'ja']])]);
+    expect(texts(first)).toEqual(['', 'いい天気ですね']);
+    const both = mine([spoke('a', 'Nice weather', 'en', [['いい天気ですね', 'ja'], ['天气真好', 'zh-CN']])]);
+    expect(texts(both)).toEqual(['天气真好', 'いい天気ですね']);
+    // Said in their main one: the user's own, then their second.
+    expect(texts(mine([spoke('a', 'いい天気', 'ja', [['Nice weather', 'en'], ['天气真好', 'zh-CN']])]))).toEqual(['天气真好', 'Nice weather']);
+  });
+
+  it('keeps an answer of several rows together, and shows no more than it has lines for', () => {
+    const entry = spoke('a', '你好', undefined, [['こんにちは']]);
+    if (entry.kind === 'exchange') entry.translation = [row('t0-a', 'こん', 'translation'), { ...row('t0-a', 'にちは', 'translation'), key: 't0-a:1', start: 2 }, row('t1-a', 'Hello', 'translation', 'en'), row('t2-a', 'Bonjour', 'translation', 'fr')];
+    expect(texts(mine([entry]))).toEqual(['こんにちは', 'Hello']);
+    // Not told of a second language: the first by the run's order, as before.
+    expect(texts(mine([entry], 0))).toEqual(['こんにちは']);
+  });
+
+  it('is laid out a small line higher as a row, a large line higher as a pair, squeezed or not (to the pixel a height is rounded up by)', () => {
+    for (const spacing of [ROOMY, TIGHT]) {
+      expect(lanesHeight(built([]), 24, spacing) - lanesHeight(built([], 0), 24, spacing)).toBeCloseTo(24 * ROW_SCALE * spacing.rowLine + spacing.inner, -0.5);
+      expect(lanesHeight(built([], 1, ['speaker']), 24, spacing) - lanesHeight(built([], 0, ['speaker']), 24, spacing)).toBeCloseTo(24 * spacing.answerLine, -0.5);
+    }
+  });
+
+  it('has its line in a pair\u2019s answer from the start, and is a box of its own under a row, whose lines are counted as before', () => {
+    expect(linesFor(built([]), 24, 0)).toEqual({ source: 1, answer: 2, row: 1 });
+    // A further line of the row is one for each of its boxes.
+    const line = 24 * ROW_SCALE * ROOMY.rowLine;
+    expect(linesFor(built([]), 24, line * 2 - 1).row).toBe(1);
+    expect(linesFor(built([]), 24, line * 2).row).toBe(2);
+    expect(linesFor(built([]), 24, 5000)).toEqual({ source: 3, answer: 6, row: 3 });
+    expect(linesFor(built([], 1, ['speaker']), 24, 0)).toEqual({ source: 1, answer: 3, row: 1 });
+    expect(linesFor(built([], 1, ['speaker']), 24, 5000)).toEqual({ source: 3, answer: 7, row: 1 });
+  });
+
+  it('is counted from what the user’s latest sentences have, for a strip not told the run’s languages', () => {
+    expect(furtherIn([])).toBe(0);
+    expect(furtherIn([said('a', 'speaker', '你好', 'こんにちは'), said('b', 'participant', 'はい', '好')])).toBe(0);
+    expect(furtherIn([spoke('a', '你好', undefined, [['こんにちは'], ['Hello', 'en']]), said('b', 'speaker', '嗯')])).toBe(1);
+  });
+});
+
+describe('a small line with readings above it and a romanization under it (fork)', () => {
+  it('keeps its roomy line however the strip is squeezed, and only the lines asked for', () => {
+    const tight = withRoman(TIGHT, true, true);
+    expect(withSmallReads(tight, true, true)).toMatchObject({ sourceLine: ROOMY.sourceLine, rowLine: ROOMY.rowLine, roman: ROMAN_LINE, rowRoman: ROMAN_LINE });
+    expect(withSmallReads(tight, false, true)).toMatchObject({ sourceLine: TIGHT.sourceLine, rowLine: ROOMY.rowLine });
+    expect(withSmallReads(tight, false, false)).toEqual(tight);
+    // A roomy strip is as it was, and one squeezed half-way has nothing lower than roomy to give back.
+    expect(withSmallReads(ROOMY, true, true)).toEqual(ROOMY);
+    const half = spacingAt(0.5, withSmallReads(ROOMY, true, true), withSmallReads(TIGHT, true, true));
+    expect(half.sourceLine).toBe(ROOMY.sourceLine);
+    expect(half.gap).toBeLessThan(ROOMY.gap);
+  });
+});
+
+describe("the user's own row shows the sentence its clock holds (fork)", () => {
+  const theirs = said('p', 'participant', 'はい。', '好的。');
+  const first = said('a', 'speaker', '我想去咖啡店。', 'カフェに行きたいです。');
+  const next = said('b', 'speaker', '听说蛋糕');
+  const row = (entries: Entry[], held: Record<string, string> = {}) => buildLanes(entries, LEGS, BOTH, words, held)[1];
+
+  it('is the newest where nothing is held, as it was', () => {
+    expect(row([theirs, first, next])).toMatchObject({ shape: 'row', source: { text: '听说蛋糕' }, answer: { text: '' }, pending: true });
+    expect(row([theirs, first, next]).behind).toBeUndefined();
+  });
+
+  it('keeps the sentence held with its answer, and says that more was said since', () => {
+    expect(row([theirs, first, next], { speaker: 'a' })).toMatchObject({ source: { text: '我想去咖啡店。' }, answer: { text: 'カフェに行きたいです。' }, pending: false, behind: true });
+    // Held and still waiting for its answer.
+    const waiting = said('a', 'speaker', '我想去咖啡店。');
+    expect(row([theirs, waiting, next], { speaker: 'a' })).toMatchObject({ source: { text: '我想去咖啡店。' }, answer: { text: '' }, pending: true, behind: true });
+  });
+
+  it('is the newest once that is what is held, or what is held is gone', () => {
+    expect(row([theirs, first, next], { speaker: 'b' }).source?.text).toBe('听说蛋糕');
+    expect(row([theirs, first, next], { speaker: 'gone' }).source?.text).toBe('听说蛋糕');
+    expect(row([theirs, first, next], { speaker: 'b' }).behind).toBeUndefined();
+  });
+
+  it('holds nothing where what answers the user is not shown, or their lane is a pair', () => {
+    expect(rowLegOf(LEGS, BOTH)).toBe('speaker');
+    expect(rowLegOf(LEGS, { ...BOTH, speaker: 'source' })).toBeUndefined();
+    expect(rowLegOf(LEGS, { ...BOTH, participant: 'none' })).toBeUndefined();
+    expect(rowLegOf(['speaker'], BOTH)).toBeUndefined();
+    const source = buildLanes([theirs, first, next], LEGS, { ...BOTH, speaker: 'source' }, words, { speaker: 'a' })[1];
+    expect(source.source?.text).toBe('听说蛋糕');
+    // Alone, the user's lane is a pair, and `held` is the answered sentence it shows, as before.
+    expect(buildLanes([first, next], ['speaker'], BOTH, words, { speaker: 'a' })[0]).toMatchObject({ shape: 'pair', answer: { text: 'カフェに行きたいです。' }, source: { text: '我想去咖啡店。听说蛋糕' } });
+  });
+});
+
+describe('the line for grammar feedback, kept (fork)', () => {
+  const theirs = said('p', 'participant', 'はい。', '好的。');
+  const mine = said('a', 'speaker', '我想去咖啡店。', 'カフェに行きたいです。');
+
+  it('is in the user’s own lane from the start under grammar feedback, so that the strip is one height with it and without', () => {
+    const empty = withFeedbackRoom(lanes([]), true);
+    const spoken = withFeedbackRoom(lanes([theirs, mine]), true);
+    expect(empty.map((lane) => !!lane.feedback)).toEqual([false, true]);
+    expect(spoken[1].feedback).toMatchObject({ text: '', said: { text: '' } });
+    expect(lanesHeight(empty, 24)).toBe(lanesHeight(spoken, 24));
+    expect(lanesHeight(empty, 24)).toBeGreaterThan(lanesHeight(lanes([]), 24));
+  });
+
+  it('is not added without grammar feedback, where answers are not shown, or over feedback that is there', () => {
+    expect(withFeedbackRoom(lanes([theirs, mine]), false)).toEqual(lanes([theirs, mine]));
+    expect(withFeedbackRoom(lanes([theirs, mine], LEGS, { ...BOTH, speaker: 'source' }), true)[1].feedback).toBeUndefined();
+    const fed = { ...mine, feedback: [{ ...row('f-a', 'I go.', 'translation'), purpose: 'feedback' as const, accompaniesTranslation: true as const }] } as Entry;
+    expect(withFeedbackRoom(lanes([theirs, fed]), true)[1].feedback?.text).toBe('I go.');
   });
 });

@@ -42,6 +42,7 @@ export const NOTICE_TARGETS: Readonly<Record<string, string>> = {
   native_missing: 'provider',
   native_translator_missing: 'provider',
   native_coach_missing: 'provider',
+  native_voice_missing: 'provider',
 };
 
 export function settingsTargetForCode(code: string | undefined): string | null {

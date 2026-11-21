@@ -4,6 +4,7 @@ import { MicrophoneCaptureError } from '../../modern-audio/microphoneCaptureErro
 import { GATE_LOOKAHEAD_MS } from './micGate';
 import { SourceOpenError } from '../../session/source';
 import { MIC_IN_USE } from './micFailure';
+import * as diagnostics from '../../diagnostics/report';
 
 /** A begin past this many is a runaway reopen loop: it throws, so a broken source cannot spin a test forever. */
 const RUNAWAY_BEGINS = 50;
@@ -17,9 +18,10 @@ function fakeRecorder(o: { failBegins?: number[]; falseBegins?: number[]; deadOn
   const calls: string[] = [];
   /** Each begin as `device:echo-cancellation`, kept apart from `calls` so the sequences above stay as they were. */
   const opens: string[] = [];
-  let echo: EchoCancellation = 'all';
-  const track = Object.assign(new EventTarget(), { readyState: 'live' as MediaStreamTrackState, stop: vi.fn(() => calls.push('track.stop')) }) as unknown as MediaStreamTrack;
-  const stream = { getAudioTracks: () => [track], getTracks: () => [track] } as unknown as MediaStream;
+  let echo: EchoCancellation = 'gate';
+  let actualId: string;
+  const track = Object.assign(new EventTarget(), { getSettings: () => ({ deviceId: actualId }), readyState: 'live' as MediaStreamTrackState, stop: vi.fn(() => calls.push('track.stop')) }) as unknown as MediaStreamTrack;
+  let stream: MediaStream;
   let begins = 0;
   let open = false;
   let chunk: ((data: { mono: Int16Array }) => void) | null = null;
@@ -28,8 +30,10 @@ function fakeRecorder(o: { failBegins?: number[]; falseBegins?: number[]; deadOn
   const recorder: MicRecorder = {
     async begin(deviceId) {
       begins += 1;
+      actualId = `opened-${deviceId}`;
       calls.push(`begin:${deviceId ?? 'default'}`);
       opens.push(`${deviceId ?? 'default'}:${echo}`);
+      stream = { getAudioTracks: () => [track], getTracks: () => [track] } as unknown as MediaStream;
       if (begins > RUNAWAY_BEGINS) throw new Error('runaway: the source kept reopening');
       (track as { readyState: MediaStreamTrackState }).readyState = o.deadOnArrival?.(deviceId, begins) ? 'ended' : 'live';
       // The stream is live as soon as the device is acquired, before the rest of
@@ -97,7 +101,7 @@ function fakeRecorder(o: { failBegins?: number[]; falseBegins?: number[]; deadOn
 }
 
 function settingsFixture(initial: { deviceId?: string; noiseSuppression?: NoiseSuppression; echoCancellation?: EchoCancellation; muted?: boolean } = {}, options: { onUnusable?: (id: string) => void } = {}) {
-  let current = { deviceId: 'mic-1' as string | undefined, noiseSuppression: 'off' as NoiseSuppression, echoCancellation: 'all' as EchoCancellation, muted: false, ...initial };
+  let current = { deviceId: 'mic-1' as string | undefined, noiseSuppression: 'off' as NoiseSuppression, echoCancellation: 'gate' as EchoCancellation, muted: false, ...initial };
   const labels: Record<string, string> = { 'mic-1': 'Built-in Mic', 'mic-2': 'USB Mic', 'mic-3': 'Webcam Mic' };
   const listed = new Set(['mic-1', 'mic-2', 'mic-3']);
   const unusable: string[] = [];
@@ -138,10 +142,10 @@ it('reports the real processed track and echo mode on initial open and device ch
   const { settings, set } = settingsFixture();
   settings.trackOpened = vi.fn();
   const source = await openMic(settings, live(), () => fake.recorder);
-  expect(settings.trackOpened).toHaveBeenLastCalledWith(fake.track, 'all');
-  set({ deviceId: 'mic-2', echoCancellation: 'app' });
+  expect(settings.trackOpened).toHaveBeenLastCalledWith(fake.track, 'gate');
+  set({ deviceId: 'mic-2', echoCancellation: 'off' });
   await settle();
-  expect(settings.trackOpened).toHaveBeenLastCalledWith(fake.track, 'app');
+  expect(settings.trackOpened).toHaveBeenLastCalledWith(fake.track, 'off');
   expect(settings.trackOpened).toHaveBeenCalledTimes(2);
   await source.stop();
 });
@@ -199,6 +203,145 @@ describe('microphone noise suppression status', () => {
     fake.recorder.onNoiseSuppressionChange?.({ requested: 'enhanced', effective: 'standard' });
     expect(settings.noiseSuppressionState).not.toHaveBeenCalled();
     expect(degraded).not.toHaveBeenCalled();
+    await source.stop();
+  });
+});
+
+describe('microphone passthrough', () => {
+  const rawStream = () => {
+    const tracks = [{ stop: vi.fn() }];
+    return { tracks, stream: { getTracks: () => tracks } as unknown as MediaStream };
+  };
+  afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks(); });
+
+  it('carries a separate unprocessed stream only while listening, following mute, hold, switch and reopen', async () => {
+    const opens: ReturnType<typeof rawStream>[] = [];
+    const getUserMedia = vi.fn(async () => {
+      const raw = rawStream();
+      opens.push(raw);
+      return raw.stream;
+    });
+    vi.stubGlobal('navigator', { mediaDevices: { getUserMedia } });
+    const fake = fakeRecorder();
+    const { settings, set, notify } = settingsFixture();
+    let held = false;
+    settings.held = () => held;
+    const source = await openMic(settings, live(), () => fake.recorder);
+    expect(getUserMedia).not.toHaveBeenCalled();
+    const heard = vi.fn();
+    const off = source.onStream!(heard);
+    await settle();
+    const first = opens[0];
+    expect(heard.mock.lastCall![0]).toBe(first.stream);
+    expect(getUserMedia).toHaveBeenLastCalledWith({ audio: {
+      deviceId: { exact: 'opened-mic-1' }, echoCancellation: { exact: false },
+      noiseSuppression: { exact: false }, autoGainControl: { exact: false },
+    } });
+    held = true;
+    notify();
+    expect(first.tracks[0].stop).toHaveBeenCalledOnce();
+    expect(heard).toHaveBeenLastCalledWith(null);
+    set({ muted: true });
+    held = false;
+    notify();
+    expect(heard).toHaveBeenLastCalledWith(null);
+    expect(getUserMedia).toHaveBeenCalledTimes(1);
+    set({ muted: false });
+    notify();
+    await settle();
+    expect(getUserMedia).toHaveBeenCalledTimes(2);
+    const finish = fake.hangNextBegin();
+    set({ deviceId: 'mic-2' });
+    await settle();
+    expect(opens[1].tracks[0].stop).toHaveBeenCalledOnce();
+    expect(heard).toHaveBeenLastCalledWith(null);
+    finish();
+    await settle();
+    const second = opens[2];
+    expect(getUserMedia).toHaveBeenLastCalledWith({ audio: expect.objectContaining({ deviceId: { exact: 'opened-mic-2' } }) });
+    expect(heard.mock.lastCall![0]).toBe(second.stream);
+    fake.endTrack();
+    await settle();
+    const reopened = opens[3];
+    expect(second.tracks[0].stop).toHaveBeenCalledOnce();
+    expect(heard.mock.lastCall![0]).toBe(reopened.stream);
+    off();
+    expect(reopened.tracks[0].stop).toHaveBeenCalledOnce();
+    expect(heard).toHaveBeenLastCalledWith(null);
+    source.onStream!(heard);
+    await settle();
+    const last = opens[4];
+    const stopping = source.stop();
+    expect(last.tracks[0].stop).toHaveBeenCalledOnce();
+    expect(heard).toHaveBeenLastCalledWith(null);
+    await stopping;
+  });
+
+  it('releases passthrough when a recorder failure ends the source before stop', async () => {
+    const raw = rawStream();
+    const getUserMedia = vi.fn(async () => raw.stream);
+    vi.stubGlobal('navigator', { mediaDevices: { getUserMedia } });
+    const fake = fakeRecorder();
+    const { settings, set, notify } = settingsFixture();
+    const source = await openMic(settings, live(), () => fake.recorder);
+    const heard = vi.fn();
+    source.onStream!(heard);
+    await settle();
+    fake.recorder.setNoiseSuppressionMode = vi.fn().mockRejectedValue(new Error('Recorder failed'));
+    set({ noiseSuppression: 'enhanced' });
+    await settle();
+    expect(raw.tracks[0].stop).toHaveBeenCalledOnce();
+    expect(heard).toHaveBeenLastCalledWith(null);
+    notify();
+    expect(getUserMedia).toHaveBeenCalledOnce();
+    await source.stop();
+  });
+
+  it('stops late opens after unmute or stop without publishing them', async () => {
+    const opens: ((stream: MediaStream) => void)[] = [];
+    vi.stubGlobal('navigator', { mediaDevices: {
+      getUserMedia: () => new Promise<MediaStream>((resolve) => opens.push(resolve)),
+    } });
+    const fake = fakeRecorder();
+    const { settings, set } = settingsFixture();
+    const source = await openMic(settings, live(), () => fake.recorder);
+    const heard = vi.fn();
+    source.onStream!(heard);
+    set({ muted: true });
+    set({ muted: false });
+    const stale = rawStream();
+    opens[0](stale.stream);
+    await settle();
+    expect(stale.tracks[0].stop).toHaveBeenCalledOnce();
+    await source.stop();
+    const late = rawStream();
+    opens[1](late.stream);
+    await settle();
+    expect(late.tracks[0].stop).toHaveBeenCalledOnce();
+    expect(heard.mock.calls.every(([stream]) => stream === null)).toBe(true);
+  });
+
+  it('falls back to the recorder and reports once across refused opens', async () => {
+    const failure = new Error('Device in use');
+    const getUserMedia = vi.fn().mockRejectedValue(failure);
+    vi.stubGlobal('navigator', { mediaDevices: { getUserMedia } });
+    const warning = vi.spyOn(diagnostics, 'reportWarning').mockImplementation(() => {});
+    const fake = fakeRecorder();
+    const { settings, notify, set } = settingsFixture();
+    const source = await openMic(settings, live(), () => fake.recorder);
+    const heard = vi.fn();
+    const off = source.onStream!(heard);
+    await settle();
+    expect(heard.mock.lastCall![0]).toBe(fake.recorder.getStream());
+    notify();
+    expect(getUserMedia).toHaveBeenCalledOnce();
+    set({ muted: true });
+    set({ muted: false });
+    await settle();
+    expect(heard.mock.lastCall![0]).toBe(fake.recorder.getStream());
+    expect(warning).toHaveBeenCalledExactlyOnceWith('Microphone', expect.any(String), { cause: failure, dedupeKey: 'mic:raw' });
+    off();
+    expect(fake.track.stop).not.toHaveBeenCalled();
     await source.stop();
   });
 });
@@ -266,9 +409,9 @@ describe('openMic', () => {
 
   it('opens the selected device with the chosen echo cancellation', async () => {
     const fake = fakeRecorder();
-    const { settings } = settingsFixture({ echoCancellation: 'app' });
+    const { settings } = settingsFixture({ echoCancellation: 'off' });
     await openMic(settings, live(), () => fake.recorder);
-    expect(fake.opens).toEqual(['mic-1:app']);
+    expect(fake.opens).toEqual(['mic-1:off']);
   });
 
   // The browser fixes echo cancellation when it opens the device, so a change
@@ -281,11 +424,11 @@ describe('openMic', () => {
     source.onPcm(heard);
     const degraded = vi.fn();
     source.onDegraded(degraded);
-    set({ echoCancellation: 'app' });
+    set({ echoCancellation: 'off' });
     await settle();
     fake.push();
     expect(fake.calls).toEqual(['ns:off', 'begin:mic-1', 'record', 'end', 'begin:mic-1', 'record']);
-    expect(fake.opens).toEqual(['mic-1:all', 'mic-1:app']);
+    expect(fake.opens).toEqual(['mic-1:gate', 'mic-1:off']);
     expect(heard).toHaveBeenCalledTimes(1);
     expect(degraded).not.toHaveBeenCalled();
   });
@@ -294,9 +437,21 @@ describe('openMic', () => {
     const fake = fakeRecorder();
     const { settings, set } = settingsFixture();
     await openMic(settings, live(), () => fake.recorder);
-    set({ echoCancellation: 'app', deviceId: 'mic-2' });
+    set({ echoCancellation: 'off', deviceId: 'mic-2' });
     await settle();
-    expect(fake.opens).toEqual(['mic-1:all', 'mic-2:app']);
+    expect(fake.opens).toEqual(['mic-1:gate', 'mic-2:off']);
+  });
+
+  it('reopens the same microphone on entering and leaving gate mode', async () => {
+    const fake = fakeRecorder();
+    const { settings, set } = settingsFixture();
+    const source = await openMic(settings, live(), () => fake.recorder);
+    set({ echoCancellation: 'off' });
+    await settle();
+    set({ echoCancellation: 'gate' });
+    await settle();
+    expect(fake.opens).toEqual(['mic-1:gate', 'mic-1:off', 'mic-1:gate']);
+    await source.stop();
   });
 
   it('opens nothing for a change while it waits for a device, and opens the next one with it', async () => {
@@ -305,12 +460,12 @@ describe('openMic', () => {
     await openMic(settings, live(), () => fake.recorder);
     set({ deviceId: undefined });
     await settle();
-    set({ echoCancellation: 'app' });
+    set({ echoCancellation: 'off' });
     await settle();
-    expect(fake.opens).toEqual(['mic-1:all']);
+    expect(fake.opens).toEqual(['mic-1:gate']);
     set({ deviceId: 'mic-2' });
     await settle();
-    expect(fake.opens).toEqual(['mic-1:all', 'mic-2:app']);
+    expect(fake.opens).toEqual(['mic-1:gate', 'mic-2:off']);
   });
 
   it('moves to a newly selected device in place, keeping its listeners, by ending it (not quitting) so the recorder is reused', async () => {
@@ -376,6 +531,18 @@ describe('openMic — the activation threshold (fork)', () => {
   const tone = (amplitude: number) => new Int16Array(CHUNK).fill(Math.round(amplitude * 32767));
   const zeros = (pcm: Int16Array) => pcm.every((s) => s === 0);
   const chunksWaiting = Math.ceil((GATE_LOOKAHEAD_MS * 24) / CHUNK);
+
+  it('silences microphone chunks rejected by the playout verdict', async () => {
+    const fake = fakeRecorder();
+    const { settings } = settingsFixture({ echoCancellation: 'gate' });
+    const source = await openMic({ ...settings, voiced: () => false }, live(), () => fake.recorder);
+    const heard: Int16Array[] = [];
+    source.onPcm((pcm) => heard.push(pcm));
+    for (let i = 0; i <= chunksWaiting; i++) fake.push(tone(0.1));
+    expect(heard).toHaveLength(1);
+    expect(zeros(heard[0])).toBe(true);
+    await source.stop();
+  });
 
   it('hears what is quieter than the threshold as silence, after the lookahead, and reports every chunk’s level', async () => {
     const fake = fakeRecorder();

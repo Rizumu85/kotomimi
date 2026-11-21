@@ -16,13 +16,13 @@ const HOLD_MS = 40;
 const LOUD = 0.1; // −20 dBFS: level 66.7
 const QUIET = 0.01; // −40 dBFS: level 33.3
 
-function gateAt(threshold: number, over: { onLevel?: (level: number) => void } = {}) {
+function gateAt(threshold: number, over: { onLevel?: (level: number) => void; voiced?: (pcm: Int16Array) => boolean | null } = {}) {
   const out: Int16Array[] = [];
   let level = threshold;
   const gate = createMicGate({
     threshold: () => level,
     deliver: (pcm) => out.push(pcm),
-    onLevel: over.onLevel,
+    ...over,
     sampleRate: RATE,
     lookaheadMs: LOOKAHEAD_MS,
     holdMs: HOLD_MS,
@@ -42,6 +42,35 @@ describe('levelOf', () => {
 });
 
 describe('createMicGate', () => {
+  it('uses the verdict alone at threshold zero, with the same lookahead and hold', () => {
+    const voice = tone(CHUNK, QUIET), echo = tone(CHUNK, LOUD);
+    const { gate, out } = gateAt(0, { voiced: (pcm) => pcm === voice });
+    gate.push(echo);
+    gate.push(echo);
+    expect(out).toHaveLength(0);
+    gate.push(echo);
+    gate.push(voice);
+    for (let i = 0; i < 8; i++) gate.push(echo);
+    expect(out.map(silenced)).toEqual([true, false, false, false, false, false, false, false, true, true]);
+    expect(silent(out[0])).toBe(true);
+    expect(silent(out[9])).toBe(true);
+  });
+
+  it('still requires the threshold when voiced, and a null verdict leaves the threshold in charge', () => {
+    let verdict: boolean | null = true;
+    const { gate, out, setThreshold } = gateAt(50, { voiced: () => verdict });
+    const quiet = tone(CHUNK, QUIET);
+    for (let i = 0; i < 3; i++) gate.push(quiet);
+    expect(silent(out[0])).toBe(true);
+    verdict = null;
+    gate.push(tone(CHUNK, LOUD));
+    expect(silenced(out[1])).toBe(false);
+    setThreshold(0);
+    gate.push(quiet);
+    expect(out).toHaveLength(5);
+    expect(out[4]).toBe(quiet);
+  });
+
   it('off, hands every chunk on at once and untouched', () => {
     const { gate, out } = gateAt(0);
     const a = tone(CHUNK, QUIET);

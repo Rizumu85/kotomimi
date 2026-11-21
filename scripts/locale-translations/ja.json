@@ -203,6 +203,26 @@
     "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
     "text": "Kotomimi のみ — Kotomimi 自体が再生する音だけを除去するので、自分の声が最もクリアに拾われます。ヘッドホンや VR ヘッドセットの使用に適しています。スピーカーでも、モードを「両方」にすれば使えます。マイクに仮想オーディオデバイス（VB-Cable、BlackHole など）を使う場合は、こちらを選んでください。"
   },
+  "fork.echoCancellationGate": {
+    "en": "By loudness",
+    "text": "音量で判定"
+  },
+  "fork.echoCancellationGateTooltip": {
+    "en": "By loudness — for loudspeakers: what they play comes back into the microphone far quieter than your voice, so it is kept out by its loudness and your voice is left as it is.",
+    "text": "音量で判定 — スピーカー使用時：スピーカーからマイクに回り込む音はあなたの声よりはるかに小さいため、音量で除外し、あなたの声はそのままにします。"
+  },
+  "fork.echoCancellationOff": {
+    "en": "Off",
+    "text": "オフ"
+  },
+  "fork.echoCancellationOffTooltip": {
+    "en": "Off — the microphone as it is. For headphones: nothing plays into it.",
+    "text": "オフ — マイクの音をそのまま認識に送ります。ヘッドホン使用時向けで、マイクに音が入り込むことはありません。"
+  },
+  "fork.echoCancellationPassthrough": {
+    "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
+    "text": "原音パススルーがオンの間は「音量」のみ有効です。ほかの方式では自分の声をエコーとして除去します。"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "再検索"
@@ -991,6 +1011,134 @@
     "en": "What you want to say — Enter translates",
     "text": "伝えたいことを入力、Enter で翻訳"
   },
+  "fork.voice.auto": {
+    "en": "Read my translations as they come",
+    "text": "話し終えたら訳文を自動で読み上げる"
+  },
+  "fork.voice.cannotSpeak": {
+    "en": "{{name}} cannot speak {{language}}.",
+    "text": "{{name}}は{{language}}を話せません。"
+  },
+  "fork.voice.hearBoth": {
+    "en": "To both",
+    "text": "両方に"
+  },
+  "fork.voice.hearers": {
+    "en": "Read my translations aloud",
+    "text": "訳文を自動で読み上げる"
+  },
+  "fork.voice.hearMe": {
+    "en": "To me",
+    "text": "自分に"
+  },
+  "fork.voice.hearNone": {
+    "en": "Off",
+    "text": "オフ"
+  },
+  "fork.voice.hearThem": {
+    "en": "To them",
+    "text": "相手に"
+  },
+  "fork.voice.lineFailed": {
+    "en": "This line could not be read aloud",
+    "text": "この行を読み上げられませんでした"
+  },
+  "fork.voice.man": {
+    "en": "Male voice",
+    "text": "男性の声"
+  },
+  "fork.voice.meetingDevice": {
+    "en": "Output for the other side",
+    "text": "相手に届く音声の出力先"
+  },
+  "fork.voice.meetingDeviceAuto": {
+    "en": "Virtual microphone (automatic)",
+    "text": "仮想マイク（自動）"
+  },
+  "fork.voice.meetingDeviceTooltip": {
+    "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
+    "text": "訳文の読み上げは、このデバイスからマイク音声として相手に届きます。サウンドカード本体で音を混ぜられる場合は、そのカードの再生チャンネルを選び、カード側でマイクの音と混ぜてください。自分の声はソフトウェアを通らずに相手に届きます。"
+  },
+  "fork.voice.modelPlaceholder": {
+    "en": "The model's name, e.g. tts-1",
+    "text": "モデル名（例：tts-1）"
+  },
+  "fork.voice.myVoiceToo": {
+    "en": "My own voice goes too",
+    "text": "自分の声も送る"
+  },
+  "fork.voice.myVoiceTooTooltip": {
+    "en": "Off: they hear only the voice reading your translation.",
+    "text": "オフにすると、相手には訳文の読み上げだけが聞こえます。"
+  },
+  "fork.voice.needsSpeaker": {
+    "en": "It reads what you say or type. Switch the mode to \"Me\" or \"Both\".",
+    "text": "自分が話した内容や入力した文字の訳文を読み上げます。モードを「自分」か「両方」に切り替えてください。"
+  },
+  "fork.voice.on": {
+    "en": "Read aloud",
+    "text": "読み上げをオン"
+  },
+  "fork.voice.sample": {
+    "en": "Play a sample",
+    "text": "試聴"
+  },
+  "fork.voice.sayLine": {
+    "en": "Read this line aloud",
+    "text": "この行を読み上げる"
+  },
+  "fork.voice.stage": {
+    "en": "Voice",
+    "text": "読み上げ"
+  },
+  "fork.voice.stageTooltip": {
+    "en": "Reads your translations aloud. Any line of the conversation can be heard too: press its speaker button.",
+    "text": "自分の発言の訳文を読み上げます。会話の各行も、スピーカーボタンを押すと聞けます。"
+  },
+  "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "停止"
+  },
+  "fork.voice.toMe": {
+    "en": "I hear it",
+    "text": "自分に聞かせる"
+  },
+  "fork.voice.toMeFix": {
+    "en": "Choose",
+    "text": "アプリを選ぶ"
+  },
+  "fork.voice.toMeLocked": {
+    "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
+    "text": "「自分に読み上げ」は使えません。システム全体の音を拾う設定では、読み上げ音声も相手の声として拾ってしまいます。相手の音声元に VRChat などのアプリを1つ選ぶと使えます。"
+  },
+  "fork.voice.toThem": {
+    "en": "The other side hears it",
+    "text": "相手に聞かせる"
+  },
+  "fork.voice.toThemTooltip": {
+    "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
+    "text": "相手に読み上げるときは、音声が仮想マイクに送られます。VRChat や会議アプリで、その仮想マイクをマイクとして選んでください（Windows では CABLE Output）。"
+  },
+  "fork.voice.voice": {
+    "en": "Voice",
+    "text": "声の種類"
+  },
+  "fork.voice.voiceOf": {
+    "en": "{{language}} voice",
+    "text": "{{language}}の声"
+  },
+  "fork.voice.volumeMine": {
+    "en": "Volume for me",
+    "text": "音量（自分に聞こえる）"
+  },
+  "fork.voice.volumeTheirs": {
+    "en": "Volume for them",
+    "text": "音量（相手に聞こえる）"
+  },
+  "fork.voice.woman": {
+    "en": "Female voice",
+    "text": "女性の声"
+  },
   "fork.vr.back": {
     "en": "Back",
     "text": "戻る"
@@ -1459,6 +1607,10 @@
     "en": "Custom address",
     "text": "アドレスを指定"
   },
+  "providers.localai.apiServiceEdge": {
+    "en": "Edge online voices (free)",
+    "text": "Edge オンライン音声（無料）"
+  },
   "providers.localai.apiServiceModel": {
     "en": "Choose from the list on the right, or type a name",
     "text": "右の一覧から選ぶか、名前を入力"
@@ -1851,6 +2003,34 @@
     "en": "Updating the speech recognition engine. You can start once it is done.",
     "text": "音声認識エンジンを更新中です。完了すると開始できます。"
   },
+  "providers.localai.nativeVoiceFailed": {
+    "en": "The voice engine could not start. In the Voice card, press \"Try again\" — or choose another model.",
+    "text": "読み上げエンジンを起動できませんでした。「読み上げ」カードで「再試行」を押すか、別のモデルを選んでください。"
+  },
+  "providers.localai.nativeVoiceFailedShort": {
+    "en": "The voice engine could not start.",
+    "text": "読み上げエンジンを起動できませんでした。"
+  },
+  "providers.localai.nativeVoiceMissing": {
+    "en": "The voice model is not downloaded yet. Download it to start.",
+    "text": "読み上げモデルがまだダウンロードされていません。ダウンロードすると始められます。"
+  },
+  "providers.localai.nativeVoiceReady": {
+    "en": "The voice engine is ready.",
+    "text": "読み上げエンジンの準備ができました。"
+  },
+  "providers.localai.nativeVoiceUnsupported": {
+    "en": "The native voice engine is not available for this system. In the Voice card, switch to \"API model\".",
+    "text": "このシステムではネイティブ読み上げエンジンを利用できません。「読み上げ」カードで「API モデル」に切り替えてください。"
+  },
+  "providers.localai.nativeVoiceUpdating": {
+    "en": "Updating the voice engine. You can start once it is done.",
+    "text": "読み上げエンジンを更新中です。完了すると始められます。"
+  },
+  "providers.localai.nativeVoiceWarmingShort": {
+    "en": "Starting the voice engine…",
+    "text": "読み上げエンジンを起動中…"
+  },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
     "text": "音声認識エンジンを起動中です。パソコン起動後の初回は約 30 秒かかります。準備ができると開始できます。"
@@ -1890,6 +2070,14 @@
   "providers.localai.noteIndexTranslate": {
     "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
     "text": "日本語から中国語への翻訳の実測では、重大な誤りは 30 文中約 3 文で、検証した中では最も高精度でした。1 文あたり約 0.1 秒。ビデオメモリは約 2 GB、100 以上の言語に対応。"
+  },
+  "providers.localai.noteIrodori": {
+    "en": "Japanese only. Measured: nothing misread, about half a second a sentence. About 1.7 GB of video memory.",
+    "text": "日本語専用。検証では読み間違いがなく、1 文あたり約半秒。ビデオメモリ使用量は約 1.7 GB。"
+  },
+  "providers.localai.noteKokoro": {
+    "en": "Light: runs on the processor and takes no video memory. Less natural, Japanese most of all.",
+    "text": "軽量：CPU だけで動作し、ビデオメモリを使いません。自然さはやや劣り、特に日本語で目立ちます。"
   },
   "providers.localai.noteMoonshineJa": {
     "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
@@ -1938,6 +2126,10 @@
   "providers.localai.noteQwen17": {
     "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
     "text": "日本語の雑談での実測では、文字の誤り率は約 19%。文を話し終えてから文字を表示します（約 10 秒遅れ）。上の GGUF 版は話しながら文字を表示します。"
+  },
+  "providers.localai.noteQwen3Tts": {
+    "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
+    "text": "最も自然で、すぐに話し始めます。日本語・中国語・英語で検証し、読み間違いはありませんでした。ビデオメモリ使用量は約 3 GB、10 言語に対応。"
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
@@ -2114,6 +2306,10 @@
   "providers.localai.sourceAuto": {
     "en": "The language cannot be detected with this setup. Choose the language you speak.",
     "text": "この組み合わせでは言語を自動判別できません。自分が話す言語を選んでください。"
+  },
+  "providers.localai.speakKey": {
+    "en": "API key of the voice",
+    "text": "読み上げモデルの API キー"
   },
   "providers.localai.speedAbout": {
     "en": "About {{seconds}} s",
@@ -2323,6 +2519,10 @@
     "en": "API model",
     "text": "API モデル"
   },
+  "providers.localai.voiceUnnamed": {
+    "en": "The voice has no model to run yet. Name one in the Voice card.",
+    "text": "読み上げモデルが未入力です。「読み上げ」カードで入力してください。"
+  },
   "providers.openai_live.name": {
     "en": "OpenAI Live",
     "text": "OpenAI Live"
@@ -2422,6 +2622,10 @@
   "settings.glossaryWritten": {
     "en": "Word",
     "text": "単語"
+  },
+  "settings.noiseSuppressionTooltip.off": {
+    "en": "Off — no noise suppression: the microphone as it is. Best in a quiet room.",
+    "text": "オフ — ノイズ抑制なし：マイク音声をそのまま認識に送ります。静かな部屋での使用に最適です。"
   },
   "settings.transcriptKeywordsPlaceholder": {
     "en": "Sokuji, Kizuna AI, PulseAudio",

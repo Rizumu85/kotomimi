@@ -16,6 +16,8 @@ export interface SourceNotice {
 /** One leg's capture (spec: "Sources, in full"): 24 kHz mono pcm, an end, and a degradation. */
 export interface Source {
   onPcm(listener: (pcm: Int16Array) => void): () => void;
+  /** Microphone only: its passthrough sink follows the live stream, or null while muted or closed. */
+  onStream?(listener: (stream: MediaStream | null) => void): () => void;
   /** Fires at most once, when the capture can no longer deliver: a device unplugged, a tab closed, the app-capture helper gone. */
   onEnded(listener: (reason: string) => void): () => void;
   /** Still delivering, but worse: app capture fell back to whole-system capture. */

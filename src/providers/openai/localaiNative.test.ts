@@ -437,6 +437,30 @@ describe('the Mac\'s recognizer hearing a speaker who speaks both (fork)', () =>
   const MINE = { asrNativeModel: `${APPLE_PREFIX}ja`, asrNativeByLanguage: {} };
   const PAIR_JA = { source: 'ja', target: 'zh-CN' };
 
+  it.each([false, true])('requires the Apple asset of each language in use (per-language choice: %s)', async (perLanguage) => {
+    const chosen = perLanguage ? { asrNativeByLanguage: { ja: 'apple-speech:ja' } } : MINE;
+    const s = settings({ ...NATIVE, ...chosen, speakAlso: ['zh-CN'] });
+    try {
+      for (const downloaded of [false, true]) {
+        const status = MAC(downloaded);
+        useNativeEngineStore.setState({ status });
+        const result = await checkLocalAIWithNative(NONE, s, CTX, async () => ({ ok: true }), {
+          gap: (pick, heard) => nativeGap(pick, heard, { status: async () => status }), idle: vi.fn(),
+        });
+        const built = buildLocalAI(SPEAKER, s, shared);
+        if (downloaded) {
+          expect(result.ok).toBe(true);
+          expect(built).toMatchObject({ device: { native: { either: { first: 'ja', also: ['zh'] } } }, stages: { requiresLanguage: true } });
+        } else {
+          expect(result).toMatchObject({ ok: false, code: 'native_missing', params: { name: 'Apple Speech' } });
+          expect(built).toMatchObject({ code: 'native_missing', params: { name: 'Apple Speech' } });
+        }
+      }
+    } finally {
+      useNativeEngineStore.setState({ status: NO_NATIVE_ENGINE });
+    }
+  });
+
   it('hears them in both at once where their own language\'s model is the Mac\'s and the other one is downloaded too', () => {
     const pick = hearingPick(MINE, PAIR_JA, { detecting: false, both: true }, has(MAC(true)));
     expect(pick).toEqual({ model: `${APPLE_PREFIX}ja`, byLanguage: {}, either: { own: 'ja', others: ['zh-CN'] } });

@@ -451,6 +451,12 @@ export interface Provider<S, K extends { missing?: never } & object, C extends {
 
   // the only capabilities generic code reads
   speech: 'always' | 'optional' | 'never';
+  /**
+   * Fork: of a provider whose speech is `optional`, whether the speaker's leg speaks under these settings: its own
+   * switch, in place of the shared text-only one (Kotomimi's voice stage, off until a voice is chosen). Absent: the
+   * text-only switch decides.
+   */
+  speaks?(s: S): boolean;
   /** Whether the speaker leg takes typed text under these settings: Gemini's Live Translate ignores it where its dialogue models answer it. */
   textInput(s: S): boolean;
   boundaries(s: S): 'provider' | 'silence';

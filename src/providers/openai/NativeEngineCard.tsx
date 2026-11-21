@@ -11,12 +11,13 @@ import { CircleCheck, Loader, RefreshCw, TriangleAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ModelCard } from '../../components/Settings/sections/ModelManagementSection';
 import type { ModelManifestEntry } from '../../lib/local-inference/modelManifest';
-import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
+import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore, useNativeVoiceStore } from '../../stores/nativeEngineStore';
+import { NATIVE_VOICES } from './nativeVoices';
 import { NATIVE_MODELS, nativeReady, nativeUpdating } from './localaiNative';
 import { ROOM_MARGIN, sizeText, useModelStorageStore } from '../../lib/native/modelStorage';
 import { driveLabel } from '../../components/ModelStorage/ModelStorageSection';
 
-export type NativeKind = 'asr' | 'translation' | 'coach';
+export type NativeKind = 'asr' | 'translation' | 'coach' | 'voice';
 
 /** A model as its card shows it, whichever engine runs it. */
 export interface NativeCardModel {
@@ -34,6 +35,7 @@ const WORDS: Record<NativeKind, { ready: string; warming: string; failed: string
   asr: { ready: 'providers.localai.nativeReady', warming: 'providers.localai.nativeWarmingShort', failed: 'providers.localai.nativeFailedShort' },
   translation: { ready: 'providers.localai.translatorReady', warming: 'providers.localai.translatorWarmingShort', failed: 'providers.localai.translatorFailedShort' },
   coach: { ready: 'providers.localai.nativeCoachReady', warming: 'providers.localai.nativeCoachWarmingShort', failed: 'providers.localai.nativeCoachFailedShort' },
+  voice: { ready: 'providers.localai.nativeVoiceReady', warming: 'providers.localai.nativeVoiceWarmingShort', failed: 'providers.localai.nativeVoiceFailedShort' },
 };
 
 /** What was found of each model, as the key of a sentence under `providers.localai`. */
@@ -53,6 +55,8 @@ const NOTES: Readonly<Record<string, string>> = {
   'plamo-3-translate-0.8b': 'notePlamo3Small',
   'hy-mt1.5-1.8b': 'noteHyMt15',
   'gemma-4-e2b': 'noteGemma4',
+  'qwen3-tts-1.7b-customvoice-q8': 'noteQwen3Tts',
+  'irodori-tts-v4.1-small-mf-q8': 'noteIrodori',
 };
 
 /** The note of a model's card. A model of one family to a language (the Mac's recognition) shares its family's. */
@@ -64,13 +68,13 @@ export const nativeNoteKey = (id: string): string | undefined => NOTES[id] ?? NO
  * neither does a model the processor runs (`usesGpu: false`).
  */
 const tagOf = (id: string): 'native' | 'system' | 'cpu' => (id.startsWith('apple-speech') ? 'system'
-  : NATIVE_MODELS.some((model) => model.id === id && model.usesGpu === false) ? 'cpu' : 'native');
+  : NATIVE_MODELS.some((model) => model.id === id && model.usesGpu === false) || NATIVE_VOICES.some((model) => model.id === id && model.usesGpu === false) ? 'cpu' : 'native');
 
 /** Enough languages for the card to say "multilingual", for a model that lists none. */
 const MANY = ['zh', 'en', 'ja', 'ko', 'es', 'ru', 'fr', 'de', 'pt', 'it', 'ar', 'hi', 'th', 'vi', 'id', 'tr'];
 
 /** The store of the engine that runs models of this kind. */
-export const nativeStoreOf = (kind: NativeKind) => (kind === 'asr' ? useNativeEngineStore : kind === 'translation' ? useNativeTranslatorStore : useNativeCoachStore);
+export const nativeStoreOf = (kind: NativeKind) => (kind === 'asr' ? useNativeEngineStore : kind === 'translation' ? useNativeTranslatorStore : kind === 'voice' ? useNativeVoiceStore : useNativeCoachStore);
 
 /** The id its card goes by in the library: no catalog model's. */
 export const nativeCardId = (model: NativeCardModel): string => `native:${model.id}`;
@@ -80,7 +84,7 @@ function entryOf(kind: NativeKind, model: NativeCardModel, recommended: boolean)
   return {
     id: nativeCardId(model),
     // The library has no kind of its own for a feedback model: it is a text model, as a translator is.
-    type: kind === 'asr' ? 'asr' : 'translation',
+    type: kind === 'asr' ? 'asr' : kind === 'voice' ? 'tts' : 'translation',
     name: model.name,
     languages: model.languages === 'any' ? MANY : [...model.languages],
     multilingual: model.languages === 'any' || model.languages.length > 3,

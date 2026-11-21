@@ -7,7 +7,6 @@ import WarningModal from '../shared/WarningModal';
 import { useFilteredDevices, WarningType, AudioDevice, isVirtualMic } from '../shared/hooks';
 import { useAudioContext, useNoiseSuppressionMode, useNoiseSuppressionState, useSetNoiseSuppressionMode, useIsMonitorChannelInScope, NoiseSuppressionMode, useEchoCancellationMode, useSetEchoCancellationMode, EchoCancellationMode } from '../../../stores/audioStore';
 import { useAnalytics } from '../../../lib/analytics';
-import { isElectron, isLinux } from '../../../utils/environment';
 import MicGateControl from './MicGateControl';
 
 interface AudioDeviceSectionProps {
@@ -81,9 +80,6 @@ const AudioDeviceSection: React.FC<AudioDeviceSectionProps> = ({
   const setNoiseSuppressionMode = useSetNoiseSuppressionMode();
   const echoCancellationMode = useEchoCancellationMode();
   const setEchoCancellationMode = useSetEchoCancellationMode();
-  // `true` cancels what the browser plays: the desktop app is the browser, the
-  // extension shares Chrome with every other tab.
-  const ownPlayout = isElectron() ? 'app' : 'browser';
 
   const {
     audioInputDevices,
@@ -260,15 +256,14 @@ const AudioDeviceSection: React.FC<AudioDeviceSectionProps> = ({
             )}
           </div>
 
-          {/* Echo Cancellation: Chromium on Linux has no 'all', so nothing to choose there */}
-          {showEchoCancellation && !isLinux() && (
+          {/* Fork: echo handling: none (headphones), or the playout gate (`src/lib/audio/capture/echoFollow.ts`). */}
+          {showEchoCancellation && (
             <div className="noise-suppression-control">
               <div className="noise-suppression-header">
                 <span className="noise-suppression-label">{t('settings.echoCancellation')}</span>
                 <Tooltip
                   content={
-                    `${ownPlayout === 'app' ? t('fork.echoCancellationAppTooltip') : t('settings.echoCancellationTooltip.browser')}\n\n` +
-                    `${t('settings.echoCancellationTooltip.all')}`
+                    `${t('fork.echoCancellationOffTooltip')}\n\n${t('fork.echoCancellationGateTooltip')}`
                   }
                   position="top"
                   icon="help"
@@ -276,7 +271,7 @@ const AudioDeviceSection: React.FC<AudioDeviceSectionProps> = ({
                 />
               </div>
               <div className="segmented-control noise-suppression-modes">
-                {(['app', 'all'] as EchoCancellationMode[]).map((mode) => (
+                {(['off', 'gate'] as EchoCancellationMode[]).map((mode) => (
                   <button
                     key={mode}
                     className={`segmented-option ${echoCancellationMode === mode ? 'active' : ''}`}
@@ -289,7 +284,7 @@ const AudioDeviceSection: React.FC<AudioDeviceSectionProps> = ({
                       });
                     }}
                   >
-                    {mode === 'all' ? t('settings.echoCancellationMode.all') : ownPlayout === 'app' ? t('fork.echoCancellationApp') : t('settings.echoCancellationMode.browser')}
+                    {mode === 'gate' ? t('fork.echoCancellationGate') : t('fork.echoCancellationOff')}
                   </button>
                 ))}
               </div>

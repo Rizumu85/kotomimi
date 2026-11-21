@@ -25,7 +25,7 @@ vi.mock('../diagnostics/report', async (importOriginal) => {
   return { ...actual, reportWarning: reportWarningSpy, reportError: reportErrorSpy };
 });
 
-import { listAudioDevices, listSystemAudioSources } from './devices';
+import { listAudioDevices, listSystemAudioSources, systemDefaultOutputId } from './devices';
 
 type FakeTrack = { stop: ReturnType<typeof vi.fn> };
 
@@ -76,6 +76,31 @@ describe('listAudioDevices', () => {
     expect(getUserMedia).not.toHaveBeenCalled();
     expect(devices.inputs.map(d => d.deviceId)).toEqual(['mic-1']);
     expect(devices.outputs.map(d => d.deviceId)).toEqual(['spk-1']);
+  });
+
+  it('marks the output the system plays on, which the browser lists a second time as `default`', async () => {
+    // A capture card's HDMI sound stands first; the system plays on the interface's first pair.
+    const listed = [
+      { deviceId: 'mic-1', kind: 'audioinput', label: 'Microphone', groupId: 'g1' },
+      { deviceId: 'default', kind: 'audiooutput', label: 'Default - Playback 1/2 (Interface)', groupId: 'g3' },
+      { deviceId: 'communications', kind: 'audiooutput', label: 'Communications - Playback 1/2 (Interface)', groupId: 'g3' },
+      { deviceId: 'hdmi', kind: 'audiooutput', label: 'Capture card (HDMI)', groupId: 'g2' },
+      { deviceId: 'pair-34', kind: 'audiooutput', label: 'Playback 3/4 (Interface)', groupId: 'g4' },
+      { deviceId: 'pair-12', kind: 'audiooutput', label: 'Playback 1/2 (Interface)', groupId: 'g3' },
+    ];
+    setMediaDevices(vi.fn(async () => makeStream()), vi.fn(async () => listed));
+    const devices = await listAudioDevices();
+    expect(devices.outputs.map((d) => [d.deviceId, d.isDefault === true])).toEqual([['hdmi', false], ['pair-34', false], ['pair-12', true]]);
+
+    // Two outputs of one group: the label says which. None it could be: none marked.
+    const twins = (label: string) => [
+      { deviceId: 'default', kind: 'audiooutput', label, groupId: 'g' },
+      { deviceId: 'a', kind: 'audiooutput', label: 'Headphones', groupId: 'g' },
+      { deviceId: 'b', kind: 'audiooutput', label: 'Speakers', groupId: 'g' },
+    ] as never[];
+    expect(systemDefaultOutputId(twins('Default - Speakers'))).toBe('b');
+    expect(systemDefaultOutputId(twins('Default'))).toBeNull();
+    expect(systemDefaultOutputId(LABELED as never[])).toBeNull();
   });
 
   it('still returns the enumerated devices when the warm-up mic fails (broken default device), and reports a warning with the permission toast shown', async () => {

@@ -86,11 +86,11 @@ const electron = (): ElectronApi | undefined => (typeof window === 'undefined' ?
 export type NativeEngineAction = 'get' | 'download' | 'cancel' | 'remove' | 'start' | 'stop';
 
 /**
- * The two engines the main process runs this way, by the name their channels
- * go by: the one that hears (audio.cpp), and the one that translates
- * (llama.cpp's server).
+ * The engines the main process runs this way, by the name their channels
+ * go by: the one that hears (audio.cpp), the ones that translate and give
+ * feedback (llama.cpp's server), and the one that speaks (audio.cpp again).
  */
-export type NativeEngineName = 'native-engine' | 'native-translator' | 'native-coach';
+export type NativeEngineName = 'native-engine' | 'native-translator' | 'native-coach' | 'native-voice';
 
 /** Asks the main process; resolves with the state of things, which says what failed. Never rejects. */
 export async function askNativeEngine(action: NativeEngineAction, id?: string, engine: NativeEngineName = 'native-engine'): Promise<NativeEngineStatus> {

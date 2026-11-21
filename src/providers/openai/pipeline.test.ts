@@ -107,6 +107,17 @@ describe('a leg heard in the language it is shown in (fork)', () => {
 });
 
 describe('a language the recognizer named that the writing rules out (fork)', () => {
+  it.each([true, false])('routes unlabelled speech on a told leg (recognizer names the language: %s)', async (named) => {
+    const h = await live(SPEAKER, VIA_MODEL, [sse('Translation')], K, (config) => {
+      if (named) config.stages!.named = 'recognizer';
+      delete config.stages!.leakCheck;
+    });
+    h.receive(...heard('market', 'お昼は何を食べますか。'));
+    expect(h.lastText(1)?.language).toBe(named ? 'zh-CN' : 'ja');
+    if (named) await h.settled();
+    expect(h.calls).toHaveLength(named ? 1 : 0);
+    await h.session.stop();
+  });
   const context = { ...SPEAKER, direction: { source: 'zh-CN', target: 'en' } };
   const both = (config: LocalAIConfig) => {
     config.stages = {

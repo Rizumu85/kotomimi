@@ -199,6 +199,26 @@
     "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
     "text": "Kotomimi sahaja — hanya menyingkirkan bunyi yang dimainkan oleh Kotomimi, supaya suara anda dirakam paling jelas. Sesuai jika anda memakai fon kepala atau set kepala VR; dengan pembesar suara, mod \"Kedua-duanya\" juga boleh digunakan. Pilih ini jika mikrofon anda ialah kad bunyi maya (VB-Cable, BlackHole)."
   },
+  "fork.echoCancellationGate": {
+    "en": "By loudness",
+    "text": "Ikut kelantangan"
+  },
+  "fork.echoCancellationGateTooltip": {
+    "en": "By loudness — for loudspeakers: what they play comes back into the microphone far quieter than your voice, so it is kept out by its loudness and your voice is left as it is.",
+    "text": "Mengikut kelantangan — untuk pembesar suara: bunyi yang dimainkan masuk semula ke mikrofon jauh lebih perlahan daripada suara anda, jadi ia ditapis berdasarkan kelantangan tanpa menjejaskan suara anda."
+  },
+  "fork.echoCancellationOff": {
+    "en": "Off",
+    "text": "Mati"
+  },
+  "fork.echoCancellationOffTooltip": {
+    "en": "Off — the microphone as it is. For headphones: nothing plays into it.",
+    "text": "Mati — mikrofon dihantar untuk pengecaman tanpa perubahan. Untuk fon kepala: tiada bunyi bocor ke mikrofon."
+  },
+  "fork.echoCancellationPassthrough": {
+    "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
+    "text": "Apabila Laluan Audio Asal dihidupkan, hanya kaedah Ikut kelantangan yang berfungsi; kaedah lain akan menganggap suara anda sendiri sebagai gema lalu menghapuskannya."
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Cari semula"
@@ -987,6 +1007,134 @@
     "en": "What you want to say — Enter translates",
     "text": "Apa yang anda mahu katakan, tekan Enter untuk terjemah"
   },
+  "fork.voice.auto": {
+    "en": "Read my translations as they come",
+    "text": "Baca terjemahan secara automatik selepas saya bercakap"
+  },
+  "fork.voice.cannotSpeak": {
+    "en": "{{name}} cannot speak {{language}}.",
+    "text": "{{name}} tidak boleh bertutur dalam {{language}}."
+  },
+  "fork.voice.hearBoth": {
+    "en": "To both",
+    "text": "Untuk kedua-dua pihak"
+  },
+  "fork.voice.hearers": {
+    "en": "Read my translations aloud",
+    "text": "Baca terjemahan secara automatik"
+  },
+  "fork.voice.hearMe": {
+    "en": "To me",
+    "text": "Untuk saya"
+  },
+  "fork.voice.hearNone": {
+    "en": "Off",
+    "text": "Mati"
+  },
+  "fork.voice.hearThem": {
+    "en": "To them",
+    "text": "Untuk mereka"
+  },
+  "fork.voice.lineFailed": {
+    "en": "This line could not be read aloud",
+    "text": "Baris ini gagal dibacakan"
+  },
+  "fork.voice.man": {
+    "en": "Male voice",
+    "text": "Suara lelaki"
+  },
+  "fork.voice.meetingDevice": {
+    "en": "Output for the other side",
+    "text": "Salurkan audio untuk pihak satu lagi ke"
+  },
+  "fork.voice.meetingDeviceAuto": {
+    "en": "Virtual microphone (automatic)",
+    "text": "Mikrofon maya (automatik)"
+  },
+  "fork.voice.meetingDeviceTooltip": {
+    "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
+    "text": "Bacaan terjemahan dimainkan melalui peranti ini, yang digunakan sebagai mikrofon untuk didengar oleh pihak satu lagi. Jika kad bunyi anda boleh mencampurkan audio, pilih salah satu saluran main baliknya dan campurkan audio saluran itu dengan audio mikrofon anda pada kad bunyi. Dengan cara ini, suara asal anda tidak melalui perisian."
+  },
+  "fork.voice.modelPlaceholder": {
+    "en": "The model's name, e.g. tts-1",
+    "text": "Nama model, contohnya tts-1"
+  },
+  "fork.voice.myVoiceToo": {
+    "en": "My own voice goes too",
+    "text": "Hantar suara asal saya juga"
+  },
+  "fork.voice.myVoiceTooTooltip": {
+    "en": "Off: they hear only the voice reading your translation.",
+    "text": "Apabila dimatikan, pihak satu lagi hanya mendengar terjemahan yang dibacakan."
+  },
+  "fork.voice.needsSpeaker": {
+    "en": "It reads what you say or type. Switch the mode to \"Me\" or \"Both\".",
+    "text": "Bacaan menyuarakan apa yang anda cakap atau taip. Tukar mod kepada \"Saya\" atau \"Kedua-duanya\"."
+  },
+  "fork.voice.on": {
+    "en": "Read aloud",
+    "text": "Aktifkan bacaan"
+  },
+  "fork.voice.sample": {
+    "en": "Play a sample",
+    "text": "Dengar sampel"
+  },
+  "fork.voice.sayLine": {
+    "en": "Read this line aloud",
+    "text": "Baca baris ini"
+  },
+  "fork.voice.stage": {
+    "en": "Voice",
+    "text": "Bacaan"
+  },
+  "fork.voice.stageTooltip": {
+    "en": "Reads your translations aloud. Any line of the conversation can be heard too: press its speaker button.",
+    "text": "Membaca terjemahan anda dengan kuat. Anda juga boleh mendengar mana-mana baris perbualan: tekan butang pembesar suaranya."
+  },
+  "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "Hentikan"
+  },
+  "fork.voice.toMe": {
+    "en": "I hear it",
+    "text": "Saya dengar"
+  },
+  "fork.voice.toMeFix": {
+    "en": "Choose",
+    "text": "Pilih"
+  },
+  "fork.voice.toMeLocked": {
+    "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
+    "text": "\"Saya dengar\" belum boleh digunakan. Kotomimi mengambil audio daripada seluruh sistem, jadi bacaan terjemahan akan disangka suara orang yang anda dengar. Pilih satu aplikasi seperti VRChat sebagai sumber audio mereka."
+  },
+  "fork.voice.toThem": {
+    "en": "The other side hears it",
+    "text": "Pihak satu lagi dengar"
+  },
+  "fork.voice.toThemTooltip": {
+    "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
+    "text": "Apabila dibacakan kepada pihak sana, suara dihantar ke mikrofon maya. Pilih mikrofon itu dalam VRChat atau aplikasi mesyuarat anda (namanya CABLE Output pada Windows)."
+  },
+  "fork.voice.voice": {
+    "en": "Voice",
+    "text": "Suara"
+  },
+  "fork.voice.voiceOf": {
+    "en": "{{language}} voice",
+    "text": "Suara {{language}}"
+  },
+  "fork.voice.volumeMine": {
+    "en": "Volume for me",
+    "text": "Kelantangan untuk saya"
+  },
+  "fork.voice.volumeTheirs": {
+    "en": "Volume for them",
+    "text": "Kelantangan untuk orang lain"
+  },
+  "fork.voice.woman": {
+    "en": "Female voice",
+    "text": "Suara wanita"
+  },
   "fork.vr.back": {
     "en": "Back",
     "text": "Kembali"
@@ -1475,6 +1623,10 @@
     "en": "Custom address",
     "text": "Alamat tersuai"
   },
+  "providers.localai.apiServiceEdge": {
+    "en": "Edge online voices (free)",
+    "text": "Suara dalam talian Edge (percuma)"
+  },
   "providers.localai.apiServiceModel": {
     "en": "Choose from the list on the right, or type a name",
     "text": "Pilih daripada senarai di kanan atau masukkan nama"
@@ -1867,6 +2019,34 @@
     "en": "Updating the speech recognition engine. You can start once it is done.",
     "text": "Sedang mengemas kini enjin pengecaman pertuturan. Anda boleh mula selepas selesai."
   },
+  "providers.localai.nativeVoiceFailed": {
+    "en": "The voice engine could not start. In the Voice card, press \"Try again\" — or choose another model.",
+    "text": "Enjin bacaan gagal dimulakan. Tekan \"Cuba lagi\" dalam kad Bacaan, atau pilih model lain."
+  },
+  "providers.localai.nativeVoiceFailedShort": {
+    "en": "The voice engine could not start.",
+    "text": "Enjin bacaan gagal dimulakan."
+  },
+  "providers.localai.nativeVoiceMissing": {
+    "en": "The voice model is not downloaded yet. Download it to start.",
+    "text": "Model bacaan belum dimuat turun. Muat turun untuk bermula."
+  },
+  "providers.localai.nativeVoiceReady": {
+    "en": "The voice engine is ready.",
+    "text": "Enjin bacaan sudah sedia."
+  },
+  "providers.localai.nativeVoiceUnsupported": {
+    "en": "The native voice engine is not available for this system. In the Voice card, switch to \"API model\".",
+    "text": "Sistem ini belum menyokong enjin bacaan natif. Tukar kepada \"Model API\" dalam kad Bacaan."
+  },
+  "providers.localai.nativeVoiceUpdating": {
+    "en": "Updating the voice engine. You can start once it is done.",
+    "text": "Mengemas kini enjin bacaan. Anda boleh bermula setelah selesai."
+  },
+  "providers.localai.nativeVoiceWarmingShort": {
+    "en": "Starting the voice engine…",
+    "text": "Memulakan enjin bacaan…"
+  },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
     "text": "Enjin pengecaman masih dimulakan. Kali pertama selepas komputer dihidupkan mengambil masa kira-kira setengah minit. Anda boleh mula sebaik sahaja enjin sedia."
@@ -1906,6 +2086,14 @@
   "providers.localai.noteIndexTranslate": {
     "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
     "text": "Ujian terjemahan Jepun ke Cina: kesilapan serius dalam kira-kira 3 daripada 30 ayat, yang terbaik antara model yang diuji. Kira-kira 0.1 saat setiap ayat. Menggunakan kira-kira 2 GB memori grafik dan menyokong lebih seratus bahasa."
+  },
+  "providers.localai.noteIrodori": {
+    "en": "Japanese only. Measured: nothing misread, about half a second a sentence. About 1.7 GB of video memory.",
+    "text": "Bahasa Jepun sahaja. Diuji tanpa kesilapan sebutan, kira-kira setengah saat setiap ayat. Menggunakan kira-kira 1.7 GB memori video."
+  },
+  "providers.localai.noteKokoro": {
+    "en": "Light: runs on the processor and takes no video memory. Less natural, Japanese most of all.",
+    "text": "Ringan: hanya menggunakan pemproses, tanpa memori grafik. Kurang semula jadi, terutama dalam bahasa Jepun."
   },
   "providers.localai.noteMoonshineJa": {
     "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
@@ -1954,6 +2142,10 @@
   "providers.localai.noteQwen17": {
     "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
     "text": "Ujian perbualan santai bahasa Jepun: kira-kira 19% aksara salah. Teks hanya muncul selepas ayat selesai (lewat kira-kira 10 saat). Versi GGUF di atas memaparkan teks semasa anda bercakap."
+  },
+  "providers.localai.noteQwen3Tts": {
+    "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
+    "text": "Paling semula jadi, terus bersuara tanpa menunggu. Diuji dalam bahasa Jepun, Cina dan Inggeris: tiada kesilapan sebutan. Menggunakan kira-kira 3 GB memori video, menyokong 10 bahasa."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
@@ -2130,6 +2322,10 @@
   "providers.localai.sourceAuto": {
     "en": "The language cannot be detected with this setup. Choose the language you speak.",
     "text": "Gabungan ini tidak dapat mengesan bahasa secara automatik. Pilih bahasa yang anda tuturkan."
+  },
+  "providers.localai.speakKey": {
+    "en": "API key of the voice",
+    "text": "Kunci API model bacaan"
   },
   "providers.localai.speedAbout": {
     "en": "About {{seconds}} s",
@@ -2339,6 +2535,10 @@
     "en": "API model",
     "text": "Model API"
   },
+  "providers.localai.voiceUnnamed": {
+    "en": "The voice has no model to run yet. Name one in the Voice card.",
+    "text": "Model bacaan belum diisi. Masukkan namanya dalam kad Bacaan."
+  },
   "providers.openai_live.name": {
     "en": "OpenAI Live",
     "text": "OpenAI Live"
@@ -2446,6 +2646,10 @@
   "settings.noiseSuppressionMode.standard": {
     "en": "Standard",
     "text": "Standard"
+  },
+  "settings.noiseSuppressionTooltip.off": {
+    "en": "Off — no noise suppression: the microphone as it is. Best in a quiet room.",
+    "text": "Mati — tiada penyingkiran hingar: mikrofon seadanya. Paling sesuai dalam bilik yang sunyi."
   },
   "settings.tabs.audio": {
     "en": "Audio",

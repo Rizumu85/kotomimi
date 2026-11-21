@@ -302,6 +302,26 @@ describe('the quick pace, of what is sent', () => {
   });
 });
 
+describe('a stretch the detector cut at its longest', () => {
+  it('is sent whole: the speaker is still talking, and no pause ends it', async () => {
+    const api = fakeApi({ body: { text: 'いち' } }, { body: { text: 'に' } });
+    const { asr, vad } = await started(api);
+    vad.worker.say('speech_start');
+    for (let i = 0; i < 4; i++) asr.feedAudio(seconds(1, 5), RATE);
+    vad.worker.onmessage?.({ data: { type: 'speech_end', forced: true } });
+    await settled();
+    await settled();
+    expect((api.calls[0].form.get('file') as File).size).toBe(44 + 4 * RATE * 2);
+    // One that ends in a pause still loses the pause: all of it but 0.3 s.
+    vad.worker.say('speech_start');
+    for (let i = 0; i < 4; i++) asr.feedAudio(seconds(1, 5), RATE);
+    vad.worker.say('speech_end');
+    await settled();
+    await settled();
+    expect((api.calls[1].form.get('file') as File).size).toBe(44 + Math.round((4 - 1.1) * RATE) * 2);
+  });
+});
+
 describe('a service too busy to answer', () => {
   const said = async (api: ReturnType<typeof fakeApi>) => {
     const clock = createVirtualClock();

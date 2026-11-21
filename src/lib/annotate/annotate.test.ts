@@ -11,7 +11,7 @@ import { transliterateRussian } from './russian';
 import { transliterateUkrainian } from './ukrainian';
 import { annotateCantonese } from './cantonese';
 import { annotateChinese } from './chinese';
-import { annotatedLanguage, explainsInChinese, isChinese, quotesJapanese, romanizedLanguage, romanizedText, scriptLanguage } from './script';
+import { annotatedLanguage, chineseOnly, explainsInChinese, isChinese, quotesJapanese, romanizedLanguage, romanizedText, scriptLanguage, writtenInChinese } from './script';
 import type { JapaneseTokenizer } from './types';
 
 const DICT = resolve(__dirname, '../../../node_modules/@sglkc/kuromoji/dict');
@@ -272,6 +272,60 @@ describe('a Chinese explanation that quotes Japanese, in a row of any language (
     const tokenizer = { tokenize: () => [] };
     const line = annotateLine(FEEDBACK, { furigana: true, roman: true, language: 'ja', japanese: tokenizer });
     expect(line).toEqual({ parts: [{ text: FEEDBACK }] });
+  });
+});
+
+describe('a line said in two languages (fork, 2026-11-17)', () => {
+  const o = (language: 'ja' | 'zh' | null, pinyin = true) => ({ furigana: true, roman: true, pinyin, language, chinese: language === 'zh', japanese: ja });
+
+  it('tells Chinese by the characters Japanese does not write, and by its small words', () => {
+    expect(chineseOnly('这个字幕')).toBe(true);
+    expect(chineseOnly('颜色都可以换了')).toBe(true);
+    expect(chineseOnly('你好')).toBe(true);
+    // Characters both write, the old forms among them.
+    expect(chineseOnly('写真を撮る')).toBe(false);
+    expect(chineseOnly('給料と請求と誤解と錯覚')).toBe(false);
+    expect(chineseOnly('頰を塡める')).toBe(false);
+    expect(writtenInChinese('我不知道是谁')).toBe(true);
+    expect(writtenInChinese('大丈夫')).toBe(false);
+    expect(writtenInChinese('東京都渋谷区')).toBe(false);
+    expect(writtenInChinese('了解')).toBe(false);
+  });
+
+  it('reads each clause in its own: Japanese with its readings and romanization, Chinese with its pinyin', () => {
+    const mixed = annotateLine('届かなかったっけ？要再买吗？买两个吧。', o('ja'));
+    expect(ruby(mixed.parts)).toBe('届[とど]かなかったっけ？要[yào]再[zài]买[mǎi]吗[ma]？买[mǎi]两[liǎng]个[gè]吧[ba]。');
+    expect(mixed.roman).toBe('todokanakatta kke?');
+    // Whatever the row was taken for, and with no pinyin asked for the Chinese is plain.
+    expect(ruby(annotateLine('届かなかったっけ？要再买吗？买两个吧。', o(null, false)).parts)).toBe('届[とど]かなかったっけ？要再买吗？买两个吧。');
+    expect(ruby(annotateLine('但是今天只能坐到最后一排。うん。', o('zh')).parts)).toBe('但[dàn]是[shì]今[jīn]天[tiān]只[zhǐ]能[néng]坐[zuò]到[dào]最[zuì]后[hòu]一[yì]排[pái]。うん。');
+    expect(annotateLine('但是今天只能坐到最后一排。うん。', o('zh')).roman).toBe('un.');
+  });
+
+  it('gives a Chinese sentence begun with a Japanese sound no Japanese readings', () => {
+    expect(ruby(annotateLine('お、颜色都可以换了。', o('ja', false)).parts)).toBe('お、颜色都可以换了。');
+    expect(ruby(annotateLine('で、另外那只狗、跑过来的也是那一只。', o(null, false)).parts)).toBe('で、另外那只狗、跑过来的也是那一只。');
+  });
+
+  it('reads Han characters alone as Chinese where only Chinese writes them so, in a row taken for Japanese', () => {
+    expect(ruby(annotateLine('我不知道这是什么', o('ja')).parts)).toBe('我[wǒ]不[bù]知[zhī]道[dào]这[zhè]是[shì]什[shén]么[me]');
+    expect(annotateLine('我不知道这是什么', o('ja', false))).toEqual({ parts: [{ text: '我不知道这是什么' }] });
+    expect(needsJapanese('我不知道这是什么', o('ja'))).toBe(false);
+  });
+
+  it('leaves a Japanese sentence whole: one with 写真 or 給料 has its readings, and a clause of kanji alone goes with the rest', () => {
+    expect(ruby(annotateLine('ここで写真を撮ってる。', o('ja')).parts)).toBe('ここで写真[しゃしん]を撮[と]ってる。');
+    expect(ruby(annotateLine('今月の給料。', o(null)).parts)).toBe('今月[こんげつ]の給料[きゅうりょう]。');
+    expect(annotateLine('大丈夫、行きましょう。', o(null))).toEqual({ parts: [{ text: '大丈夫', ruby: 'だいじょうぶ' }, { text: '、' }, { text: '行', ruby: 'い' }, { text: 'きましょう。' }], roman: 'daijoubu, ikimashou.' });
+  });
+
+  it('flows in the stretches of each clause: Japanese between its words, a Chinese clause as one', () => {
+    expect(romanStretches('届かなかったっけ？要再买吗？买两个吧。', o('ja'))).toEqual(['届かなかったっけ？', '要再买吗？买两个吧。']);
+    expect(romanStretches('えっと、这个周末只能去一个地方。うん。', o(null))).toEqual(['えっと、', '这个周末只能去一个地方。', 'うん。']);
+  });
+
+  it('still reads an explanation that quotes Japanese whole', () => {
+    expect(annotateLine('“に”后面缺少动词，句子不完整；用“について”表示“关于”。', o('ja', false))).toEqual({ parts: [{ text: '“に”后面缺少动词，句子不完整；用“について”表示“关于”。' }] });
   });
 });
 

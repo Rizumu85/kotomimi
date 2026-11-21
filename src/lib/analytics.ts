@@ -96,7 +96,7 @@ export interface AnalyticsEvents {
     during_session: boolean;
   };
   'echo_cancellation_changed': {
-    mode: 'app' | 'all';
+    mode: 'off' | 'gate';
     during_session: boolean;
   };
   'virtual_device_warning': {

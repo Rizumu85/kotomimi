@@ -37,7 +37,7 @@ const VoicePassthroughSection: React.FC<VoicePassthroughSectionProps> = ({
 
   // `disabled` means passthrough is externally managed (Push-to-Translate, on @
   // 100% during idle). Reflect that on-state in the toggle without mutating the
-  // user's saved setting, and hide the 0-60% slider — it can't represent the
+  // user's saved setting, and hide the slider — it can't represent the
   // fixed 100% and would mislead if it kept showing the saved percentage.
   const displayChecked = isRealVoicePassthroughEnabled || disabled;
   const showVolumeSlider = isRealVoicePassthroughEnabled && !disabled;
@@ -84,7 +84,7 @@ const VoicePassthroughSection: React.FC<VoicePassthroughSectionProps> = ({
           <input
             type="range"
             min="0"
-            max="0.6"
+            max="1"
             step="0.01"
             value={realVoicePassthroughVolume}
             disabled={disabled}
@@ -105,7 +105,7 @@ const VoicePassthroughSection: React.FC<VoicePassthroughSectionProps> = ({
           />
           <div className="volume-limits">
             <span>0%</span>
-            <span>60%</span>
+            <span>100%</span>
           </div>
         </div>
       )}

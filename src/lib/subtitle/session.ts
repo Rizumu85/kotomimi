@@ -17,6 +17,9 @@ export type SubtitleIdleModel =
   | { kind: 'unready'; message: string; code?: string; params?: Record<string, string | number>; unsure?: true }
   | { kind: 'failed'; notice: RunNotice };
 
+/** The languages each side may speak beside its main one (`SubtitleSession.beside`). */
+export interface Beside { mine: readonly string[]; theirs: readonly string[] }
+
 export interface SubtitleSession {
   phase: RunState['phase'];
   /** The wall clock the run went live; null unless running. */
@@ -25,6 +28,16 @@ export interface SubtitleSession {
   legs: readonly LegName[];
   /** The selected provider's language pair, for the bar. */
   pair: LanguagePair | null;
+  /**
+   * Fork: the translations a sentence of the user's has beyond the first: the other side's languages lit beside their
+   * main one. The strip has a line for each from the start (`Lane.more`). Absent: none.
+   */
+  also?: number;
+  /**
+   * Fork: the languages each side may speak beside the pair's: the user's in use ("我也会说"), and the one of the other
+   * side's lit. The strip keeps the room their reading aids take from the start (`plannedRoom`). Absent: none.
+   */
+  beside?: Beside;
   /** A run is live under manual turns with a speaker leg to hold (plan 1e-4 ruling 8): the surface offers its hold control. */
   holdToTalk: boolean;
   /** Start is offered: false while a run is not idle, no microphone is chosen, the provider's entry has not loaded, the start gate refuses (F7), or the provider is known to be unready or is being checked. */
@@ -36,6 +49,10 @@ export interface SubtitleSessionInput {
   run: RunState;
   readiness: Readiness | undefined;
   pair: LanguagePair | null;
+  /** Fork: `SubtitleSession.also`. */
+  also?: number;
+  /** Fork: `SubtitleSession.beside`. */
+  beside?: Beside;
   turnMode: TurnMode;
   legs: readonly LegName[];
   /** The app's capture needs a microphone and none is chosen (1e-3 ruling 5). */
@@ -68,12 +85,14 @@ export function idleOf(run: RunState, readiness: Readiness | undefined, micropho
   return end ? { kind: 'ended' } : { kind: 'ready' };
 }
 
-export function subtitleSession({ run, readiness, pair, turnMode, legs, microphoneMissing = false, providerLoaded = true, refusal = null }: SubtitleSessionInput): SubtitleSession {
+export function subtitleSession({ run, readiness, pair, also = 0, beside, turnMode, legs, microphoneMissing = false, providerLoaded = true, refusal = null }: SubtitleSessionInput): SubtitleSession {
   return {
     phase: run.phase,
     since: run.phase === 'running' ? run.since : null,
     legs,
     pair,
+    ...(also > 0 ? { also } : {}),
+    ...(beside && (beside.mine.length > 0 || beside.theirs.length > 0) ? { beside } : {}),
     // A press opens a turn on the speaker leg only (`Run.press`, run.ts:275-281):
     // a participant-only run offers no hold — it would do nothing.
     holdToTalk: run.phase === 'running' && turnMode !== 'auto' && run.legs.speaker !== undefined,
@@ -93,6 +112,8 @@ function sameParams(a: Record<string, string | number> | undefined, b: Record<st
   return aKeys.length === bKeys.length && aKeys.every((key) => a[key] === b[key]);
 }
 
+const sameCodes = (a: readonly string[] = [], b: readonly string[] = []): boolean => a.length === b.length && a.every((code, i) => code === b[i]);
+
 function sameIdle(a: SubtitleIdleModel, b: SubtitleIdleModel): boolean {
   if (a.kind !== b.kind) return false;
   if (a.kind === 'unready' && b.kind === 'unready') return a.message === b.message && a.code === b.code && sameParams(a.params, b.params);
@@ -104,6 +125,7 @@ function sameIdle(a: SubtitleIdleModel, b: SubtitleIdleModel): boolean {
 export function sameSession(a: SubtitleSession, b: SubtitleSession): boolean {
   return a.phase === b.phase && a.since === b.since && a.holdToTalk === b.holdToTalk && a.canStart === b.canStart
     && a.legs.length === b.legs.length && a.legs.every((leg, i) => leg === b.legs[i])
-    && a.pair?.source === b.pair?.source && a.pair?.target === b.pair?.target
+    && a.pair?.source === b.pair?.source && a.pair?.target === b.pair?.target && (a.also ?? 0) === (b.also ?? 0)
+    && sameCodes(a.beside?.mine, b.beside?.mine) && sameCodes(a.beside?.theirs, b.beside?.theirs)
     && sameIdle(a.idle, b.idle);
 }

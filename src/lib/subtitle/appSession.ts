@@ -11,7 +11,9 @@ import { legsFor, liveGate } from '../session/appShape';
 import type { Runner } from '../session/runner';
 import { microphoneMissing } from '../session/shape';
 import type { ConversationViewState, Readable } from '../view/conversationView';
+import { getProvider } from '../../providers/registry';
 import { useAccountStore } from '../../stores/accountStore';
+import { useCoachingStore } from '../../stores/coachingStore';
 import useAudioStore from '../../stores/audioStore';
 import { useProviderStore } from '../../stores/providerStore';
 import { useRoutingStore } from '../../stores/routingStore';
@@ -36,10 +38,19 @@ export function appSubtitleSession(
     // changed (roadmap 1d-2 → 1e; today's `effectiveMode || items` rule).
     const intent = legsFor(audio.mode);
     const shown = view.get().legs.map((leg) => leg.leg);
+    // Fork: a second language of theirs is lit (`MoreLanguages.lit`): a sentence of the user's is translated into it as
+    // well. Not counted under grammar feedback, where the user's sentences may be answered by that alone.
+    const entry = id ? providers.entries[id] : undefined;
+    const more = id && entry ? getProvider(id)?.languages.more?.(entry.settings, providers.models[id] ?? [], entry.pair) : undefined;
+    const lit = more?.theirs?.lit;
+    // What each side may then be written in beside the pair's languages: named ones only ("any language" names none).
+    const named = (codes: readonly string[] | undefined) => (codes ?? []).filter((code) => code !== '' && code !== 'auto');
     return subtitleSession({
       run: runner.state.getState(),
       readiness: id ? providers.readiness[id] : undefined,
-      pair: id ? providers.entries[id]?.pair ?? null : null,
+      pair: entry?.pair ?? null,
+      also: lit && lit !== 'auto' && !useCoachingStore.getState().coached ? 1 : 0,
+      beside: { mine: named(more?.mine?.using ?? more?.mine?.chosen), theirs: named(lit ? [lit] : []) },
       turnMode: useTurnModeStore.getState().turnMode,
       legs: (['speaker', 'participant'] as const).filter((leg) => intent.includes(leg) || shown.includes(leg)),
       microphoneMissing: (options.microphoneRequired?.() ?? false) && microphoneMissing(intent, audio.selectedInputDevice?.deviceId),
@@ -68,6 +79,7 @@ export function appSubtitleSession(
     useAudioStore.subscribe(update),
     view.subscribe(update),
     useAccountStore.subscribe(update),
+    useCoachingStore.subscribe(update),
     useSettingsStore.subscribe((s) => s.textOnly, update),
     // A plain store (no subscribeWithSelector): fires on every change of it,
     // but `update` compares the computed session before it notifies its own

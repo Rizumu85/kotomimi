@@ -207,6 +207,26 @@
     "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
     "text": "Tylko Kotomimi — usuwa jedynie dźwięk odtwarzany przez Kotomimi, dzięki czemu Twój głos jest odbierany najwyraźniej. Najlepiej sprawdza się ze słuchawkami lub goglami VR. Z głośnikami działa też w trybie „Oboje”. Wybierz tę opcję, jeśli jako mikrofon służy wirtualna karta dźwiękowa (VB-Cable, BlackHole)."
   },
+  "fork.echoCancellationGate": {
+    "en": "By loudness",
+    "text": "Według głośności"
+  },
+  "fork.echoCancellationGateTooltip": {
+    "en": "By loudness — for loudspeakers: what they play comes back into the microphone far quieter than your voice, so it is kept out by its loudness and your voice is left as it is.",
+    "text": "Według głośności — przy korzystaniu z głośników: dźwięk z głośników docierający do mikrofonu jest znacznie cichszy niż twój głos, więc jest odfiltrowywany na podstawie głośności, a twój głos pozostaje bez zmian."
+  },
+  "fork.echoCancellationOff": {
+    "en": "Off",
+    "text": "Wyłączone"
+  },
+  "fork.echoCancellationOffTooltip": {
+    "en": "Off — the microphone as it is. For headphones: nothing plays into it.",
+    "text": "Wyłączone — mikrofon trafia do rozpoznawania bez zmian. Do słuchawek: żaden dźwięk nie przedostaje się do mikrofonu."
+  },
+  "fork.echoCancellationPassthrough": {
+    "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
+    "text": "Gdy przekazywanie oryginalnego dźwięku jest włączone, działa tylko „Według głośności”: pozostałe opcje uznają Twój głos za echo i go usuwają."
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Szukaj ponownie"
@@ -995,6 +1015,134 @@
     "en": "What you want to say — Enter translates",
     "text": "Co chcesz powiedzieć? Enter tłumaczy"
   },
+  "fork.voice.auto": {
+    "en": "Read my translations as they come",
+    "text": "Czytaj tłumaczenie, gdy skończę mówić"
+  },
+  "fork.voice.cannotSpeak": {
+    "en": "{{name}} cannot speak {{language}}.",
+    "text": "{{name}} nie obsługuje języka {{language}}."
+  },
+  "fork.voice.hearBoth": {
+    "en": "To both",
+    "text": "Dla obu stron"
+  },
+  "fork.voice.hearers": {
+    "en": "Read my translations aloud",
+    "text": "Odczytuj tłumaczenia na głos"
+  },
+  "fork.voice.hearMe": {
+    "en": "To me",
+    "text": "Dla mnie"
+  },
+  "fork.voice.hearNone": {
+    "en": "Off",
+    "text": "Wyłączone"
+  },
+  "fork.voice.hearThem": {
+    "en": "To them",
+    "text": "Dla rozmówcy"
+  },
+  "fork.voice.lineFailed": {
+    "en": "This line could not be read aloud",
+    "text": "Nie udało się przeczytać tego wiersza"
+  },
+  "fork.voice.man": {
+    "en": "Male voice",
+    "text": "Głos męski"
+  },
+  "fork.voice.meetingDevice": {
+    "en": "Output for the other side",
+    "text": "Wyjście audio dla rozmówców"
+  },
+  "fork.voice.meetingDeviceAuto": {
+    "en": "Virtual microphone (automatic)",
+    "text": "Wirtualny mikrofon (automatycznie)"
+  },
+  "fork.voice.meetingDeviceTooltip": {
+    "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
+    "text": "Kotomimi odtwarza tłumaczenie na tym urządzeniu. Aplikacja do rozmów używa go jako mikrofonu. Jeśli karta dźwiękowa obsługuje miksowanie sprzętowe, wybierz jeden z jej kanałów odtwarzania i połącz na karcie dźwięk z tego kanału z dźwiękiem z mikrofonu. Dzięki temu Twój głos nie przechodzi przez oprogramowanie."
+  },
+  "fork.voice.modelPlaceholder": {
+    "en": "The model's name, e.g. tts-1",
+    "text": "Nazwa modelu, np. tts-1"
+  },
+  "fork.voice.myVoiceToo": {
+    "en": "My own voice goes too",
+    "text": "Przesyłaj też mój głos"
+  },
+  "fork.voice.myVoiceTooTooltip": {
+    "en": "Off: they hear only the voice reading your translation.",
+    "text": "Po wyłączeniu rozmówca słyszy tylko odczytywane tłumaczenie."
+  },
+  "fork.voice.needsSpeaker": {
+    "en": "It reads what you say or type. Switch the mode to \"Me\" or \"Both\".",
+    "text": "Czytane są tłumaczenia tego, co mówisz lub piszesz. Przełącz tryb na „Ja” lub „Obie strony”."
+  },
+  "fork.voice.on": {
+    "en": "Read aloud",
+    "text": "Czytaj na głos"
+  },
+  "fork.voice.sample": {
+    "en": "Play a sample",
+    "text": "Odsłuchaj próbkę"
+  },
+  "fork.voice.sayLine": {
+    "en": "Read this line aloud",
+    "text": "Przeczytaj ten wiersz"
+  },
+  "fork.voice.stage": {
+    "en": "Voice",
+    "text": "Czytanie"
+  },
+  "fork.voice.stageTooltip": {
+    "en": "Reads your translations aloud. Any line of the conversation can be heard too: press its speaker button.",
+    "text": "Czyta na głos tłumaczenia Twoich wypowiedzi. Możesz też odsłuchać dowolny wiersz rozmowy: kliknij przy nim ikonę głośnika."
+  },
+  "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "Zatrzymaj"
+  },
+  "fork.voice.toMe": {
+    "en": "I hear it",
+    "text": "Słyszę ja"
+  },
+  "fork.voice.toMeFix": {
+    "en": "Choose",
+    "text": "Wybierz"
+  },
+  "fork.voice.toMeLocked": {
+    "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
+    "text": "Opcja „Do mnie” jest niedostępna. Kotomimi pobiera dźwięk z całego systemu, więc odczytane tłumaczenie zostałoby uznane za wypowiedź rozmówcy. Wybierz jedną aplikację (np. VRChat) jako źródło głosu rozmówcy."
+  },
+  "fork.voice.toThem": {
+    "en": "The other side hears it",
+    "text": "Słyszy rozmówca"
+  },
+  "fork.voice.toThemTooltip": {
+    "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
+    "text": "Przy czytaniu rozmówcy dźwięk trafia do wirtualnego mikrofonu. W VRChat lub aplikacji do spotkań wybierz go jako mikrofon (w Windows: CABLE Output)."
+  },
+  "fork.voice.voice": {
+    "en": "Voice",
+    "text": "Głos"
+  },
+  "fork.voice.voiceOf": {
+    "en": "{{language}} voice",
+    "text": "Głos: {{language}}"
+  },
+  "fork.voice.volumeMine": {
+    "en": "Volume for me",
+    "text": "Głośność dla mnie"
+  },
+  "fork.voice.volumeTheirs": {
+    "en": "Volume for them",
+    "text": "Głośność dla rozmówcy"
+  },
+  "fork.voice.woman": {
+    "en": "Female voice",
+    "text": "Głos żeński"
+  },
   "fork.vr.back": {
     "en": "Back",
     "text": "Wstecz"
@@ -1475,6 +1623,10 @@
     "en": "Custom address",
     "text": "Własny adres"
   },
+  "providers.localai.apiServiceEdge": {
+    "en": "Edge online voices (free)",
+    "text": "Głosy online Edge (bezpłatne)"
+  },
   "providers.localai.apiServiceModel": {
     "en": "Choose from the list on the right, or type a name",
     "text": "Wybierz z listy po prawej lub wpisz nazwę"
@@ -1867,6 +2019,34 @@
     "en": "Updating the speech recognition engine. You can start once it is done.",
     "text": "Aktualizowanie silnika rozpoznawania mowy. Możesz rozpocząć po zakończeniu."
   },
+  "providers.localai.nativeVoiceFailed": {
+    "en": "The voice engine could not start. In the Voice card, press \"Try again\" — or choose another model.",
+    "text": "Nie udało się uruchomić silnika mowy. W sekcji „Czytanie” kliknij „Spróbuj ponownie” lub wybierz inny model."
+  },
+  "providers.localai.nativeVoiceFailedShort": {
+    "en": "The voice engine could not start.",
+    "text": "Nie udało się uruchomić silnika mowy."
+  },
+  "providers.localai.nativeVoiceMissing": {
+    "en": "The voice model is not downloaded yet. Download it to start.",
+    "text": "Model do czytania nie został jeszcze pobrany. Pobierz go, aby rozpocząć."
+  },
+  "providers.localai.nativeVoiceReady": {
+    "en": "The voice engine is ready.",
+    "text": "Silnik mowy jest gotowy."
+  },
+  "providers.localai.nativeVoiceUnsupported": {
+    "en": "The native voice engine is not available for this system. In the Voice card, switch to \"API model\".",
+    "text": "Ten system nie obsługuje natywnego silnika mowy. W sekcji „Czytanie” wybierz „Model API”."
+  },
+  "providers.localai.nativeVoiceUpdating": {
+    "en": "Updating the voice engine. You can start once it is done.",
+    "text": "Aktualizowanie silnika mowy. Po zakończeniu możesz zacząć."
+  },
+  "providers.localai.nativeVoiceWarmingShort": {
+    "en": "Starting the voice engine…",
+    "text": "Uruchamianie silnika mowy…"
+  },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
     "text": "Silnik rozpoznawania mowy jeszcze się uruchamia. Pierwszy raz po włączeniu komputera zajmuje to około pół minuty. Możesz zacząć, gdy będzie gotowy."
@@ -1906,6 +2086,14 @@
   "providers.localai.noteIndexTranslate": {
     "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
     "text": "Test tłumaczenia z japońskiego na chiński: poważne błędy w około 3 z 30 zdań, najlepszy wynik wśród testowanych modeli. Około 0.1 s na zdanie. Zajmuje około 2 GB pamięci karty graficznej, obsługuje ponad 100 języków."
+  },
+  "providers.localai.noteIrodori": {
+    "en": "Japanese only. Measured: nothing misread, about half a second a sentence. About 1.7 GB of video memory.",
+    "text": "Tylko po japońsku. W testach: bez błędów wymowy, około pół sekundy na zdanie. Zajmuje około 1.7 GB pamięci karty graficznej."
+  },
+  "providers.localai.noteKokoro": {
+    "en": "Light: runs on the processor and takes no video memory. Less natural, Japanese most of all.",
+    "text": "Lekki: używa tylko procesora, bez pamięci karty graficznej. Brzmi mniej naturalnie, zwłaszcza po japońsku."
   },
   "providers.localai.noteMoonshineJa": {
     "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
@@ -1954,6 +2142,10 @@
   "providers.localai.noteQwen17": {
     "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
     "text": "Test rozmów po japońsku: około 19% błędnych znaków. Tekst pojawia się dopiero po zakończeniu zdania (z opóźnieniem około 10 s). Powyższa wersja GGUF zapisuje tekst na bieżąco."
+  },
+  "providers.localai.noteQwen3Tts": {
+    "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
+    "text": "Brzmi najbardziej naturalnie i zaczyna mówić od razu. W testach po japońsku, chińsku i angielsku: bez błędów wymowy. Zajmuje około 3 GB pamięci karty graficznej, obsługuje 10 języków."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
@@ -2130,6 +2322,10 @@
   "providers.localai.sourceAuto": {
     "en": "The language cannot be detected with this setup. Choose the language you speak.",
     "text": "Ta konfiguracja nie pozwala automatycznie wykrywać języka. Wybierz język, w którym mówisz."
+  },
+  "providers.localai.speakKey": {
+    "en": "API key of the voice",
+    "text": "Klucz API modelu do czytania"
   },
   "providers.localai.speedAbout": {
     "en": "About {{seconds}} s",
@@ -2339,6 +2535,10 @@
     "en": "API model",
     "text": "Model przez API"
   },
+  "providers.localai.voiceUnnamed": {
+    "en": "The voice has no model to run yet. Name one in the Voice card.",
+    "text": "Nie podano jeszcze modelu do czytania. Wpisz jego nazwę w sekcji „Czytanie”."
+  },
   "providers.openai_live.name": {
     "en": "OpenAI Live",
     "text": "OpenAI Live"
@@ -2454,6 +2654,10 @@
   "settings.model": {
     "en": "Model",
     "text": "Model"
+  },
+  "settings.noiseSuppressionTooltip.off": {
+    "en": "Off — no noise suppression: the microphone as it is. Best in a quiet room.",
+    "text": "Wyłączone — brak redukcji szumów: mikrofon działa bez zmian. Najlepiej w cichym pomieszczeniu."
   },
   "settings.sentenceSegmentationChunkAuto": {
     "en": "Auto",

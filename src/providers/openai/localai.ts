@@ -64,11 +64,13 @@ import { buildRealtime } from './config';
 import { glossaryRecognitionTerms } from '../../lib/glossary/glossary';
 import { recognizerAsked, serverBilingual } from './serverRecognizers';
 import { phoneBase, plainAddress } from '../../lib/lan/discover';
-import { alsoFirst, alsoInto, alsoListed, alsoLit, alsoSpoken, mineReach, backInto, crossings, myRow, theirRow, theirLitLanguages, theyLitOf, deviceLanguage, canDetectOther, hearingOf, type HearingChoice, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, hearsNatively, needsServer, serverDetects, PLACE_FIELDS, PLACES, translatesNatively, type AsrHere, type Place } from './localaiDevice';
-import { NATIVE_MODELS, isApple, preferNative, type NativePick } from './localaiNative';
-import { NATIVE_DEFAULT_MODEL, appleAlso, coachBaseUrl, coachGap, coachIdle, coachUp, hearingPick, hearsByDownloaded, holdNativeForRun, nativeEither, nativeGap, nativeUp, restNative, translatorUp, nativeIdle, nativeModelFor, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
+import { alsoFirst, alsoInto, alsoListed, alsoLit, alsoSpoken, backInto, crossings, myRow, theirRow, theirLitLanguages, theyLitOf, deviceLanguage, canDetectOther, hearingOf, type HearingChoice, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, hearsNatively, needsServer, serverDetects, PLACE_FIELDS, PLACES, translatesNatively, type AsrHere, type Place } from './localaiDevice';
+import { NATIVE_MODELS, isApple, preferNative, type NativeModel, type NativePick } from './localaiNative';
+import { NATIVE_DEFAULT_MODEL, appleExtraGap, downloadedAppleLanguages, coachBaseUrl, coachGap, coachIdle, coachUp, hearingPick, hearsByDownloaded, holdNativeForRun, nativeEither, nativeGap, nativeUp, restNative, translatorUp, nativeIdle, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_COACH_EXTRA, NATIVE_COACHES, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
-import { namedAmong, pairedLanguages, recognitionLimits, speechDetection, toldLanguage } from './hearingPlan';
+import { VOICE_DEFAULTS, speaksAlong, speaksByKeyedApi, speaksNatively, voiceChoice, voiceSpeaks, voiceStageOf, type VoiceChoice } from './localaiVoice';
+import { voiceGap, voiceIdle, voiceUp } from './localaiNative';
+import { defaultPairedModel, namedAmong, pairedLanguages, recognitionLimits, speechDetection, tellingOf, toldLanguage, type Telling } from './hearingPlan';
 import { NATIVE_DEFAULT_TRANSLATOR, NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator, translatorRequest } from './nativeTranslators';
 import { LocalAITurnDetectionControls, LocalAITurnDetectionHelp, LocalAITurnDetectionSummary } from './LocalAIEngine';
 import { KotomimiIcon } from './LocalAIIcon';
@@ -189,6 +191,8 @@ export interface LocalAISettings extends RealtimeSettings {
   coachNativeModel: string;
   /** The other device wants an access key: a credential field appears. */
   serverNeedsKey: boolean;
+  /** Fork: whether translations are spoken, where the voice is made and in which voices (`localaiVoice.ts`). */
+  speak: VoiceChoice;
   /** This computer's turn detection, when it hears: Local Inference's own knobs, under its own names. */
   vadThreshold: number;
   vadNegativeThreshold: number;
@@ -253,6 +257,7 @@ export const LOCALAI_DEFAULTS: LocalAISettings = {
   coachHere: 'native',
   coachNativeModel: NATIVE_DEFAULT_COACH,
   serverNeedsKey: false,
+  speak: VOICE_DEFAULTS,
   vadThreshold: LOCAL_INFERENCE_DEFAULTS.vadThreshold,
   vadNegativeThreshold: LOCAL_INFERENCE_DEFAULTS.vadNegativeThreshold,
   vadMinSilenceDuration: LOCAL_INFERENCE_DEFAULTS.vadMinSilenceDuration,
@@ -413,6 +418,7 @@ export function migrateLocalAISettings(stored: Readonly<Record<string, unknown>>
     coachNativeModel: text('coachNativeModel'),
     ...migratePlaces(stored, inputs.legacy ?? {}),
     serverNeedsKey: flag('serverNeedsKey'),
+    speak: voiceChoice(stored.speak),
     vadThreshold: number('vadThreshold'),
     vadNegativeThreshold: number('vadNegativeThreshold'),
     vadMinSilenceDuration: number('vadMinSilenceDuration'),
@@ -482,7 +488,7 @@ const needsServerEither = (s: LocalAISettings): boolean => SIDES.some((leg) => n
 const own = (key: string, labelKey: string, secret: boolean, placeholderKey = labelKey): CredentialField => ({ key, labelKey, secret, placeholderKey, drawnByAssist: true });
 
 export const localaiCredentials: Provider<LocalAISettings, LocalAICredentials, never>['credentials'] = {
-  keys: ['endpoint', 'serverKey', 'asrKey', 'translateKey', 'coachKey'],
+  keys: ['endpoint', 'serverKey', 'asrKey', 'translateKey', 'coachKey', 'speakKey'],
   fields: (s): CredentialField[] => [
     ...(needsServerEither(s) ? [own('endpoint', 'providers.localai.endpoint', false, 'providers.localai.endpointPlaceholder')] : []),
     ...(needsServerEither(s) && s.serverNeedsKey ? [own('serverKey', 'providers.localai.serverKey', true)] : []),
@@ -490,6 +496,7 @@ export const localaiCredentials: Provider<LocalAISettings, LocalAICredentials, n
     ...(SIDES.some((leg) => { const one = hearingOf(s, leg); return one.asrVia === 'api' && one.asrApiNeedsKey; }) ? [own('asrKey', 'providers.localai.asrKey', true)] : []),
     ...(s.translateAt === 'api' && s.translateNeedsKey ? [own('translateKey', 'providers.localai.translateKey', true)] : []),
     ...(coachIs(s, 'api') && s.coachNeedsKey ? [own('coachKey', 'providers.localai.coachKey', true)] : []),
+    ...(speaksByKeyedApi(s.speak) ? [own('speakKey', 'providers.localai.speakKey', true)] : []),
   ],
   // `values` holds exactly the fields shown: the address is in it only while a stage is on the other device, a key only when its stage asks for one.
   read: (values): LocalAICredentials | CredentialsMissing => {
@@ -500,12 +507,13 @@ export const localaiCredentials: Provider<LocalAISettings, LocalAICredentials, n
     const asrKey = values.asrKey?.trim();
     const translateKey = values.translateKey?.trim();
     const coachKey = values.coachKey?.trim();
+    const speakKey = values.speakKey?.trim();
     if (values.serverKey !== undefined && !serverKey) return { missing: 'Enter the access key of the server.', code: 'server_key_missing' };
     if (values.asrKey !== undefined && !asrKey) return { missing: 'Enter the API key of the speech recognition API.' };
     if (values.translateKey !== undefined && !translateKey) return { missing: 'Enter the API key of the translation model.' };
     if (values.coachKey !== undefined && !coachKey) return { missing: 'Enter the API key of the feedback model.' };
     // No Realtime key (see the header) unless the server asks for one: the adapter then offers no subprotocol.
-    return { apiKey: serverKey ?? '', endpoint, ...(asrKey ? { asrKey } : {}), ...(translateKey ? { translateKey } : {}), ...(coachKey ? { coachKey } : {}) };
+    return { apiKey: serverKey ?? '', endpoint, ...(asrKey ? { asrKey } : {}), ...(translateKey ? { translateKey } : {}), ...(coachKey ? { coachKey } : {}), ...(speakKey ? { speakKey } : {}) };
   },
   // The setup wizard's one question (`StepKotomimi`): everything on another device, or everything on this computer.
   choice: {
@@ -558,7 +566,7 @@ function unnamedStage(s: LocalAISettings, models: readonly LocalAIModel[], coach
  * the card refuses before the run rather than a sentence failing — or being translated by a model nobody chose.
  */
 function serverTranslatorUnfit(
-  s: LocalAISettings, models: readonly LocalAIModel[], pair: { source: string; target: string }, leg: LegName, heard: string, both = false,
+  s: LocalAISettings, models: readonly LocalAIModel[], pair: { source: string; target: string }, leg: LegName, heard: string, spoken: string[] = [],
 ): ProviderRefusal | null {
   const named = s.translateServerModel.trim();
   if (!named || translatePlace(s) !== 'server' || translatesAtOwnDevice(s)) return null;
@@ -568,8 +576,8 @@ function serverTranslatorUnfit(
   const directions: Array<[string, string]> = leg === 'speaker'
     ? [
       [pair.source, pair.target],
-      ...(both ? backInto(s, pair).map((also) => [also, pair.source] as [string, string]) : []),
-      ...(both ? crossings(s, pair).map((c) => [c.source, c.target] as [string, string]) : []),
+      ...spoken.map((also) => [also, pair.source] as [string, string]),
+      ...crossings(s, pair, spoken).map((c) => [c.source, c.target] as [string, string]),
       ...((into) => (into ? [[pair.source, into] as [string, string]] : []))(alsoInto(s, pair)),
     ]
     : [[heard, pair.source]];
@@ -616,10 +624,10 @@ function undetected(s: LocalAISettings, models: readonly LocalAIModel[], source:
  * lends from a model server beside it (a LocalAI), whose languages it does
  * not know. `heard`: the language the leg hears.
  */
-function unheard(s: LocalAISettings, models: readonly LocalAIModel[], heard: string): ProviderRefusal | null {
+function unheard(s: LocalAISettings, models: readonly LocalAIModel[], heard: string, family?: readonly string[] | null): ProviderRefusal | null {
   if (s.asrVia !== 'server' || heard === AUTO || !isKotomimiServer(models)) return null;
   const language = deviceLanguage(heard);
-  if (modelsFor(models, 'asr').some((m) => m.host !== KOTOMIMI_HOST || !m.languages?.length || m.languages.includes(language))) return null;
+  if (family ? family.includes(language) : modelsFor(models, 'asr').some((m) => m.host !== KOTOMIMI_HOST || !m.languages?.length || m.languages.includes(language))) return null;
   return { refused: `The other device shares no speech recognition model for ${heard}.`, code: 'server_no_asr', params: { source: heard } };
 }
 
@@ -628,20 +636,13 @@ function unheard(s: LocalAISettings, models: readonly LocalAIModel[], heard: str
  * main language, or one the user also speaks. Refused here, at the start and at a switch alike, rather than every
  * stretch being refused there once it runs. A recognizer whose languages are not known is left to answer for itself.
  */
-function phoneUnheard(s: LocalAISettings, models: readonly LocalAIModel[], pair: { source: string; target: string }, leg: LegName): ProviderRefusal | null {
+function phoneUnheard(s: LocalAISettings, pair: { source: string; target: string }, leg: LegName, heard: string, hearer: ReturnType<typeof hearerOf>): ProviderRefusal | null {
   const address = s.asrOther?.trim() ?? '';
   if (!address || s.asrVia !== 'api' || s.asrApiBaseUrl.trim().replace(/\/+$/, '') !== phoneTextBase(address)) return null;
-  const hearer = hearerOf(s, models, pair, leg);
   const languages = hearer?.languages?.filter((code) => code !== AUTO) ?? [];
-  if (!hearer || languages.length === 0) return null;
-  const heard = heardBy(s, pair, leg, models);
-  // Apple Speech hears one beside the leg's own (`pairedLanguages`): the user's first other language in use; the other
-  // side's second lit one. The others kept from another recognizer are not asked of it.
-  const paired = hearer.apple && !hearer.detects;
-  const first = alsoFirst(s, pair);
-  const also = s.coach ? [] : alsoSpoken(s, pair).filter((code) => !paired || (first !== undefined && deviceLanguage(code) === deviceLanguage(first)));
-  const theirs = paired ? theirLitLanguages(s, pair) : [];
-  const asked = leg === 'speaker' ? [heard === AUTO ? pair.source : heard, ...also] : heard !== AUTO ? [heard] : theirs.length > 1 ? theirs : [];
+  if (!hearer?.languages || (!languages.length && hearer.telling.by !== 'pairing')) return null;
+  const asked = hearer.telling.by === 'pairing' ? [toldLanguage(heard, leg === 'speaker' ? pair.source : pair.target, false)]
+    : leg === 'speaker' ? [heard === AUTO ? pair.source : heard, ...(s.coach ? [] : alsoSpoken(s, pair))] : heard !== AUTO ? [heard] : [];
   const missing = asked.find((code) => !languages.some((has) => deviceLanguage(has) === deviceLanguage(code)));
   if (!missing) return null;
   return {
@@ -652,18 +653,36 @@ function phoneUnheard(s: LocalAISettings, models: readonly LocalAIModel[], pair:
 }
 
 /** An explicitly selected paired recognizer or bilingual mode must not silently become single-language. */
-function unpaired(s: LocalAISettings, models: readonly LocalAIModel[], pair: { source: string; target: string }, speaker: boolean): ProviderRefusal | null {
-  const also = alsoFirst(s, pair);
-  const first = normalizeTranscriptionLanguage(pair.source);
-  const second = normalizeTranscriptionLanguage(also ?? pair.target);
-  if (hearingPlace(s) !== 'server' || !isKotomimiServer(models) || !first || !second || first === second) return null;
-  // Only the speaker's other languages ask the device for a pair; the other side's detection is a different choice.
-  if (!speaker || !also) return null;
-  if (canDetectOther(s, models) || serverBilingual(s.asrModel, { source: pair.source, target: also }, models)) return null;
-  return {
-    refused: `The other device cannot recognize both ${first} and ${second} with the selected model. Update Kotomimi on both computers and install both Apple Speech languages on the Mac, or choose a recognizer that supports both.`,
-    code: 'server_no_bilingual', params: { source: first, target: second },
-  };
+function pairingFor(s: LocalAISettings, models: readonly LocalAIModel[], pair: { source: string; target: string }, leg: LegName, heard: string, hearer: ReturnType<typeof hearerOf>) {
+  if (hearer?.telling.by !== 'pairing') return undefined;
+  const primary = toldLanguage(heard, leg === 'speaker' ? pair.source : pair.target, false);
+  const lit = theirLitLanguages(s, pair);
+  const required = heard !== AUTO ? [] : leg === 'speaker' ? alsoSpoken(s, pair, models, hearer.telling) : lit.slice(1);
+  const has = (code: string) => !hearer.languages || hearer.languages.some((one) => deviceLanguage(one) === deviceLanguage(code));
+  const place = hearingPlace(s);
+  const extras = place === 'api' && heard !== AUTO ? [] : pairedLanguages({
+    leg, told: primary, pair, most: hearer.telling.most, theirLit: lit, alsoSpoken: required, has,
+  });
+  const remote = place === 'server' && extras.length ? serverBilingual(s.asrModel, { source: primary, target: extras[0] }, models, extras[1]) : null;
+  const paired = place === 'server' ? remote?.languages.slice(1) ?? [] : extras;
+  if (hearer.native) {
+    const absent = has(primary) ? appleExtraGap(hearer.native, required) : null;
+    const gap: ProviderRefusal | undefined = absent ? { refused: absent.reason, code: absent.code, params: absent.params } : undefined;
+    return { required, paired, remote, gap };
+  }
+  const missing = has(primary) && required.find((code) => !paired.includes(deviceLanguage(code)));
+  let gap: ProviderRefusal | undefined;
+  if (missing) {
+    if (place === 'api') {
+      const address = plainAddress(s.asrOther || s.asrApiBaseUrl);
+      gap = { refused: `The phone (${address}) hears no ${missing} with ${hearer.name}.`, code: 'phone_no_language', params: { address, name: hearer.name, source: missing } };
+    } else {
+      const source = deviceLanguage(primary);
+      const target = deviceLanguage(missing);
+      gap = { refused: `The other device cannot recognize both ${source} and ${target} with the selected model.`, code: 'server_no_bilingual', params: { source, target } };
+    }
+  }
+  return { required, paired, remote, gap };
 }
 
 export interface LocalAICheckDeps {
@@ -736,13 +755,13 @@ const listed = (body: unknown): Listed[] => {
 };
 
 /** A lent device's recognizers (`hear`, the iPad app's), each with the languages it lists for it: none, where it lists none. */
-const hearListing = (body: unknown): Map<string, string[]> => {
-  const out = new Map<string, string[]>();
+const hearListing = (body: unknown): Map<string, string[] | undefined> => {
+  const out = new Map<string, string[] | undefined>();
   const hear = (body as { hear?: unknown } | null)?.hear;
   if (!Array.isArray(hear)) return out;
   for (const m of hear as Array<{ id?: unknown; languages?: unknown }>) {
     if (typeof m?.id !== 'string' || !m.id || out.has(m.id)) continue;
-    const languages = Array.isArray(m.languages) ? m.languages.filter((l): l is string => typeof l === 'string' && /^[a-z]{2,3}([-_][A-Za-z0-9]{2,8})?$/i.test(l)).slice(0, 60) : [];
+    const languages = Array.isArray(m.languages) ? m.languages.filter((l): l is string => typeof l === 'string' && /^[a-z]{2,3}([-_][A-Za-z0-9]{2,8})?$/i.test(l)).slice(0, 60) : undefined;
     out.set(m.id.slice(0, 80), languages);
   }
   return out;
@@ -879,9 +898,9 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
           // those it has them for (`hear`): what a side may add, and what a run may ask of it, is read from them.
           if (other.slot === 'asr') {
             const hears = hearListing(body);
-            for (const m of theirs) models.push({ id: m.id, kind: 'asr', from: 'asr', ...(hears.get(m.id)?.length ? { languages: hears.get(m.id) } : {}) });
+            for (const m of theirs) models.push({ id: m.id, kind: 'asr', from: 'asr', ...(hears.get(m.id) ? { languages: hears.get(m.id) } : {}) });
             for (const [id, languages] of hears) {
-              if (!theirs.some((m) => m.id === id)) models.push({ id, kind: 'asr', from: 'asr', ...(languages.length ? { languages } : {}) });
+              if (!theirs.some((m) => m.id === id)) models.push({ id, kind: 'asr', from: 'asr', ...(languages ? { languages } : {}) });
             }
             continue;
           }
@@ -951,12 +970,16 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
       const plain = shownAsSaid(s, ctx.pair, leg, found);
       const both = leg === 'speaker' && speaksBoth(s, found, ctx.pair) && ctx.pair.source.toLowerCase() !== ctx.pair.target.toLowerCase();
       // What the leg translates: the speaker the pair and — when it speaks both — its reverse; the other side its reverse.
-      const unfitServer = serverTranslatorUnfit(s, found, ctx.pair, leg, heard, both);
-      const gap = unfitServer ?? unpaired(s, found, ctx.pair, leg === 'speaker') ?? unnamedStage(s, found, coached, plain, both) ?? undetected(s, found, leg === 'speaker' ? ctx.pair.source : heard, coached, leg === 'participant' ? ctx.pair.target : undefined) ?? unheard(s, found, heard === AUTO && !serverDetects(found, s.asrModel) ? (leg === 'speaker' ? ctx.pair.source : ctx.pair.target) : heard)
-        ?? phoneUnheard(s, found, ctx.pair, leg)
+      const hearer = hearerOf(s, found, ctx.pair, leg);
+      const pairing = pairingFor(s, found, ctx.pair, leg, heard, hearer);
+      const spoken = both ? pairing?.required ?? alsoSpoken(s, ctx.pair, found) : [];
+      const unfitServer = serverTranslatorUnfit(s, found, ctx.pair, leg, heard, spoken);
+      const primary = toldLanguage(heard, leg === 'speaker' ? ctx.pair.source : ctx.pair.target, !pairing && serverDetects(found, s.asrModel));
+      const gap = (hearsNatively(s) ? null : pairing?.gap) ?? unfitServer ?? unnamedStage(s, found, coached, plain, both) ?? undetected(s, found, leg === 'speaker' ? ctx.pair.source : heard, coached, leg === 'participant' ? ctx.pair.target : undefined) ?? unheard(s, found, primary, pairing ? hearer?.languages : undefined)
+        ?? phoneUnheard(s, ctx.pair, leg, heard, hearer)
         ?? ((coached && !both) || plain ? null : phoneTranslatorUnfit(s, leg === 'speaker' ? ctx.pair.source : heard, leg === 'speaker' ? ctx.pair.target : ctx.pair.source))
-        ?? (both ? backInto(s, ctx.pair).reduce<ProviderRefusal | null>((found, also) => found ?? phoneTranslatorUnfit(s, also, ctx.pair.source), null) : null)
-        ?? (both ? crossings(s, ctx.pair).reduce<ProviderRefusal | null>((found, c) => found ?? phoneTranslatorUnfit(s, c.source, c.target), null) : null)
+        ?? spoken.reduce<ProviderRefusal | null>((found, also) => found ?? phoneTranslatorUnfit(s, also, ctx.pair.source), null)
+        ?? crossings(s, ctx.pair, spoken).reduce<ProviderRefusal | null>((found, c) => found ?? phoneTranslatorUnfit(s, c.source, c.target), null)
         ?? ((into) => (leg === 'speaker' && into && !(coached && !both) ? phoneTranslatorUnfit(s, ctx.pair.source, into) : null))(alsoInto(s, ctx.pair));
       // Fork: another Kotomimi with nothing for the leg's language is told which, and offers a model to download for it
       // in its own settings. Not waited for: the refusal stands, whatever it answers.
@@ -979,11 +1002,12 @@ interface NativeNeeds {
   hears?: { pick: NativePick; heard: string[] };
   translates?: string;
   coaches?: string;
+  speaks?: string;
 }
 
 /** Fork: what this computer's recognizer hears a run's languages with (`hearingPick`), for the run's pair. */
 export const runHearing = (s: LocalAISettings, pair: { source: string; target: string }, models: readonly LocalAIModel[] = []): NativePick => {
-  const also = pairedLanguages({ leg: 'speaker', told: pair.source, pair, alsoFirst: alsoFirst(s, pair) })[0];
+  const also = alsoFirst(s, pair, models);
   // Fork: of the side this computer hears alone, where the other is elsewhere (`hearingOf`): the other side's
   // detection, or the speaker's two languages, are then no reason to pick a model that tells languages apart.
   const detecting = s.asrAlone !== 'speaker' && detectsOther(s, models);
@@ -997,41 +1021,31 @@ export const runHearing = (s: LocalAISettings, pair: { source: string; target: s
 
 /** Resolve an explicit side choice before auto merges the two legs. */
 export function runSideHearing(s: LocalAISettings, pair: { source: string; target: string }, leg: 'speaker' | 'participant', models: readonly LocalAIModel[] = []): NativePick {
-  const fallback = runHearing(s, pair, models);
   const own = leg === 'speaker' ? pair.source : pair.target;
   const key = leg === 'participant' && s.asrDetectOther ? 'auto' : own.toLowerCase().split(/[-_]/)[0];
-  const chosen = s.asrNativeByLanguage[key];
-  if (!chosen || !NATIVE_MODELS.some((m) => m.id === chosen)) return fallback;
-  const others = leg === 'speaker' ? alsoSpoken(s, pair) : theirLitLanguages(s, pair).filter((code) => code !== own);
+  const chosen = s.asrNativeByLanguage[key] ?? (isApple(s.asrNativeModel) ? s.asrNativeModel : undefined);
+  if (!chosen || !NATIVE_MODELS.some((m) => m.id === chosen)) return runHearing(s, pair, models);
+  const telling = tellingOf('device', chosen);
+  const others = leg === 'speaker' ? alsoSpoken(s, pair, models, telling) : theirLitLanguages(s, pair).slice(1);
   // Fork: the user's own side alone on this computer is heard by its own choice whatever it hears (`nativeChoiceRows`).
   const heard = leg === 'speaker' && s.asrAlone === 'speaker' ? heardBy(s, pair, leg, models) : AUTO;
-  const pick: NativePick = { model: chosen, byLanguage: { ...s.asrNativeByLanguage, auto: chosen, [own.toLowerCase().split(/[-_]/)[0]]: chosen, ...(heard !== AUTO ? { [heard.toLowerCase().split(/[-_]/)[0]]: chosen } : {}) }, bestEffort: !nativeModelFor(chosen, AUTO)?.detects && !isApple(chosen) };
-  if (isApple(chosen) && others.length) pick.either = { own, others };
+  const pick: NativePick = { model: chosen, byLanguage: { ...s.asrNativeByLanguage, auto: chosen, [own.toLowerCase().split(/[-_]/)[0]]: chosen, ...(heard !== AUTO ? { [heard.toLowerCase().split(/[-_]/)[0]]: chosen } : {}) }, bestEffort: telling.by === 'told' };
+  if (telling.by === 'pairing' && others.length) pick.either = { own, others };
   return pick;
 }
 
 /** The same picks readiness and startup must load, even when both legs are auto. */
 function runHearingNeeds(s: LocalAISettings, pair: { source: string; target: string }, legs: readonly ('speaker' | 'participant')[]): { pick: NativePick; heard: string[] } {
-  const heard = legs.map((leg) => heardForModel(s, pair, leg));
   const pick = runHearing(s, pair);
-  if (Object.keys(s.asrNativeByLanguage).length) pick.selections = legs.map((leg, index) => ({ pick: runSideHearing(s, pair, leg), language: heard[index] }));
-  return { pick, heard };
+  const selections = legs.map((leg) => {
+    const side = runSideHearing(s, pair, leg);
+    const nominal = leg === 'speaker' ? pair.source : pair.target;
+    const language = toldLanguage(heardBy(s, pair, leg), nominal, nativePicked(side, nominal)?.detects === true);
+    return { pick: side, language };
+  });
+  if (Object.keys(s.asrNativeByLanguage).length || selections.some((side) => isApple(side.pick.model) || side.pick.either)) pick.selections = selections;
+  return { pick, heard: selections.map((side) => side.language) };
 }
-
-/**
- * The language a native model is told for a leg. A leg left to be detected
- * (`AUTO`) is told `auto` only when its selected recognizer detects language;
- * otherwise it is told the leg's own source, and `identify.ts` names each finished sentence.
- * The native engine runs one model and gives it one language; `AUTO` is no
- * language to a model that cannot name it.
- */
-const heardForModel = (s: LocalAISettings, pair: { source: string; target: string }, leg: LegName): string => {
-  const heard = heardBy(s, pair, leg);
-  if (heard !== AUTO) return heard;
-  // Only a model that names the language is asked for `auto`; a best-effort one is told the leg's source.
-  const pick = runSideHearing(s, pair, leg);
-  return nativePicked(pick, AUTO)?.detects ? AUTO : (leg === 'speaker' ? pair.source : pair.target);
-};
 
 /** Fork: a recognizer that tells more languages apart than this offers "any language" (SenseVoice's five do not). */
 const ANY_PAST = 5;
@@ -1043,41 +1057,46 @@ const APPLE_NAME = 'apple-speech';
  * Fork: what hears a leg, as the language section names it (`languages.hearing`): this computer's model by its name and
  * the languages it tells apart; another device's or an API's by the model named, its languages not known here.
  */
-function hearerOf(s: LocalAISettings, models: readonly LocalAIModel[], pair: { source: string; target: string }, leg: LegName): { name: string; languages: readonly string[] | null; apple?: true; detects?: true; listed?: true } | undefined {
+function hearerOf(s: LocalAISettings, models: readonly LocalAIModel[], pair: { source: string; target: string }, leg: LegName): { name: string; languages: readonly string[] | null; telling: Telling; native?: NativeModel } | undefined {
   if (hearsNatively(s)) {
     const heard = heardBy(s, pair, leg, models);
-    const model = nativePicked(runSideHearing(s, pair, leg, models), heard) ?? nativePicked(runSideHearing(s, pair, leg, models), leg === 'speaker' ? pair.source : pair.target);
+    const model = nativePicked(runSideHearing(s, pair, leg, models), toldLanguage(heard, leg === 'speaker' ? pair.source : pair.target, false));
     if (!model) return undefined;
-    return { name: model.name.replace(/ GGUF$/, ''), languages: model.languages, ...(isApple(model.id) ? { apple: true as const } : {}), ...(model.detects ? { detects: true as const } : {}) };
+    const telling = tellingOf('device', model.id);
+    return { native: model, name: model.name.replace(/ GGUF$/, ''), languages: telling.by === 'pairing' ? downloadedAppleLanguages() : model.languages, telling };
   }
-  const named = (s.asrVia === 'api' ? asrApiModelOf(s) : hearsAtOwnDevice(s) ? s.asrOtherModel : s.asrModel).trim();
+  let named = (s.asrVia === 'api' ? asrApiModelOf(s) : hearsAtOwnDevice(s) ? s.asrOtherModel : s.asrModel).trim();
+  const place = hearingPlace(s);
+  if (!named && place === 'server') {
+    const primary = toldLanguage(heardBy(s, pair, leg, models), leg === 'speaker' ? pair.source : pair.target, false);
+    named = defaultPairedModel({ leg, told: primary, pair, theirLit: theirLitLanguages(s, pair), alsoSpoken: alsoLit(s, pair) }, models);
+  }
   if (!named) return undefined;
-  // Another Kotomimi lists a model's languages, and "auto" among them where it tells them apart (`nativeShared`); the
-  // Mac's recognition there, as one that hears two at once (`bilingual`): the user's own and one other, as here.
+  const telling = tellingOf(place, named, models);
   // The Mac's recognition is named as a whole ("apple-speech") and listed a language at a time ("apple-speech:ja").
-  const apple = named === APPLE_NAME || isApple(named);
   // The iPad names it whole too, and lists the languages downloaded there with it (`hearListing`).
-  if (apple) {
-    const each = models.filter((m) => isApple(m.id)).map((m) => m.id.slice(APPLE_NAME.length + 1));
-    const languages = each.length ? each : models.find((m) => m.id === named)?.languages?.filter((code) => code !== AUTO) ?? [];
-    // `listed`: every language it has, not this computer's one model of a language (`apple-speech:zh`).
-    return { name: 'Apple Speech', languages: languages.length ? languages : null, apple: true, ...(languages.length ? { listed: true as const } : {}) };
+  if (telling.by === 'pairing') {
+    const languages = place === 'server' ? models.filter((m) => !m.from && isApple(m.id)).map((m) => m.id.slice(APPLE_NAME.length + 1))
+      : models.find((m) => m.id === named)?.languages;
+    return { name: 'Apple Speech', languages: languages ?? null, telling };
   }
   const model = models.find((m) => m.id === named);
   const listed = model?.languages?.filter((code) => code !== AUTO);
-  const pairsTwo = model?.bilingual === true && !model.languages?.includes(AUTO);
   // A model of this app's own names, lent by another device: what it is here (its languages, whether it detects).
   const known = NATIVE_MODELS.find((m) => m.id === named);
   const name = known ? known.name.replace(/ GGUF$/, '') : nativeTextName(named);
-  const detects = model?.languages?.includes(AUTO) === true || known?.detects === true;
   const languages = listed?.length ? listed : known?.languages ?? null;
-  return { name, languages, ...(pairsTwo ? { apple: true as const } : {}), ...(detects ? { detects: true as const } : {}) };
+  return { name, languages, telling };
 }
 
 /** Fork: the legs this computer's own recognizer hears, and the settings as the first of them reads them (`hearingOf`): where both do, they read alike. */
 function nativeHearing(s: LocalAISettings, legs: readonly LegName[]): { s: LocalAISettings; legs: LegName[] } | null {
   const here = legs.filter((leg) => hearsNatively(hearingOf(s, leg)));
   return here.length > 0 ? { s: hearingOf(s, here[0]), legs: here } : null;
+}
+
+function voicesTarget(choice: VoiceChoice, target: string): boolean {
+  return speaksAlong(choice) && voiceSpeaks(choice, target);
 }
 
 function nativeNeeds(s: LocalAISettings, pair: { source: string; target: string }, legs: readonly ('speaker' | 'participant')[]): NativeNeeds {
@@ -1087,11 +1106,13 @@ function nativeNeeds(s: LocalAISettings, pair: { source: string; target: string 
     // Not where every leg is shown as said: nothing would ask it.
     ...(translatesNatively(s) && legs.some((leg) => !shownAsSaid(s, pair, leg)) ? { translates: s.translateNativeModel } : {}),
     ...(coachesNatively(s) && legs.includes('speaker') ? { coaches: s.coachNativeModel } : {}),
+    // Only the speaker's leg speaks.
+    ...(legs.includes('speaker') && voicesTarget(s.speak, pair.target) && speaksNatively(s.speak) ? { speaks: s.speak.nativeModel } : {}),
   };
 }
 
-export interface NativeUps { hears: typeof nativeUp; translates: typeof translatorUp; coaches: typeof coachUp; rest: typeof restNative }
-const UPS: NativeUps = { hears: nativeUp, translates: translatorUp, coaches: coachUp, rest: restNative };
+export interface NativeUps { hears: typeof nativeUp; translates: typeof translatorUp; coaches: typeof coachUp; speaks?: typeof voiceUp; rest: typeof restNative }
+const UPS: NativeUps = { hears: nativeUp, translates: translatorUp, coaches: coachUp, speaks: voiceUp, rest: restNative };
 
 /** The engines a run needs, brought up side by side and waited for. Rejects with the first that did not come up. */
 async function bringUp(needs: NativeNeeds, ups: NativeUps): Promise<boolean> {
@@ -1099,6 +1120,7 @@ async function bringUp(needs: NativeNeeds, ups: NativeUps): Promise<boolean> {
     ...(needs.hears ? [ups.hears(needs.hears.pick, needs.hears.heard)] : []),
     ...(needs.translates ? [ups.translates(needs.translates)] : []),
     ...(needs.coaches ? [ups.coaches(needs.coaches)] : []),
+    ...(needs.speaks && ups.speaks ? [ups.speaks(needs.speaks)] : []),
   ];
   if (starts.length === 0) return false;
   // Held while they load: a rest that an earlier run left pending does not stop what this one is waiting for.
@@ -1154,7 +1176,7 @@ export async function prepareLocalAI(shape: { pair: { source: string; target: st
   // The run holds its engines from here to its end, whatever that end is: a stop, a refusal after this step, a leg
   // that never opened, the page going away — the run's signal is aborted on every one of them. Not only from the
   // moment a leg opens: its source may take a minute to open, and the minute's rest would have stopped them by then.
-  if (signal && (needs.hears || needs.translates || needs.coaches)) {
+  if (signal && (needs.hears || needs.translates || needs.coaches || needs.speaks)) {
     const asrModels = needs.hears ? (needs.hears.pick.selections ?? needs.hears.heard.map((language) => ({ pick: needs.hears!.pick, language }))).flatMap(({ pick, language }) => {
       const model = nativePicked(pick, language);
       return model ? [model.id] : [];
@@ -1195,7 +1217,7 @@ export function primeNativeOnce(ups: NativeUps = UPS, now: () => number = () => 
  * (`prepareLocalAI`), so that no model holds video memory while nothing
  * listens. What the servers listed goes with its refusal, as with any other.
  */
-export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISettings, ctx: CheckContext, check: typeof checkLocalAI = checkLocalAI, native: { gap: typeof nativeGap; idle: typeof nativeIdle; translatorGap?: typeof translatorGap; translatorIdle?: typeof translatorIdle; coachGap?: typeof coachGap; coachIdle?: typeof coachIdle } = { gap: nativeGap, idle: nativeIdle }): Promise<CheckResult> {
+export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISettings, ctx: CheckContext, check: typeof checkLocalAI = checkLocalAI, native: { gap: typeof nativeGap; idle: typeof nativeIdle; translatorGap?: typeof translatorGap; translatorIdle?: typeof translatorIdle; coachGap?: typeof coachGap; coachIdle?: typeof coachIdle; voiceGap?: typeof voiceGap; voiceIdle?: typeof voiceIdle } = { gap: nativeGap, idle: nativeIdle }): Promise<CheckResult> {
   // Asked first, beside the servers.
   let hears: ReturnType<typeof nativeGap> | null = null;
   const here = nativeHearing(s, ctx.legs);
@@ -1207,14 +1229,19 @@ export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISe
   } else {
     native.idle();
   }
+  const servers = await check(k, settled(s), ctx);
+  const models = servers.models ?? [];
   let translates: ReturnType<typeof translatorGap> | null = null;
   if (translatesNatively(s)) {
     // What each leg translates: the speaker the pair, plus its reverse when bilingual; the other side its reverse.
     const reverse = { source: ctx.pair.target, target: ctx.pair.source };
-    const both = speaksBoth(s, [], ctx.pair) && ctx.pair.source.toLowerCase() !== ctx.pair.target.toLowerCase();
-    const back = both ? backInto(s, ctx.pair).map((also) => ({ source: also, target: ctx.pair.source })) : [];
+    const mine = settled(hearingOf(s, 'speaker'));
+    const telling = hearerOf(mine, models, ctx.pair, 'speaker')?.telling;
+    const both = speaksBoth(s, telling?.by === 'pairing' ? models : [], ctx.pair) && ctx.pair.source.toLowerCase() !== ctx.pair.target.toLowerCase();
+    const spoken = both ? backInto(s, ctx.pair, models, telling) : [];
+    const back = spoken.map((also) => ({ source: also, target: ctx.pair.source }));
     // Fork: a sentence in one of two lit languages of theirs goes into the other; the speech into their second one lit.
-    const cross = both ? crossings(s, ctx.pair) : [];
+    const cross = crossings(s, ctx.pair, spoken);
     const into = alsoInto(s, ctx.pair);
     // As the start builds it (`buildLocalAI`): not for a speaker coached in their own language alone, whose speech nothing translates.
     const forward = [ctx.pair, ...back, ...cross, ...(into && !(s.coach && !both) ? [{ source: ctx.pair.source, target: into }] : [])];
@@ -1230,6 +1257,15 @@ export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISe
   } else {
     (native.coachIdle ?? coachIdle)();
   }
+  let speaks: ReturnType<typeof voiceGap> | null = null;
+  // Only where a run speaks by itself: a stage kept for lines said on demand loads its model when one is asked for.
+  const usesVoice = ctx.legs.includes('speaker') && voicesTarget(s.speak, ctx.pair.target);
+  if (usesVoice && speaksNatively(s.speak)) {
+    speaks = (native.voiceGap ?? voiceGap)(s.speak.nativeModel);
+    speaks.catch(() => undefined);
+  } else {
+    (native.voiceIdle ?? voiceIdle)();
+  }
   // What a run would load, kept for a start in the background to load once (`primeNativeOnce`).
   lastNeeds = nativeNeeds(s, ctx.pair, ctx.legs);
   // And what a device is given of this computer's engines when it names no model: its owner's own choice.
@@ -1241,9 +1277,15 @@ export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISe
     // be the quiet load it was meant as.
     if (wanted) primeNow(lastNeeds, primeUps);
   }
-  const servers = await check(k, settled(s), ctx);
   if (!servers.ok) return servers;
-  const refused = (hears ? await hears : null) ?? (translates ? await translates : null) ?? (coaches ? await coaches : null);
+  // Fork: a voice API with no model named: said here, by the card it is named in, before a start would refuse it.
+  if (usesVoice && !voiceStageOf(s.speak, [ctx.pair.target])) {
+    return { ok: false, reason: 'No voice API is named.', code: 'voice_unnamed', ...(servers.models?.length ? { models: servers.models } : {}) };
+  }
+  if (usesVoice && speaksByKeyedApi(s.speak) && !k.speakKey) {
+    return { ok: false, reason: 'Enter the API key of the voice.', ...(servers.models?.length ? { models: servers.models } : {}) };
+  }
+  const refused = (hears ? await hears : null) ?? (translates ? await translates : null) ?? (coaches ? await coaches : null) ?? (speaks ? await speaks : null);
   return refused ? { ...refused, ...(servers.models?.length ? { models: servers.models } : {}) } : servers;
 }
 
@@ -1285,11 +1327,20 @@ export function buildLocalAI(asked: SessionContext, all: LocalAISettings, shared
   const s = hearingOf(all, asked.leg ?? (shared.reversed(asked.direction) ? 'participant' : 'speaker'));
   const models: readonly LocalAIModel[] = shared.models;
   // The other side's leg, with their language left to be detected: built as a leg whose source is to be detected.
-  const detected = detectsOther(s, models) && shared.reversed(asked.direction);
+  const participant = shared.reversed(asked.direction);
+  const leg = participant ? 'participant' : 'speaker';
+  const runPair = participant ? { source: asked.direction.target, target: asked.direction.source } : asked.direction;
+  const hearer = hearerOf(s, models, runPair, leg);
+  const requested = heardBy(s, runPair, leg, models);
+  const pairing = pairingFor(s, models, runPair, leg, requested, hearer);
+  if (pairing) {
+    const gap = pairing.gap ?? unheard(s, models, toldLanguage(requested, asked.direction.source, false), hearer?.languages)
+      ?? phoneUnheard(s, runPair, leg, requested, hearer);
+    if (gap) return gap;
+  }
+  const detected = detectsOther(s, models) && participant && (!pairing || pairing.paired.length > 0);
   const context: SessionContext = detected ? { ...asked, direction: { source: AUTO, target: asked.direction.target } } : asked;
   const { source, target } = context.direction;
-  const participant = shared.reversed(asked.direction);
-  const runPair = participant ? { source: asked.direction.target, target: asked.direction.source } : asked.direction;
   // What a translation that has to be told a pair is told: the pair's own language, where the leg's is left to be detected.
   const told = detected ? asked.direction.source : source;
   // Heard without any Realtime session: by this computer's own recognizer, or by an API it uploads each sentence to.
@@ -1312,14 +1363,13 @@ export function buildLocalAI(asked: SessionContext, all: LocalAISettings, shared
    * Fork: the languages they speak besides their own that are in use (those the other side has lit): each heard, and
    * translated back (`Stages.back`) and across into the other lit one (`Stages.cross`); the first, what pairs with theirs.
    */
-  const also = both ? alsoSpoken(s, asked.direction) : [];
-  const backs = both ? backInto(s, asked.direction) : [];
-  const crossed = both ? crossings(s, asked.direction) : [];
-  const alsoMain = both ? alsoFirst(s, asked.direction) ?? target : target;
+  const also = both ? pairing?.required ?? alsoSpoken(s, asked.direction, models) : [];
+  const crossed = both ? crossings(s, asked.direction, also) : [];
+  const alsoMain = both ? alsoFirst(s, asked.direction, models) ?? target : target;
 
   // Every stage named, before anything is built: a run with none has nothing to say. A coached speaker's translation
   // is for what they type only: the run starts without it. A leg shown as said has none.
-  const gap = unpaired(s, models, asked.direction, !shared.reversed(asked.direction)) ?? unnamedStage(s, models, coached, plain, both) ?? undetected(s, models, source, coached, detected ? told : undefined);
+  const gap = unnamedStage(s, models, coached, plain, both) ?? undetected(s, models, source, coached, detected ? told : undefined);
   if (gap) return gap;
   const apiBase = s.translateBaseUrl.trim();
   const apiModel = s.translateModel.trim();
@@ -1339,28 +1389,9 @@ export function buildLocalAI(asked: SessionContext, all: LocalAISettings, shared
   const heard = both ? AUTO : coached ? target : source;
   // A model that cannot name a language is still told the leg's own source; `identify.ts` names each sentence.
   const modelHeard = toldLanguage(heard, asked.direction.source, false);
-  // Every paired Apple stream hears both languages, including the feedback and participant streams.
-  // Open-ended language detection remains a different capability.
-  const pairedWith = pairedLanguages({
-    leg: participant ? 'participant' : 'speaker',
-    told: participant ? runPair.target : modelHeard,
-    pair: runPair,
-    theirLit: theirLitLanguages(s, runPair),
-    alsoFirst: alsoFirst(s, runPair),
-  });
   // A speaker who speaks more than one: a stretch named outside them is read again (`namedAmong`).
   const among = namedAmong(heard, source, also);
-  const remoteSecond = pairedWith[0];
-  const remotePair = s.asrVia === 'server'
-    ? serverBilingual(s.asrModel, soloCoach
-      ? { source: target, target: source }
-      : participant
-        ? { source: runPair.target, target: remoteSecond ?? runPair.source }
-        : { source, target: remoteSecond ?? alsoMain }, models,
-    // Fork: and a third where the device hears three (the Mac): the other side's two lit, and the user's own — theirs
-    // said in it is then written as it is, not as one of the two.
-    soloCoach || !remoteSecond ? undefined : pairedWith[1])
-    : null;
+  const remotePair = pairing?.remote;
   let device: DeviceHearing | undefined;
   /** A native model that names the language, where one is downloaded: the leg is asked for `auto` through it. */
   let detector: ReturnType<typeof nativePicked> = null;
@@ -1369,23 +1400,14 @@ export function buildLocalAI(asked: SessionContext, all: LocalAISettings, shared
   if (hearsHere) {
     let recognizer: Pick<DeviceHearing, 'modelId' | 'streaming' | 'api' | 'native'> | null;
     if (hearsNatively(s)) {
-      // Of the run: each engine runs one model, while separate engines can serve the two legs.
-      const pick = runSideHearing(s, runPair, participant ? 'participant' : 'speaker', models);
-      // Resolve the actual leg once. Looking up an unrelated detector first would replace an explicit choice.
-      // The run's pick already applies detection and bilingual rules where they are enabled.
-      const picked = nativePicked(pick, modelHeard);
-      detector = picked?.detects ? picked : null;
-      const native = picked ? nativeModelFor(picked.id, modelHeard) ?? picked : null;
+      const native = hearer?.native;
+      detector = native?.detects ? native : null;
       // The language has no native model chosen: said as that, since downloading one would not help.
       if (!native) return { refused: `No native recognition model is chosen for ${modelHeard}.`, code: 'native_unchosen', params: { source: modelHeard } };
       // Fork: the Mac's recognition hears the pair's other language beside the leg's own, where it has both: the
       // speaker in either (`speakBoth`), told their own; else any leg, told its own — a sentence in the other is then
       // known for what it is, not guessed from its writing.
-      const either = both ? nativeEither(pick) : null;
-      const paired = appleAlso(native, pairedWith);
-      const alsoHeard = either ? either.also : paired;
-      const first = either ? source : modelHeard;
-      recognizer = { modelId: native.id, streaming: true, native: { model: native.id, ...(native.limits ? { limits: native.limits } : {}), ...(alsoHeard.length ? { either: { first, also: alsoHeard } } : {}), ...(native.takesHints !== false && hints.length ? { hints } : {}) } };
+      recognizer = { modelId: native.id, streaming: true, native: { model: native.id, ...(native.limits ? { limits: native.limits } : {}), ...(pairing?.paired.length ? { either: { first: modelHeard, also: pairing.paired } } : {}), ...(native.takesHints !== false && hints.length ? { hints } : {}) } };
     } else if (s.asrVia === 'api') {
       const baseUrl = s.asrApiBaseUrl.trim();
       const named = asrApiModelOf(s);
@@ -1403,7 +1425,7 @@ export function buildLocalAI(asked: SessionContext, all: LocalAISettings, shared
     if (!recognizer) return { refused: `No speech recognition model is downloaded for ${modelHeard}.`, code: 'no_asr', params: { source: modelHeard } };
     device = {
       ...recognizer,
-      pairedWith,
+      ...(pairing?.paired.length ? { pairedWith: pairing.paired } : {}),
       // Only a soft leg needs the model told a language of its own; a detector is asked for "auto".
       ...(heard === AUTO && !detector ? { language: toldLanguage(heard, modelHeard, false) } : {}),
       // One that cannot be told another language is not asked again: what it writes outside them is not written.
@@ -1460,7 +1482,7 @@ export function buildLocalAI(asked: SessionContext, all: LocalAISettings, shared
   // they have takes that direction (asked of a named model as the other side's leg asks it); a run starts without.
   let back: AnswerStage | undefined;
   const practised = soloCoach && !serverTranslatorUnfit(s, models, { source, target }, 'participant', target) ? [target] : [];
-  const backFrom = both ? backs : practised;
+  const backFrom = both ? also : practised;
   if (translate && backFrom.length > 0) {
     // Out of the one language they speak besides their own, or — where they speak more — whichever it was.
     const from = backFrom.length === 1 ? backFrom[0] : AUTO;
@@ -1548,10 +1570,18 @@ export function buildLocalAI(asked: SessionContext, all: LocalAISettings, shared
 
   // A paired recognizer identifies the language at finalization. Show tentative words immediately, but do not
   // translate or classify them by their script before that decision (English and French share one, for example).
-  if (stages && (remotePair || device?.native?.either)) stages = { ...stages, requiresLanguage: true };
+  if (stages && pairing) stages = { ...stages, named: 'recognizer', ...(pairing.paired.length ? { requiresLanguage: true } : {}) };
   // The speaker's microphone: the other side's sound, come back through loudspeakers, is told from their own voice by
   // the other leg hearing it at the same moment (`leakCheck` in pipeline.ts). The other side's leg is that sound.
   if (stages && !shared.reversed(asked.direction)) stages = { ...stages, leakCheck: true };
+  // Fork: the speaker's leg speaks its translations into the other side's language, and what they type in a language
+  // of the other side's, where the voice stage is on (`context.speech`, by `speaks`). A leg the other device's own
+  // session answers has no stage of its own: it is given the voice alone, and its session's translations are spoken.
+  if (asked.speech && (asked.leg ? asked.leg === 'speaker' : !participant) && voicesTarget(s.speak, target)) {
+    const voice = voiceStageOf(s.speak, [target, ...also]);
+    if (!voice) return { refused: 'No voice API is named.', code: 'voice_unnamed' };
+    stages = { ...(stages ?? { speech: null, typed: null }), voice };
+  }
 
   // Another Kotomimi whose recognizer does not name the language is told this leg's own source; `identify.ts` names the rest.
   const serverHeard = toldLanguage(heard, asked.direction.source, hearingPlace(s) !== 'server' || serverDetects(models, s.asrModel));
@@ -1603,35 +1633,26 @@ export const localaiLanguages: Provider<LocalAISettings, never, never>['language
   more: (stored, models, pair) => {
     const s = settled(stored);
     const listed = models as readonly LocalAIModel[];
-    const base = (code: string) => code.toLowerCase().split(/[-_]/)[0];
-    /**
-     * How far what hears a side reaches: a model that tells languages apart, as many as it has (any, where it has
-     * many); the Mac's recognition, the user's own and one other (theirs); anything else, its main language alone —
-     * an API, whose reach is not known, included.
-     */
+    /** Pairing limits simultaneous languages. The other side lights one extra at a time. */
     const reach = (hearer: ReturnType<typeof hearerOf>, mine: boolean) => {
-      if (hearer?.detects) return { offered: hearer.languages, most: null, any: (hearer.languages?.length ?? 0) > ANY_PAST };
-      if (hearer?.apple && !mine) return { offered: hearer.languages, most: 1, any: false };
-      // Only where it has theirs: a device that lists its languages and has not it reaches the user's own alone.
-      if (hearer?.apple && mine && (!hearer.listed || hearer.languages?.some((code) => base(code) === base(pair.target)))) return { offered: [pair.target], most: 1, any: false };
+      if (hearer?.telling.by === 'naming') return { offered: hearer.languages, most: null, any: (hearer.languages?.length ?? 0) > ANY_PAST };
+      if (hearer?.telling.by === 'pairing') return { offered: hearer.languages, most: mine ? hearer.telling.most - 1 : 1, any: false };
       return { offered: hearer?.languages ?? null, most: 0, any: false };
     };
     const mineHearer = hearerOf(hearingOf(s, 'speaker'), listed, pair, 'speaker');
     const theirsHearer = hearerOf(s, listed, pair, 'participant');
     const strip = (h: typeof mineHearer) => (h ? { hearer: { name: h.name, languages: h.languages } } : {});
     const spoken = alsoListed(s, pair);
+    const using = alsoSpoken(s, pair, listed, mineHearer?.telling);
+    const quiet = alsoLit(s, pair).filter((code) => !using.includes(code));
     return {
       mine: {
         ...strip(mineHearer),
         ...reach(mineHearer, true),
-        // The Mac's recognition hears one beside the user's own: theirs, the only one shown chosen there.
-        chosen: mineHearer?.apple && !mineHearer.detects ? spoken.filter((code) => base(code) === base(pair.target)) : spoken,
+        chosen: spoken,
         // In use: those the other side has lit. The row as shown, their own language among it.
-        using: alsoSpoken(s, pair),
-        ...((reach) => {
-          const left = reach ? alsoLit(s, pair).filter((code) => !reach.languages.includes(base(code))) : [];
-          return left.length > 0 ? { quiet: { codes: left, by: reach!.name } } : {};
-        })(mineReach(s, pair)),
+        using,
+        ...(quiet.length && mineHearer ? { quiet: { codes: quiet, by: mineHearer.name } } : {}),
         row: myRow(s, pair),
         set: (chosen) => ({ speakAlso: [...chosen], speakBoth: false }),
       },
@@ -1655,7 +1676,7 @@ export const localaiLanguages: Provider<LocalAISettings, never, never>['language
     const of = (s: LocalAISettings) => {
       const available = canDetectOther(s, models);
       // The speaker in either of the pair's languages: also the Mac's recognition, where it hears theirs and has both.
-      const second = pairedLanguages({ leg: 'speaker', told: pair.source, pair, alsoFirst: alsoFirst(s, pair) })[0];
+      const second = alsoFirst(s, pair, models) ?? pair.target;
       const either = (hearsNatively(s) && second !== undefined && nativeEither({ model: s.asrNativeModel, byLanguage: s.asrNativeByLanguage, either: { own: pair.source, others: [second] } }) !== null)
         || (hearingPlace(s) === 'server' && second !== undefined && serverBilingual(s.asrModel, { source: pair.source, target: second }, models as readonly LocalAIModel[]) !== null);
       // A model chosen here that names the language, or a paired Apple one, is exact; everything else is a best effort.
@@ -1694,11 +1715,13 @@ export const localaiProvider: Provider<LocalAISettings, LocalAICredentials, Loca
   checkReads: [
     'asrVia', 'asrApiBaseUrl', 'asrApiModel', 'asrApiNeedsKey', 'asrOther', 'asrOtherModel', 'asrMine', 'translateOther', 'translateOtherModel', 'coachOther', 'coachOtherModel', 'asrDetectOther', 'speakBoth', 'translateAt', 'translateBaseUrl', 'translateNeedsKey', 'coach', 'coachAt', 'coachBaseUrl', 'coachNeedsKey', 'serverNeedsKey',
     // The models a start needs named (`unnamedStage`).
-    'model', 'translateModel', 'translateServerModel', 'coachModel', 'coachServerModel',
+    'model', 'asrModel', 'speakAlso', 'theyAlso', 'theyLit', 'translateModel', 'translateServerModel', 'coachModel', 'coachServerModel',
     // Legacy runtime fields, normalized to native.
     'asrHere', 'translateHere', 'coachHere',
     // The native engine's own model choices.
     'asrNativeModel', 'asrNativeByLanguage', 'translateNativeModel', 'coachNativeModel',
+    // Whether it speaks, and by what.
+    'speak',
   ],
   // This computer's models are per direction, and each leg needs its own.
   checkReadsDirection: true,
@@ -1707,7 +1730,10 @@ export const localaiProvider: Provider<LocalAISettings, LocalAICredentials, Loca
 
   languages: localaiLanguages,
 
-  speech: 'never',
+  // Fork: it speaks where the voice stage is on (`speaks`), not by the shared text-only switch; the speaker's leg only.
+  speech: 'optional',
+  speaks: (stored) => speaksAlong(stored.speak),
+  participantSpeech: false,
   // A coached speaker's session only transcribes: typed text is answered by the translation stage, which an API with no model named cannot be.
   textInput: (stored) => { const s = settled(stored); return !s.coach || s.translateAt !== 'api' || (s.translateBaseUrl.trim() !== '' && s.translateModel.trim() !== ''); },
   boundaries: () => 'provider',

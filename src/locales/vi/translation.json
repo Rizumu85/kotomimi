@@ -48,7 +48,7 @@
     "noiseReduction": "Giảm tiếng ồn",
     "noiseSuppression": "Khử tiếng ồn",
     "noiseSuppressionTooltip": {
-      "off": "Tắt — Chỉ sử dụng xử lý tiếng ồn tích hợp của trình duyệt.",
+      "off": "Tắt — không khử tiếng ồn: giữ nguyên âm thanh từ micrô. Phù hợp nhất trong phòng yên tĩnh.",
       "standard": "Tiêu chuẩn (RNNoise) — Khử tiếng ồn AI nhẹ với độ trễ thấp.",
       "enhanced": "Nâng cao (GTCRN) — Khử tiếng ồn AI chất lượng cao, tốt nhất cho môi trường ồn ào phức tạp."
     },
@@ -774,7 +774,19 @@
       "tagHint_cpu": "Chạy trên bộ xử lý, nhường card đồ họa cho game. Được tải khi bắt đầu phiên.",
       "noteNativeXAsr": "Hiện chữ ngay khi bạn nói, chỉ dùng bộ xử lý, không chiếm bộ nhớ đồ họa: dùng khoảng một phần năm của một lõi. Chỉ hỗ trợ tiếng Trung và tiếng Anh. Các từ trong từ điển cá nhân không được cung cấp trước cho bộ nhận dạng, nhưng vẫn được sửa theo cách phát âm sau khi nhận dạng.",
       "noteStreamRevise": "Bắt đầu dịch khi người bên kia vẫn đang nói, rồi dịch lại cả câu khi họ nói xong. Chỉ hỗ trợ tiếng Trung, tiếng Anh và tiếng Nhật.",
-      "noteNativeSenseVoiceCpu": "Chỉ dùng bộ xử lý, không chiếm bộ nhớ đồ họa. Độ chính xác gần bằng SenseVoice chạy trên card đồ họa, hỗ trợ tiếng Trung, tiếng Quảng Đông, tiếng Anh, tiếng Nhật và tiếng Hàn. Các từ trong từ điển cá nhân không được cung cấp trước cho mô hình, nhưng vẫn được sửa theo cách phát âm sau khi nhận dạng."
+      "noteNativeSenseVoiceCpu": "Chỉ dùng bộ xử lý, không chiếm bộ nhớ đồ họa. Độ chính xác gần bằng SenseVoice chạy trên card đồ họa, hỗ trợ tiếng Trung, tiếng Quảng Đông, tiếng Anh, tiếng Nhật và tiếng Hàn. Các từ trong từ điển cá nhân không được cung cấp trước cho mô hình, nhưng vẫn được sửa theo cách phát âm sau khi nhận dạng.",
+      "apiServiceEdge": "Giọng đọc trực tuyến Edge (miễn phí)",
+      "speakKey": "Khóa API của mô hình đọc",
+      "nativeVoiceReady": "Bộ đọc đã sẵn sàng.",
+      "nativeVoiceWarmingShort": "Đang khởi động bộ đọc…",
+      "nativeVoiceFailedShort": "Không thể khởi động bộ đọc.",
+      "nativeVoiceUnsupported": "Hệ thống này hiện chưa hỗ trợ bộ đọc tích hợp. Hãy chuyển sang \"Mô hình API\" trong mục \"Đọc thành tiếng\".",
+      "nativeVoiceMissing": "Chưa tải mô hình đọc. Tải xuống để bắt đầu.",
+      "nativeVoiceUpdating": "Đang cập nhật bộ đọc. Bạn có thể bắt đầu khi cập nhật xong.",
+      "nativeVoiceFailed": "Không thể khởi động bộ đọc. Hãy nhấn \"Thử lại\" trong mục \"Đọc thành tiếng\" hoặc chọn mô hình khác.",
+      "voiceUnnamed": "Chưa nhập mô hình đọc. Hãy nhập trong mục \"Đọc thành tiếng\".",
+      "noteQwen3Tts": "Tự nhiên nhất, phát giọng ngay khi bắt đầu. Thử nghiệm với tiếng Nhật, tiếng Trung và tiếng Anh đều không đọc sai. Dùng khoảng 3 GB bộ nhớ đồ họa, hỗ trợ 10 ngôn ngữ.",
+      "noteIrodori": "Chỉ hỗ trợ tiếng Nhật. Thử nghiệm không đọc sai, mỗi câu mất khoảng nửa giây. Dùng khoảng 1.7 GB bộ nhớ đồ họa."
     }
   },
   "logsPanel": {
@@ -1739,8 +1751,6 @@
     "furigana": "Hiện furigana trên kanji (tiếng Nhật)",
     "romanization": "Hiện phiên âm Latinh",
     "pinyin": "Hiện bính âm trên tiếng Trung",
-    "echoCancellationApp": "Chỉ Kotomimi",
-    "echoCancellationAppTooltip": "Chỉ Kotomimi — chỉ khử âm thanh do Kotomimi phát, giúp thu giọng bạn rõ nhất. Phù hợp khi đeo tai nghe hoặc kính VR; nếu dùng loa, bạn cũng có thể chọn chế độ \"Cả hai\". Chọn mục này khi dùng thiết bị âm thanh ảo (VB-Cable, BlackHole) làm micrô.",
     "speechDetection": {
       "title": "Phát hiện giọng nói"
     },
@@ -2113,6 +2123,40 @@
     "apart": {
       "split": "Nghe phần tôi nói ở nơi khác",
       "merge": "Nghe cả hai bên ở cùng một nơi"
-    }
+    },
+    "voice": {
+      "stage": "Đọc thành tiếng",
+      "stageTooltip": "Đọc bản dịch của bạn thành tiếng. Bạn cũng có thể nghe bất kỳ dòng nào trong cuộc trò chuyện bằng cách nhấn nút loa bên cạnh.",
+      "on": "Bật đọc thành tiếng",
+      "toMeLocked": "Chưa dùng được mục «Tôi nghe». Âm thanh của người bên kia đang được thu từ toàn bộ hệ thống, nên ứng dụng sẽ nhầm giọng đọc bản dịch với lời họ nói. Hãy chọn một ứng dụng cụ thể làm nguồn âm thanh, ví dụ VRChat.",
+      "toThemTooltip": "Khi đọc cho bên kia nghe, âm thanh sẽ được gửi vào micrô ảo. Trong VRChat hoặc ứng dụng họp, hãy chọn micrô đó (trên Windows có tên là CABLE Output).",
+      "myVoiceToo": "Gửi cả giọng thật của tôi",
+      "myVoiceTooTooltip": "Khi tắt, bên kia chỉ nghe thấy giọng đọc bản dịch.",
+      "needsSpeaker": "Tính năng này đọc lời bạn nói và nội dung bạn gõ. Hãy chuyển chế độ sang \"Tôi\" hoặc \"Cả hai\".",
+      "modelPlaceholder": "Tên mô hình, ví dụ tts-1",
+      "voice": "Giọng đọc",
+      "voiceOf": "Giọng đọc {{language}}",
+      "sample": "Nghe thử",
+      "cannotSpeak": "{{name}} không nói được {{language}}.",
+      "sayLine": "Đọc dòng này",
+      "stopLine": "Dừng",
+      "lineFailed": "Không thể đọc dòng này",
+      "woman": "Giọng nữ",
+      "man": "Giọng nam",
+      "hearers": "Tự động đọc bản dịch",
+      "hearNone": "Tắt",
+      "hearMe": "Cho tôi nghe",
+      "hearThem": "Cho người kia nghe",
+      "hearBoth": "Cho cả hai nghe",
+      "volumeMine": "Âm lượng cho bạn",
+      "volumeTheirs": "Âm lượng cho đối phương",
+      "meetingDevice": "Đầu ra âm thanh cho bên kia",
+      "meetingDeviceAuto": "Micrô ảo (tự động)",
+      "meetingDeviceTooltip": "Bản dịch được đọc qua thiết bị này để bên kia nghe như qua micrô. Nếu card âm thanh có sẵn chức năng trộn âm, hãy chọn một kênh phát của card rồi trộn âm từ kênh đó với tiếng micrô ngay trên card. Như vậy, giọng gốc của bạn không đi qua phần mềm."
+    },
+    "echoCancellationGate": "Theo âm lượng",
+    "echoCancellationGateTooltip": "Theo âm lượng — khi dùng loa: âm thanh từ loa lọt vào mic nhỏ hơn nhiều so với giọng bạn, nên được chặn theo âm lượng và giọng bạn không bị ảnh hưởng.",
+    "echoCancellationOff": "Tắt",
+    "echoCancellationOffTooltip": "Tắt — gửi nguyên âm thanh từ mic đi nhận dạng. Dùng khi đeo tai nghe: không có âm thanh nào lọt vào mic."
   }
 }

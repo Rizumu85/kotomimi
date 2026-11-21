@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { CircleCheck, CircleHelp, GraduationCap, Languages, LibraryBig, Loader, Merge, Mic, MonitorSmartphone, RefreshCw, Split, Star } from 'lucide-react';
+import { CircleCheck, CircleHelp, GraduationCap, Languages, LibraryBig, Loader, Merge, Mic, MonitorSmartphone, RefreshCw, Split, Star, Volume2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ServerFinder, type FinderStage } from '../../components/LanSharing/ServerFinder';
 import ToggleSwitch from '../../components/Settings/shared/ToggleSwitch';
@@ -29,6 +29,10 @@ import { languageLabel } from '../../lib/language/label';
 import { NativeEngineCard, nativeStoreOf, type NativeCardModel, type NativeKind } from './NativeEngineCard';
 import { NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator } from './nativeTranslators';
 import { NATIVE_COACHES, nativeCoach } from './nativeCoaches';
+import { NATIVE_VOICES, nativeVoice } from './nativeVoices';
+import { speaksByEdge, VOICE_PLACES, type VoiceChoice } from './localaiVoice';
+import { VoiceRows } from './VoiceRows';
+import { VoiceHearers } from './VoiceHearers';
 import { lentChoice } from './phoneText';
 import { useNativeStageSlots } from './LocalAIEngine';
 import { recommendNativeModel, type NativeRecommendation } from './nativeRecommendation';
@@ -71,12 +75,12 @@ function Field({ label, aside, children }: { label: string; aside?: string; chil
 }
 
 /** The three places a stage can run, as one row of buttons: the same three, in the same order, for every stage. */
-function PlaceSwitch({ label, value, onChange, disabled }: { label: string; value: Place; onChange(place: Place): void; disabled?: boolean }) {
+function PlaceSwitch({ label, value, onChange, disabled, places = PLACES }: { label: string; value: Place; onChange(place: Place): void; disabled?: boolean; /** Fork: the places this stage can run, where they are not all three (the voice's). */ places?: readonly Place[] }) {
   const { t } = useTranslation();
   const names: Record<Place, string> = { server: t('providers.localai.placeServer'), api: t('providers.localai.viaModel'), device: t('providers.localai.placeDevice') };
   return (
     <div className="kt-seg" role="group" aria-label={label}>
-      {PLACES.map((place) => (
+      {PLACES.filter((place) => places.includes(place)).map((place) => (
         <button key={place} type="button" className={`kt-seg__option${place === value ? ' is-active' : ''}`} aria-pressed={place === value} onClick={() => { if (place !== value) onChange(place); }} disabled={disabled}>
           {names[place]}
         </button>
@@ -294,7 +298,7 @@ function ApiFields({ id, kind, others, baseUrl, model, needsKey, apiKey, urlPlac
         </Field>
       )}
       {/* A service with one recognizer of its own (`ApiService.hears`) has no model to pick. */}
-      {!(kind === 'asr' && service?.hears) && (
+      {!(kind === 'asr' && service?.hears) && !(kind === 'voice' && service?.speaks) && (
         <ApiModelPicker
           id={id}
           label={t('providers.localai.model')}
@@ -329,7 +333,7 @@ const NATIVE_ENTRY = '\u0000native:';
 const ENGINE_ROW = '\u0000engine';
 
 /** A stage's native models, as their cards and menus read them. */
-const NATIVE_OF: Record<NativeKind, readonly NativeCardModel[]> = { asr: NATIVE_MODELS, translation: NATIVE_TRANSLATORS, coach: NATIVE_COACHES };
+const NATIVE_OF: Record<NativeKind, readonly NativeCardModel[]> = { asr: NATIVE_MODELS, translation: NATIVE_TRANSLATORS, coach: NATIVE_COACHES, voice: NATIVE_VOICES };
 
 /** Whether a native model serves a direction: hears its language, or translates its pair. */
 const nativeFits = (kind: NativeKind, id: string, source: string, target: string): boolean => (kind === 'asr'
@@ -676,13 +680,13 @@ function DeviceModels({ stage, settings, update, pair, legs, models, disabled, t
   );
 }
 
-function DeviceChat({ disabled, native }: { disabled?: boolean; native: NativeRunner }) {
+function DeviceChat({ disabled, native, kind = 'coach' }: { disabled?: boolean; native: NativeRunner; /** Fork: the engine whose models these are: the feedback's, or the voice's. */ kind?: 'coach' | 'voice' }) {
   const { t } = useTranslation();
-  const engine = useNativeModels('coach');
-  // The native feedback engine's model whose download ends while this is shown is the one wanted: it is used from then on.
-  const downloading = useNativeDownloads('coach', disabled, (id) => native.onPick(id));
-  const status = nativeStoreOf('coach')((one) => one.status);
-  const looked = nativeStoreOf('coach')((one) => one.asked);
+  const engine = useNativeModels(kind);
+  // The engine's model whose download ends while this is shown is the one wanted: it is used from then on.
+  const downloading = useNativeDownloads(kind, disabled, (id) => native.onPick(id));
+  const status = nativeStoreOf(kind)((one) => one.status);
+  const looked = nativeStoreOf(kind)((one) => one.asked);
   const mine = native.inUse();
   const natives = mine && !engine.ready.some((m) => m.id === mine.id) ? [mine, ...engine.ready] : engine.ready;
   const [picked, setPicked] = useState<boolean | undefined>(undefined);
@@ -725,7 +729,7 @@ function DeviceChat({ disabled, native }: { disabled?: boolean; native: NativeRu
             <div className="model-management-section kt-here__native">
               <div className="model-subgroup">
                 <div className="model-subgroup__label"><Star size={11} />{t('models.recommendedGroup', 'Recommended')}</div>
-                {engine.offered.map((m, at) => <NativeEngineCard key={m.id} kind="coach" model={m} onDownloadStarted={() => downloading(m.id)} recommended={at === 0} selected={mine?.id === m.id} onSelect={() => { if (mine?.id !== m.id) native.onPick(m.id); }} disabled={disabled} />)}
+                {engine.offered.map((m, at) => <NativeEngineCard key={m.id} kind={kind} model={m} onDownloadStarted={() => downloading(m.id)} recommended={at === 0} selected={mine?.id === m.id} onSelect={() => { if (mine?.id !== m.id) native.onPick(m.id); }} disabled={disabled} />)}
               </div>
             </div>
           )}
@@ -778,6 +782,16 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
     pinned.current = true;
     update({ ...Object.fromEntries(PLACE_FIELDS.map((field) => [field, now[field]])), ...patch } as Partial<S>);
   }, [update, pair]);
+
+  // Fork: the voice stage's choice, written whole (`settings.localai.speak`).
+  const voice: VoiceChoice = settings.speak;
+  const putVoice = (asked: Partial<VoiceChoice>) => put({ speak: { ...latest.current.speak, ...asked } } as Partial<S>);
+  // What it speaks in a run: the other side's language, and the ones the user types to them in besides.
+  const voiceLanguagesShown = [pair.target, ...alsoSpoken(settings, pair)];
+  const voiceService = voice.at === 'api' ? serviceOf(voice.apiBaseUrl, 'voice') : undefined;
+  const voiceStatus = nativeStoreOf('voice')((one) => one.status);
+  // Something to ask now: this computer's model downloaded, or an API named.
+  const voiceHere = voice.at === 'device' ? nativeDownloaded(voiceStatus, nativeVoice(voice.nativeModel).id) : speaksByEdge(voice) || (voice.apiBaseUrl.trim() !== '' && voice.apiModel.trim() !== '');
 
   const found: readonly LocalAIModel[] = models;
   // On the device the stages share: a device of the hearing stage's own (a phone) is none of what follows.
@@ -1430,6 +1444,65 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
               stage="coach" result={speedShown ? speed.result('coach') : null} disabled={disabled}
               advice={coachSmaller && { name: coachSmaller.name, onSwitch: switchTo(() => put({ coachHere: 'native', coachNativeModel: coachSmaller.id })) }}
             />
+          </>
+        )}
+      </StageCard>
+
+      {/* Fork: the voice — what reads a translation aloud, and any line on demand (`localaiVoice.ts`). */}
+      <StageCard
+        id="localai-voice"
+        icon={<Volume2 size={14} />}
+        title={t('fork.voice.stage')}
+        tooltip={t('fork.voice.stageTooltip')}
+        lead={<ToggleSwitch checked={voice.on} onChange={() => putVoice({ on: !voice.on })} label={t('fork.voice.on')} disabled={disabled} />}
+      >
+        {voice.on && (
+          <>
+            <PlaceSwitch label={t('fork.voice.stage')} value={voice.at} onChange={(at) => putVoice({ at })} disabled={disabled} places={VOICE_PLACES} />
+            {voice.at === 'api' && (
+              <ApiFields
+                id="localai-voice-api"
+                kind="voice"
+                others={[{ baseUrl: settings.translateBaseUrl, key: values.translateKey ?? '', name: t('providers.localai.translateStage') }, { baseUrl: settings.asrApiBaseUrl, key: values.asrKey ?? '', name: t('providers.localai.hearStage') }]}
+                baseUrl={voice.apiBaseUrl}
+                model={voice.apiModel}
+                needsKey={voice.apiNeedsKey}
+                apiKey={values.speakKey ?? ''}
+                urlPlaceholder={t('providers.localai.textBaseUrlPlaceholder')}
+                modelPlaceholder={t('fork.voice.modelPlaceholder')}
+                options={[]}
+                onChange={(p) => putVoice({
+                  ...(p.baseUrl !== undefined ? { apiBaseUrl: p.baseUrl } : {}),
+                  ...(p.model !== undefined ? { apiModel: p.model } : {}),
+                  ...(p.needsKey !== undefined ? { apiNeedsKey: p.needsKey } : {}),
+                })}
+                onKey={(value) => set('speakKey', value)}
+                disabled={disabled}
+              />
+            )}
+            {voice.at === 'device' && (
+              <DeviceChat
+                kind="voice"
+                disabled={disabled}
+                native={{
+                  onPick: (nativeModel) => putVoice({ nativeModel }),
+                  inUse: () => nativeVoice(voice.nativeModel),
+                }}
+              />
+            )}
+            <VoiceRows
+              choice={voice}
+              languages={voiceLanguagesShown}
+              placeName={voice.at === 'device' ? nativeVoice(voice.nativeModel).name : speaksByEdge(voice) ? t('providers.localai.apiServiceEdge') : voice.apiModel.trim() || t('providers.localai.viaModel')}
+              onChange={(next) => put({ speak: next } as Partial<S>)}
+              disabled={disabled}
+              // Not while a session runs: its settings are locked, and a sample could be captured as the other side's.
+              sampleDisabled={!voiceHere || disabled === true}
+              {...(voiceService?.voice ? { apiVoiceHint: voiceService.voice } : {})}
+            />
+            {/* Speaking is the user's own leg's: with the other side alone heard there is nothing of theirs to say. */}
+            {!legs.includes('speaker') && <p className="kt-note kt-note--todo" role="status">{t('fork.voice.needsSpeaker')}</p>}
+            <VoiceHearers auto={voice.auto} onAuto={(auto) => putVoice({ auto })} {...(disabled ? { locked: true } : {})} />
           </>
         )}
       </StageCard>

@@ -48,7 +48,7 @@
     "noiseReduction": "Pagbawas ng ingay",
     "noiseSuppression": "Pagpigil ng Ingay",
     "noiseSuppressionTooltip": {
-      "off": "Naka-off — Browser lang ang mag-aayos ng ingay.",
+      "off": "Naka-off — walang pagbawas ng ingay: ang mikropono ay ipinapadala kung ano ito para sa pagkilala. Pinakamainam sa tahimik na kuwarto.",
       "standard": "Karaniwan (RNNoise) — Magaang na AI pagpigil ng ingay na may mababang latency.",
       "enhanced": "Pinahusay (GTCRN) — Mataas na kalidad na AI pagpigil ng ingay, pinakamainam para sa kumplikadong kapaligiran ng ingay."
     },
@@ -774,7 +774,19 @@
       "tagHint_cpu": "Sa processor tumatakbo para malaya ang graphics card para sa laro. Nilo-load kapag nagsimula ang sesyon.",
       "noteNativeXAsr": "Lumalabas ang teksto habang nagsasalita ka. Processor lang ang gamit, walang kinakain na video memory: mga ikalimang bahagi ng isang core. Chinese at English lang ang suportado. Hindi nito natatanggap nang maaga ang mga salita sa personal na diksyunaryo; itinatama pa rin ang mga ito ayon sa tunog pagkatapos makilala ang sinabi.",
       "noteStreamRevise": "Nagsasalin habang nagsasalita pa ang kausap, at muling isinasalin ang buong pangungusap kapag tapos na. Chinese, English at Japanese lang ang suportado.",
-      "noteNativeSenseVoiceCpu": "Processor lang ang gamit, walang kinakain na video memory. Halos kasing-tumpak ng SenseVoice sa graphics card. Suportado ang Chinese, Cantonese, English, Japanese at Korean. Hindi nito nakukuha nang maaga ang mga salita sa personal mong diksyunaryo; itinatama pa rin ang mga ito ayon sa tunog pagkatapos makilala ang pananalita."
+      "noteNativeSenseVoiceCpu": "Processor lang ang gamit, walang kinakain na video memory. Halos kasing-tumpak ng SenseVoice sa graphics card. Suportado ang Chinese, Cantonese, English, Japanese at Korean. Hindi nito nakukuha nang maaga ang mga salita sa personal mong diksyunaryo; itinatama pa rin ang mga ito ayon sa tunog pagkatapos makilala ang pananalita.",
+      "apiServiceEdge": "Mga online na boses ng Edge (libre)",
+      "speakKey": "API key ng modelo sa pagbasa",
+      "nativeVoiceReady": "Handa na ang makina sa pagbasa.",
+      "nativeVoiceWarmingShort": "Sinisimulan ang makina sa pagbasa…",
+      "nativeVoiceFailedShort": "Hindi masimulan ang makina sa pagbasa.",
+      "nativeVoiceUnsupported": "Hindi pa suportado ng sistemang ito ang katutubong makina sa pagbasa. Sa seksyong \"Pagbasa\", lumipat sa \"Modelo ng API\".",
+      "nativeVoiceMissing": "Hindi pa na-download ang modelo sa pagbasa. I-download ito para makapagsimula.",
+      "nativeVoiceUpdating": "Ina-update ang makina sa pagbasa. Makakapagsimula ka kapag tapos na.",
+      "nativeVoiceFailed": "Hindi masimulan ang makina sa pagbasa. Sa seksyong \"Pagbasa\", pindutin ang \"Subukan muli\" o pumili ng ibang modelo.",
+      "voiceUnnamed": "Wala pang nakalagay na modelo sa pagbasa. Ilagay ito sa seksyong \"Pagbasa\".",
+      "noteQwen3Tts": "Pinakanatural, at agad nagsasalita. Sa pagsubok sa Japanese, Chinese at English, walang maling bigkas. Gumagamit ng humigit-kumulang 3 GB ng video memory at may suporta sa 10 wika.",
+      "noteIrodori": "Japanese lang. Sa pagsubok, walang maling bigkas at humigit-kumulang kalahating segundo bawat pangungusap. Gumagamit ng humigit-kumulang 1.7 GB ng video memory."
     }
   },
   "logsPanel": {
@@ -1739,8 +1751,6 @@
     "furigana": "Furigana sa itaas ng kanji (Hapones)",
     "romanization": "Ipakita ang romanisasyon",
     "pinyin": "Pinyin sa itaas ng tekstong Tsino",
-    "echoCancellationApp": "Kotomimi lang",
-    "echoCancellationAppTooltip": "Kotomimi lang — inaalis lang ang tunog na pinapatugtog ng Kotomimi para pinakamalinaw na makuha ang boses mo. Angkop kapag naka-headphone o VR headset; puwede rin sa speaker kung \"Pareho\" ang mode. Piliin ito kung virtual sound card (VB-Cable, BlackHole) ang gamit bilang mikropono.",
     "speechDetection": {
       "title": "Pagtukoy sa pananalita"
     },
@@ -2113,6 +2123,40 @@
     "apart": {
       "split": "Pakinggan sa iba ang panig ko",
       "merge": "Pakinggan ang magkabilang panig sa iisang lugar"
-    }
+    },
+    "voice": {
+      "stage": "Pagbasa",
+      "stageTooltip": "Binabasa nang malakas ang iyong mga salin. Puwede ring pakinggan ang anumang linya sa usapan: pindutin ang icon ng speaker nito.",
+      "on": "Basahin nang malakas",
+      "toMeLocked": "Hindi magagamit ngayon ang \"Pakinggan ko\". Kinukuha ang tunog ng kausap sa buong sistema, kaya mapagkakamalang boses niya ang binabasang salin. Pumili ng isang app bilang pinagmulan ng tunog ng kausap (hal. VRChat).",
+      "toThemTooltip": "Kapag binabasa para sa kausap, ipinapadala ang tunog sa virtual na mikropono. Piliin ito bilang mikropono sa VRChat o sa app para sa pulong (CABLE Output ang tawag dito sa Windows).",
+      "myVoiceToo": "Isama ang sarili kong boses",
+      "myVoiceTooTooltip": "Kapag naka-off, ang binabasang salin lang ang maririnig ng kausap.",
+      "needsSpeaker": "Binabasa nito ang sinasabi o tina-type mo. Lumipat sa mode na \"Ako\" o \"Pareho\".",
+      "modelPlaceholder": "Pangalan ng modelo, hal. tts-1",
+      "voice": "Boses",
+      "voiceOf": "Boses sa {{language}}",
+      "sample": "Pakinggan ang sample",
+      "cannotSpeak": "Hindi nakapagsasalita ng {{language}} ang {{name}}.",
+      "sayLine": "Basahin nang malakas ang linyang ito",
+      "stopLine": "Ihinto",
+      "lineFailed": "Hindi mabasa nang malakas ang linyang ito",
+      "woman": "Boses babae",
+      "man": "Boses lalaki",
+      "hearers": "Awtomatikong basahin ang salin",
+      "hearNone": "Naka-off",
+      "hearMe": "Sa akin",
+      "hearThem": "Sa kausap",
+      "hearBoth": "Sa pareho",
+      "volumeMine": "Lakas ng tunog para sa akin",
+      "volumeTheirs": "Lakas ng tunog para sa kausap",
+      "meetingDevice": "Ipadala ang tunog para sa kausap sa",
+      "meetingDeviceAuto": "Birtuwal na mikropono (awtomatiko)",
+      "meetingDeviceTooltip": "Dito pinapatugtog ang binibigkas na salin. Naririnig ito ng kausap mo na parang galing sa mikropono. Kung kayang pagsamahin ng sound card mo mismo ang mga tunog, pumili ng isa sa mga playback channel nito at doon ihalo ang tunog mula sa mikropono mo. Sa ganitong paraan, hindi na dadaan sa software ang boses mo."
+    },
+    "echoCancellationGate": "Batay sa lakas ng tunog",
+    "echoCancellationGateTooltip": "Ayon sa lakas ng tunog — para sa mga speaker: ang pinapatugtog ng mga ito ay mas mahina pagbalik sa mikropono kaysa sa boses mo, kaya hinaharangan ito batay sa lakas at hindi naaapektuhan ang boses mo.",
+    "echoCancellationOff": "Naka-off",
+    "echoCancellationOffTooltip": "Naka-off — ipinapadala ang mikropono nang walang pagbabago. Para sa mga headphone: walang tunog na pumapasok dito."
   }
 }

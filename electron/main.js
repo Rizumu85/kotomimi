@@ -28,7 +28,7 @@ const { startLanServer } = require('./lan-server');
 const { keepMaximizeHonest, pageShift } = require('./window-maximize');
 const { firewallStatus, allowThroughFirewall } = require('./lan-firewall');
 const { discoverServers } = require('./lan-discover');
-const { createNativeEngine, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME } = require('./native-engine');
+const { createNativeEngine, ENGINE, LLAMA, TRANSLATORS, COACHES, VOICES, LLAMA_RUNTIME, VOICE_RUNTIME } = require('./native-engine');
 const { joinEngines } = require('./native-engines');
 const { createSherpaEngine } = require('./sherpa-engine');
 const { createRemoteEngine } = require('./remote-engine');
@@ -168,6 +168,19 @@ const loadsDevServer = () => (import.meta.env.MODE === 'development' || !app.isP
 if (!app.isPackaged) {
   if (process.env.KOTOMIMI_PROFILE) app.setPath('userData', process.env.KOTOMIMI_PROFILE);
   if (process.env.KOTOMIMI_DEBUG_PORT) app.commandLine.appendSwitch('remote-debugging-port', process.env.KOTOMIMI_DEBUG_PORT);
+}
+/**
+ * Fork: an unpackaged test window that never takes the screen or the keyboard from whatever the person is doing
+ * (`KOTOMIMI_HIDDEN_WINDOW=1`): placed off the screen and shown without being activated, so it still paints and can
+ * be looked at over the debugging port, and muted, so that nothing it plays is heard — by the person, or by a game
+ * listening to the virtual microphone. A window that is never shown paints nothing, and one off the screen is
+ * taken for covered and stops too unless told not to.
+ */
+const quietTestWindow = !app.isPackaged && process.env.KOTOMIMI_HIDDEN_WINDOW === '1';
+if (quietTestWindow) {
+  app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion');
+  app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
+  app.commandLine.appendSwitch('disable-renderer-backgrounding');
 }
 
 /**
@@ -527,8 +540,10 @@ function createWindow() {
     frame: false,
     transparent: true,
     hasShadow: true,
-    // Fork: a start with the computer stays out of sight until the app is opened.
-    show: !autostart.startedHidden,
+    // Fork: a start with the computer stays out of sight until the app is opened. So does an unpackaged test window
+    // asked to (`quietTestWindow`): it is shown below, off the screen and without being made the active window.
+    show: !autostart.startedHidden && !quietTestWindow,
+    ...(quietTestWindow ? { x: -32000, y: -32000, skipTaskbar: true } : {}),
     backgroundColor: '#00000000',
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
     webPreferences: {
@@ -569,6 +584,8 @@ function createWindow() {
   // Fork, Windows only: on a display scaled by a fraction Electron loses track of this window being maximized, and it
   // could not be restored (electron/window-maximize.js). Before anything below asks the window whether it is.
   // The change itself is played by the page (`windowShift` below), the system's animation being lost with the frame.
+  // …and it makes no sound: what it plays, to any device, is dropped before it leaves the app.
+  if (quietTestWindow) { mainWindow.webContents.setAudioMuted(true); mainWindow.showInactive(); }
   keepMaximizeHonest(mainWindow, (bounds) => require('electron').screen.getDisplayMatching(bounds).workArea, process.platform, windowShift.shift);
   // Subtitle chrome lives in a separate window; the main renderer owns both views.
   // Windows only: frame:false + transparent:true above costs the window its
@@ -1600,6 +1617,43 @@ ipcMain.handle('native-coach:start', async (event, args) => {
 ipcMain.handle('native-coach:stop', () => getNativeCoach().stop());
 app.on('will-quit', () => { void nativeCoach?.stop(); });
 
+// Fork: the native voice engine — audio.cpp's server once more, with a model that speaks (`VOICES`). A process of its
+// own: the recognition engine runs one model, and a run that speaks needs both. It answers no page (it sends no CORS
+// headers), so a sentence is asked for here and its sound handed to the page as it is made.
+let nativeVoice = null;
+const getNativeVoice = () => {
+  if (nativeVoice) return nativeVoice;
+  const log = engineLog('native-voice.log');
+  const { net } = require('electron');
+  nativeVoice = createNativeEngine({
+    dir: nativeDirFixed() ? `${process.env.KOTOMIMI_NATIVE_DIR}-voice` : engineDir('native-voice'),
+    catalog: { engine: ENGINE, models: VOICES },
+    runtime: VOICE_RUNTIME,
+    fetch: (url, init) => net.fetch(url, init),
+    log,
+    onChange: (status) => toPage('native-voice:status', status),
+    autoUpdate: true,
+  });
+  return nativeVoice;
+};
+ipcMain.handle('native-voice:get', () => getNativeVoice().status());
+ipcMain.handle('native-voice:download', (event, args) => getNativeVoice().download(String(args?.id ?? '')));
+ipcMain.handle('native-voice:cancel', (event, args) => getNativeVoice().cancel(String(args?.id ?? '')));
+ipcMain.handle('native-voice:remove', (event, args) => getNativeVoice().remove(String(args?.id ?? '')));
+ipcMain.handle('native-voice:start', async (event, args) => {
+  await autostart.quiet;
+  return getNativeVoice().start(String(args?.id ?? ''));
+});
+ipcMain.handle('native-voice:stop', () => getNativeVoice().stop());
+ipcMain.handle('native-voice:speak', (event, args) => {
+  const id = Number.isInteger(args?.id) ? args.id : 0;
+  return getNativeVoice().speak({ id, model: args?.model, text: args?.text, voice: args?.voice, language: args?.language },
+    // A copy: the piece is a view of the response's buffer, which is used again.
+    (pcm, sampleRate) => toPage('native-voice:audio', { id, sampleRate, pcm: Uint8Array.from(pcm) }));
+});
+ipcMain.handle('native-voice:speak-stop', (event, args) => getNativeVoice().stopSpeaking(args?.id));
+app.on('will-quit', () => { void nativeVoice?.stop(); });
+
 // Fork: the models' folder, and moving it. A move stops the engines first — their runtimes are in the folders that
 // move — and makes them afresh after, at the new folder; the page is told their states again. Nothing moves while a
 // model is downloading.
@@ -1609,11 +1663,13 @@ const remakeEngines = () => {
   nativeEngine = null;
   nativeTranslator = null;
   nativeCoach = null;
+  nativeVoice = null;
   toPage('native-engine:status', getNativeEngine().status());
   toPage('native-translator:status', getNativeTranslator().status());
   toPage('native-coach:status', getNativeCoach().status());
+  toPage('native-voice:status', getNativeVoice().status());
 };
-const downloading = () => [nativeEngine, nativeTranslator, nativeCoach].some((engine) => engine
+const downloading = () => [nativeEngine, nativeTranslator, nativeCoach, nativeVoice].some((engine) => engine
   && (engine.status().engine === 'downloading' || Object.values(engine.status().models).some((m) => m.state === 'downloading' || m.state === 'verifying')));
 ipcMain.handle('model-storage:status', () => storageStatus());
 ipcMain.handle('model-storage:choose', async () => {
@@ -1629,7 +1685,7 @@ ipcMain.handle('model-storage:move', async (event, args) => {
   const controller = new AbortController();
   storageMove = controller;
   try {
-    await Promise.allSettled([nativeEngine?.stop(), nativeTranslator?.stop(), nativeCoach?.stop()]);
+    await Promise.allSettled([nativeEngine?.stop(), nativeTranslator?.stop(), nativeCoach?.stop(), nativeVoice?.stop()]);
     await getModelStorage().move(String(args?.target ?? ''), { signal: controller.signal, onProgress: (progress) => toPage('model-storage:progress', progress) });
     return { status: storageStatus() };
   } catch (error) {
@@ -1642,7 +1698,7 @@ ipcMain.handle('model-storage:move', async (event, args) => {
 ipcMain.handle('model-storage:cancel', () => { storageMove?.abort(); return true; });
 ipcMain.handle('model-storage:reset', async () => {
   if (nativeDirFixed() || storageMove) return storageStatus();
-  await Promise.allSettled([nativeEngine?.stop(), nativeTranslator?.stop(), nativeCoach?.stop()]);
+  await Promise.allSettled([nativeEngine?.stop(), nativeTranslator?.stop(), nativeCoach?.stop(), nativeVoice?.stop()]);
   getModelStorage().reset();
   remakeEngines();
   return storageStatus();
@@ -1661,6 +1717,7 @@ const stopNativeEngines = () => {
   void nativeEngine?.stop();
   void nativeTranslator?.stop();
   void nativeCoach?.stop();
+  void nativeVoice?.stop();
 };
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') return;

@@ -666,24 +666,28 @@ describe('audioStore — refreshDevices and the saved device', () => {
 describe('echo cancellation', () => {
   const KEY = 'audio.echoCancellationMode';
 
-  it('defaults to Kotomimi only, persists a choice, and restores it', async () => {
-    useAudioStore.setState({ echoCancellationMode: 'all' });
-    useAudioStore.getState().setEchoCancellationMode('app');
-    expect(useAudioStore.getState().echoCancellationMode).toBe('app');
-    expect(await ServiceFactory.getSettingsService().getSetting<string>(KEY, '')).toBe('app');
-
-    useAudioStore.setState({ echoCancellationMode: 'all' });
+  it('loads the stored playout gate mode', async () => {
+    await ServiceFactory.getSettingsService().setSetting(KEY, 'gate');
     await useAudioStore.getState().refreshDevices();
-    expect(useAudioStore.getState().echoCancellationMode).toBe('app');
+    expect(useAudioStore.getState().echoCancellationMode).toBe('gate');
   });
 
-  it('reads an unknown stored value, or none, as Kotomimi only, and a stored all sounds as that', async () => {
-    await ServiceFactory.getSettingsService().setSetting(KEY, 'off');
-    useAudioStore.setState({ echoCancellationMode: 'all' });
+  it('defaults to the gate, persists a choice, and restores it', async () => {
+    useAudioStore.getState().setEchoCancellationMode('off');
+    expect(useAudioStore.getState().echoCancellationMode).toBe('off');
+    expect(await ServiceFactory.getSettingsService().getSetting<string>(KEY, '')).toBe('off');
+
+    useAudioStore.setState({ echoCancellationMode: 'gate' });
     await useAudioStore.getState().refreshDevices();
-    expect(useAudioStore.getState().echoCancellationMode).toBe('app');
+    expect(useAudioStore.getState().echoCancellationMode).toBe('off');
+  });
+
+  it("reads an older build's choices: Kotomimi only as off, all sounds (and nothing stored) as the gate", async () => {
+    await ServiceFactory.getSettingsService().setSetting(KEY, 'app');
+    await useAudioStore.getState().refreshDevices();
+    expect(useAudioStore.getState().echoCancellationMode).toBe('off');
     await ServiceFactory.getSettingsService().setSetting(KEY, 'all');
     await useAudioStore.getState().refreshDevices();
-    expect(useAudioStore.getState().echoCancellationMode).toBe('all');
+    expect(useAudioStore.getState().echoCancellationMode).toBe('gate');
   });
 });

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import { createVirtualClock } from '../contract/clock';
 import { LEAD_S } from './clipQueue';
 import {
@@ -38,7 +38,7 @@ async function setup(virtual: 'device' | 'tabs' | 'none' = 'device') {
   const [real, virtualSink] = sinks;
   const destinationOf = (sink: FakeSink): FakeNode => ctx.destinations.find((d) => d.stream === sink.srcObject)!;
   /** Plays a clip into a feed; returns its source node. */
-  const clip = (feed: 'speaker' | 'participant' | 'replay' | 'passthrough'): FakeBufferSource => {
+  const clip = (feed: 'speaker' | 'participant' | 'replay'): FakeBufferSource => {
     graph.timeline(feed).play(new Int16Array(2400), 0, () => {});
     return ctx.sources[ctx.sources.length - 1];
   };
@@ -58,17 +58,18 @@ describe('createAudioGraph — routes', () => {
   });
 
   it('applies a diff: a changed gain is updated in place, a missing edge is disconnected', async () => {
-    const { graph, clip } = await setup();
-    const feed = [...clip('passthrough').outputs][0];
-    const edge = () => [...feed.outputs][0] as FakeGain;
-    graph.route([{ from: 'passthrough', to: 'virtual', gain: 0.2 }]);
+    const { ctx, graph, clip, real, destinationOf } = await setup();
+    const feed = [...clip('speaker').outputs][0];
+    const edge = () => [...feed.outputs].find((node) => reaches(node, destinationOf(real))) as FakeGain;
+    graph.route([{ from: 'speaker', to: 'real', gain: 0.2 }]);
+    ctx.advance(0.05);
     const first = edge();
     expect(first.gain.value).toBe(0.2);
-    graph.route([{ from: 'passthrough', to: 'virtual', gain: 0.4 }]);
+    graph.route([{ from: 'speaker', to: 'real', gain: 0.4 }]);
     expect(edge()).toBe(first);
     expect(first.gain.value).toBe(0.4);
     graph.route([]);
-    expect(feed.outputs.size).toBe(0);
+    expect(edge()).toBeUndefined();
   });
 
   it('ignores an edge to a bus this platform lacks (the web build has no virtual device)', async () => {
@@ -79,19 +80,127 @@ describe('createAudioGraph — routes', () => {
   });
 
   it("sends the extension's virtual bus to the tabs", async () => {
-    const { graph, taps, sent, clip } = await setup('tabs');
+    const { ctx, graph, taps, sent, clip } = await setup('tabs');
     // The tts tap is created first, then the virtual bus's.
     const virtualTap = taps[1];
-    graph.route([{ from: 'speaker', to: 'virtual', gain: 1 }]);
+    graph.route([{ from: 'speaker', to: 'virtual', gain: 1 }, { from: 'passthrough', to: 'virtual', gain: 1 }]);
     expect(reaches(clip('speaker'), virtualTap)).toBe(true);
+    graph.connectMicrophone({} as MediaStream);
+    expect(reaches(ctx.streamSources[0], virtualTap)).toBe(true);
     virtualTap.emit(Float32Array.of(0.5));
     expect(sent).toEqual([Float32Array.of(0.5)]);
   });
 
-  it('routes the passthrough feed into the meeting at its ratio', async () => {
-    const { graph, virtualSink, destinationOf, clip } = await setup();
+});
+
+describe('desktop microphone passthrough', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('uses one gain at the landed device rate, only while the run and route allow it', async () => {
+    const direct: Direct[] = [];
+    class Direct extends FakeAudioContext {
+      readonly sinkId: string;
+      constructor(readonly options: { sinkId: string; latencyHint: number }) {
+        super();
+        this.sinkId = options.sinkId;
+        direct.push(this);
+      }
+    }
+    vi.stubGlobal('AudioContext', Direct);
+    const { ctx, graph, virtualSink } = await setup();
+    let reroute!: () => void;
+    const settings = {
+      meeting: true, monitor: false, participantSpeech: false, speechVolume: { mine: 0.5, theirs: 1 },
+      passthrough: { on: true, ratio: 0.3, gate: 'held' as const }, sinks: { virtual: 'a' as string | undefined },
+    };
+    const playback = createPlayback(graph, { get: () => settings, subscribe: (fn) => { reroute = fn; return () => {}; } });
+    const mic = {} as MediaStream;
+    playback.passthrough(mic);
+    await vi.waitFor(() => expect(virtualSink.sinkId).toBe('a'));
+    playback.held(true);
+    expect(direct).toHaveLength(0);
+    playback.live(true);
+    expect(direct[0].options).toEqual({ sinkId: 'a', latencyHint: 0 });
+    const [source] = direct[0].streamSources;
+    expect(source.mediaStream).toBe(mic);
+    const [gain] = [...source.outputs] as FakeGain[];
+    expect([...gain.outputs]).toEqual([direct[0].destination]);
+    expect(gain.gain.value).toBe(0.3);
+    settings.passthrough.ratio = 0.7;
+    reroute();
+    expect(direct).toHaveLength(1);
+    expect(gain.gain.value).toBe(0.7);
+    settings.sinks.virtual = 'b';
+    reroute();
+    expect(gain.outputs.size).toBe(0);
+    expect(direct[0].closed).toBe(1);
+    expect(direct).toHaveLength(1);
+    await vi.waitFor(() => expect(direct[1]?.sinkId).toBe('b'));
+    settings.sinks.virtual = undefined;
+    reroute();
+    expect(direct[1].closed).toBe(1);
+    playback.held(false);
+    settings.sinks.virtual = 'a';
+    reroute();
+    await vi.waitFor(() => expect(virtualSink.sinkId).toBe('a'));
+    expect(direct).toHaveLength(2);
+    playback.held(true);
+    playback.held(false);
+    expect(direct[2].closed).toBe(1);
+    playback.held(true);
+    playback.passthrough(null);
+    expect(direct[3].closed).toBe(1);
+    const next = {} as MediaStream;
+    playback.passthrough(next);
+    expect(direct[4].streamSources[0].mediaStream).toBe(next);
+    playback.live(false);
+    expect(direct[4].closed).toBe(1);
+    expect(ctx.streamSources).toHaveLength(0);
+    await playback.dispose();
+  });
+
+  it.each(['ignored', 'refused'])('uses the graph when the device option is %s, warning once for this sink', async (reason) => {
+    const attempts = vi.fn();
+    vi.stubGlobal('AudioContext', class extends FakeAudioContext {
+      sinkId = '';
+      constructor() {
+        super();
+        attempts();
+        if (reason === 'refused') throw new Error('Device unavailable');
+      }
+    });
+    reportWarningSpy.mockClear();
+    const { ctx, graph, virtualSink, destinationOf, taps } = await setup();
+    await graph.setSinks({ virtual: 'cable' });
     graph.route([{ from: 'passthrough', to: 'virtual', gain: 0.3 }]);
-    expect(reaches(clip('passthrough'), destinationOf(virtualSink))).toBe(true);
+    const disconnect = graph.connectMicrophone({} as MediaStream);
+    expect(reaches(ctx.streamSources[0], destinationOf(virtualSink))).toBe(true);
+    expect(reaches(ctx.streamSources[0], taps[0])).toBe(false);
+    const [feed] = ctx.streamSources[0].outputs;
+    expect(([...feed.outputs][0] as FakeGain).gain.value).toBe(0.3);
+    disconnect();
+    expect(reaches(ctx.streamSources[0], destinationOf(virtualSink))).toBe(false);
+    graph.connectMicrophone({} as MediaStream);
+    expect(reaches(ctx.streamSources[1], destinationOf(virtualSink))).toBe(true);
+    expect(attempts).toHaveBeenCalledOnce();
+    expect(withKey(reportWarningSpy, 'graph:direct-mic')).toHaveLength(1);
+    await graph.close();
+  });
+
+  it('ignores a rejected resume after the microphone disconnected', async () => {
+    let reject!: (error: Error) => void;
+    vi.stubGlobal('AudioContext', class extends FakeAudioContext {
+      sinkId = 'cable';
+      state = 'suspended' as const;
+      resume = () => new Promise<void>((_, no) => { reject = no; });
+    });
+    const { ctx, graph } = await setup();
+    await graph.setSinks({ virtual: 'cable' });
+    graph.route([{ from: 'passthrough', to: 'virtual', gain: 1 }]);
+    graph.connectMicrophone({} as MediaStream)();
+    reject(new Error('closed'));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(ctx.streamSources).toHaveLength(0);
   });
 });
 
@@ -331,14 +440,15 @@ describe('createAudioGraph — outputs', () => {
 
 describe('createAudioGraph — the tts tap', () => {
   it('hears the translated speech whatever the routes, and not the preview or passthrough', async () => {
-    const { ctx, graph, taps, clip } = await setup();
+    const { ctx, graph, taps, clip } = await setup('tabs');
     const ttsTap = taps[0];
     expect(reaches(clip('speaker'), ttsTap)).toBe(true);
     expect(reaches(clip('participant'), ttsTap)).toBe(true);
     expect(reaches(clip('replay'), ttsTap)).toBe(true);
     graph.playOnce(new Float32Array(10), 48000);
     expect(reaches(ctx.sources[ctx.sources.length - 1], ttsTap)).toBe(false);
-    expect(reaches(clip('passthrough'), ttsTap)).toBe(false);
+    graph.connectMicrophone({} as MediaStream);
+    expect(reaches(ctx.streamSources[0], ttsTap)).toBe(false);
   });
 
   it('hands the reader what the worklet posts', async () => {
@@ -676,10 +786,10 @@ describe('createAudioGraph — a wedged context (#246)', () => {
   });
 
   it('starts on the new clock what was scheduled while the rebuild ran', async () => {
-    const { first, contexts, clock, graph, flush } = await setupRecovering();
-    // Speaker clips reach the real bus, passthrough the virtual one.
+    const { first, contexts, clock, graph, flush, tapsOn } = await setupRecovering({ virtual: 'tabs' });
+    // Speaker clips reach the real bus, passthrough the tabs.
     const routing: RoutingSource = {
-      get: () => ({ meeting: false, monitor: true, participantSpeech: false, passthrough: { on: true, ratio: 1 }, sinks: {} }),
+      get: () => ({ meeting: false, monitor: true, participantSpeech: false, speechVolume: { mine: 0.5, theirs: 1 }, passthrough: { on: true, ratio: 1 }, sinks: {} }),
       subscribe: () => () => {},
     };
     const playback = createPlayback(graph, routing, clock);
@@ -692,16 +802,19 @@ describe('createAudioGraph — a wedged context (#246)', () => {
     clock.advance(1_750);
     // The rebuild now awaits the tap module: both of these land on the dead context.
     playback.audio('speaker', 1, pcm);
-    playback.passthrough(pcm);
-    expect(first.sources).toHaveLength(2);
+    const mic = {} as MediaStream;
+    playback.passthrough(mic);
+    expect(first.sources).toHaveLength(1);
+    expect(first.streamSources[0].mediaStream).toBe(mic);
     await flush();
     expect(contexts).toHaveLength(2);
     playback.audio('speaker', 2, pcm);
     const clip = contexts[1].sources[contexts[1].sources.length - 1];
     expect(clip.startedAt).toBeLessThan(contexts[1].currentTime + LEAD_S + 0.01);
-    const before = contexts[1].sources.length;
-    playback.passthrough(pcm);
-    expect(contexts[1].sources).toHaveLength(before + 1);
+    expect(first.streamSources[0].outputs.size).toBe(0);
+    expect(contexts[1].streamSources).toHaveLength(1);
+    expect(contexts[1].streamSources[0].mediaStream).toBe(mic);
+    expect(reaches(contexts[1].streamSources[0], tapsOn(contexts[1])[1])).toBe(true);
   });
 
   it('finishes a rebuild whose dead context never settles its close()', async () => {

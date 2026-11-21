@@ -9,6 +9,7 @@ import type { AudioMode } from '../../stores/audioStore';
 import { useLanguageLabel } from '../../lib/language/useLanguageLabel';
 import { orderLanguages, pinnedLanguages, PIN_SEPARATOR, type OrderContext } from '../../lib/language/order';
 import { effectiveTextOnly } from '../../utils/effectiveTextOnly';
+import { sharedSpeech } from '../../lib/session/shape';
 import { useLanguageMenu } from './LanguageMenu';
 import { HearerButton, LanguageHearing, type MySide, type SideLanguages, type TheirSide } from './LanguageHearing';
 
@@ -95,7 +96,7 @@ export function LanguagePairSection({ provider, settings, pair, onChange, disabl
   const resolved = sentence && pairSentence({
     mode: sentence.mode,
     textOnly: effectiveTextOnly({ speakerLegRuns: sentence.mode !== 'participant', textOnly: sentence.textOnly }),
-    capability: provider.speech === 'always' ? 'never' : provider.speech === 'never' ? 'always' : 'optional',
+    capability: sharedSpeech(provider) === 'always' ? 'never' : sharedSpeech(provider) === 'never' ? 'always' : 'optional',
     source: pair.source,
     target: pair.target,
   });

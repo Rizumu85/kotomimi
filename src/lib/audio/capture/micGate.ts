@@ -1,7 +1,8 @@
 /**
- * Fork: the microphone's activation threshold — a gate on its level, as
- * VRChat has one. Below the threshold the microphone is heard as silence;
- * at or above it, it is heard as it is.
+ * Fork: the microphone's activation threshold is a gate on its level, as
+ * VRChat has one. The gate calls a chunk loud when it meets the activation
+ * threshold and the playout follower hears the user's voice. Either check
+ * can run alone. With both off, the microphone is heard at once.
  *
  * Why: with loudspeakers near the microphone the other side's voice comes
  * back through it, quieter than the user's own but clear enough to be
@@ -18,26 +19,25 @@
  *   zeros of its length, never dropped: the recognizers' VAD counts its
  *   pause in frames it is given (`native-vad.worker.ts`, `redemptionMs`),
  *   a stream that stops arriving never ends a sentence, and every other
- *   listener (the echo monitor, the meters, the passthrough) keeps its clock.
+ *   PCM listener (the echo monitor, the meters) keeps its clock.
  * - **A little lookahead.** The gate decides each chunk only after the next
  *   `GATE_LOOKAHEAD_MS` have arrived, so the quiet onset of a word — the
  *   breath before it, a soft consonant — is delivered whole once the word
- *   proves loud enough. The microphone is heard that much later; nothing
- *   else is.
+ *   proves loud enough. Live passthrough does not wait on this gate.
  * - **A hold.** Once open the gate stays open `GATE_HOLD_MS` past the last
  *   loud chunk: the dip between two words, a trailing consonant, are not cut.
  *   Longer would let more of the other side's voice through after the user
  *   stops; shorter would chop their own.
  *
  * The edges are faded over a few milliseconds, so that neither the gate's
- * opening nor its closing clicks in the passthrough or the recording. Pure:
+ * opening nor its closing clicks in the recording. Pure:
  * clock-free, in samples; the recorder's chunks are what it counts by.
  */
 import { SAMPLE_RATE } from '../../contract/adapter';
 
 /** How long a chunk waits for what follows it before the gate decides it. */
 export const GATE_LOOKAHEAD_MS = 170;
-/** How long the gate stays open after the last chunk at or over the threshold. */
+/** How long the gate stays open after the last loud chunk. */
 export const GATE_HOLD_MS = 400;
 /** The quietest level the meter and the threshold tell apart from silence, in dBFS. */
 export const GATE_FLOOR_DB = -60;
@@ -64,8 +64,10 @@ export function levelOf(pcm: Int16Array): number {
 }
 
 export interface MicGateOptions {
-  /** Read on every chunk: 0–100, and 0 is off — everything is delivered, at once. */
+  /** Read on every chunk. Zero disables the level threshold. */
   threshold(): number;
+  /** Null leaves the decision to the threshold alone. */
+  voiced?(pcm: Int16Array): boolean | null;
   deliver(pcm: Int16Array): void;
   /** Told every chunk's level before the gate, for the meter the threshold is set by. */
   onLevel?(level: number): void;
@@ -135,8 +137,9 @@ export function createMicGate(options: MicGateOptions): MicGate {
       const threshold = options.threshold();
       const level = levelOf(pcm);
       options.onLevel?.(level);
+      const voiced = options.voiced?.(pcm) ?? null;
       // Off: the microphone as it is, untouched — only what waited on the gate is faded in, where it had been silenced.
-      if (!(threshold > 0)) {
+      if (threshold === 0 && voiced === null) {
         flush();
         position += pcm.length;
         wasOpen = true;
@@ -145,7 +148,7 @@ export function createMicGate(options: MicGateOptions): MicGate {
       }
       const at = position;
       position += pcm.length;
-      if (level >= threshold) openUntil = Math.max(openUntil, position + hold);
+      if (level >= threshold && voiced !== false) openUntil = Math.max(openUntil, position + hold);
       queue.push({ pcm, at });
       queued += pcm.length;
       // A chunk is decided once the lookahead after it has arrived: a loud chunk within it has already set `openUntil`.

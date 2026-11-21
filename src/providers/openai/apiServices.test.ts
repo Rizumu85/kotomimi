@@ -7,6 +7,8 @@ describe('the services an API model usually is', () => {
   it('offers a stage only the services that can serve it', () => {
     expect(servicesFor('asr').map((s) => s.id)).toEqual(['openai', 'deepseek', 'groq', 'siliconflow']);
     expect(servicesFor('text').map((s) => s.id)).toEqual(['openai', 'gemini', 'ark', 'deepseek', 'groq', 'siliconflow', 'openrouter', 'ollama']);
+    // Fork: what can speak: Edge first, which needs nothing typed.
+    expect(servicesFor('voice').map((s) => s.id)).toEqual(['edge', 'openai', 'siliconflow']);
   });
 
   it('reads the service back from the address, however it was typed', () => {
@@ -20,7 +22,9 @@ describe('the services an API model usually is', () => {
   });
 
   it('has an address with a scheme and no trailing slash, and each id once', () => {
-    for (const s of API_SERVICES) expect(s.baseUrl).toMatch(/^https?:\/\/[^\s]+[^/]$/);
+    // Edge's voices are asked in their own way: no address is typed for them, and a name stands where one would.
+    for (const s of API_SERVICES.filter((one) => !one.speaks)) expect(s.baseUrl).toMatch(/^https?:\/\/[^\s]+[^/]$/);
+    expect(API_SERVICES.filter((one) => one.speaks).map((one) => [one.id, one.baseUrl, one.needsKey])).toEqual([['edge', 'edge:', false]]);
     expect(new Set(API_SERVICES.map((s) => s.id)).size).toBe(API_SERVICES.length);
   });
 });

@@ -1,5 +1,31 @@
-import { describe, it, expect } from 'vitest';
-import { resolveParticipantSourceId, isApplicationSource, needsLoopbackStream, SYSTEM_PARTICIPANT_SOURCE_ID } from './participantSource';
+import { afterEach, describe, it, expect, vi } from 'vitest';
+import { monitorHeard, resolveParticipantSourceId, isApplicationSource, needsLoopbackStream, SYSTEM_PARTICIPANT_SOURCE_ID } from './participantSource';
+
+describe('monitorHeard (fork)', () => {
+  const on = (platform: string) => vi.spyOn(navigator, 'platform', 'get').mockReturnValue(platform);
+  afterEach(() => { vi.restoreAllMocks(); });
+
+  it('is heard with the microphone alone, whatever the other side would be captured from', () => {
+    on('Win32');
+    expect(monitorHeard('speaker', 'electron', SYSTEM_PARTICIPANT_SOURCE_ID)).toBe(true);
+    expect(monitorHeard('participant', 'electron', 'app:pid:42')).toBe(false);
+  });
+
+  it('is heard beside the other side only while that is one application, and never beside the whole system', () => {
+    on('Win32');
+    expect(monitorHeard('both', 'electron', 'app:pid:42')).toBe(true);
+    expect(monitorHeard('both', 'electron', SYSTEM_PARTICIPANT_SOURCE_ID)).toBe(false);
+    expect(monitorHeard('both', 'electron', undefined)).toBe(false);
+    on('MacIntel');
+    expect(monitorHeard('both', 'electron', 'app:pid:42')).toBe(true);
+  });
+
+  it('keeps to the microphone alone on Linux, where an application capture can widen to the whole system unseen', () => {
+    on('Linux x86_64');
+    expect(monitorHeard('both', 'electron', 'app:pid:42')).toBe(false);
+    expect(monitorHeard('speaker', 'electron', 'app:pid:42')).toBe(true);
+  });
+});
 
 describe('resolveParticipantSourceId', () => {
   it('returns the selected application source id', () => {

@@ -124,7 +124,7 @@ describe('a leg another Kotomimi hears', () => {
     }
   });
 
-  it('hears an explicitly selected Apple pair as a best effort when the host is old or lacks either language', async () => {
+  it('refuses an explicitly selected Apple pair when the host is old or lacks either language', async () => {
     const pair = { source: 'en', target: 'fr' };
     const offered: SharedModel[] = ['en', 'fr'].map((language) => ({ id: `apple-speech:${language}`, kind: 'asr', languages: [language], bilingual: true }));
     for (const asr of [offered.map(({ bilingual: _, ...m }) => m), offered.slice(0, 1)]) {
@@ -132,9 +132,9 @@ describe('a leg another Kotomimi hears', () => {
       const fetch = vi.fn(async (input: RequestInfo | URL) => json(String(input).endsWith('/capabilities') ? capabilityList(all) : modelList(all)));
       const s = settings({ asrModel: 'apple-speech', speakBoth: true });
       const result = await createLocalAICheck({ fetch })(K, s, { pair, legs: ['speaker'] });
-      expect(result).toMatchObject({ ok: true });
+      expect(result).toMatchObject({ ok: false, code: 'server_no_bilingual', params: { source: 'en', target: 'fr' } });
       const models = result.models ?? [];
-      expect(buildLocalAI({ ...SPEAKER, direction: pair }, s, { ...shared, models, reversed: () => false })).toMatchObject({ stages: { heard: 'auto' } });
+      expect(buildLocalAI({ ...SPEAKER, direction: pair }, s, { ...shared, models, reversed: () => false })).toMatchObject({ code: 'server_no_bilingual' });
       expect(localaiLanguages.detection?.(s, models, pair).both).toMatchObject({ on: true, available: true });
     }
   });
@@ -288,6 +288,15 @@ describe('another Kotomimi that hears none of a leg\'s language', () => {
     expect(told.mock.calls.map((c) => String(c[0])).filter((url) => url.includes('asks='))).toEqual([expect.stringMatching(/\/models\/capabilities\?asks=zh-CN(&|$)/)]);
     // What it lists stays: another place, or a model there, is chosen from it.
     expect(await ask(serving(JA_ONLY), ['speaker'])).toMatchObject({ models: expect.arrayContaining([expect.objectContaining({ id: 'custom-kotoba-whisper' })]) });
+  });
+
+  it('offers the missing primary Apple language on the host even when a second language is required', async () => {
+    const host = serving([...JA_ONLY, { id: 'apple-speech:ja', kind: 'asr', languages: ['ja'], bilingual: true }]);
+    const s = { asrModel: 'apple-speech', speakBoth: true };
+    const result = await ask(host, ['speaker'], s);
+    expect(result).toMatchObject({ ok: false, code: 'server_no_asr', params: { source: 'zh-CN' } });
+    expect(host.mock.calls.map(([url]) => String(url))).toContainEqual(expect.stringContaining('/capabilities?asks=zh-CN&model=apple-speech'));
+    expect(buildLocalAI(SPEAKER, settings(s), { ...shared, models: result.models ?? [] })).toMatchObject({ code: 'server_no_asr' });
   });
 
   it('passes what it hears: the other side\'s Japanese, a coached speaker\'s Japanese, a recognizer that hears any language, the LocalAI it lends', async () => {

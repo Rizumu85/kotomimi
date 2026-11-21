@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { SAMPLE_RATE } from '../contract/adapter';
 import { createVirtualClock } from '../contract/clock';
 import { EMPTY_PCM, type Segment } from '../conversation/types';
@@ -20,6 +20,7 @@ function fakeGraph() {
   const shots: Array<{ audio: Float32Array; sampleRate: number; stopped: boolean; end: () => void }> = [];
   const resets = new Set<() => void>();
   const graph: AudioGraph & { readonly suspended: number; readonly closed: number } = {
+    connectMicrophone: vi.fn(() => vi.fn()),
     timeline: (feed) => ({
       now: () => now,
       play(pcm, at, onEnded) {
@@ -69,17 +70,17 @@ function fakeGraph() {
 
 /** As `fakeGraph`, but wired through `createPlayback` with a virtual clock the test drives by hand. */
 function build(routingSettings: RoutingSettings = ROUTING) {
-  const { graph, plays, advance, resumed } = fakeGraph();
+  const { graph, resumed } = fakeGraph();
   const clock = createVirtualClock(0);
   const playback = createPlayback(graph, routing(routingSettings).source, clock);
-  const passthroughPlayed = () => plays.filter((p) => p.feed === 'passthrough').length;
-  return { playback, graph, clock, plays, advance, resumed, passthroughPlayed };
+  return { playback, graph, clock, resumed };
 }
 
 const ROUTING: RoutingSettings = {
   meeting: true,
   monitor: false,
   participantSpeech: false,
+  speechVolume: { mine: 0.5, theirs: 1 },
   passthrough: { on: true, ratio: 0.2 },
   sinks: { real: 'monitor-1' },
 };
@@ -182,7 +183,7 @@ describe('createPlayback — routes', () => {
     expect(routes).toEqual([routesFor(ROUTING, false)]);
     expect(sinks).toEqual([{ real: 'monitor-1' }]);
     r.set({ monitor: true });
-    expect(routes[1]).toContainEqual({ from: 'speaker', to: 'real', gain: 1 });
+    expect(routes[1]).toContainEqual({ from: 'speaker', to: 'real', gain: 0.5 });
   });
 
   it("opens passthrough only while push-to-talk's key is held", () => {
@@ -277,63 +278,60 @@ describe('parseClipKey', () => {
 });
 
 describe('createPlayback — passthrough', () => {
-  it("plays the microphone's chunks back to back on the passthrough feed, while live", () => {
-    const { graph, plays } = fakeGraph();
-    const playback = createPlayback(graph, routing().source);
+  it('subscribes to the microphone only while the run and route carry it', async () => {
+    const { graph } = fakeGraph();
+    const route = routing({ ...ROUTING, passthrough: { on: false, ratio: 1 } });
+    const playback = createPlayback(graph, route.source);
+    const mic = {} as MediaStream;
+    const listen = vi.fn((receive: (stream: MediaStream | null) => void) => {
+      receive(mic);
+      return vi.fn(() => receive(null));
+    });
+    const detach = playback.passthrough(listen);
     playback.live(true);
-    playback.passthrough(pcm(85));
-    playback.passthrough(pcm(85));
-    expect(plays.map((p) => p.feed)).toEqual(['passthrough', 'passthrough']);
-    expect(plays[1].at).toBeCloseTo(plays[0].at + 0.085, 9);
-  });
-
-  it('resumes the graph before it plays (autoplay)', () => {
-    const { graph, resumed } = fakeGraph();
-    const playback = createPlayback(graph, routing().source);
-    playback.live(true);
-    playback.passthrough(pcm(85));
-    expect(resumed()).toBeGreaterThan(0);
-  });
-
-  it("schedules nothing while push-to-talk's route is closed, so a press never lets out the voice from before it", () => {
-    const { playback, passthroughPlayed } = build({ ...ROUTING, passthrough: { on: true, ratio: 0.2, gate: 'held' } });
-    playback.live(true);
-    playback.passthrough(pcm(85));
-    expect(passthroughPlayed()).toBe(0);
+    expect(listen).not.toHaveBeenCalled();
+    route.set({ passthrough: { on: true, ratio: 1, gate: 'idle' } });
+    expect(listen).toHaveBeenCalledOnce();
+    expect(graph.connectMicrophone).toHaveBeenCalledWith(mic);
     playback.held(true);
-    playback.passthrough(pcm(85));
-    expect(passthroughPlayed()).toBe(1);
-  });
-
-  it('stops what it scheduled when the route closes, so a quick reopen never plays it late', () => {
-    const { playback, plays } = build({ ...ROUTING, passthrough: { on: true, ratio: 0.2, gate: 'held' } });
-    playback.live(true);
-    playback.held(true);
-    playback.passthrough(pcm(85));
-    expect(plays.filter((p) => p.feed === 'passthrough' && !p.done)).toHaveLength(1);
+    expect(listen.mock.results[0].value).toHaveBeenCalledOnce();
     playback.held(false);
-    expect(plays.filter((p) => p.feed === 'passthrough' && !p.done)).toHaveLength(0);
-  });
-
-  it("schedules nothing while push-to-translate's key is held, so a release never lets out the held voice", () => {
-    const { playback, passthroughPlayed } = build({ ...ROUTING, passthrough: { on: true, ratio: 1, gate: 'idle' } });
-    playback.live(true);
-    playback.held(true);
-    playback.passthrough(pcm(85));
-    expect(passthroughPlayed()).toBe(0);
-    playback.held(false);
-    playback.passthrough(pcm(85));
-    expect(passthroughPlayed()).toBe(1);
-  });
-
-  it('forwards the original voice only while the run is live', () => {
-    const { playback, passthroughPlayed } = build();
-    playback.passthrough(pcm(85));
-    playback.live(true);
-    playback.passthrough(pcm(85));
     playback.live(false);
-    playback.passthrough(pcm(85));
-    expect(passthroughPlayed()).toBe(1);
+    expect(listen.mock.results[1].value).toHaveBeenCalledOnce();
+    playback.live(true);
+    detach();
+    expect(listen.mock.results[2].value).toHaveBeenCalledOnce();
+    playback.held(true);
+    playback.held(false);
+    expect(listen).toHaveBeenCalledTimes(3);
+    await playback.dispose();
+  });
+
+  it('connects only the current stream, while both the key and the run allow it', () => {
+    const { playback, graph, resumed, clock } = build({ ...ROUTING, passthrough: { on: true, ratio: 0.2, gate: 'held' } });
+    const connect = vi.mocked(graph.connectMicrophone);
+    const mic = { id: 'first' } as MediaStream;
+    const next = { id: 'next' } as MediaStream;
+    playback.passthrough(mic);
+    playback.held(true);
+    expect(connect).not.toHaveBeenCalled();
+    playback.live(true);
+    expect(connect).toHaveBeenCalledWith(mic);
+    expect(resumed()).toBe(1);
+    clock.advance(QUIET_MS);
+    expect(graph.suspended).toBe(0);
+    playback.held(false);
+    expect(connect.mock.results[0].value).toHaveBeenCalledOnce();
+    playback.passthrough(next);
+    expect(connect).toHaveBeenCalledTimes(1);
+    playback.held(true);
+    expect(connect).toHaveBeenLastCalledWith(next);
+    playback.passthrough(null);
+    expect(connect.mock.results[1].value).toHaveBeenCalledOnce();
+    playback.passthrough(next);
+    playback.live(false);
+    expect(connect.mock.results[2].value).toHaveBeenCalledOnce();
+    expect(connect).toHaveBeenCalledTimes(3);
   });
 });
 

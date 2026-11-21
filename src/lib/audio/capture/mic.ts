@@ -44,8 +44,12 @@ function refused(error: unknown): boolean {
 }
 
 export type NoiseSuppression = NoiseSuppressionMode;
-/** What echo cancellation removes: what this app plays, or every sound the system plays. */
-export type EchoCancellation = 'app' | 'all';
+/**
+ * Fork: how the loudspeakers' sound is kept out of the microphone: not at all (`off`, headphones), or by its loudness,
+ * a gate following what the system plays (`gate`, `echoFollow.ts`). The browser's echo cancellation is never asked
+ * for: it cancels what the app plays, and the app plays the user's own voice where passthrough is on (2026-11-20).
+ */
+export type EchoCancellation = 'off' | 'gate';
 
 /** The settings a microphone follows, read live. */
 export interface MicSettings {
@@ -68,9 +72,11 @@ export interface MicSettings {
   muted(): boolean;
   /**
    * Fork: the activation threshold, 0–100, read on every chunk (`micGate.ts`): sound under it is heard as silence.
-   * Absent or 0: everything is heard.
+   * Absent or 0 leaves the decision to the playout verdict alone.
    */
   activation?(): number;
+  /** Whether the playout follower hears the user's voice in this chunk. Null leaves the threshold to decide. */
+  voiced?(pcm: Int16Array): boolean | null;
   /** Fork: told every chunk's level, 0–100, before the gate — for the meter the threshold is set by. */
   level?(level: number): void;
   /**
@@ -128,12 +134,62 @@ export async function openMic(
   let unwatch = () => {};
   let unsubscribe = () => {};
   let chain: Promise<void> = Promise.resolve();
+  let stream: MediaStream | null = null;
+  let streamListener: ((stream: MediaStream | null) => void) | undefined;
+  let carrying: { source: MediaStream; raw?: MediaStream } | undefined;
+  let warnedRaw = false;
+  const releaseRaw = () => {
+    const raw = carrying?.raw;
+    carrying = undefined;
+    for (const track of raw?.getTracks() ?? []) track.stop();
+  };
+  const publishStream = async () => {
+    const source = stream;
+    if (!streamListener || !source || settings.muted() || settings.held?.()) {
+      releaseRaw();
+      streamListener?.(null);
+      return;
+    }
+    if (carrying?.source === source) return;
+    releaseRaw();
+    // getUserMedia cannot be cancelled. Each open belongs to just this stretch
+    // of passthrough, even if a mute and unmute return to the same recorder.
+    const request = carrying = { source };
+    let raw: MediaStream;
+    try {
+      const id = source.getAudioTracks()[0]?.getSettings().deviceId;
+      if (!id) throw new Error('The microphone track has no device id.');
+      raw = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          deviceId: { exact: id },
+          echoCancellation: { exact: false },
+          noiseSuppression: { exact: false },
+          autoGainControl: { exact: false },
+        },
+      });
+    } catch (cause) {
+      if (carrying !== request) return;
+      if (!warnedRaw) {
+        warnedRaw = true;
+        reportWarning('Microphone', 'Unprocessed microphone unavailable; using the recording stream for passthrough.', { cause, dedupeKey: 'mic:raw' });
+      }
+      streamListener(source);
+      return;
+    }
+    if (carrying !== request) {
+      for (const track of raw.getTracks()) track.stop();
+      return;
+    }
+    carrying.raw = raw;
+    streamListener(raw);
+  };
 
   // Fork: the activation threshold (`micGate.ts`). Between the recorder and the listeners, so that every one of them
-  // — the leg's adapter, the passthrough, the meters, the echo monitor — hears the gated microphone; and before
+  // — the leg's adapter, the meters, the echo monitor — hears the gated microphone; and before
   // `deliver`, so that a mute still drops the chunk whole.
   const gate = createMicGate({
     threshold: () => settings.activation?.() ?? 0,
+    voiced: settings.voiced,
     deliver: (pcm) => core.deliver(settings.held?.() ? new Int16Array(pcm.length) : pcm),
     onLevel: (level) => settings.level?.(level),
   });
@@ -143,6 +199,8 @@ export async function openMic(
     unwatch = () => {};
     if (!open) return;
     open = false;
+    stream = null;
+    void publishStream();
     // What waited on its lookahead was the old device's: let go with it.
     gate.reset();
     await recorder.end();
@@ -154,6 +212,9 @@ export async function openMic(
       // `Source.stop` stops capturing before its first `await` (roadmap 1e-1): a
       // `pagehide` never awaits this, and a device switch in flight must not keep
       // the microphone open while it settles. `quit()` below still ends the recorder.
+      stream = null;
+      void publishStream();
+      streamListener = undefined;
       for (const track of recorder.getStream()?.getTracks() ?? []) track.stop();
       unsubscribe();
       recorder.onNoiseSuppressionChange = null;
@@ -205,10 +266,15 @@ export async function openMic(
     if (!(await recorder.begin(deviceId))) throw new Error('The microphone could not be opened. Reload the page and try again.');
     open = true;
     label = name;
-    if (settings.trackOpened) settings.trackOpened(recorder.getStream()!.getAudioTracks()[0], echo);
+    const opened = recorder.getStream();
+    if (settings.trackOpened) settings.trackOpened(opened!.getAudioTracks()[0], echo);
     const mine = ++generation;
-    unwatch = core.watch(recorder.getStream(), () => queue(() => trackEnded(mine)));
+    unwatch = core.watch(opened, () => queue(() => trackEnded(mine)));
     await recorder.record((data) => gate.push(data.mono));
+    if (!core.stopped && !core.ended) {
+      stream = opened;
+      void publishStream();
+    }
   };
 
   // A device switch is a passing event: the surfaces hide its notice after a
@@ -337,8 +403,26 @@ export async function openMic(
     throw signal.reason ?? new Error('aborted');
   }
 
-  unsubscribe = settings.subscribe(() => queue(follow));
+  unsubscribe = settings.subscribe(() => {
+    void publishStream();
+    queue(follow);
+  });
   // Opening can await a denoiser for seconds. Follow choices made before the subscription existed.
   queue(follow);
+  core.onEnded(() => { stream = null; void publishStream(); });
+  core.onStream = (listener) => {
+    if (streamListener) {
+      releaseRaw();
+      streamListener(null);
+    }
+    streamListener = listener;
+    void publishStream();
+    return () => {
+      if (streamListener !== listener) return;
+      streamListener = undefined;
+      releaseRaw();
+      listener(null);
+    };
+  };
   return core;
 }

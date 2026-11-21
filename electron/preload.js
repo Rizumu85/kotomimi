@@ -93,6 +93,9 @@ const validReceiveChannels = [
   'native-translator:status',
   // Fork: the native feedback engine's state as it changes
   'native-coach:status',
+  // Fork: the native voice engine's state as it changes, and a sentence's sound as it is made
+  'native-voice:status',
+  'native-voice:audio',
   // Fork: how far a move of the models has come (electron/model-storage.js)
   'model-storage:progress',
   // LAN caption sharing status (main → renderer)

@@ -26,7 +26,9 @@ vi.mock('./capture/echoWatch', () => ({
 }));
 
 import useAudioStore from '../../stores/audioStore';
+import { useVRChatStore } from '../../stores/vrchatStore';
 import { createAppCapture, micSettings, systemAudioSettings } from './appCapture';
+import { openMic } from './capture/mic';
 import type { Playback } from './playback';
 
 function fakePlayback() {
@@ -44,6 +46,31 @@ beforeEach(() => {
 });
 
 describe('createAppCapture', () => {
+  it('follows only this capture’s participant chunks and reads the echo mode live', async () => {
+    const capture = createAppCapture(fakePlayback(), 'electron', { meterGate: () => false });
+    const speaker = await capture.openSource('speaker', live());
+    const voiced = vi.mocked(openMic).mock.lastCall![0].voiced!;
+    const quiet = new Int16Array(80);
+    useAudioStore.setState({ echoCancellationMode: 'gate' });
+    expect(micSettings().voiced).toBeUndefined();
+    opened.sources.push(createFakeSource(clock, { voiced: true }));
+    const other = await createAppCapture(fakePlayback(), 'electron').openSource('participant', live());
+    clock.advance(100);
+    expect(voiced(quiet)).toBe(true);
+    useAudioStore.setState({ echoCancellationMode: 'off' });
+    opened.sources.push(createFakeSource(clock, { voiced: true }));
+    const participant = await capture.openSource('participant', live());
+    clock.advance(100);
+    expect(voiced(quiet)).toBeNull();
+    useAudioStore.setState({ echoCancellationMode: 'gate' });
+    expect(voiced(quiet)).toBe(false);
+    await other.stop();
+    expect(voiced(quiet)).toBe(false);
+    await participant.stop();
+    expect(voiced(quiet)).toBe(true);
+    await speaker.stop();
+  });
+
   it('taps both sources exactly as delivered even while the level meter is gated', async () => {
     const onPcm = vi.fn();
     const capture = createAppCapture(fakePlayback(), 'electron', { onPcm, meterGate: () => false });
@@ -61,14 +88,31 @@ describe('createAppCapture', () => {
     expect(onPcm).not.toHaveBeenCalled();
   });
 
-  it('opens the microphone for the speaker and feeds its chunks to passthrough', async () => {
+  it('passes the live microphone through without sending PCM, even with the level meter gated', async () => {
     const playback = fakePlayback();
-    const capture = createAppCapture(playback, 'electron');
-    await capture.openSource('speaker', live());
+    const capture = createAppCapture(playback, 'electron', { meterGate: () => false });
+    const mic = {} as MediaStream;
+    const off = vi.fn();
+    opened.sources[0].onStream = (listen) => { listen(mic); return off; };
+    const receive = vi.fn();
+    vi.mocked(playback.passthrough).mockImplementation((onStream) => onStream(receive));
+    const source = await capture.openSource('speaker', live());
     clock.advance(100);
     expect(opened.calls).toEqual(['mic']);
     expect(playback.passthrough).toHaveBeenCalledTimes(1);
+    expect(playback.passthrough).toHaveBeenCalledWith(opened.sources[0].onStream);
+    expect(receive).toHaveBeenCalledWith(mic);
     expect(watch.attached).toEqual(['speaker']);
+    await source.stop();
+    expect(off).toHaveBeenCalledOnce();
+  });
+
+  it('does not request a passthrough stream on the web, where there is no meeting output', async () => {
+    const playback = fakePlayback();
+    opened.sources[0].onStream = vi.fn();
+    const source = await createAppCapture(playback, 'web').openSource('speaker', live());
+    expect(playback.passthrough).not.toHaveBeenCalled();
+    await source.stop();
   });
 
   it("opens the system audio for the participant in Electron and the tab in the extension, and never passes it through", async () => {
@@ -150,13 +194,6 @@ describe('createAppCapture — the meter gate', () => {
     expect(flat(capture.levels.speaker)).toBe(false);
   });
 
-  it('still passes a gated chunk through to playback', async () => {
-    const playback = fakePlayback();
-    const capture = createAppCapture(playback, 'electron', { meterGate: () => false });
-    await capture.openSource('speaker', live());
-    clock.advance(100);
-    expect(playback.passthrough).toHaveBeenCalledTimes(1);
-  });
 });
 
 describe('the settings the sources follow', () => {
@@ -209,10 +246,10 @@ describe('the settings the sources follow', () => {
 
   it("reads the microphone's device, noise suppression, echo cancellation and mute from the audio store, live", () => {
     const settings = micSettings();
-    useAudioStore.setState({ selectedInputDevice: { deviceId: 'mic-1', label: 'Mic' }, noiseSuppressionMode: 'standard', echoCancellationMode: 'app', isMicMuted: false });
-    expect([settings.deviceId(), settings.noiseSuppression(), settings.echoCancellation(), settings.muted()]).toEqual(['mic-1', 'standard', 'app', false]);
-    useAudioStore.setState({ isMicMuted: true, echoCancellationMode: 'all' });
-    expect([settings.muted(), settings.echoCancellation()]).toEqual([true, 'all']);
+    useAudioStore.setState({ selectedInputDevice: { deviceId: 'mic-1', label: 'Mic' }, noiseSuppressionMode: 'standard', echoCancellationMode: 'off', isMicMuted: false });
+    expect([settings.deviceId(), settings.noiseSuppression(), settings.echoCancellation(), settings.muted()]).toEqual(['mic-1', 'standard', 'off', false]);
+    useAudioStore.setState({ isMicMuted: true, echoCancellationMode: 'gate' });
+    expect([settings.muted(), settings.echoCancellation()]).toEqual([true, 'gate']);
   });
 
   it('publishes runtime noise suppression without overwriting the saved preference', () => {
@@ -238,12 +275,15 @@ describe('the settings the sources follow', () => {
     expect(useAudioStore.getState().participantTapAudioSeen).toBe(true);
   });
 
-  it('tells the sources when the audio store changes', () => {
+  it('notifies the microphone immediately for app mute and VRChat hold changes', () => {
     const listener = vi.fn();
     const off = micSettings().subscribe(listener);
     useAudioStore.setState({ isMicMuted: false });
+    useVRChatStore.setState({ link: { found: true, connected: true, muted: true } });
+    expect(micSettings().held!()).toBe(true);
     off();
     useAudioStore.setState({ isMicMuted: true });
-    expect(listener).toHaveBeenCalledTimes(1);
+    useVRChatStore.setState({ link: { found: false, connected: false, muted: null } });
+    expect(listener).toHaveBeenCalledTimes(2);
   });
 });

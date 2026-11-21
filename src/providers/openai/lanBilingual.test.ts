@@ -144,6 +144,12 @@ function expectHeard(h: Live, ref: number, text: string, language: string) {
 const userText = (call: TextCall) => call.body.messages[call.body.messages.length - 1].content;
 
 describe('paired Apple recognition across the LAN wire and client pipeline', () => {
+  it('opens three recognizers for a speaker using two extra languages', async () => {
+    const three = MODELS.map((model) => model.bilingual ? { ...model, trilingual: true } : model);
+    const h = await live(SPEAKER, { speakAlso: ['es', 'fr'], asrDetectOther: true, theyAlso: ['es'], theyLit: 'es' }, undefined, three);
+    expect(h.resolve).toHaveBeenCalledWith('en', 'apple-speech:en', 'fr', 'es');
+    expect(h.config.stages?.back?.languages).toEqual(['fr', 'es']);
+  });
   it('uses the participant side’s lit language beside its target', async () => {
     const h = await live(PARTICIPANT, { asrDetectOther: true, theyAlso: ['es'], theyLit: 'es' });
     expectPair(h, 'fr', 'es');

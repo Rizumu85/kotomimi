@@ -164,6 +164,12 @@ export const NOTICE_ALIASES: Readonly<Record<string, string>> = {
   native_coach_missing: 'providers.localai.nativeCoachMissing',
   native_coach_warming: 'providers.localai.nativeCoachWarming',
   native_coach_failed: 'providers.localai.nativeCoachFailed',
+  // Fork: the native voice engine of this computer, and a voice API with no model named.
+  native_voice_unsupported: 'providers.localai.nativeVoiceUnsupported',
+  native_voice_missing: 'providers.localai.nativeVoiceMissing',
+  native_voice_updating: 'providers.localai.nativeVoiceUpdating',
+  native_voice_failed: 'providers.localai.nativeVoiceFailed',
+  voice_unnamed: 'providers.localai.voiceUnnamed',
   api_key_needed: 'providers.localai.apiKeyNeeded',
   api_key_refused: 'providers.localai.apiKeyRefused',
   // Fork: another Kotomimi hears a leg's language with none of its recognizers.

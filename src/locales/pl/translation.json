@@ -48,7 +48,7 @@
     "noiseReduction": "Redukcja szumów",
     "noiseSuppression": "Tłumienie szumów",
     "noiseSuppressionTooltip": {
-      "off": "Wyłączone — Tylko wbudowana obsługa szumów przeglądarki.",
+      "off": "Wyłączone — brak redukcji szumów: mikrofon działa bez zmian. Najlepiej w cichym pomieszczeniu.",
       "standard": "Standardowe (RNNoise) — Lekkie tłumienie szumów AI z niskim opóźnieniem.",
       "enhanced": "Ulepszone (GTCRN) — Wysokiej jakości tłumienie szumów AI, najlepsze dla złożonych środowisk hałasu."
     },
@@ -774,7 +774,19 @@
       "tagHint_cpu": "Działa na procesorze, zostawiając kartę graficzną grze. Ładuje się przy rozpoczęciu sesji.",
       "noteNativeXAsr": "Zapisuje tekst na bieżąco, gdy mówisz. Korzysta tylko z procesora, bez zajmowania pamięci karty graficznej: zużywa około jednej piątej mocy jednego rdzenia. Obsługuje tylko chiński i angielski. Nie otrzymuje wcześniej słów z osobistego słownika, ale po rozpoznaniu mowy poprawia je na podstawie brzmienia.",
       "noteStreamRevise": "Tłumaczy, gdy rozmówca jeszcze mówi, a po zakończeniu zdania tłumaczy je ponownie w całości. Obsługuje tylko chiński, angielski i japoński.",
-      "noteNativeSenseVoiceCpu": "Korzysta tylko z procesora, nie zajmuje pamięci karty graficznej. Rozpoznaje mowę z podobną dokładnością jak SenseVoice na karcie graficznej. Obsługuje chiński, kantoński, angielski, japoński i koreański. Nie otrzymuje wcześniej słów z własnego słownika, ale po rozpoznaniu mowy nadal koryguje je na podstawie brzmienia."
+      "noteNativeSenseVoiceCpu": "Korzysta tylko z procesora, nie zajmuje pamięci karty graficznej. Rozpoznaje mowę z podobną dokładnością jak SenseVoice na karcie graficznej. Obsługuje chiński, kantoński, angielski, japoński i koreański. Nie otrzymuje wcześniej słów z własnego słownika, ale po rozpoznaniu mowy nadal koryguje je na podstawie brzmienia.",
+      "apiServiceEdge": "Głosy online Edge (bezpłatne)",
+      "speakKey": "Klucz API modelu do czytania",
+      "nativeVoiceReady": "Silnik mowy jest gotowy.",
+      "nativeVoiceWarmingShort": "Uruchamianie silnika mowy…",
+      "nativeVoiceFailedShort": "Nie udało się uruchomić silnika mowy.",
+      "nativeVoiceUnsupported": "Ten system nie obsługuje natywnego silnika mowy. W sekcji „Czytanie” wybierz „Model API”.",
+      "nativeVoiceMissing": "Model do czytania nie został jeszcze pobrany. Pobierz go, aby rozpocząć.",
+      "nativeVoiceUpdating": "Aktualizowanie silnika mowy. Po zakończeniu możesz zacząć.",
+      "nativeVoiceFailed": "Nie udało się uruchomić silnika mowy. W sekcji „Czytanie” kliknij „Spróbuj ponownie” lub wybierz inny model.",
+      "voiceUnnamed": "Nie podano jeszcze modelu do czytania. Wpisz jego nazwę w sekcji „Czytanie”.",
+      "noteQwen3Tts": "Brzmi najbardziej naturalnie i zaczyna mówić od razu. W testach po japońsku, chińsku i angielsku: bez błędów wymowy. Zajmuje około 3 GB pamięci karty graficznej, obsługuje 10 języków.",
+      "noteIrodori": "Tylko po japońsku. W testach: bez błędów wymowy, około pół sekundy na zdanie. Zajmuje około 1.7 GB pamięci karty graficznej."
     }
   },
   "logsPanel": {
@@ -1739,8 +1751,6 @@
     "furigana": "Furigana nad kanji (japoński)",
     "romanization": "Latynizacja",
     "pinyin": "Pinyin nad chińskim tekstem",
-    "echoCancellationApp": "Tylko Kotomimi",
-    "echoCancellationAppTooltip": "Tylko Kotomimi — usuwa jedynie dźwięk odtwarzany przez Kotomimi, dzięki czemu Twój głos jest odbierany najwyraźniej. Najlepiej sprawdza się ze słuchawkami lub goglami VR. Z głośnikami działa też w trybie „Oboje”. Wybierz tę opcję, jeśli jako mikrofon służy wirtualna karta dźwiękowa (VB-Cable, BlackHole).",
     "speechDetection": {
       "title": "Wykrywanie mowy"
     },
@@ -2113,6 +2123,40 @@
     "apart": {
       "split": "Słuchaj moich wypowiedzi w innym miejscu",
       "merge": "Słuchaj obu stron w jednym miejscu"
-    }
+    },
+    "voice": {
+      "stage": "Czytanie",
+      "stageTooltip": "Czyta na głos tłumaczenia Twoich wypowiedzi. Możesz też odsłuchać dowolny wiersz rozmowy: kliknij przy nim ikonę głośnika.",
+      "on": "Czytaj na głos",
+      "toMeLocked": "Opcja „Do mnie” jest niedostępna. Kotomimi pobiera dźwięk z całego systemu, więc odczytane tłumaczenie zostałoby uznane za wypowiedź rozmówcy. Wybierz jedną aplikację (np. VRChat) jako źródło głosu rozmówcy.",
+      "toThemTooltip": "Przy czytaniu rozmówcy dźwięk trafia do wirtualnego mikrofonu. W VRChat lub aplikacji do spotkań wybierz go jako mikrofon (w Windows: CABLE Output).",
+      "myVoiceToo": "Przesyłaj też mój głos",
+      "myVoiceTooTooltip": "Po wyłączeniu rozmówca słyszy tylko odczytywane tłumaczenie.",
+      "needsSpeaker": "Czytane są tłumaczenia tego, co mówisz lub piszesz. Przełącz tryb na „Ja” lub „Obie strony”.",
+      "modelPlaceholder": "Nazwa modelu, np. tts-1",
+      "voice": "Głos",
+      "voiceOf": "Głos: {{language}}",
+      "sample": "Odsłuchaj próbkę",
+      "cannotSpeak": "{{name}} nie obsługuje języka {{language}}.",
+      "sayLine": "Przeczytaj ten wiersz",
+      "stopLine": "Zatrzymaj",
+      "lineFailed": "Nie udało się przeczytać tego wiersza",
+      "woman": "Głos żeński",
+      "man": "Głos męski",
+      "hearers": "Odczytuj tłumaczenia na głos",
+      "hearNone": "Wyłączone",
+      "hearMe": "Dla mnie",
+      "hearThem": "Dla rozmówcy",
+      "hearBoth": "Dla obu stron",
+      "volumeMine": "Głośność dla mnie",
+      "volumeTheirs": "Głośność dla rozmówcy",
+      "meetingDevice": "Wyjście audio dla rozmówców",
+      "meetingDeviceAuto": "Wirtualny mikrofon (automatycznie)",
+      "meetingDeviceTooltip": "Kotomimi odtwarza tłumaczenie na tym urządzeniu. Aplikacja do rozmów używa go jako mikrofonu. Jeśli karta dźwiękowa obsługuje miksowanie sprzętowe, wybierz jeden z jej kanałów odtwarzania i połącz na karcie dźwięk z tego kanału z dźwiękiem z mikrofonu. Dzięki temu Twój głos nie przechodzi przez oprogramowanie."
+    },
+    "echoCancellationGate": "Według głośności",
+    "echoCancellationGateTooltip": "Według głośności — przy korzystaniu z głośników: dźwięk z głośników docierający do mikrofonu jest znacznie cichszy niż twój głos, więc jest odfiltrowywany na podstawie głośności, a twój głos pozostaje bez zmian.",
+    "echoCancellationOff": "Wyłączone",
+    "echoCancellationOffTooltip": "Wyłączone — mikrofon trafia do rozpoznawania bez zmian. Do słuchawek: żaden dźwięk nie przedostaje się do mikrofonu."
   }
 }

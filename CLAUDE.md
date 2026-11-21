@@ -222,8 +222,8 @@ Prefer the optimized selectors (`useUIMode()`, `useSetUIMode()`), which prevent 
 
 ### Audio Handling
 - Capture through the runner's sources (`src/lib/audio/capture/`, the microphone over `ModernAudioRecorder`); play through `src/lib/audio/playback.ts`
-- Passthrough: the processed microphone voice under the translation, into the virtual output on its own `passthrough` feed (`src/lib/audio/routes.ts`); off by default, volume `audioStore.realVoicePassthroughVolume`, default 0.2 (20% on a 0–60% slider)
-- Echo cancellation asks for `true` by default ("Kotomimi only", `fork.echoCancellationApp`; "Browser only" outside Electron): `'all'` cancels every sound the system plays, a game's voices included (`AUDIO_CONSTRAINT_PROFILES`, `src/lib/config/performance.js`), and turned the user's voice down while others spoke. The control under Noise Suppression (`audioStore.echoCancellationMode`, `audio.echoCancellationMode`; Windows and macOS, every provider) can ask for `'all'` for loudspeakers: Chromium 141+ grants it there, Linux falls back to `true`, and `track.getSettings().echoCancellation` (logged at `begin()`) says which took effect. A loopback microphone (BlackHole) carries system playout, which `'all'` silences. A change mid-session reopens the microphone (`openMic`'s `follow`)
+- Passthrough: the microphone opened a second time, unprocessed and live, to the virtual output device (`connectDeviceMic`; the `passthrough` edge of `src/lib/audio/routes.ts` opens it); off by default, volume `audioStore.realVoicePassthroughVolume`, default 0.2 (20% on a 0–100% slider)
+- Echo cancellation (`audioStore.echoCancellationMode`, under Noise Suppression, every platform): `'gate'` (default, loudspeakers: no automatic gain, a gate on the system's playout, `capture/echoFollow.ts`) or `'off'` (headphones). The browser's own echo cancellation is never asked for: it cancels what the app plays, and passthrough plays the user's voice. A change mid-session reopens the microphone (`openMic`'s `follow`)
 
 ## Testing and Quality
 

@@ -22,7 +22,7 @@ export type NoticeActionSpec =
  * Fork: a model of this computer's not downloaded yet: the button says what is to be done there. A first run that
  * met one used to be told where to go in words, with nothing to press (a friend, 2026-11-04).
  */
-const DOWNLOAD_CODES: ReadonlySet<string> = new Set(['native_missing', 'native_translator_missing', 'native_coach_missing']);
+const DOWNLOAD_CODES: ReadonlySet<string> = new Set(['native_missing', 'native_translator_missing', 'native_coach_missing', 'native_voice_missing']);
 
 /** The managed provider's lease refused a start, or the gate did, on the balance: both are fixed by topping up. */
 const TOP_UP_CODES: ReadonlySet<string> = new Set([BALANCE_BELOW_FLOOR, 'insufficient_balance']);

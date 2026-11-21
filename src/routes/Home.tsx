@@ -12,7 +12,8 @@ import { useSubtitleStore } from '../stores/subtitleStore';
 import { useAnnotationStore } from '../stores/annotationStore';
 import { useSubtitleLookStore } from '../stores/subtitleLookStore';
 import { useLanStore } from '../stores/lanStore';
-import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../stores/nativeEngineStore';
+import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore, useNativeVoiceStore } from '../stores/nativeEngineStore';
+import { watchLineVoice } from '../app/lineVoice';
 import { useLanguagePinStore } from '../stores/languagePinStore';
 import { useGlossaryStore } from '../stores/glossaryStore';
 import { useFontStore } from '../stores/fontStore';
@@ -61,6 +62,9 @@ export function Home() {
     void useNativeEngineStore.getState().hydrate();
     void useNativeTranslatorStore.getState().hydrate();
     void useNativeCoachStore.getState().hydrate();
+    // Fork: the voice engine, and whether a line of the conversation can be said aloud now.
+    void useNativeVoiceStore.getState().hydrate();
+    const unwatchVoice = watchLineVoice();
     // Fork: the engines are loaded when a session begins, and let go after it. A start in the background at sign-in
     // loads them once ahead of time, so that the long first load after the computer starts is not waited for.
     void startedInBackground().then((hidden) => { if (hidden) primeNativeOnce(); });
@@ -96,6 +100,7 @@ export function Home() {
     return () => {
       unwatchDevices();
       unwatchShape();
+      unwatchVoice();
     };
   }, []); // Empty dependency array - only run once on mount
 

@@ -111,9 +111,29 @@
     }
 
     // The user's own row keeps the height of its lines: a window made higher gives all it adds to the pair.
+    // Fork: and of as much again for each further translation under it (`--lane-more`, `Lane.more`).
     .subtitle-lane--row {
-      flex: 0 0 var(--lane-row-height, 1.18em);
+      --lane-also-room: calc(var(--lane-more, 0) * (var(--lane-row-height, 1.18em) + var(--lane-inner-gap, 2px)));
+      flex: 0 0 calc(var(--lane-row-height, 1.18em) + var(--lane-also-room));
       grid-template-rows: minmax(0, 1fr);
+    }
+
+    .subtitle-lane__rows {
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--lane-inner-gap, 2px);
+
+      .subtitle-lane__row {
+        flex: 0 0 auto;
+        height: var(--lane-row-height, 1.18em);
+        max-height: none;
+      }
+
+      .subtitle-lane__row--also .subtitle-lane__arrow {
+        margin-left: 0;
+      }
     }
 
     .subtitle-lane.has-feedback {
@@ -125,8 +145,24 @@
     }
 
     .subtitle-lane--row.has-feedback {
-      flex-basis: calc(var(--lane-row-height, 1.18em) + var(--lane-feedback-height, 1.33em) + var(--lane-inner-gap, 2px));
+      flex-basis: calc(var(--lane-row-height, 1.18em) + var(--lane-also-room) + var(--lane-feedback-height, 1.33em) + var(--lane-inner-gap, 2px));
       grid-template-rows: minmax(0, 1fr) auto;
+
+      // Fork: the row is as high as its lines, not as the lane: centred, a lane is a block, and a row the lane's
+      // height left the feedback under it past the lane's foot, half of it past the window's (seen 2026-11-18).
+      > .subtitle-lane__row {
+        height: var(--lane-row-height, 1.18em);
+        max-height: none;
+      }
+
+      > .subtitle-lane__feedback {
+        margin-top: calc(var(--lane-inner-gap, 2px) - 0.12em);
+      }
+    }
+
+    // In a grid the gap between the two is the grid's own.
+    &:not([data-align='center']) .subtitle-lane--row.has-feedback > .subtitle-lane__feedback {
+      margin-top: -0.12em;
     }
 
     // Feedback has its own line and source; it never takes the translated caption's place.
@@ -141,6 +177,11 @@
       font-size: 0.62em;
       line-height: var(--lane-row-line, 2.15);
       color: var(--subtitle-translation-color, #e8e8e8);
+      // The two pixels a reading reaches up by, as the other small lines have them: squeezed, the readings over a
+      // marked sentence lost their tops.
+      box-sizing: content-box;
+      padding-top: 0.12em;
+      margin-top: -0.12em;
     }
 
     .subtitle-lane__source,
@@ -172,6 +213,17 @@
       // the feet off the romanization under it (g, j, y; the user, 2026-10-06).
       padding-bottom: 0.2em;
       margin-bottom: -0.2em;
+    }
+
+    // Fork: where a line of romanization is kept under a small line, a text whose last line has none (`data-bare`,
+    // `Slot`) stands above that line, where a text that has one has its words: the words keep their place from one
+    // sentence to the next, whichever of them is romanized.
+    .subtitle-lane__source .subtitle-lane__text[data-bare] {
+      padding-bottom: calc(var(--lane-roman, 0) * 1em);
+    }
+
+    .subtitle-lane__row .subtitle-lane__text[data-bare] {
+      padding-bottom: calc(var(--lane-row-roman, 0) * 1em);
     }
 
     // Each of a pair's texts has its lines, written in or not, and is drawn at one size: the sentence does not move
@@ -214,6 +266,14 @@
       }
     }
 
+    // Fork: a row too long for its lines gives up the sentence, and keeps its answer from the start (`Slot`).
+    .subtitle-lane__row[data-tight] {
+      .subtitle-lane__said,
+      .subtitle-lane__said + .subtitle-lane__arrow {
+        display: none;
+      }
+    }
+
     .subtitle-lane__said {
       color: var(--subtitle-source-color, #9aa0a6);
       font-style: var(--kt-source-font-style, italic);
@@ -249,6 +309,11 @@
       color: var(--subtitle-translation-color, #e8e8e8);
     }
 
+    // Fork: in a pair, a sentence's translation into the other side's second language: on the line under the first.
+    .subtitle-lane__also {
+      display: block;
+    }
+
     // A correction in the row: the sentence keeps the said line's look, the reason is written as the answer is.
     .subtitle-lane__said--fixed .kt-fix__why {
       color: var(--subtitle-translation-color, #e8e8e8);
@@ -259,6 +324,16 @@
       margin-left: 0.4em;
       opacity: 0.6;
       font-style: normal;
+    }
+
+    // Fork: the mark that more was said since (`Lane.behind`) takes no room: on a line the answer just fills it would
+    // go to a line of its own, and the row, rolled to its last line, show nothing but the mark.
+    .subtitle-lane__pending--behind {
+      display: inline-block;
+      width: 0;
+      margin-left: 0;
+      text-indent: 0.4em;
+      white-space: nowrap;
     }
 
     .subtitle-lane__answer--notice {

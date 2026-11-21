@@ -40,7 +40,7 @@ export function createSessionRecording() {
   type Run = {
     startedAt: number; origin: number; accepting: boolean; failed: boolean; opened: boolean; pendingBytes: number;
     queue: Promise<void>; raw: DeviceCaptureRecorder; rawOpening: Promise<void>;
-    seen: Map<string, { source: boolean; translation: boolean }>;
+    seen: Map<string, { source: boolean; translationSegments: number; feedback: boolean }>;
   };
   let current: Run | null = null;
   let settled = Promise.resolve();
@@ -81,15 +81,26 @@ export function createSessionRecording() {
     for (const entry of entries) {
       if (entry.kind !== 'exchange' || entry.lane === 'video' || entry.t < run.startedAt) continue;
       const key = `${entry.leg}:${entry.id}`;
-      const seen = run.seen.get(key) ?? { source: false, translation: false };
-      for (const stage of ['source', 'translation'] as const) {
-        if (seen[stage] || !entry[stage].some((r) => r.text.trim()) || !entry[stage].every((r) => r.final)) continue;
-        if (stage === 'translation' && !seen.source) continue;
-        seen[stage] = true;
+      const seen = run.seen.get(key) ?? { source: false, translationSegments: 0, feedback: false };
+      for (const stage of ['source', 'translation', 'feedback'] as const) {
+        if (stage !== 'source' && !seen.source) continue;
+        if (stage !== 'translation' && seen[stage]) continue;
+        const rows = entry[stage];
+        if (!rows?.some((r) => r.text.trim()) || !rows.every((r) => r.final)) continue;
+        if (stage === 'translation') {
+          const count = new Set(rows.filter((r) => r.text.trim()).map((r) => r.segmentId)).size;
+          if (count <= seen.translationSegments) continue;
+          seen.translationSegments = count;
+        } else {
+          seen[stage] = true;
+        }
         enqueue(run, 'session-recording:write', { kind: 'line', data: {
           stage, leg: entry.leg, entryId: entry.id, ms: ms(run), wallTime: Date.now(), lineWallTime: entry.t,
           sourceText: text(entry.source), sourceLanguage: entry.source.find((r) => r.language)?.language,
           translations: entry.translation.map((r) => ({ text: r.text, language: r.language })),
+          ...(stage === 'feedback' && { feedback: rows.map(({ text, language, accompaniesTranslation }) => ({
+            text, language, ...(accompaniesTranslation && { accompaniesTranslation }),
+          })) }),
         } });
       }
       if (seen.source) run.seen.set(key, seen);

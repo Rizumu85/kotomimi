@@ -48,7 +48,7 @@
     "noiseReduction": "Brusreducering",
     "noiseSuppression": "Brusreducering",
     "noiseSuppressionTooltip": {
-      "off": "Av — Endast webbläsarens inbyggda brushantering.",
+      "off": "Av – ingen brusreducering: mikrofonen används som den är. Bäst i ett tyst rum.",
       "standard": "Standard (RNNoise) — Lätt AI-brusreducering med låg latens.",
       "enhanced": "Förbättrad (GTCRN) — Högkvalitativ AI-brusreducering, bäst för komplexa buller­miljöer."
     },
@@ -774,7 +774,19 @@
       "tagHint_cpu": "Körs på processorn och lämnar grafikkortet åt spelet. Laddas när en session startar.",
       "noteNativeXAsr": "Skriver medan du pratar och använder bara processorn, inget grafikminne: ungefär en femtedel av en kärna. Stöder bara kinesiska och engelska. Orden i din personliga ordlista ges inte till modellen i förväg, men texten rättas ändå efteråt utifrån uttalet.",
       "noteStreamRevise": "Översätter medan den andra personen pratar och översätter sedan hela meningen igen när den är klar. Stöder bara kinesiska, engelska och japanska.",
-      "noteNativeSenseVoiceCpu": "Använder bara processorn och tar inget grafikminne. Ungefär lika träffsäker som SenseVoice på grafikkortet. Stöder kinesiska, kantonesiska, engelska, japanska och koreanska. Orden i din personliga ordlista skickas inte till modellen i förväg, men rättas ändå efter uttalet när talet har tolkats."
+      "noteNativeSenseVoiceCpu": "Använder bara processorn och tar inget grafikminne. Ungefär lika träffsäker som SenseVoice på grafikkortet. Stöder kinesiska, kantonesiska, engelska, japanska och koreanska. Orden i din personliga ordlista skickas inte till modellen i förväg, men rättas ändå efter uttalet när talet har tolkats.",
+      "apiServiceEdge": "Edge-röster online (gratis)",
+      "speakKey": "API-nyckel för uppläsningsmodellen",
+      "nativeVoiceReady": "Uppläsningsmotorn är redo.",
+      "nativeVoiceWarmingShort": "Startar uppläsningsmotorn…",
+      "nativeVoiceFailedShort": "Uppläsningsmotorn kunde inte starta.",
+      "nativeVoiceUnsupported": "Systemet stöder inte den inbyggda uppläsningsmotorn ännu. Byt till \"API-modell\" under \"Uppläsning\".",
+      "nativeVoiceMissing": "Uppläsningsmodellen har inte laddats ner än. Ladda ner den för att börja.",
+      "nativeVoiceUpdating": "Uppdaterar uppläsningsmotorn. Du kan börja när uppdateringen är klar.",
+      "nativeVoiceFailed": "Uppläsningsmotorn kunde inte starta. Tryck på \"Försök igen\" under \"Uppläsning\" eller välj en annan modell.",
+      "voiceUnnamed": "Ingen uppläsningsmodell har angetts än. Ange en under \"Uppläsning\".",
+      "noteQwen3Tts": "Naturligast och börjar tala direkt. Inga felläsningar i tester på japanska, kinesiska och engelska. Använder cirka 3 GB grafikminne och stöder 10 språk.",
+      "noteIrodori": "Talar bara japanska. Inga felläsningar i tester, cirka en halv sekund per mening. Använder cirka 1.7 GB grafikminne."
     }
   },
   "logsPanel": {
@@ -1739,8 +1751,6 @@
     "furigana": "Furigana ovanför kanji (japanska)",
     "romanization": "Visa romanisering",
     "pinyin": "Visa pinyin ovanför kinesiskan",
-    "echoCancellationApp": "Endast Kotomimi",
-    "echoCancellationAppTooltip": "Endast Kotomimi — tar bara bort ljud som Kotomimi själv spelar upp, så att din röst hörs så tydligt som möjligt. Passar med hörlurar eller VR-headset. Med högtalare fungerar det också i läget ”Båda”. Välj detta om mikrofonen är ett virtuellt ljudkort (VB-Cable, BlackHole).",
     "speechDetection": {
       "title": "Talidentifiering"
     },
@@ -2113,6 +2123,40 @@
     "apart": {
       "split": "Lyssna på min sida någon annanstans",
       "merge": "Lyssna på båda sidor på samma ställe"
-    }
+    },
+    "voice": {
+      "stage": "Uppläsning",
+      "stageTooltip": "Läser upp dina översättningar. Du kan också lyssna på valfri rad i samtalet: tryck på högtalarknappen.",
+      "on": "Aktivera uppläsning",
+      "toMeLocked": "”För mig” är inte tillgängligt just nu. När ljudet hämtas från hela systemet tolkar Kotomimi uppläsningen som tal från den andra personen. Välj en enskild app, till exempel VRChat, som ljudkälla.",
+      "toThemTooltip": "När du läser upp för den andra skickas ljudet till den virtuella mikrofonen. Välj den som mikrofon i VRChat eller din mötesapp (i Windows heter den CABLE Output).",
+      "myVoiceToo": "Skicka även min egen röst",
+      "myVoiceTooTooltip": "När detta är avstängt hör den andra bara den upplästa översättningen.",
+      "needsSpeaker": "Uppläsningen läser det du säger och skriver. Byt läge till \"Jag\" eller \"Båda\".",
+      "modelPlaceholder": "Modellnamn, t.ex. tts-1",
+      "voice": "Röst",
+      "voiceOf": "Röst för {{language}}",
+      "sample": "Provlyssna",
+      "cannotSpeak": "{{name}} kan inte tala {{language}}.",
+      "sayLine": "Läs upp den här raden",
+      "stopLine": "Stoppa",
+      "lineFailed": "Den här raden kunde inte läsas upp",
+      "woman": "Kvinnlig röst",
+      "man": "Manlig röst",
+      "hearers": "Läs upp översättningar automatiskt",
+      "hearNone": "Av",
+      "hearMe": "För mig",
+      "hearThem": "För andra",
+      "hearBoth": "För alla",
+      "volumeMine": "Volym för mig",
+      "volumeTheirs": "Volym för den andra",
+      "meetingDevice": "Skicka samtalsljudet till",
+      "meetingDeviceAuto": "Virtuell mikrofon (automatiskt)",
+      "meetingDeviceTooltip": "Upplästa översättningar spelas upp på den här enheten, som fungerar som mikrofon så att den andra parten hör dem. Om ljudkortet har inbyggd mixning kan du välja en av dess uppspelningskanaler och blanda ljudet från den med mikrofonsignalen direkt i ljudkortet. Då går din egen röst inte via någon programvara."
+    },
+    "echoCancellationGate": "Efter ljudnivå",
+    "echoCancellationGateTooltip": "Efter ljudstyrka — för högtalare: ljudet de spelar upp kommer tillbaka till mikrofonen mycket svagare än din röst, så det filtreras bort efter ljudstyrka medan din röst lämnas oförändrad.",
+    "echoCancellationOff": "Av",
+    "echoCancellationOffTooltip": "Av — mikrofonen skickas oförändrad till igenkänningen. Använd med hörlurar: inget ljud läcker in i mikrofonen."
   }
 }

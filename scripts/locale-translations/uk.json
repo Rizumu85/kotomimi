@@ -199,6 +199,26 @@
     "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
     "text": "Лише Kotomimi — прибирає тільки звук, який відтворює Kotomimi, тож ваш голос чути найчіткіше. Підходить для навушників або VR-гарнітури; з динаміками також працює в режимі «Обидва». Виберіть цей варіант, якщо мікрофоном слугує віртуальна звукова карта (VB-Cable, BlackHole тощо)."
   },
+  "fork.echoCancellationGate": {
+    "en": "By loudness",
+    "text": "За гучністю"
+  },
+  "fork.echoCancellationGateTooltip": {
+    "en": "By loudness — for loudspeakers: what they play comes back into the microphone far quieter than your voice, so it is kept out by its loudness and your voice is left as it is.",
+    "text": "За гучністю — для динаміків: звук, який вони відтворюють, повертається в мікрофон набагато тихішим за ваш голос, тож його відсіюють за гучністю, а ваш голос залишається без змін."
+  },
+  "fork.echoCancellationOff": {
+    "en": "Off",
+    "text": "Вимкнено"
+  },
+  "fork.echoCancellationOffTooltip": {
+    "en": "Off — the microphone as it is. For headphones: nothing plays into it.",
+    "text": "Вимкнено — мікрофон передає звук на розпізнавання без змін. Використовуйте в навушниках: звук не потрапляє в мікрофон."
+  },
+  "fork.echoCancellationPassthrough": {
+    "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
+    "text": "Коли ввімкнено пряме пропускання оригінального аудіо, працює лише «За гучністю»: інші способи сприймають ваш голос як відлуння й усувають його."
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Шукати знову"
@@ -987,6 +1007,134 @@
     "en": "What you want to say — Enter translates",
     "text": "Що хочете сказати? Enter — перекласти"
   },
+  "fork.voice.auto": {
+    "en": "Read my translations as they come",
+    "text": "Автоматично озвучувати переклад після моїх слів"
+  },
+  "fork.voice.cannotSpeak": {
+    "en": "{{name}} cannot speak {{language}}.",
+    "text": "{{name}} не підтримує озвучення мовою {{language}}."
+  },
+  "fork.voice.hearBoth": {
+    "en": "To both",
+    "text": "Для обох"
+  },
+  "fork.voice.hearers": {
+    "en": "Read my translations aloud",
+    "text": "Озвучувати переклад"
+  },
+  "fork.voice.hearMe": {
+    "en": "To me",
+    "text": "Для мене"
+  },
+  "fork.voice.hearNone": {
+    "en": "Off",
+    "text": "Вимкнено"
+  },
+  "fork.voice.hearThem": {
+    "en": "To them",
+    "text": "Для співрозмовника"
+  },
+  "fork.voice.lineFailed": {
+    "en": "This line could not be read aloud",
+    "text": "Не вдалося озвучити цей рядок"
+  },
+  "fork.voice.man": {
+    "en": "Male voice",
+    "text": "Чоловічий голос"
+  },
+  "fork.voice.meetingDevice": {
+    "en": "Output for the other side",
+    "text": "Аудіовихід для співрозмовника"
+  },
+  "fork.voice.meetingDeviceAuto": {
+    "en": "Virtual microphone (automatic)",
+    "text": "Віртуальний мікрофон (автоматично)"
+  },
+  "fork.voice.meetingDeviceTooltip": {
+    "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
+    "text": "Озвучений переклад відтворюється на цьому пристрої, а співрозмовник чує його як звук із мікрофона. Якщо ваша звукова карта підтримує апаратне мікшування, виберіть один із її каналів відтворення та змішайте його зі звуком мікрофона на самій карті. Тоді ваш голос не проходитиме через програму."
+  },
+  "fork.voice.modelPlaceholder": {
+    "en": "The model's name, e.g. tts-1",
+    "text": "Назва моделі, наприклад tts-1"
+  },
+  "fork.voice.myVoiceToo": {
+    "en": "My own voice goes too",
+    "text": "Також передавати мій голос"
+  },
+  "fork.voice.myVoiceTooTooltip": {
+    "en": "Off: they hear only the voice reading your translation.",
+    "text": "Якщо вимкнути, співрозмовник чутиме лише озвучений переклад."
+  },
+  "fork.voice.needsSpeaker": {
+    "en": "It reads what you say or type. Switch the mode to \"Me\" or \"Both\".",
+    "text": "Озвучуються ваші слова й набраний текст. Виберіть режим «Я» або «Обидва»."
+  },
+  "fork.voice.on": {
+    "en": "Read aloud",
+    "text": "Увімкнути озвучення"
+  },
+  "fork.voice.sample": {
+    "en": "Play a sample",
+    "text": "Прослухати"
+  },
+  "fork.voice.sayLine": {
+    "en": "Read this line aloud",
+    "text": "Озвучити цей рядок"
+  },
+  "fork.voice.stage": {
+    "en": "Voice",
+    "text": "Озвучення"
+  },
+  "fork.voice.stageTooltip": {
+    "en": "Reads your translations aloud. Any line of the conversation can be heard too: press its speaker button.",
+    "text": "Озвучує ваші переклади. Також можна прослухати будь-який рядок розмови: натисніть значок динаміка поруч."
+  },
+  "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "Зупинити"
+  },
+  "fork.voice.toMe": {
+    "en": "I hear it",
+    "text": "Чую я"
+  },
+  "fork.voice.toMeFix": {
+    "en": "Choose",
+    "text": "Вибрати"
+  },
+  "fork.voice.toMeLocked": {
+    "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
+    "text": "«Для мене» зараз недоступне: звук співрозмовника береться з усієї системи, тому озвучення теж сприйматиметься як його мова. Виберіть окрему програму (наприклад, VRChat) як джерело звуку співрозмовника."
+  },
+  "fork.voice.toThem": {
+    "en": "The other side hears it",
+    "text": "Чує співрозмовник"
+  },
+  "fork.voice.toThemTooltip": {
+    "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
+    "text": "Під час озвучування для співрозмовника звук надходить у віртуальний мікрофон. Виберіть його як мікрофон у VRChat або програмі для зустрічей (у Windows він називається CABLE Output)."
+  },
+  "fork.voice.voice": {
+    "en": "Voice",
+    "text": "Голос"
+  },
+  "fork.voice.voiceOf": {
+    "en": "{{language}} voice",
+    "text": "Голос для мови {{language}}"
+  },
+  "fork.voice.volumeMine": {
+    "en": "Volume for me",
+    "text": "Гучність для мене"
+  },
+  "fork.voice.volumeTheirs": {
+    "en": "Volume for them",
+    "text": "Гучність для співрозмовника"
+  },
+  "fork.voice.woman": {
+    "en": "Female voice",
+    "text": "Жіночий голос"
+  },
   "fork.vr.back": {
     "en": "Back",
     "text": "Назад"
@@ -1455,6 +1603,10 @@
     "en": "Custom address",
     "text": "Власна адреса"
   },
+  "providers.localai.apiServiceEdge": {
+    "en": "Edge online voices (free)",
+    "text": "Онлайн-голоси Edge (безкоштовно)"
+  },
   "providers.localai.apiServiceModel": {
     "en": "Choose from the list on the right, or type a name",
     "text": "Виберіть зі списку праворуч або введіть назву"
@@ -1847,6 +1999,34 @@
     "en": "Updating the speech recognition engine. You can start once it is done.",
     "text": "Оновлення рушія розпізнавання мовлення. Після завершення можна буде почати."
   },
+  "providers.localai.nativeVoiceFailed": {
+    "en": "The voice engine could not start. In the Voice card, press \"Try again\" — or choose another model.",
+    "text": "Не вдалося запустити рушій озвучення. На панелі «Озвучення» натисніть «Спробувати ще раз» або виберіть іншу модель."
+  },
+  "providers.localai.nativeVoiceFailedShort": {
+    "en": "The voice engine could not start.",
+    "text": "Не вдалося запустити рушій озвучення."
+  },
+  "providers.localai.nativeVoiceMissing": {
+    "en": "The voice model is not downloaded yet. Download it to start.",
+    "text": "Модель озвучення ще не завантажено. Завантажте її, щоб почати."
+  },
+  "providers.localai.nativeVoiceReady": {
+    "en": "The voice engine is ready.",
+    "text": "Рушій озвучення готовий."
+  },
+  "providers.localai.nativeVoiceUnsupported": {
+    "en": "The native voice engine is not available for this system. In the Voice card, switch to \"API model\".",
+    "text": "Ця система поки не підтримує вбудований рушій озвучення. На панелі «Озвучення» виберіть «Модель API»."
+  },
+  "providers.localai.nativeVoiceUpdating": {
+    "en": "Updating the voice engine. You can start once it is done.",
+    "text": "Рушій озвучення оновлюється. Після завершення можна буде почати."
+  },
+  "providers.localai.nativeVoiceWarmingShort": {
+    "en": "Starting the voice engine…",
+    "text": "Запуск рушія озвучення…"
+  },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
     "text": "Рушій розпізнавання ще запускається. Уперше після ввімкнення комп’ютера це займає близько пів хвилини. Щойно він буде готовий, можна починати."
@@ -1886,6 +2066,14 @@
   "providers.localai.noteIndexTranslate": {
     "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
     "text": "У тестах перекладу з японської на китайську серйозні помилки були приблизно в 3 із 30 речень. Це найкращий результат серед перевірених моделей. Близько 0.1 с на речення. Займає близько 2 ГБ відеопам’яті, підтримує понад 100 мов."
+  },
+  "providers.localai.noteIrodori": {
+    "en": "Japanese only. Measured: nothing misread, about half a second a sentence. About 1.7 GB of video memory.",
+    "text": "Лише японська. Перевірено: жодної помилки у вимові, близько пів секунди на речення. Потребує близько 1.7 GB відеопам’яті."
+  },
+  "providers.localai.noteKokoro": {
+    "en": "Light: runs on the processor and takes no video memory. Less natural, Japanese most of all.",
+    "text": "Легка модель: працює на процесорі й не займає відеопам’яті. Звучить менш природно, особливо японською."
   },
   "providers.localai.noteMoonshineJa": {
     "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
@@ -1934,6 +2122,10 @@
   "providers.localai.noteQwen17": {
     "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
     "text": "У тестах невимушених розмов японською помилки були приблизно у 19% символів. Текст з’являється лише після завершення речення із затримкою близько 10 с. Версія GGUF вище виводить текст під час мовлення."
+  },
+  "providers.localai.noteQwen3Tts": {
+    "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
+    "text": "Найприродніше звучання, озвучення починається одразу. Перевірено японською, китайською та англійською: жодної помилки у вимові. Потребує близько 3 GB відеопам’яті, підтримує 10 мов."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
@@ -2110,6 +2302,10 @@
   "providers.localai.sourceAuto": {
     "en": "The language cannot be detected with this setup. Choose the language you speak.",
     "text": "З цими налаштуваннями неможливо автоматично визначити мову. Виберіть мову, якою говорите."
+  },
+  "providers.localai.speakKey": {
+    "en": "API key of the voice",
+    "text": "API-ключ моделі озвучення"
   },
   "providers.localai.speedAbout": {
     "en": "About {{seconds}} s",
@@ -2319,6 +2515,10 @@
     "en": "API model",
     "text": "Модель через API"
   },
+  "providers.localai.voiceUnnamed": {
+    "en": "The voice has no model to run yet. Name one in the Voice card.",
+    "text": "Модель озвучення ще не вказано. Впишіть її назву на панелі «Озвучення»."
+  },
   "providers.openai_live.name": {
     "en": "OpenAI Live",
     "text": "OpenAI Live"
@@ -2422,6 +2622,10 @@
   "settings.glossaryWritten": {
     "en": "Word",
     "text": "Слово"
+  },
+  "settings.noiseSuppressionTooltip.off": {
+    "en": "Off — no noise suppression: the microphone as it is. Best in a quiet room.",
+    "text": "Вимкнено — без шумозаглушення: мікрофон передає звук без змін для розпізнавання. Найкраще працює в тихій кімнаті."
   },
   "settings.transcriptKeywordsPlaceholder": {
     "en": "Sokuji, Kizuna AI, PulseAudio",

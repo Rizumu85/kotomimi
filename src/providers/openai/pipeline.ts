@@ -50,6 +50,9 @@ import { phoneKey } from '../../lib/lan/phoneKeys';
 import { knownDeviceLabel } from '../../lib/lan/knownDevices';
 import { unwrapTranslationText } from './wire';
 import { recognitionLimits } from './hearingPlan';
+import type { VoiceDeps, VoiceStage } from './voice';
+import { Speaker, speakingEvents } from './speaker';
+import { liveVoiceDeps } from '../../lib/voice/liveVoice';
 
 /** The credential a stage's endpoint is called with, by its field. */
 export type StageKey = 'translateKey' | 'coachKey' | 'apiKey' | 'asrKey';
@@ -127,6 +130,8 @@ export interface Stages {
   whole?: boolean;
   /** Paired recognition: only final language metadata may choose translation or feedback. */
   requiresLanguage?: boolean;
+  /** Only the recognizer can name heard speech in a language other than the one it was told. */
+  named?: 'recognizer';
   /**
    * Fork: the speaker speaks the other side's language too (`speakBoth`; `heard` is then `auto`): a sentence in it —
    * `language` — is answered by `stage`, into their own (`own`); one in their own by `speech`, as ever. A coached
@@ -154,6 +159,12 @@ export interface Stages {
    * also turned the user's own voice down while the other side spoke.
    */
   leakCheck?: true;
+  /**
+   * Fork: what speaks (`voice.ts`), on a leg whose context says it speaks: each translation into the other side's
+   * language, when it is whole, and what the speaker typed in that language as it is. Not a second answer into another
+   * language, a translation back into the speaker's own, or feedback: those are read, not heard.
+   */
+  voice?: VoiceStage;
 }
 
 /** This computer hears: its own recognizer and turn detection, and no socket. */
@@ -201,6 +212,7 @@ export interface PipelineCredentials extends RealtimeCredentials {
   translateKey?: string;
   coachKey?: string;
   asrKey?: string;
+  speakKey?: string;
 }
 
 export interface PipelineDeps {
@@ -221,6 +233,8 @@ export interface PipelineDeps {
   };
   /** The native engine, when a leg hears by it: the main process's by default, stand-ins in tests. */
   native: { bridge: NativeBridge; start(model: string): Promise<NativeEngineStatus>; /** Where a native text engine answers now, up with this model, and the key its present run asks for. Rejects when it is not up and cannot be brought up. */ base?(engine: 'translator' | 'coach', model: string): Promise<EngineAddress> };
+  /** What a voice is asked through (`voice.ts`): the page's own by default, stand-ins in tests. Its clock and `fetch` are the leg's. */
+  voice: Pick<VoiceDeps, 'decode' | 'native' | 'edge'>;
 }
 
 /** A native text engine's chat base URL, and the key of its run where it asks for one: both are new each time it starts. */
@@ -271,7 +285,7 @@ export function tidyAnswer(kind: AnswerStage['kind'], text: string): string {
  * feedback. Such a sentence began while the other leg was hearing one, and
  * reads as that one does.
  */
-interface Heard { leg: object; ref: Ref; text: string; from: number; until: number | null }
+interface Heard { leg: object; ref: Ref; text: string; from: number; until: number | null; /** Fork: not heard by a leg but said by the app itself (`voiced`): its words are whole from the start. */ voiced?: true }
 const heardLately: Heard[] = [];
 /** A stretch ended this long ago is forgotten. */
 const HEARD_KEPT_MS = 30_000;
@@ -281,6 +295,9 @@ function forgetHeard(now: number): void {
     if (h.until !== null && now - h.until > HEARD_KEPT_MS) heardLately.splice(i, 1);
   }
 }
+/** Fork: how long the app's own voice is taken to last before its sound is made: a moment to begin, and this long a letter. */
+const VOICED_LEAD_MS = 1500;
+const VOICED_MS_A_CHAR = 250;
 /** Two recognizers do not hear one voice begin at the same instant. */
 const HEARD_SLACK_MS = 1000;
 /** A stretch is closed by the pause after it: a sentence begun in the last of that pause is an answer, not the same voice. */
@@ -364,6 +381,8 @@ class PipelineLeg implements AdapterSession {
   private saidBusy = false;
   /** The phones this leg uses, asked now and then whether they are still there (`phoneWatch.ts`). */
   private readonly phones: PhoneWatch;
+  /** Fork: what speaks this leg's sentences, where it speaks (`Stages.voice`, `speaker.ts`). */
+  private readonly speaker: Speaker | null;
 
   constructor(
     private readonly request: StartRequest<PipelineConfig, PipelineCredentials>,
@@ -371,9 +390,10 @@ class PipelineLeg implements AdapterSession {
     private readonly events: AdapterEvents,
     private readonly doFetch: typeof fetch,
     private readonly engineBase: (engine: 'translator' | 'coach', model: string) => Promise<EngineAddress> = engineBaseNow,
+    voice: Pick<VoiceDeps, 'decode' | 'native' | 'edge'> = liveVoiceDeps,
   ) {
     this.inner = eventsFrom((e) => this.onInner(e));
-    this.requiresLanguage = stages.requiresLanguage === true;
+    this.speaker = speakerOf(request, stages.voice, events, doFetch, voice, (text, untilAtLeast) => this.voiced(text, untilAtLeast));
     this.phones = watchPhones({
       fetch: doFetch,
       clock: request.clock,
@@ -389,17 +409,6 @@ class PipelineLeg implements AdapterSession {
       },
     });
     for (const stage of [stages.speech, stages.typed, stages.back?.stage, stages.feedback?.stage, stages.into, ...(stages.cross ?? []).map((c) => c.stage)]) if (stage?.phone) this.watchPhone(stage.baseUrl);
-  }
-
-  /**
-   * Whether only a sentence's final language may choose what answers it (`Stages.requiresLanguage`): as built, or
-   * found as the session starts, where a lent device hears in either of two languages (`pairedHearing`).
-   */
-  private requiresLanguage: boolean;
-
-  /** The device that hears does so in either of two languages, and says which at the end, as the Mac's own does. */
-  pairedHearing(): void {
-    this.requiresLanguage = true;
   }
 
   /** A phone this leg uses, watched until the leg ends: one a stage answers on, or what hears (`hearing`). */
@@ -466,7 +475,10 @@ class PipelineLeg implements AdapterSession {
       const answer = backward ?? stage;
       this.push({ stage: answer, text: trimmed, origin, typed: true });
       this.alsoInto(trimmed, origin, true, undefined, backward);
+      // Fork: typed in the other side's language already: it is what they are to hear, said as typed.
+      if (backward && language) this.say(undefined, trimmed, language);
     } else if (!this.stages.asIs) this.events.degraded({ code: 'translation_unavailable', message: 'Typed text has no translation stage in this session — shown as typed.' });
+    else this.say(undefined, trimmed, this.request.context.direction.target);
   }
 
   beginTurn(): void {
@@ -497,12 +509,13 @@ class PipelineLeg implements AdapterSession {
     this.warming.abort(new Error('the session ended'));
     this.phones.stop();
     this.cuts.clear();
-    for (let i = heardLately.length - 1; i >= 0; i--) if (heardLately[i].leg === this) heardLately.splice(i, 1);
+    for (let i = heardLately.length - 1; i >= 0; i--) if (heardLately[i].leg === this || heardLately[i].leg === this.ownVoice) heardLately.splice(i, 1);
     this.queue.length = 0;
     for (const { controller } of this.running.values()) controller.abort(new Error('the session ended'));
     this.running.clear();
     for (const draft of this.drafts.values()) draft.controller?.abort(new Error('the session ended'));
     this.drafts.clear();
+    this.speaker?.stop();
   }
 
   private onInner(e: AdapterEvent): void {
@@ -547,7 +560,9 @@ class PipelineLeg implements AdapterSession {
         // one outside them read from the writing, as a sentence it said nothing of is. Fork: one the writing rules out
         // (Chinese, of a sentence in Latin letters alone) is first put right (`namedByWriting`).
         const named = e.payload.language ? namedByWriting(e.payload.text, e.payload.language, this.mayBeAmong()) : undefined;
-        const said = named && (this.stages.heard !== AUTO || this.mayBeIn(named)) ? named : undefined;
+        const toldByDefault = source && this.stages.named && !this.stages.requiresLanguage
+          ? this.stages.heard ?? this.request.context.direction.source : undefined;
+        const said = named && (this.stages.heard !== AUTO || this.mayBeIn(named)) ? named : toldByDefault;
         if (source) {
           source.text = e.payload.text;
           if (said) source.language = said;
@@ -559,14 +574,14 @@ class PipelineLeg implements AdapterSession {
         // Left to be detected: the language its writing shows, or none — which also keeps the leg's own from being assumed.
         // Told one, and written in the leg's other language: said to be in that one.
         // Said by the recognizer: that, which also goes with the sentences closed from it.
-        const heard = said ?? (this.requiresLanguage ? undefined : (told === AUTO ? this.byWriting(e.payload.text) ?? AUTO : (open ? this.otherThanHeard(e.payload.text) : undefined) ?? told));
+        const heard = said ?? (this.stages.requiresLanguage ? undefined : (told === AUTO ? this.byWriting(e.payload.text) ?? AUTO : (open ? this.otherThanHeard(e.payload.text) : undefined) ?? told));
         if (source && this.cutsSentences()) {
           this.heardSoFar(e.payload.ref, source, heard);
           return;
         }
         this.events.segmentText(heard ? { ...e.payload, language: heard } : e.payload);
         // Fork: a stretch answered whole, when it closes, is translated meanwhile too, as far as it goes (`draft`).
-        if (source && !this.requiresLanguage) this.draft(source.origin, e.payload.text, heard);
+        if (source && !this.stages.requiresLanguage) this.draft(source.origin, e.payload.text, heard);
         return;
       }
       case 'segmentClosed': {
@@ -656,7 +671,7 @@ class PipelineLeg implements AdapterSession {
    */
   private settleOwn(heard: Heard, closed: { ref: Ref; origin?: string }, origin: string | undefined, text: string, asksLeft: number, language?: string): void {
     if (this.ended) return;
-    const there = this.heardElsewhere(heard);
+    const there = this.heardElsewhere(heard, heard.text, true);
     if (there === 'same') {
       this.frame('in', 'speech.dropped', { reason: 'heard by the other leg', chars: text.length });
       this.dropDraft(closed.origin ?? origin);
@@ -680,7 +695,7 @@ class PipelineLeg implements AdapterSession {
    */
   private settleLeak(mine: Heard, closed: { ref: Ref; origin?: string }, source: { origin?: string; text: string } | undefined, text: string, language: string | undefined, asksLeft: number): void {
     if (this.ended) return;
-    const there = this.heardElsewhere(mine, text);
+    const there = this.heardElsewhere(mine, text, this.stages.leakCheck === true);
     if (there === 'same') {
       this.frame('in', 'speech.dropped', { reason: 'the other side, through the loudspeakers', chars: text.length });
       this.dropDraft(closed.origin ?? source?.origin);
@@ -709,7 +724,7 @@ class PipelineLeg implements AdapterSession {
    */
   private cutsSentences(): boolean {
     const speech = this.stages.speech;
-    return !!speech && speech.kind !== 'coach' && !this.stages.feedback && this.stages.whole !== true && !this.requiresLanguage;
+    return !!speech && speech.kind !== 'coach' && !this.stages.feedback && this.stages.whole !== true && !this.stages.requiresLanguage;
   }
 
   /** The segment that shows what is left of a stretch: opened when there first is something left. */
@@ -777,6 +792,7 @@ class PipelineLeg implements AdapterSession {
    * suggests. Until a sentence is closed, the stretch is its own one piece, and keeps its language.
    */
   private pieceLanguage(cut: Cut, text: string): string | undefined {
+    if (this.stages.named) return cut.said;
     if (this.stages.heard === AUTO) {
       const written = this.written(text);
       return (written?.sure ? written.language : undefined) ?? cut.said ?? written?.language ?? AUTO;
@@ -902,15 +918,14 @@ class PipelineLeg implements AdapterSession {
 
   /** A source sentence, closed: said so, and handed to what answers it. `language`: what the recognizer said it heard it in. */
   private closed(payload: { ref: Ref; origin?: string }, source: { origin?: string; text: string } | undefined, text: string | undefined, language?: string, settled = false): void {
-    // The other side's sound, come back through the loudspeakers into the microphone: asked of every sentence, as it
-    // closes, whether a stretch closed at its end or one closed from it as it came.
-    if (!settled && this.stages.leakCheck && text) {
+    // Either leg may capture the app's voice. Only the user's microphone compares against the other leg as well.
+    if (!settled && text) {
       const mine = this.lastHeard();
       if (mine) { this.settleLeak(mine, payload, source, text, language, HEARD_LEAK_ASKS); return; }
     }
     const coached = this.stages.speech?.kind === 'coach';
     // Failed paired recognition must not seal a provisional guess as final text that the chatbox could send.
-    if (this.requiresLanguage && !language) {
+    if (this.stages.requiresLanguage && !language) {
       this.dropDraft(payload.origin ?? source?.origin);
       this.events.segmentText({ ref: payload.ref, text: '' });
       this.events.segmentClosed(payload);
@@ -966,9 +981,14 @@ class PipelineLeg implements AdapterSession {
    * leg is still hearing it, 'other' once it has closed. 'none': no other leg
    * was hearing anything. Older stretches are forgotten here.
    */
-  private heardElsewhere(mine: Heard, text: string = mine.text): 'same' | 'open' | 'other' | 'none' {
+  private heardElsewhere(mine: Heard, text: string, compareLegs: boolean): 'same' | 'open' | 'other' | 'none' {
     forgetHeard(this.request.clock.now());
-    const there = heardLately.filter((h) => h.leg !== this && mine.from >= h.from - HEARD_SLACK_MS && (h.until === null || mine.from <= h.until - HEARD_TRAIL_MS));
+    const then = heardLately.filter((h) => h.leg !== this && mine.from >= h.from - HEARD_SLACK_MS && (h.until === null || mine.from <= h.until - (h.voiced ? 0 : HEARD_TRAIL_MS)));
+    // Fork: what the app itself was saying then is known whole: the same words are its voice, and any others are
+    // nothing to wait for — the user's own sentence is never held up by a voice that is still speaking.
+    if (then.some((h) => h.voiced && sameSpeech(text, h.text))) return 'same';
+    if (!compareLegs) return 'none';
+    const there = then.filter((h) => !h.voiced);
     if (there.length === 0) return 'none';
     if (sameSpeech(text, there.map((h) => h.text).join(' '))) return 'same';
     return there.some((h) => h.until === null) ? 'open' : 'other';
@@ -1110,6 +1130,9 @@ class PipelineLeg implements AdapterSession {
       // `served`: the model that answered, where the server says (another Kotomimi chooses a blank one itself).
       this.frame('in', 'text.done', { stage: stage.kind, model: stage.model, served: answer.model ?? stage.model, firstMs: answer.firstMs ?? null, totalMs: answer.totalMs, chars: final.length, ...where });
       if (opened) this.events.segmentClosed({ ref });
+      // Fork: a translation into the other side's language is spoken, where this leg speaks (`Stages.voice`).
+      const into = this.request.context.direction.target;
+      if (opened && final && stage.kind === 'translate' && baseOf(stage.language ?? into) === baseOf(into)) this.say(ref, final, stage.language ?? into);
       // A model that said nothing: feedback with nothing to say is no fault; a translation with none is — also where
       // what was written while the sentence was said stays in its place.
       if (stage.kind === 'translate' && (!opened || !final)) this.unanswered(job, 'the model answered with no text');
@@ -1183,6 +1206,30 @@ class PipelineLeg implements AdapterSession {
     });
   }
 
+  /** What the app's own voice is told apart by among what was lately heard: no leg's. */
+  private readonly ownVoice = {};
+
+  /**
+   * Fork: a sentence this leg is saying aloud, kept with what the legs have lately heard: played on loudspeakers it
+   * comes back through the microphone, and a sentence heard then that reads as it does is the app's own voice, not
+   * the user's (`heardElsewhere`). Until its sound is made it is taken to last as long as its text suggests.
+   */
+  private voiced(text: string, untilAtLeast: number): (until: number | null) => void {
+    const from = this.request.clock.now();
+    forgetHeard(from);
+    const entry: Heard = { leg: this.ownVoice, ref: -1, text, from, until: untilAtLeast + VOICED_LEAD_MS + text.length * VOICED_MS_A_CHAR, voiced: true };
+    heardLately.push(entry);
+    return (until) => {
+      if (until === null) { const at = heardLately.indexOf(entry); if (at >= 0) heardLately.splice(at, 1); return; }
+      entry.until = until;
+    };
+  }
+
+  /** Fork: a sentence, spoken, where this leg speaks (`Stages.voice`). */
+  private say(ref: Ref | undefined, text: string, language: string): void {
+    if (!this.ended) this.speaker?.say(ref, text, language);
+  }
+
   private sayBusy(): void {
     const busy = this.innerBusy || this.running.size > 0 || this.queue.length > 0;
     if (busy === this.saidBusy || this.ended) return;
@@ -1198,6 +1245,12 @@ class PipelineLeg implements AdapterSession {
 
 /** What the app's model catalog calls a language: its base (`zh-CN` → `zh`). */
 const baseOf = (code: string): string => code.split('-')[0];
+
+/** Fork: what speaks a leg's sentences: its voice stage, where there is one and the leg's context says it speaks. */
+function speakerOf(request: StartRequest<PipelineConfig, PipelineCredentials>, stage: VoiceStage | undefined, events: AdapterEvents, doFetch: typeof fetch, voice: Pick<VoiceDeps, 'decode' | 'native' | 'edge'>, saying?: (text: string, untilAtLeast: number) => (until: number | null) => void): Speaker | null {
+  if (!stage || !request.context.speech) return null;
+  return new Speaker(stage, stage.key ? request.credentials[stage.key] : undefined, { ...voice, fetch: doFetch, clock: request.clock }, events, saying);
+}
 
 /** `fetch` as it is when called, so a test's stubbed global is seen. */
 const fetchNow: typeof fetch = (input, init) => fetch(input, init);
@@ -1228,7 +1281,7 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
     tts: () => { throw new Error('The pipeline has no app-model speech synthesizer.'); },
   };
   /** What hears on this computer: its own recognizer, or — the same adapter with that one engine changed — an API's. */
-  const hearing = (device: DeviceHearing, request: StartRequest<PipelineConfig, PipelineCredentials>, onPhone: (base: string) => void, heard: string | undefined, onPaired: () => void) => {
+  const hearing = (device: DeviceHearing, request: StartRequest<PipelineConfig, PipelineCredentials>, onPhone: (base: string) => void, stages: Stages) => {
     const { api, native } = device;
     if (native) {
       const start = deps.native?.start ?? ((model: string) => askNativeEngine('start', model));
@@ -1248,11 +1301,17 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
       asr: () => createEitherAsr(async () => {
         let node = await remote.node(api.baseUrl);
         for (let again = 0; !node && again < 2; again++) node = await remote.node(api.baseUrl);
-        if (!node) return byApi();
-        onPhone(api.baseUrl);
         // The model chosen here, where the device has it and can be asked for it by name (the iPad app); else the one
         // the phone lends now, whatever was written down when it was chosen: its owner may have changed it.
-        const model = api.model && (node.hears ?? []).includes(api.model) ? api.model : node.model || api.model;
+        const model = node?.hears?.includes(api.model) ? api.model : node?.model || api.model;
+        const live = node?.live && node.live.model === model ? node.live : undefined;
+        const told = hearingRequest(request, device, stages.heard).context.direction.source;
+        if (device.pairedWith && !live) {
+          stages.requiresLanguage = false;
+          stages.heard = told;
+        }
+        if (!node) return byApi();
+        onPhone(api.baseUrl);
         const lent: NativeEngineStatus = { ...NO_NATIVE_ENGINE, run: { state: 'ready', model, port: 0, tail: '' }, up: [model] };
         // Its last words are waited for as long as a reading may take there (`READ_TIMEOUT_MS` in
         // `electron/remote-engine.js`): a phone slower than the voice still writes all of it, late, where the wait
@@ -1261,23 +1320,22 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
         // The device's own recognition, heard while it is spoken (the iPad's): streamed to it as the voice comes, as
         // this computer's Mac hears with its own, and — where it has both of the pair's languages — in either of them,
         // as the Mac's does (`appleAlso`): a sentence in the other is known for what it is, not guessed from its writing.
-        const live = node.live && node.live.model === model ? node.live : undefined;
-        const told = hearingRequest(request, device, heard).context.direction.source;
         // Only where the leg's language is left open (a speaker who speaks both, the other side detected): the iPad
         // runs two recognizers at once, so two languages take its slower, careful one's place, and every sentence
         // would be heard a little worse for a label (`Recognizers` in ios/KotomimiNode/Hearing/Live.swift). The Mac
         // pairs every leg where it has both; this is where the two differ, on purpose.
-        const requested = device.pairedWith?.[0];
-        const primary = baseOf(told);
-        const also = live && heard === AUTO && requested && live.languages.some((language) => baseOf(language) === primary) && live.languages.some((language) => baseOf(language) === baseOf(requested)) ? requested : undefined;
-        if (also) onPaired();
+        const also = live ? device.pairedWith : undefined;
         const limits = recognitionLimits(model, live ? told : undefined);
-        return createNativeAsr({ bridge: remote.bridge(api.baseUrl, live ? { streamed: true } : {}), start: async () => lent, model, clock: request.clock, named: 'The recognition engine of the other device', limits: { ...(limits ?? api.limits), lastWordsMs: REMOTE_LAST_WORDS_MS }, ...(api.hints?.length ? { hints: api.hints } : {}), ...(also ? { also: [also] } : {}), ...(device.among?.length ? { among: device.among } : {}) });
+        return createNativeAsr({ bridge: remote.bridge(api.baseUrl, live ? { streamed: true } : {}), start: async () => lent, model, clock: request.clock, named: 'The recognition engine of the other device', limits: { ...(limits ?? api.limits), lastWordsMs: REMOTE_LAST_WORDS_MS }, ...(api.hints?.length ? { hints: api.hints } : {}), ...(also ? { also } : {}), ...(device.among?.length ? { among: device.among } : {}) });
       }),
     });
   };
-  /** The Realtime session's own request: on the socket the config names, when it names one. */
-  const dialled = (request: StartRequest<PipelineConfig, PipelineCredentials>): StartRequest<PipelineConfig, PipelineCredentials> => {
+  /**
+   * The Realtime session's own request: on the socket the config names, when it names one. It never speaks: what
+   * speaks here is a stage of the leg's own (`Stages.voice`), not the server's session.
+   */
+  const dialled = (asked: StartRequest<PipelineConfig, PipelineCredentials>): StartRequest<PipelineConfig, PipelineCredentials> => {
+    const request = asked.context.speech ? { ...asked, context: { ...asked.context, speech: false } } : asked;
     const { socket } = request.config;
     return socket ? { ...request, credentials: { ...request.credentials, endpoint: socket.endpoint, apiKey: '' } } : request;
   };
@@ -1288,11 +1346,27 @@ export function createPipelineAdapter(deps: Partial<PipelineDeps> = {}): Adapter
       // told keeps the recognizer it has, and the session still hears. (Nothing is waited for where nothing is asked:
       // a start opens its socket in the same turn.)
       if (prepare && deps.prepare && !device) await deps.prepare(prepare.pipeline, prepare.transcription).catch(() => undefined);
-      if (!device && (!stages || (!stages.speech && !stages.typed && !stages.asIs))) return realtime.start(dialled(request), events);
-      const leg = new PipelineLeg(request, stages ?? { speech: null, typed: null }, events, deps.fetch ?? fetchNow, deps.native?.base ?? engineBaseNow);
+      if (!device && (!stages || (!stages.speech && !stages.typed && !stages.asIs))) {
+        // Fork: the other device's own session answers this leg, and writes its translations itself: they are
+        // spoken as they close, by the same speaker a leg with stages of its own has (`speakingEvents`).
+        const speaker = speakerOf(request, stages?.voice, events, deps.fetch ?? fetchNow, deps.voice ?? liveVoiceDeps);
+        if (!speaker) return realtime.start(dialled(request), events);
+        let session: AdapterSession;
+        try {
+          session = await realtime.start(dialled(request), speakingEvents(events, speaker, request.context.direction.target));
+        } catch (error) {
+          speaker.stop();
+          throw error;
+        }
+        const stop = session.stop.bind(session);
+        session.stop = () => { speaker.stop(); return stop(); };
+        return session;
+      }
+      const sessionStages = { speech: null, typed: null, ...stages };
+      const leg = new PipelineLeg(request, sessionStages, events, deps.fetch ?? fetchNow, deps.native?.base ?? engineBaseNow, deps.voice ?? liveVoiceDeps);
       let session: AdapterSession;
       try {
-        session = await (device ? hearing(device, request, (base) => leg.watchPhone(base), stages?.heard, () => leg.pairedHearing()).start(hearingRequest(request, device, stages?.heard), leg.inner) : realtime.start(dialled(request), leg.inner));
+        session = await (device ? hearing(device, request, (base) => leg.watchPhone(base), sessionStages).start(hearingRequest(request, device, stages?.heard), leg.inner) : realtime.start(dialled(request), leg.inner));
       } catch (error) {
         leg.abandon();
         throw error;

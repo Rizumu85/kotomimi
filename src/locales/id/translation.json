@@ -48,7 +48,7 @@
     "noiseReduction": "Pengurangan noise",
     "noiseSuppression": "Peredam Noise",
     "noiseSuppressionTooltip": {
-      "off": "Nonaktif — Hanya penanganan noise bawaan browser.",
+      "off": "Nonaktif — tanpa peredam bising, mikrofon dikirim apa adanya untuk dikenali. Hasil terbaik di ruangan yang tenang.",
       "standard": "Standar (RNNoise) — Peredam noise AI ringan dengan latensi rendah.",
       "enhanced": "Ditingkatkan (GTCRN) — Peredam noise AI berkualitas tinggi, terbaik untuk lingkungan noise kompleks."
     },
@@ -774,7 +774,19 @@
       "tagHint_cpu": "Berjalan di prosesor tanpa memakai kartu grafis, sehingga kartu grafis bisa dipakai untuk game. Dimuat saat sesi dimulai.",
       "noteNativeXAsr": "Teks muncul sambil Anda berbicara. Hanya memakai prosesor tanpa memori grafis: sekitar seperlima dari satu inti. Hanya mendukung bahasa Mandarin dan Inggris. Kata dalam kamus pribadi tidak diberikan sebelumnya, tetapi hasil pengenalan tetap dikoreksi berdasarkan bunyinya.",
       "noteStreamRevise": "Mulai menerjemahkan saat lawan bicara masih berbicara, lalu menerjemahkan ulang seluruh kalimat setelah selesai. Hanya mendukung bahasa Mandarin, Inggris, dan Jepang.",
-      "noteNativeSenseVoiceCpu": "Hanya memakai prosesor, tanpa memakai memori grafis. Akurasinya hampir sama dengan SenseVoice di kartu grafis. Mendukung bahasa Mandarin, Kanton, Inggris, Jepang, dan Korea. Kata dalam kamus pribadi tidak diberikan sebelumnya, tetapi hasil pengenalan tetap dikoreksi berdasarkan bunyinya."
+      "noteNativeSenseVoiceCpu": "Hanya memakai prosesor, tanpa memakai memori grafis. Akurasinya hampir sama dengan SenseVoice di kartu grafis. Mendukung bahasa Mandarin, Kanton, Inggris, Jepang, dan Korea. Kata dalam kamus pribadi tidak diberikan sebelumnya, tetapi hasil pengenalan tetap dikoreksi berdasarkan bunyinya.",
+      "apiServiceEdge": "Suara online Edge (gratis)",
+      "speakKey": "Kunci API model pembaca",
+      "nativeVoiceReady": "Mesin pembaca siap.",
+      "nativeVoiceWarmingShort": "Memulai mesin pembaca…",
+      "nativeVoiceFailedShort": "Mesin pembaca gagal dimulai.",
+      "nativeVoiceUnsupported": "Sistem ini belum mendukung mesin pembaca bawaan. Di panel \"Baca nyaring\", pilih \"Model API\".",
+      "nativeVoiceMissing": "Model pembaca belum diunduh. Unduh untuk mulai.",
+      "nativeVoiceUpdating": "Memperbarui mesin pembaca. Anda bisa mulai setelah selesai.",
+      "nativeVoiceFailed": "Mesin pembaca gagal dimulai. Di panel \"Baca nyaring\", klik \"Coba lagi\" atau pilih model lain.",
+      "voiceUnnamed": "Model pembaca belum diisi. Isi namanya di panel \"Baca nyaring\".",
+      "noteQwen3Tts": "Paling alami, langsung bersuara. Diuji dalam bahasa Jepang, Mandarin, dan Inggris: tidak ada salah baca. Memakai sekitar 3 GB memori grafis, mendukung 10 bahasa.",
+      "noteIrodori": "Hanya bahasa Jepang. Hasil uji: tidak ada salah baca, sekitar setengah detik per kalimat. Memakai sekitar 1.7 GB memori grafis."
     }
   },
   "logsPanel": {
@@ -1739,8 +1751,6 @@
     "furigana": "Furigana di atas kanji (Jepang)",
     "romanization": "Tampilkan romanisasi",
     "pinyin": "Pinyin di atas teks Mandarin",
-    "echoCancellationApp": "Hanya Kotomimi",
-    "echoCancellationAppTooltip": "Hanya Kotomimi — hanya menghilangkan suara yang diputar Kotomimi, agar suaramu tertangkap paling jelas. Cocok saat memakai headphone atau headset VR; jika memakai speaker, gunakan mode \"Keduanya\". Pilih ini jika mikrofonmu berupa kartu suara virtual (VB-Cable, BlackHole).",
     "speechDetection": {
       "title": "Deteksi ucapan"
     },
@@ -2113,6 +2123,40 @@
     "apart": {
       "split": "Dengarkan sisi saya di tempat lain",
       "merge": "Dengarkan kedua sisi di satu tempat"
-    }
+    },
+    "voice": {
+      "stage": "Baca nyaring",
+      "stageTooltip": "Membacakan terjemahan Anda. Setiap baris percakapan juga bisa didengarkan: klik tombol speakernya.",
+      "on": "Aktifkan baca nyaring",
+      "toMeLocked": "\"Untuk saya\" belum bisa dipakai. Audio dari seluruh sistem membuat suara bacaan terjemahan ikut dianggap sebagai ucapan lawan bicara. Pilih satu aplikasi (misalnya VRChat) sebagai sumber suara lawan bicara.",
+      "toThemTooltip": "Saat dibacakan untuk lawan bicara, suara dikirim ke mikrofon virtual. Di VRChat atau aplikasi rapat, pilih mikrofon tersebut (di Windows namanya CABLE Output).",
+      "myVoiceToo": "Kirim juga suara asli saya",
+      "myVoiceTooTooltip": "Jika dimatikan, lawan bicara hanya mendengar terjemahan yang dibacakan.",
+      "needsSpeaker": "Yang dibacakan adalah ucapan dan teks yang Anda ketik. Ubah mode ke \"Saya\" atau \"Keduanya\".",
+      "modelPlaceholder": "Nama model, misalnya tts-1",
+      "voice": "Suara",
+      "voiceOf": "Suara {{language}}",
+      "sample": "Dengarkan contoh",
+      "cannotSpeak": "{{name}} tidak bisa berbicara dalam bahasa {{language}}.",
+      "sayLine": "Bacakan baris ini",
+      "stopLine": "Hentikan",
+      "lineFailed": "Baris ini gagal dibacakan",
+      "woman": "Suara wanita",
+      "man": "Suara pria",
+      "hearers": "Bacakan terjemahan otomatis",
+      "hearNone": "Nonaktif",
+      "hearMe": "Untuk saya",
+      "hearThem": "Untuk lawan bicara",
+      "hearBoth": "Untuk keduanya",
+      "volumeMine": "Volume untuk saya",
+      "volumeTheirs": "Volume untuk lawan bicara",
+      "meetingDevice": "Kirim audio ke lawan bicara lewat",
+      "meetingDeviceAuto": "Mikrofon virtual (otomatis)",
+      "meetingDeviceTooltip": "Terjemahan yang dibacakan diputar melalui perangkat ini. Lawan bicara mendengarnya seolah-olah dari mikrofon Anda. Jika kartu suara Anda bisa mencampur audio secara langsung, pilih salah satu saluran pemutarannya lalu gabungkan audio dari saluran itu dengan suara mikrofon di kartu suara. Dengan begitu, suara asli Anda tidak melewati perangkat lunak."
+    },
+    "echoCancellationGate": "Berdasarkan volume",
+    "echoCancellationGateTooltip": "Berdasarkan volume — untuk pengeras suara: suara yang diputar masuk kembali ke mikrofon jauh lebih pelan daripada suara Anda, jadi disaring berdasarkan volumenya dan suara Anda tetap seperti semula.",
+    "echoCancellationOff": "Nonaktif",
+    "echoCancellationOffTooltip": "Nonaktif — mikrofon dikirim apa adanya untuk dikenali. Gunakan saat memakai headphone: tidak ada suara yang masuk ke mikrofon."
   }
 }

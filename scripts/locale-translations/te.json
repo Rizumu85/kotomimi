@@ -203,6 +203,26 @@
     "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
     "text": "Kotomimi మాత్రమే — Kotomimi ప్లే చేసే శబ్దాన్ని మాత్రమే తొలగిస్తుంది. మీ గొంతు అత్యంత స్పష్టంగా వినిపిస్తుంది. హెడ్‌ఫోన్లు లేదా VR హెడ్‌సెట్ వాడేటప్పుడు అనుకూలం. స్పీకర్లు వాడేటప్పుడు \"ఇద్దరూ\" మోడ్‌లో కూడా పనిచేస్తుంది. మైక్రోఫోన్‌గా వర్చువల్ సౌండ్ కార్డ్ (VB-Cable, BlackHole వంటివి) వాడితే దీన్ని ఎంచుకోండి."
   },
+  "fork.echoCancellationGate": {
+    "en": "By loudness",
+    "text": "వాల్యూమ్ ఆధారంగా"
+  },
+  "fork.echoCancellationGateTooltip": {
+    "en": "By loudness — for loudspeakers: what they play comes back into the microphone far quieter than your voice, so it is kept out by its loudness and your voice is left as it is.",
+    "text": "ధ్వని స్థాయిని బట్టి — స్పీకర్లు వాడేటప్పుడు: స్పీకర్‌ నుంచి మైక్రోఫోన్‌లోకి తిరిగి వచ్చే శబ్దం మీ స్వరం కంటే చాలా తక్కువగా ఉంటుంది. దాన్ని ధ్వని స్థాయి ఆధారంగా అడ్డుకుంటాం, మీ స్వరం మాత్రం అలాగే ఉంటుంది."
+  },
+  "fork.echoCancellationOff": {
+    "en": "Off",
+    "text": "ఆఫ్"
+  },
+  "fork.echoCancellationOffTooltip": {
+    "en": "Off — the microphone as it is. For headphones: nothing plays into it.",
+    "text": "ఆఫ్ — మైక్రోఫోన్‌ నుంచి వచ్చినది యథాతథంగా గుర్తింపుకు పంపబడుతుంది. హెడ్‌ఫోన్‌లతో వాడండి: శబ్దం మైక్రోఫోన్‌లోకి లీక్‌ అవదు."
+  },
+  "fork.echoCancellationPassthrough": {
+    "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
+    "text": "అసలు ఆడియో పాస్‌త్రూ ఆన్‌లో ఉన్నప్పుడు, శబ్దస్థాయి ఆధారిత పద్ధతి మాత్రమే పని చేస్తుంది: మిగతావి మీ స్వరాన్నే ప్రతిధ్వనిగా భావించి తొలగిస్తాయి."
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "మళ్లీ శోధించండి"
@@ -991,6 +1011,134 @@
     "en": "What you want to say — Enter translates",
     "text": "మీరు చెప్పాలనేది — Enter అనువదిస్తుంది"
   },
+  "fork.voice.auto": {
+    "en": "Read my translations as they come",
+    "text": "నేను మాట్లాడాక అనువాదాన్ని ఆటోమేటిక్‌గా చదువు"
+  },
+  "fork.voice.cannotSpeak": {
+    "en": "{{name}} cannot speak {{language}}.",
+    "text": "{{name}} {{language}}లో మాట్లాడలేదు."
+  },
+  "fork.voice.hearBoth": {
+    "en": "To both",
+    "text": "ఇద్దరికీ వినిపించు"
+  },
+  "fork.voice.hearers": {
+    "en": "Read my translations aloud",
+    "text": "అనువాదాలను ఆటోమేటిక్‌గా చదివి వినిపించు"
+  },
+  "fork.voice.hearMe": {
+    "en": "To me",
+    "text": "నాకు వినిపించు"
+  },
+  "fork.voice.hearNone": {
+    "en": "Off",
+    "text": "ఆఫ్"
+  },
+  "fork.voice.hearThem": {
+    "en": "To them",
+    "text": "వారికి వినిపించు"
+  },
+  "fork.voice.lineFailed": {
+    "en": "This line could not be read aloud",
+    "text": "ఈ పంక్తిని చదివి వినిపించలేకపోయింది"
+  },
+  "fork.voice.man": {
+    "en": "Male voice",
+    "text": "పురుష స్వరం"
+  },
+  "fork.voice.meetingDevice": {
+    "en": "Output for the other side",
+    "text": "అవతలి వారికి వినిపించే ఆడియోను పంపే పరికరం"
+  },
+  "fork.voice.meetingDeviceAuto": {
+    "en": "Virtual microphone (automatic)",
+    "text": "వర్చువల్ మైక్రోఫోన్ (ఆటోమేటిక్)"
+  },
+  "fork.voice.meetingDeviceTooltip": {
+    "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
+    "text": "అనువాదాన్ని ఈ పరికరంలో చదివి వినిపిస్తారు. అవతలి వారికి అది మైక్రోఫోన్ నుంచి వచ్చినట్లుగా వినిపిస్తుంది. మీ సౌండ్ కార్డ్‌లోనే ఆడియోను కలిపే సదుపాయం ఉంటే, దానిలోని ఒక ప్లేబ్యాక్ ఛానల్‌ను ఎంచుకుని, ఆ ఛానల్ ఆడియోను మీ మైక్రోఫోన్ ఆడియోతో కార్డ్‌లోనే కలపండి. అప్పుడు మీ అసలు గొంతు సాఫ్ట్‌వేర్ గుండా వెళ్లదు."
+  },
+  "fork.voice.modelPlaceholder": {
+    "en": "The model's name, e.g. tts-1",
+    "text": "మోడల్ పేరు, ఉదా. tts-1"
+  },
+  "fork.voice.myVoiceToo": {
+    "en": "My own voice goes too",
+    "text": "నా అసలు స్వరాన్ని కూడా పంపు"
+  },
+  "fork.voice.myVoiceTooTooltip": {
+    "en": "Off: they hear only the voice reading your translation.",
+    "text": "ఆఫ్ చేస్తే, అవతలి వారికి చదివిన అనువాదం మాత్రమే వినిపిస్తుంది."
+  },
+  "fork.voice.needsSpeaker": {
+    "en": "It reads what you say or type. Switch the mode to \"Me\" or \"Both\".",
+    "text": "మీరు మాట్లాడిన లేదా టైప్ చేసిన మాటలను చదువుతుంది. మోడ్‌ను \"నేను\" లేదా \"ఇద్దరూ\"కు మార్చండి."
+  },
+  "fork.voice.on": {
+    "en": "Read aloud",
+    "text": "చదివి వినిపించు"
+  },
+  "fork.voice.sample": {
+    "en": "Play a sample",
+    "text": "నమూనా వినండి"
+  },
+  "fork.voice.sayLine": {
+    "en": "Read this line aloud",
+    "text": "ఈ పంక్తిని చదివి వినిపించు"
+  },
+  "fork.voice.stage": {
+    "en": "Voice",
+    "text": "చదివి వినిపించడం"
+  },
+  "fork.voice.stageTooltip": {
+    "en": "Reads your translations aloud. Any line of the conversation can be heard too: press its speaker button.",
+    "text": "మీ అనువాదాలను చదివి వినిపిస్తుంది. సంభాషణలో ఏ పంక్తినైనా వినవచ్చు: దాని స్పీకర్ బటన్ నొక్కండి."
+  },
+  "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "ఆపు"
+  },
+  "fork.voice.toMe": {
+    "en": "I hear it",
+    "text": "నాకు వినిపించు"
+  },
+  "fork.voice.toMeFix": {
+    "en": "Choose",
+    "text": "ఎంచుకోండి"
+  },
+  "fork.voice.toMeLocked": {
+    "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
+    "text": "‘నాకు వినిపించు’ ఇప్పుడు అందుబాటులో లేదు. సిస్టమ్‌లోని శబ్దమంతా తీసుకోవడం వల్ల, యాప్ చదివి వినిపించే మాటలను కూడా అవతలి వ్యక్తి అన్నట్టుగా గుర్తిస్తుంది. వారి మాటల కోసం VRChat లాంటి ఒక్క యాప్‌ను ఎంచుకోండి."
+  },
+  "fork.voice.toThem": {
+    "en": "The other side hears it",
+    "text": "అవతలి వారికి వినిపించు"
+  },
+  "fork.voice.toThemTooltip": {
+    "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
+    "text": "అవతలివారికి చదివి వినిపించేటప్పుడు, ఆ స్వరం వర్చువల్ మైక్రోఫోన్‌కు వెళ్తుంది. VRChat లేదా మీ మీటింగ్ యాప్‌లో దానిని మైక్రోఫోన్‌గా ఎంచుకోండి (Windowsలో దాని పేరు CABLE Output)."
+  },
+  "fork.voice.voice": {
+    "en": "Voice",
+    "text": "స్వరం"
+  },
+  "fork.voice.voiceOf": {
+    "en": "{{language}} voice",
+    "text": "{{language}} స్వరం"
+  },
+  "fork.voice.volumeMine": {
+    "en": "Volume for me",
+    "text": "నాకు వినిపించే వాల్యూమ్"
+  },
+  "fork.voice.volumeTheirs": {
+    "en": "Volume for them",
+    "text": "అవతలి వారికి వినిపించే వాల్యూమ్"
+  },
+  "fork.voice.woman": {
+    "en": "Female voice",
+    "text": "స్త్రీ స్వరం"
+  },
   "fork.vr.back": {
     "en": "Back",
     "text": "వెనక్కి"
@@ -1459,6 +1607,10 @@
     "en": "Custom address",
     "text": "అనుకూల చిరునామా"
   },
+  "providers.localai.apiServiceEdge": {
+    "en": "Edge online voices (free)",
+    "text": "Edge ఆన్‌లైన్ స్వరాలు (ఉచితం)"
+  },
   "providers.localai.apiServiceModel": {
     "en": "Choose from the list on the right, or type a name",
     "text": "కుడివైపు జాబితా నుంచి ఎంచుకోండి లేదా పేరు రాయండి"
@@ -1851,6 +2003,34 @@
     "en": "Updating the speech recognition engine. You can start once it is done.",
     "text": "స్పీచ్ గుర్తింపు ఇంజిన్‌ను నవీకరిస్తోంది. పూర్తయిన తర్వాత ప్రారంభించవచ్చు."
   },
+  "providers.localai.nativeVoiceFailed": {
+    "en": "The voice engine could not start. In the Voice card, press \"Try again\" — or choose another model.",
+    "text": "చదివే ఇంజిన్ ప్రారంభం కాలేదు. \"చదివి వినిపించడం\" కార్డులో \"మళ్లీ ప్రయత్నించండి\" నొక్కండి లేదా మరో మోడల్ ఎంచుకోండి."
+  },
+  "providers.localai.nativeVoiceFailedShort": {
+    "en": "The voice engine could not start.",
+    "text": "చదివే ఇంజిన్ ప్రారంభం కాలేదు."
+  },
+  "providers.localai.nativeVoiceMissing": {
+    "en": "The voice model is not downloaded yet. Download it to start.",
+    "text": "చదివే మోడల్ ఇంకా డౌన్‌లోడ్ కాలేదు. డౌన్‌లోడ్ చేశాక ప్రారంభించవచ్చు."
+  },
+  "providers.localai.nativeVoiceReady": {
+    "en": "The voice engine is ready.",
+    "text": "చదివే ఇంజిన్ సిద్ధంగా ఉంది."
+  },
+  "providers.localai.nativeVoiceUnsupported": {
+    "en": "The native voice engine is not available for this system. In the Voice card, switch to \"API model\".",
+    "text": "ఈ సిస్టమ్‌లో స్థానికంగా చదివే ఇంజిన్‌కు ఇంకా మద్దతు లేదు. \"చదివి వినిపించడం\" కార్డులో \"API మోడల్\"కు మారండి."
+  },
+  "providers.localai.nativeVoiceUpdating": {
+    "en": "Updating the voice engine. You can start once it is done.",
+    "text": "చదివే ఇంజిన్ అప్‌డేట్ అవుతోంది. పూర్తయ్యాక ప్రారంభించవచ్చు."
+  },
+  "providers.localai.nativeVoiceWarmingShort": {
+    "en": "Starting the voice engine…",
+    "text": "చదివే ఇంజిన్ ప్రారంభమవుతోంది…"
+  },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
     "text": "గుర్తింపు ఇంజిన్ ఇంకా ప్రారంభమవుతోంది. కంప్యూటర్ ఆన్ చేశాక మొదటిసారి సుమారు అర నిమిషం పడుతుంది. సిద్ధమైన వెంటనే మొదలుపెట్టవచ్చు."
@@ -1890,6 +2070,14 @@
   "providers.localai.noteIndexTranslate": {
     "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
     "text": "జపనీస్ నుంచి చైనీస్ అనువాద పరీక్షల్లో: 30 వాక్యాల్లో సుమారు 3లో తీవ్రమైన తప్పులు వచ్చాయి. పరీక్షించిన వాటిలో ఇదే ఉత్తమం. ఒక్కో వాక్యానికి సుమారు 0.1 సెకను. సుమారు 2 GB గ్రాఫిక్స్ మెమరీ వాడుతుంది, 100కి పైగా భాషలకు మద్దతు ఉంది."
+  },
+  "providers.localai.noteIrodori": {
+    "en": "Japanese only. Measured: nothing misread, about half a second a sentence. About 1.7 GB of video memory.",
+    "text": "జపనీస్ మాత్రమే మాట్లాడుతుంది. పరీక్షల్లో ఏదీ తప్పుగా చదవలేదు, ఒక్కో వాక్యానికి సుమారు అర సెకను పట్టింది. సుమారు 1.7 GB వీడియో మెమరీ అవసరం."
+  },
+  "providers.localai.noteKokoro": {
+    "en": "Light: runs on the processor and takes no video memory. Less natural, Japanese most of all.",
+    "text": "తేలికైనది: ప్రాసెసర్‌పైనే నడుస్తుంది, వీడియో మెమరీ వాడదు. అంత సహజంగా ఉండదు, ముఖ్యంగా జపనీస్‌లో."
   },
   "providers.localai.noteMoonshineJa": {
     "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
@@ -1938,6 +2126,10 @@
   "providers.localai.noteQwen17": {
     "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
     "text": "జపనీస్ సంభాషణ పరీక్షల్లో సుమారు 19% అక్షరాలు తప్పుగా వచ్చాయి. వాక్యం ముగిశాకే అక్షరాలు వస్తాయి (సుమారు 10 సెకన్ల ఆలస్యం). పైనున్న GGUF వెర్షన్ మాట్లాడుతుండగానే రాస్తుంది."
+  },
+  "providers.localai.noteQwen3Tts": {
+    "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
+    "text": "అత్యంత సహజమైన స్వరం, వెంటనే మాట్లాడటం మొదలవుతుంది. పరీక్షల్లో జపనీస్, చైనీస్, ఇంగ్లీష్‌లో ఏదీ తప్పుగా చదవలేదు. సుమారు 3 GB వీడియో మెమరీ అవసరం, 10 భాషలకు మద్దతు ఉంది."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
@@ -2114,6 +2306,10 @@
   "providers.localai.sourceAuto": {
     "en": "The language cannot be detected with this setup. Choose the language you speak.",
     "text": "ఈ అమరికతో భాషను ఆటోమేటిక్‌గా గుర్తించలేం. మీరు మాట్లాడే భాషను ఎంచుకోండి."
+  },
+  "providers.localai.speakKey": {
+    "en": "API key of the voice",
+    "text": "చదివే మోడల్ API కీ"
   },
   "providers.localai.speedAbout": {
     "en": "About {{seconds}} s",
@@ -2323,6 +2519,10 @@
     "en": "API model",
     "text": "API మోడల్"
   },
+  "providers.localai.voiceUnnamed": {
+    "en": "The voice has no model to run yet. Name one in the Voice card.",
+    "text": "చదివే మోడల్ పేరు ఇంకా ఇవ్వలేదు. \"చదివి వినిపించడం\" కార్డులో నమోదు చేయండి."
+  },
   "providers.openai_live.name": {
     "en": "OpenAI Live",
     "text": "OpenAI Live"
@@ -2422,6 +2622,10 @@
   "settings.glossaryWritten": {
     "en": "Word",
     "text": "పదం"
+  },
+  "settings.noiseSuppressionTooltip.off": {
+    "en": "Off — no noise suppression: the microphone as it is. Best in a quiet room.",
+    "text": "ఆఫ్ — శబ్దం తగ్గింపు లేదు: మైక్రోఫోన్ ఉన్నట్టుగానే. నిశ్శబ్ద గదిలో ఉత్తమంగా పనిచేస్తుంది."
   },
   "settings.transcriptKeywordsPlaceholder": {
     "en": "Sokuji, Kizuna AI, PulseAudio",

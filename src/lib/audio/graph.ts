@@ -1,10 +1,9 @@
 /**
  * One Web Audio graph for everything the app plays (spec: "Playback"): five
  * feeds, two buses, the route table applied as a diff of gain edges, and a
- * tap of the translated speech for the echo monitor. Output leaves through
- * `<audio>` elements, as the old `ModernAudioPlayer`'s did (deleted in plan
- * 1e-3c), so the browser's echo canceller sees it; the context runs at
- * 24 kHz, the system rate. A
+ * tap of the translated speech for the echo monitor. Translated speech leaves
+ * through `<audio>` elements so the browser's echo canceller sees it. Desktop
+ * microphone passthrough goes directly to the cable at its own rate. A
  * context the renderer wedges is rebuilt on a fresh one (#246), behind the
  * same graph object.
  */
@@ -56,8 +55,10 @@ export interface BusMeter {
 }
 
 export interface AudioGraph {
-  /** A timeline playing into a feed: the clip queues' and the passthrough stream's. */
-  timeline(feed: 'speaker' | 'participant' | 'replay' | 'passthrough'): AudioTimeline;
+  /** A clip queue's timeline. */
+  timeline(feed: 'speaker' | 'participant' | 'replay'): AudioTimeline;
+  /** Follows the live microphone to the virtual output. Returns the disconnect. */
+  connectMicrophone(stream: MediaStream): () => void;
   /** Plays a clip at its own rate on the preview feed. */
   playOnce(audio: Float32Array, sampleRate: number): OneShot;
   /** Makes the edges exactly these; an edge to a bus this platform lacks is ignored. */
@@ -200,6 +201,14 @@ export async function createAudioGraph(deps: GraphDeps): Promise<AudioGraph> {
   // sets `applied`, or forgets `requested` when it fails.
   const requested: Partial<Record<Bus, string>> = {};
   const applied: Partial<Record<Bus, string>> = {};
+  let syncDeviceMic: (() => void) | undefined;
+  let directFailed = false;
+  const landVirtual = (id: string | undefined) => {
+    if (applied.virtual === id) return;
+    applied.virtual = id;
+    directFailed = false;
+    syncDeviceMic?.();
+  };
   // An output that will not start is reported once per failing streak, not once per chunk/resume.
   const playFailing: Partial<Record<Bus, boolean>> = {};
   const play = (bus: Bus) => {
@@ -243,6 +252,71 @@ export async function createAudioGraph(deps: GraphDeps): Promise<AudioGraph> {
   const edges = new Map<string, { from: Feed; node: GainNode }>();
   /** What `route` was last asked for: a rebuild applies it to the new context. */
   let lastRoute: readonly Edge[] = [];
+  const connectMicFeed = (stream: MediaStream) => {
+    const node = current.ctx.createMediaStreamSource(stream);
+    node.connect(current.feeds.passthrough);
+    return () => node.disconnect();
+  };
+
+  function connectDeviceMic(stream: MediaStream): () => void {
+    let sink: string | undefined;
+    let direct: AudioContext | undefined;
+    let gain: GainNode | undefined;
+    let disconnectFeed: (() => void) | undefined;
+    const stop = () => {
+      gain?.disconnect();
+      gain = undefined;
+      if (direct) void direct.close().catch(() => {});
+      direct = undefined;
+      disconnectFeed?.();
+      disconnectFeed = undefined;
+    };
+    const useFeed = () => {
+      try {
+        disconnectFeed = connectMicFeed(stream);
+      } catch (cause) {
+        reportError('AudioGraph', `Could not connect microphone passthrough: ${describeCause(cause)}`, { cause, dedupeKey: 'graph:mic' });
+      }
+    };
+    const fallback = (error: unknown) => {
+      stop();
+      directFailed = true;
+      reportWarning('AudioGraph', `Direct microphone output unavailable; using the virtual bus: ${describeCause(error)}`, { cause: error, dedupeKey: 'graph:direct-mic' });
+      useFeed();
+    };
+    syncDeviceMic = () => {
+      const ratio = lastRoute.find((edge) => edge.from === 'passthrough')?.gain;
+      const id = ratio ? applied.virtual : undefined;
+      if (sink === id) {
+        if (gain && direct) gain.gain.setValueAtTime(ratio!, direct.currentTime);
+        return;
+      }
+      stop();
+      sink = id;
+      if (!id) return;
+      if (directFailed) { useFeed(); return; }
+      try {
+        const options = { sinkId: id, latencyHint: 0 };
+        const ctx = direct = new AudioContext(options);
+        const fail = (error: unknown) => { if (direct === ctx) fallback(error); };
+        ctx.addEventListener('error', fail, { once: true });
+        gain = gainOn(ctx, ratio);
+        const output = gain;
+        const connect = () => {
+          if (direct !== ctx) return;
+          // An implementation that ignores the option would send the microphone to the speakers.
+          if (!('sinkId' in ctx) || ctx.sinkId !== id) throw new Error('The audio context did not select the virtual device.');
+          ctx.createMediaStreamSource(stream).connect(output).connect(ctx.destination);
+        };
+        if (ctx.state === 'suspended') void ctx.resume().then(connect).catch(fail);
+        else connect();
+      } catch (error) {
+        fallback(error);
+      }
+    };
+    syncDeviceMic();
+    return () => { syncDeviceMic = undefined; stop(); };
+  }
   const applyRoute = (next: readonly Edge[]) => {
     const { ctx, feeds, buses } = current;
     const wanted = new Map<string, Edge>();
@@ -330,7 +404,7 @@ export async function createAudioGraph(deps: GraphDeps): Promise<AudioGraph> {
           const newest = requested[bus];
           if (bus === 'virtual') {
             // Never play the meeting's audio on a device it was not asked for (F1).
-            applied.virtual = undefined;
+            landVirtual(undefined);
             element.pause();
             if (newest === undefined) return;
           }
@@ -338,7 +412,8 @@ export async function createAudioGraph(deps: GraphDeps): Promise<AudioGraph> {
         }
         return;
       }
-      applied[bus] = id;
+      if (bus === 'virtual') landVirtual(id);
+      else applied[bus] = id;
       play(bus);
     };
     // `run` never rejects, so the chain never breaks. The next switch waits
@@ -423,7 +498,7 @@ export async function createAudioGraph(deps: GraphDeps): Promise<AudioGraph> {
       // Then the listeners: the playback clears its queues against the new
       // clock. Whatever it scheduled while the module loaded sat on the dead
       // context — its frozen currentTime became a queue's tail, which would
-      // hold every later clip that long and drop every passthrough chunk.
+      // hold every later clip that long.
       for (const listener of [...resets]) {
         try { listener(); } catch (error) { reportError('AudioGraph', `A reset listener threw: ${describeCause(error)}`, { cause: error, dedupeKey: 'graph:reset-listener' }); }
       }
@@ -452,6 +527,10 @@ export async function createAudioGraph(deps: GraphDeps): Promise<AudioGraph> {
   };
 
   return {
+    connectMicrophone(stream) {
+      return virtual.kind === 'device' ? connectDeviceMic(stream) : connectMicFeed(stream);
+    },
+
     timeline: (feed) => ({
       now: () => current.ctx.currentTime,
       play(pcm, at, onEnded) {
@@ -477,6 +556,7 @@ export async function createAudioGraph(deps: GraphDeps): Promise<AudioGraph> {
     route(next) {
       lastRoute = next;
       applyRoute(next);
+      syncDeviceMic?.();
     },
 
     meter(bus) {
@@ -501,7 +581,7 @@ export async function createAudioGraph(deps: GraphDeps): Promise<AudioGraph> {
         if (bus === 'virtual') {
           // Never play the meeting's audio on whatever device the element is
           // on while a switch is pending or absent (F1).
-          applied.virtual = undefined;
+          landVirtual(undefined);
           element.pause();
           if (!id) continue;
           if (!element.setSinkId) {
@@ -571,6 +651,7 @@ export async function createAudioGraph(deps: GraphDeps): Promise<AudioGraph> {
       // context to close twice, which a real context refuses.
       closing ??= (async () => {
         clearWatch();
+        landVirtual(undefined);
         if (deps.replaceContext) current.ctx.removeEventListener('statechange', onState);
         for (const element of Object.values(elements)) {
           element.pause();

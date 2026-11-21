@@ -48,7 +48,7 @@
     "noiseReduction": "Ruisonderdrukking",
     "noiseSuppression": "Ruisonderdrukking",
     "noiseSuppressionTooltip": {
-      "off": "Uit — Alleen de ingebouwde ruisbehandeling van de browser.",
+      "off": "Uit — geen ruisonderdrukking: de microfoon zoals hij is. Werkt het best in een stille ruimte.",
       "standard": "Standaard (RNNoise) — Lichte AI-ruisonderdrukking met lage latentie.",
       "enhanced": "Verbeterd (GTCRN) — Hoogwaardige AI-ruisonderdrukking, ideaal voor complexe ruisomgevingen."
     },
@@ -774,7 +774,19 @@
       "tagHint_cpu": "Draait op de processor en laat de grafische kaart vrij voor je game. Wordt geladen zodra een sessie begint.",
       "noteNativeXAsr": "Zet spraak direct om in tekst, alleen op de processor en zonder videogeheugen te gebruiken: ongeveer een vijfde van één processorkern. Ondersteunt alleen Chinees en Engels. Woorden uit je persoonlijke woordenlijst worden niet vooraf doorgegeven; na de herkenning worden ze op basis van hun klank gecorrigeerd.",
       "noteStreamRevise": "Vertaalt al terwijl de ander nog praat en vertaalt de hele zin opnieuw zodra die klaar is. Alleen voor Chinees, Engels en Japans.",
-      "noteNativeSenseVoiceCpu": "Gebruikt alleen de processor, geen videogeheugen. Ongeveer even nauwkeurig als SenseVoice op de grafische kaart. Ondersteunt Chinees, Kantonees, Engels, Japans en Koreaans. Woorden uit je persoonlijke woordenlijst worden niet vooraf doorgegeven, maar na de herkenning wel op basis van de uitspraak gecorrigeerd."
+      "noteNativeSenseVoiceCpu": "Gebruikt alleen de processor, geen videogeheugen. Ongeveer even nauwkeurig als SenseVoice op de grafische kaart. Ondersteunt Chinees, Kantonees, Engels, Japans en Koreaans. Woorden uit je persoonlijke woordenlijst worden niet vooraf doorgegeven, maar na de herkenning wel op basis van de uitspraak gecorrigeerd.",
+      "apiServiceEdge": "Online stemmen van Edge (gratis)",
+      "speakKey": "API-sleutel voor het voorleesmodel",
+      "nativeVoiceReady": "De voorleesengine is klaar.",
+      "nativeVoiceWarmingShort": "Voorleesengine starten…",
+      "nativeVoiceFailedShort": "De voorleesengine kon niet starten.",
+      "nativeVoiceUnsupported": "Dit systeem ondersteunt de ingebouwde voorleesengine nog niet. Kies \"API-model\" in het paneel \"Voorlezen\".",
+      "nativeVoiceMissing": "Het voorleesmodel is nog niet gedownload. Download het om te beginnen.",
+      "nativeVoiceUpdating": "De voorleesengine wordt bijgewerkt. Daarna kun je beginnen.",
+      "nativeVoiceFailed": "De voorleesengine kon niet starten. Klik op \"Opnieuw proberen\" in het paneel \"Voorlezen\" of kies een ander model.",
+      "voiceUnnamed": "Er is nog geen voorleesmodel ingevuld. Vul er een in bij \"Voorlezen\".",
+      "noteQwen3Tts": "Klinkt het natuurlijkst en begint meteen te spreken. Getest in het Japans, Chinees en Engels: alles correct uitgesproken. Gebruikt ongeveer 3 GB videogeheugen en ondersteunt 10 talen.",
+      "noteIrodori": "Spreekt alleen Japans. Getest: alles correct uitgesproken, ongeveer een halve seconde per zin. Gebruikt ongeveer 1.7 GB videogeheugen."
     }
   },
   "logsPanel": {
@@ -1739,8 +1751,6 @@
     "furigana": "Furigana boven kanji (Japans)",
     "romanization": "Romanisatie tonen",
     "pinyin": "Pinyin boven Chinese tekst",
-    "echoCancellationApp": "Alleen Kotomimi",
-    "echoCancellationAppTooltip": "Alleen Kotomimi — onderdrukt alleen geluid dat Kotomimi zelf afspeelt, zodat je stem zo duidelijk mogelijk wordt opgevangen. Geschikt voor een koptelefoon of VR-headset. Met luidsprekers werkt dit ook in de modus \"Beide\". Kies deze optie als je een virtuele geluidskaart (VB-Cable, BlackHole) als microfoon gebruikt.",
     "speechDetection": {
       "title": "Spraakdetectie"
     },
@@ -2113,6 +2123,40 @@
     "apart": {
       "split": "Mijn kant ergens anders beluisteren",
       "merge": "Beide kanten op één plek beluisteren"
-    }
+    },
+    "voice": {
+      "stage": "Voorlezen",
+      "stageTooltip": "Leest je vertalingen voor. Je kunt ook elke regel van het gesprek beluisteren: klik op het luidsprekerknopje ernaast.",
+      "on": "Voorlezen inschakelen",
+      "toMeLocked": "‘Voor mij’ is niet beschikbaar. Kotomimi neemt al het systeemgeluid op en hoort daardoor de voorgelezen tekst alsof de ander die uitspreekt. Kies één app als geluidsbron, bijvoorbeeld VRChat.",
+      "toThemTooltip": "Bij voorlezen aan de ander gaat het geluid naar de virtuele microfoon. Kies die als microfoon in VRChat of je vergaderapp (in Windows heet die CABLE Output).",
+      "myVoiceToo": "Mijn eigen stem ook doorgeven",
+      "myVoiceTooTooltip": "Uit: de ander hoort alleen de voorgelezen vertaling.",
+      "needsSpeaker": "Leest voor wat je zegt of typt. Zet de modus op \"Ik\" of \"Beide\".",
+      "modelPlaceholder": "Modelnaam, bijvoorbeeld tts-1",
+      "voice": "Stem",
+      "voiceOf": "Stem voor {{language}}",
+      "sample": "Voorbeeld beluisteren",
+      "cannotSpeak": "{{name}} spreekt geen {{language}}.",
+      "sayLine": "Deze regel voorlezen",
+      "stopLine": "Stoppen",
+      "lineFailed": "Deze regel kon niet worden voorgelezen",
+      "woman": "Vrouwenstem",
+      "man": "Mannenstem",
+      "hearers": "Vertalingen automatisch voorlezen",
+      "hearNone": "Uit",
+      "hearMe": "Voor mij",
+      "hearThem": "Voor de ander",
+      "hearBoth": "Voor beiden",
+      "volumeMine": "Volume voor mij",
+      "volumeTheirs": "Volume voor de ander",
+      "meetingDevice": "Audio-uitvoer voor je gesprekspartner",
+      "meetingDeviceAuto": "Virtuele microfoon (automatisch)",
+      "meetingDeviceTooltip": "De vertaling wordt via dit apparaat voorgelezen. Het dient als microfoon voor je gesprekspartner. Kan je geluidskaart zelf audio mixen? Kies dan een afspeelkanaal van die kaart en meng het op de kaart met je microfoongeluid. Zo gaat je eigen stem niet door de software."
+    },
+    "echoCancellationGate": "Op volume",
+    "echoCancellationGateTooltip": "Op volume — voor luidsprekers: wat ze afspelen komt veel zachter terug in de microfoon dan je stem, dus wordt het op volume tegengehouden en blijft je stem zoals die is.",
+    "echoCancellationOff": "Uit",
+    "echoCancellationOffTooltip": "Uit — de microfoon wordt onbewerkt doorgestuurd voor herkenning. Voor koptelefoons: er lekt geen geluid in de microfoon."
   }
 }

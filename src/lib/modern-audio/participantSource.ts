@@ -1,5 +1,5 @@
 import type { AudioDevice } from '../../stores/audioStore';
-import { isLoopbackPlatform, isMacOS } from '../../utils/environment';
+import { isLinux, isLoopbackPlatform, isMacOS } from '../../utils/environment';
 
 /** Whole-system capture - the participant source used when nothing else is chosen. */
 export const SYSTEM_PARTICIPANT_SOURCE_ID = 'desktop-audio-loopback';
@@ -59,4 +59,19 @@ export function needsLoopbackStream(deviceId: string | null | undefined): boolea
  */
 export function participantSpeechHeard(platform: string, participantSourceId: string | null | undefined): boolean {
   return platform !== 'electron' || isApplicationSource(participantSourceId);
+}
+
+/**
+ * Fork: whether the user's own translation, read aloud on the real device (the monitor), is heard rather than
+ * recaptured as the other side: always with the microphone alone; beside the other side's sound only while that is
+ * captured from one application, by the rule above (Windows and macOS) — a whole-system capture hears the real
+ * device, the app's own voice included. The one predicate the playback route (`readRouting`), the monitor's lock in Settings and the voice
+ * stage's "I hear it" switch share.
+ */
+export function monitorHeard(mode: 'speaker' | 'participant' | 'both', platform: string, participantSourceId: string | null | undefined): boolean {
+  if (mode === 'speaker') return true;
+  // Not on Linux: an application's capture there widens to the whole system when its tap does not appear
+  // (`APP_MONITOR_MISSING`), with the selection still naming the application. Elsewhere a lost application is
+  // waited for, never widened.
+  return mode === 'both' && !isLinux() && participantSpeechHeard(platform, participantSourceId);
 }

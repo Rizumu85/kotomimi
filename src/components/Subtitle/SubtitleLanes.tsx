@@ -8,10 +8,11 @@ import { romanStretches } from '../../lib/annotate/annotate';
 import { japaneseTokenizer, subscribeJapanese } from '../../lib/annotate/japaneseStore';
 import { annotatedLanguage, isChinese, romanizedText } from '../../lib/annotate/script';
 import type { JapaneseTokenizer } from '../../lib/annotate/types';
-import { answeredOf, holdMs, nextShown } from '../../lib/subtitle/dwell';
-import { buildLanes, lanesHeight, linesFor, ROOMY, ROW_SCALE, spacingAt, squeezeOf, TIGHT, withAnswerAids, withRoman, type Lane, type LanePiece, type LaneSpacing, type LaneText } from '../../lib/subtitle/lanes';
+import { answeredOf, answerTurn, fedOf, holdMs, nextShown, rowSentences, rowTurn, type RowShown, type TurnShown } from '../../lib/subtitle/dwell';
+import { buildLanes, furtherIn, lanesHeight, linesFor, rowLegOf, ROOMY, ROW_SCALE, spacingAt, squeezeOf, TIGHT, withAnswerAids, withFeedbackRoom, withRoman, withSmallReads, type Lane, type LanePiece, type LaneSpacing, type LaneText } from '../../lib/subtitle/lanes';
 import { useAnnotationStore } from '../../stores/annotationStore';
 import type { LegFilters } from '../../lib/view/filter';
+import type { Beside } from '../../lib/subtitle/session';
 import { noticeText } from '../../lib/view/noticeText';
 import { AnnotatedLines, useAnnotation } from '../Annotated/AnnotatedText';
 import { Correction } from '../Feedback/Correction';
@@ -50,6 +51,17 @@ function wholeLinesFrom(box: HTMLElement, text: HTMLElement, line: number): numb
 }
 
 /**
+ * Fork: whether a text's last line has no romanization under it: none of its romanized stretches ends on that line
+ * (`foot`: where the text ends; `line`: a line's height; all in pixels down the page). Where a line of romanization is
+ * kept under a small line, such a text stands above that line, as one that has a romanization does (`data-bare`, the
+ * stylesheet): on the box's foot, the user's own sentence went up a line when its answer came with a romanization,
+ * and a Japanese sentence stood a line lower than the Korean one before it (2026-11-18).
+ */
+export function lastLineBare(foot: number, line: number, romanBottoms: readonly number[]): boolean {
+  return !romanBottoms.some((bottom) => bottom > foot - line / 2);
+}
+
+/**
  * Text in a box of fixed height, at the size chosen — always. A caption is
  * read while it changes, out of the corner of an eye: the frame has to hold
  * still, and only the words move. So nothing here is ever drawn smaller to
@@ -60,6 +72,12 @@ function wholeLinesFrom(box: HTMLElement, text: HTMLElement, line: number): numb
  * loses its oldest line, a whole line at a time: the stylesheet holds the
  * text's end in sight where this says it is over (`data-over`), and what the
  * box's edge would cut is not drawn (`wholeLinesFrom`).
+ *
+ * Fork: the user's own row gives up the sentence before it gives up any of the answer (`data-tight`): a row is the
+ * sentence, an arrow and its translation on the lines it has, and rolled as one text a long one showed the last
+ * words of the translation and nothing else (a narrow window, or a sentence of some sixty characters; 2026-11-18).
+ * What the user said they know; what was made of it is what the row is read for. Only what is still too long then
+ * loses its oldest line.
  */
 function Slot({ className, lang, children, fitKey }: { className: string; lang?: string; children: ReactNode; fitKey: string }) {
   const box = useRef<HTMLDivElement>(null);
@@ -74,7 +92,23 @@ function Slot({ className, lang, children, fitKey }: { className: string; lang?:
     const line = parseFloat(getComputedStyle(inner).lineHeight) || 0;
     const { paddingTop, paddingBottom } = getComputedStyle(outer);
     const room = outer.clientHeight - (parseFloat(paddingTop) || 0) - (parseFloat(paddingBottom) || 0);
-    const over = outer.clientHeight > 0 && inner.scrollHeight > room + Math.max(1, line / 4);
+    const tooLong = () => {
+      // Said first: it changes where the text stands, which is what is measured next. No layout: left as it is.
+      if (outer.clientHeight > 0) {
+        const foot = inner.getBoundingClientRect().bottom - (parseFloat(getComputedStyle(inner).paddingBottom) || 0);
+        const bare = !!inner.textContent && lastLineBare(foot, line, Array.from(inner.querySelectorAll('.annot-line--roman'), (block) => (block as HTMLElement).offsetParent === null ? -Infinity : block.getBoundingClientRect().bottom));
+        if (bare) inner.dataset.bare = '';
+        else delete inner.dataset.bare;
+      }
+      return outer.clientHeight > 0 && inner.scrollHeight > room + Math.max(1, line / 4);
+    };
+    // Measured whole each time: what was tight may fit again.
+    delete outer.dataset.tight;
+    let over = tooLong();
+    if (over && inner.querySelector('.subtitle-lane__said:not(.subtitle-lane__said--fixed)') && inner.querySelector('.subtitle-lane__reply')) {
+      outer.dataset.tight = '';
+      over = tooLong();
+    }
     if (over) outer.dataset.over = '';
     else delete outer.dataset.over;
     inner.style.clipPath = over ? `inset(${wholeLinesFrom(outer, inner, line)}px -1em -1em)` : '';
@@ -151,12 +185,15 @@ const LEGS: readonly LegName[] = ['participant', 'speaker'];
 /**
  * Whether a kind of line has room for a reading aid: `on` is the switch; `asked`, what is on screen has the aid. Kept
  * once asked for: a side left to be detected changes language from sentence to sentence, and the window with it.
- * `unsaid`: nothing is said yet, and the room is kept so that the window is not made higher at the first word.
+ * `planned`: the run's languages say it will be asked for (`plannedRoom`), and the room is there from the start, so
+ * that the window is not made higher at the first word. For as long as they say so, not only until something is
+ * said: the user's own row lost its line between their first word and its answer, which is what has the aid, and the
+ * window went a line down and up.
  */
-function useRoom(on: boolean, asked: boolean, unsaid = false): boolean {
+function useRoom(on: boolean, asked: boolean, planned = false): boolean {
   const kept = useRef(false);
   kept.current = on && (kept.current || asked);
-  return kept.current || (on && unsaid);
+  return kept.current || (on && planned);
 }
 
 /** The reading aids' switches. */
@@ -171,25 +208,30 @@ const readsAbove = (code: string | undefined, aids: Pick<ReadingAids, 'furigana'
 export interface LanePair { source: string; target: string }
 
 /**
- * The aids a strip will need before anything is said, from what the pair says will be: the other side speaks the
- * target and is answered in the source, the user the other way about. Without them the window was made higher at the
- * first answer with readings: it has to hold still. A side left to be detected may turn out to need the romanization.
+ * The aids a strip will need before anything is said, from what the run's languages say will be: the other side speaks
+ * the target, or the language of theirs lit beside it, and is answered in the source; the user speaks the source, or
+ * another of their own in use, and is answered in each of the other side's — and in their own, where they spoke
+ * another (`beside`). Only for the texts a lane shows. Without them the window was made higher at the first answer
+ * with readings, and again at the first one in a second language: it has to hold still. A side left to be detected
+ * may turn out to need the romanization.
  */
-function plannedRoom(lanes: readonly Lane[], aids: ReadingAids, pair: LanePair | undefined) {
-  const language = (lane: Lane, side: 'source' | 'answer') => ((lane.leg === 'participant') === (side === 'source') ? pair?.target : pair?.source);
+function plannedRoom(lanes: readonly Lane[], aids: ReadingAids, pair: LanePair | undefined, beside?: Beside) {
+  const mine = [pair?.source, ...(beside?.mine ?? [])];
+  const theirs = [pair?.target, ...(beside?.theirs ?? [])];
+  const written = (lane: Lane, side: 'source' | 'answer'): ReadonlyArray<string | undefined> => {
+    if (lane.leg === 'participant') return side === 'source' ? theirs : [pair?.source];
+    return side === 'source' ? mine : [...theirs, ...(mine.length > 1 ? [pair?.source] : [])];
+  };
   const known = (code: string | undefined) => !!code && code !== 'auto';
   const roman = (code: string | undefined) => aids.romanization && (!known(code) || romanizedText('', code, aids.romanOff));
   const reads = (code: string | undefined) => readsAbove(code, aids);
   const pairs = lanes.filter((lane) => lane.shape === 'pair');
   const oneLanguage = pair?.source.toLowerCase() === pair?.target.toLowerCase();
   return {
-    pairRoman: pairs.some((lane) => lane.source && roman(language(lane, 'source'))),
-    rowRoman: lanes.some((lane) => lane.shape === 'row' && (roman(language(lane, 'source')) || roman(language(lane, 'answer')))),
-    answerReads: pairs.some((lane) => lane.answer && reads(language(lane, 'answer'))),
-    answerRoman: pairs.some((lane) => {
-      const code = language(lane, 'answer');
-      return !!lane.answer && known(code) && roman(code) && !(oneLanguage && reads(code));
-    }),
+    pairRoman: pairs.some((lane) => lane.source && written(lane, 'source').some(roman)),
+    rowRoman: lanes.some((lane) => lane.shape === 'row' && ((!!lane.source && written(lane, 'source').some(roman)) || (!!lane.answer && written(lane, 'answer').some(roman)))),
+    answerReads: pairs.some((lane) => lane.answer && written(lane, 'answer').some(reads)),
+    answerRoman: pairs.some((lane) => !!lane.answer && written(lane, 'answer').some((code) => known(code) && roman(code) && !(oneLanguage && reads(code)))),
   };
 }
 
@@ -199,28 +241,43 @@ function plannedRoom(lanes: readonly Lane[], aids: ReadingAids, pair: LanePair |
  * size before you start" was not true of a window that took a height of its own the moment it started, and whose
  * frame could meanwhile be pressed flat (the user, 2026-10-06). Null: no lanes.
  */
-export function restingHeights(legs: readonly LegName[], filters: LegFilters, fontSize: number, aids: ReadingAids, pair?: LanePair): { height: number; least: number } | null {
-  const lanes = buildLanes([], legs, filters, () => '');
+export function restingHeights(legs: readonly LegName[], filters: LegFilters, fontSize: number, aids: ReadingAids, pair?: LanePair, also = 0, beside?: Beside, coached = false): { height: number; least: number } | null {
+  const lanes = withFeedbackRoom(buildLanes([], legs, filters, () => '', {}, also), coached);
   if (lanes.length === 0) return null;
-  const planned = plannedRoom(lanes, aids, pair);
-  const aided = (spacing: LaneSpacing) => withAnswerAids(withRoman(spacing, planned.pairRoman, planned.rowRoman), planned.answerReads, planned.answerRoman);
+  const planned = plannedRoom(lanes, aids, pair, beside);
+  const readings = aids.furigana || aids.pinyin || !!aids.jyutping;
+  const aided = (spacing: LaneSpacing) => withAnswerAids(withSmallReads(withRoman(spacing, planned.pairRoman, planned.rowRoman), readings && planned.pairRoman, readings && planned.rowRoman), planned.answerReads, planned.answerRoman);
   return { height: lanesHeight(lanes, fontSize, aided(ROOMY)) + addedBefore(), least: lanesHeight(lanes, fontSize, aided(TIGHT)) };
 }
 
 /**
  * Which answered sentence each side's pair shows, by its entry: the newest — once the one before it has been on
  * the screen long enough to be read (`dwell.ts`). The clock is kept here; what is shown by it is `buildLanes`'.
+ * Fork: and which sentence the user's own row shows (`row`, `rowTurn`): its sentences in turn, each until read.
  */
-function useHeld(entries: readonly Entry[], enabled = true): Partial<Record<LegName, string>> {
+function useHeld(entries: readonly Entry[], enabled = true, row?: LegName): Partial<Record<LegName, string>> {
   const shown = useRef<Partial<Record<LegName, { id: string; since: number }>>>({});
+  const rowShown = useRef<RowShown | undefined>(undefined);
   const [held, setHeld] = useState<Partial<Record<LegName, string>>>({});
   const [turn, setTurn] = useState(0);
-  useEffect(() => {
+  // Before the frame is drawn: decided a frame late, a row showed the sentence it had just left for one more frame,
+  // with the mark of something waiting behind it.
+  useLayoutEffect(() => {
     if (!enabled) return;
     const now = Date.now();
     let soonest = Infinity;
     const next: Partial<Record<LegName, string>> = {};
+    if (!row) rowShown.current = undefined;
     for (const leg of LEGS) {
+      if (leg === row) {
+        // The clock it had as a pair is not kept: back as a pair, it would bring an answer long read up again.
+        delete shown.current[leg];
+        const took = rowTurn(rowSentences(entries, leg), rowShown.current, now);
+        rowShown.current = took.shown;
+        soonest = Math.min(soonest, took.due);
+        if (took.shown) next[leg] = took.shown.id;
+        continue;
+      }
       const answered = answeredOf(entries, leg);
       const last = answered.length - 1;
       if (last < 0) { delete shown.current[leg]; continue; }
@@ -239,8 +296,26 @@ function useHeld(entries: readonly Entry[], enabled = true): Partial<Record<LegN
     if (soonest === Infinity) return undefined;
     const timer = setTimeout(() => setTurn((n) => n + 1), Math.max(0, soonest - now) + 10);
     return () => clearTimeout(timer);
-  }, [entries, turn, enabled]);
+  }, [entries, turn, enabled, row]);
   return held;
+}
+
+/** Fork: whose grammar feedback the user's lane shows: the newest, once the one before it has been read (`answerTurn`). */
+function useFed(entries: readonly Entry[], enabled: boolean): string | undefined {
+  const shown = useRef<TurnShown | undefined>(undefined);
+  const [fed, setFed] = useState<string | undefined>(undefined);
+  const [turn, setTurn] = useState(0);
+  useLayoutEffect(() => {
+    if (!enabled) return undefined;
+    const now = Date.now();
+    const took = answerTurn(fedOf(entries, 'speaker'), shown.current, now);
+    shown.current = took.shown;
+    setFed(took.shown?.id);
+    if (took.due === Infinity) return undefined;
+    const timer = setTimeout(() => setTurn((n) => n + 1), Math.max(0, took.due - now) + 10);
+    return () => clearTimeout(timer);
+  }, [entries, turn, enabled]);
+  return fed;
 }
 
 /**
@@ -286,6 +361,14 @@ export interface SubtitleLanesProps {
   onHeight?(height: number, least: number): void;
   /** A captured dwell choice for deterministic development replay. */
   held?: Partial<Record<LegName, string>>;
+  /**
+   * Fork: the translations a sentence of the user's has beyond the first — the other side's languages lit beside their
+   * main one — where the host knows the run's languages: the strip has their lines from the start. Else it has them
+   * from the first such sentence on.
+   */
+  also?: number;
+  /** Fork: the languages each side may speak beside the pair's (`SubtitleSession.beside`): the room for their reading aids is laid out with the pair's. */
+  beside?: Beside;
 }
 
 /**
@@ -294,16 +377,23 @@ export interface SubtitleLanesProps {
  * answers it. Each text keeps its place, its size and its number of lines;
  * what does not fit loses its oldest line (`Slot`).
  */
-export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight, pair, held: replayHeld }: SubtitleLanesProps) {
+export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight, pair, held: replayHeld, also: told = 0, beside }: SubtitleLanesProps) {
   const { t } = useTranslation();
   const coached = useCoached();
-  const liveHeld = useHeld(entries, replayHeld === undefined);
+  const liveHeld = useHeld(entries, replayHeld === undefined, rowLegOf(legs, filters));
   const held = replayHeld ?? liveHeld;
-  const lanes = useMemo(() => buildLanes(entries, legs, filters, (notice) => noticeText(t, notice), held), [entries, legs, filters, t, held]);
+  const fed = useFed(entries, coached && replayHeld === undefined);
+  // Lines once given to a second translation stay: a strip that had them for one sentence and not the next would
+  // change height between the two.
+  const seen = useRef({ told, most: 0 });
+  if (seen.current.told !== told) seen.current = { told, most: 0 };
+  seen.current.most = Math.max(seen.current.most, furtherIn(entries));
+  const also = Math.max(told, seen.current.most);
+  const lanes = useMemo(() => withFeedbackRoom(buildLanes(entries, legs, filters, (notice) => noticeText(t, notice), held, also, fed), coached), [entries, legs, filters, t, held, also, coached, fed]);
   // The layout the window is fitted to: the size chosen and which texts there are, not what they say.
-  const shape = lanes.map((lane) => `${lane.leg}:${lane.source ? 's' : ''}${lane.answer ? 'a' : ''}${lane.feedback ? 'f' : ''}`).join(',');
+  const shape = lanes.map((lane) => `${lane.leg}:${lane.source ? 's' : ''}${lane.answer ? 'a' : ''}${lane.more?.length ?? ''}${lane.feedback ? 'f' : ''}`).join(',');
   // A romanization under the small lines has a line of its own there: while the switch is on and what is said is
-  // in a language that has one — or nothing is said yet, so that the window is not made higher at the first word.
+  // in a language that has one — or the run's languages say one will be, so that the window is not made higher at the first word.
   const romanization = useAnnotationStore((s) => s.romanization);
   const romanOff = useAnnotationStore((s) => s.romanizationOff);
   const furigana = useAnnotationStore((s) => s.furigana);
@@ -315,21 +405,20 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight,
   // Each kind of line for itself: a pair's small line, and the user's own row. (Not for Chinese: its pinyin is above
   // the line, and room kept under it showed half of the line before, 2026-10-28.)
   const romanized = (text: LaneText | undefined) => !!text?.pieces.some((piece) => romanizedText(piece.text, piece.language ?? text.language, romanOff));
-  const unsaid = (texts: Array<LaneText | undefined>) => !texts.some((text) => text?.text);
   const pairTexts = lanes.filter((lane) => lane.shape === 'pair').map((lane) => lane.source);
-  const rowTexts = lanes.filter((lane) => lane.shape === 'row').flatMap((lane) => [lane.source, lane.answer]);
-  const planned = plannedRoom(lanes, { romanization, romanOff, furigana, pinyin, jyutping }, pair);
-  const pairRoman = useRoom(romanization, pairTexts.some(romanized), unsaid(pairTexts) && planned.pairRoman);
-  const rowNeeds = useRoom(romanization && rowRoman, rowTexts.some(romanized), unsaid(rowTexts) && planned.rowRoman);
+  const rowTexts = lanes.filter((lane) => lane.shape === 'row').flatMap((lane) => [lane.source, lane.answer, ...(lane.more ?? [])]);
+  const planned = plannedRoom(lanes, { romanization, romanOff, furigana, pinyin, jyutping }, pair, beside);
+  const pairRoman = useRoom(romanization, pairTexts.some(romanized), planned.pairRoman);
+  const rowNeeds = useRoom(romanization && rowRoman, rowTexts.some(romanized), planned.rowRoman);
   // And the answer's own: its readings go above it, on taller lines, and its romanization under it. What was said gives
   // the romanization up to the readings, where it has any: at its size, both are more than a line can carry.
   const reads = (text: LaneText | undefined) => readsAbove(text?.language, { furigana, pinyin, jyutping });
   const answering = lanes.filter((lane) => lane.shape === 'pair');
-  const unanswered = unsaid(answering.map((lane) => lane.answer));
-  const answerReads = useRoom(furigana || pinyin || jyutping, answering.some((lane) => reads(lane.answer)), unanswered && planned.answerReads);
-  const answerRoman = useRoom(romanization, answering.some((lane) => romanized(lane.answer) && !(lane.said && reads(lane.answer))), unanswered && planned.answerRoman);
-  const roman = `${pairRoman}:${rowNeeds}:${answerReads}:${answerRoman}`;
-  const aided = (spacing: LaneSpacing) => withAnswerAids(withRoman(spacing, pairRoman, rowNeeds), answerReads, answerRoman);
+  const answerReads = useRoom(furigana || pinyin || jyutping, answering.some((lane) => reads(lane.answer) || lane.more?.some(reads)), planned.answerReads);
+  const answerRoman = useRoom(romanization, answering.some((lane) => (romanized(lane.answer) && !(lane.said && reads(lane.answer))) || lane.more?.some(romanized)), planned.answerRoman);
+  const roman = `${pairRoman}:${rowNeeds}:${answerReads}:${answerRoman}:${furigana || pinyin || jyutping}`;
+  const readings = furigana || pinyin || jyutping;
+  const aided = (spacing: LaneSpacing) => withAnswerAids(withSmallReads(withRoman(spacing, pairRoman, rowNeeds), readings && pairRoman, readings && rowNeeds), answerReads, answerRoman);
   const [roomySpacing, tightSpacing] = [aided(ROOMY), aided(TIGHT)];
   const [roomy, least] = useMemo(() => [lanesHeight(lanes, fontSize, roomySpacing), lanesHeight(lanes, fontSize, tightSpacing)], [shape, fontSize, roman]); // eslint-disable-line react-hooks/exhaustive-deps
   const strip = useRef<HTMLDivElement>(null);
@@ -379,7 +468,7 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight,
   const spacing = spacingAt(squeeze, roomySpacing, tightSpacing);
   const lines = useMemo(() => linesFor(lanes, fontSize, spare, roomySpacing), [shape, fontSize, spare, roman]); // eslint-disable-line react-hooks/exhaustive-deps
   // Squeezed, the answer has what the spacing leaves it; fitted or higher, what the window affords.
-  const answerLines = squeeze > 0 ? spacing.answerLines : lines.answer;
+  const answerLines = squeeze > 0 ? spacing.answerLines + (lanes.find((lane) => lane.shape === 'pair')?.more?.length ?? 0) : lines.answer;
   const style = {
     '--lane-pad-top': `${spacing.padTop}px`,
     '--lane-pad-bottom': `${spacing.padBottom}px`,
@@ -390,6 +479,7 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight,
     '--lane-answer-roman': String(spacing.answerRoman),
     '--lane-row-line': String(spacing.rowLine),
     '--lane-roman': String(spacing.roman),
+    '--lane-row-roman': String(spacing.rowRoman),
     // The user's own row is as high as its lines; everything else is the pair's.
     '--lane-row-lines': String(lines.row),
     '--lane-row-height': `${fontSize * ROW_SCALE * (spacing.rowLine + spacing.rowRoman) * lines.row}px`,
@@ -402,7 +492,24 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight,
   const who = (leg: LegName) => (leg === 'speaker' ? t('modePicker.modeYou', 'Me') : t('modePicker.modeParticipants', 'Other'));
   // A lane nobody has spoken in yet says nothing — not even whose it is: a tag alone on the screen, waiting, is noise.
   // It keeps its room, so that nothing moves when somebody does speak.
-  const silent = (lane: Lane) => !lane.source?.text && !lane.answer?.text && !lane.feedback?.text;
+  const silent = (lane: Lane) => !lane.source?.text && !lane.answer?.text && !lane.feedback?.text && !lane.more?.some((text) => text.text);
+  // The further translations, as what is written: a change in any is a change of the box they are in.
+  const moreKey = (lane: Lane) => (lane.more ?? []).map((text) => text.text).join('\u0001');
+  // Fork: the user's own row, and under it a box as high for each further translation: after an arrow of its own.
+  const rowsOf = (lane: Lane, row: ReactNode) => (lane.more ? (
+    <div className="subtitle-lane__rows">
+      {row}
+      {lane.more.map((text, i) => (
+        <Slot key={i} className="subtitle-lane__row subtitle-lane__row--also" fitKey={`${fontSize}:${squeeze}:${lines.row}:${text.text}`}>
+          {text.text !== '' && (<>
+            {/* An arrow from the sentence, where that is shown: with the translations alone, each is a line like the first. */}
+            {lane.source && <ArrowRight className="subtitle-lane__arrow" aria-hidden="true" strokeWidth={2.5} />}
+            <span className="subtitle-lane__reply" lang={langOf(text)} data-kt-text=""><Written text={text} lit={lit} readingsOnly={!rowRoman} /></span>
+          </>)}
+        </Slot>
+      ))}
+    </div>
+  ) : row);
   // Whose lane it is, is a bar of the lane's colour down its left edge; the word is there for a screen reader.
   const tag = (lane: Lane) => (silent(lane) ? null : <span className={`subtitle-lane__tag subtitle-lane__tag--${lane.leg}`}><span className="subtitle-lane__who">{who(lane.leg)}</span></span>);
   // Feedback that only approves is a bare tick (`tidyAnswer`): drawn as the app's own icon, in the user's colour. As
@@ -420,6 +527,8 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight,
   const feedbackFor = (lane: Lane) => {
     const feedback = lane.feedback;
     if (!feedback) return null;
+    // Its line, kept while there is none to write in it (`withFeedbackRoom`).
+    if (!feedback.text) return <div className="subtitle-lane__feedback" />;
     const fix = fixOf(feedback.said.text, feedback.said.language, feedback.text);
     return (
       <Slot className="subtitle-lane__feedback" lang={langOf(feedback.said)} fitKey={`${fontSize}:${squeeze}:${feedback.origin}:${feedback.said.text}:${feedback.text}`}>
@@ -450,9 +559,9 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight,
       {lanes.map((lane) => (
         // Whose lane it is, in a column of its own at the left: in its place whatever the text beside it says, and
         // wherever that text sits. Written into the text, it moved with every sentence of a centred strip.
-        <div key={lane.leg} className={`subtitle-lane subtitle-lane--${lane.shape} subtitle-lane--${lane.leg}${silent(lane) ? ' is-silent' : ''}${large(lane) ? ' subtitle-lane--large' : ''}${lane.feedback ? ' has-feedback' : ''}`} data-lane={lane.leg}>
+        <div key={lane.leg} className={`subtitle-lane subtitle-lane--${lane.shape} subtitle-lane--${lane.leg}${silent(lane) ? ' is-silent' : ''}${large(lane) ? ' subtitle-lane--large' : ''}${lane.feedback ? ' has-feedback' : ''}`} data-lane={lane.leg} style={lane.shape === 'row' && lane.more ? ({ '--lane-more': String(lane.more.length) } as CSSProperties) : undefined}>
           {tag(lane)}
-          {lane.shape === 'row' ? (
+          {lane.shape === 'row' ? rowsOf(lane,
             // The user's own, under the other side's: what they said and what answers it, on one small line.
             <Slot className="subtitle-lane__row" fitKey={`${fontSize}:${squeeze}:${lines.row}:${lane.source?.text ?? ''}:${lane.answer?.text ?? ''}`}>
               {fixFor(lane) ? (
@@ -463,7 +572,9 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight,
               {lane.answer && lane.answer.text !== '' && (approves(lane.answer) ? tick : <span className="subtitle-lane__reply" lang={langOf(lane.answer)} data-kt-text=""><Written text={lane.answer} lit={lit} readingsOnly={!rowRoman} /></span>)}
               {lane.answer && lane.answer.text === '' && lane.pending && pending}
               </>)}
-            </Slot>
+              {/* Fork: the user has gone on: what they said since is next (`Lane.behind`). */}
+              {lane.behind && !(lane.answer && lane.answer.text === '' && lane.pending) && <span className="subtitle-lane__pending subtitle-lane__pending--behind" aria-hidden="true">…</span>}
+            </Slot>,
           ) : (
             <div className="subtitle-lane__texts">
               {lane.source && (
@@ -475,10 +586,14 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight,
                 <Slot
                   className={`subtitle-lane__answer${lane.answer.notice ? ' subtitle-lane__answer--notice' : ''}`}
                   lang={langOf(lane.answer)}
-                  fitKey={`${fontSize}:${squeeze}:${answerLines}:${lane.answer.text}`}
+                  fitKey={`${fontSize}:${squeeze}:${answerLines}:${lane.answer.text}:${moreKey(lane)}`}
                 >
                   {approves(lane.answer) ? tick : fixFor(lane) ? <Correction correction={fixFor(lane)!} language={lane.source!.language} layout={answerLines < 2 ? 'row' : 'block'} /> : <Written text={lane.answer} lit={lit} readingsOnly={lane.said && !!reads(lane.answer)} />}
                   {!lane.source && lane.pending && pending}
+                  {/* Fork: its translation into their other language, on the line under. */}
+                  {lane.more?.map((text, i) => text.text !== '' && (
+                    <span key={i} className="subtitle-lane__also" lang={langOf(text)} data-kt-text=""><Written text={text} lit={lit} /></span>
+                  ))}
                 </Slot>
               )}
             </div>

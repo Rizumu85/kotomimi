@@ -48,7 +48,7 @@
     "noiseReduction": "Kohinanvaimennus",
     "noiseSuppression": "Kohinanvaimennus",
     "noiseSuppressionTooltip": {
-      "off": "Pois — Vain selaimen sisäänrakennettu melunkäsittely.",
+      "off": "Pois — ei melunvaimennusta: mikrofoni sellaisenaan. Toimii parhaiten hiljaisessa huoneessa.",
       "standard": "Vakio (RNNoise) — Kevyt AI-kohinanvaimennus pienellä viiveellä.",
       "enhanced": "Parannettu (GTCRN) — Laadukas AI-kohinanvaimennus, paras monimutkaisiin meluympäristöihin."
     },
@@ -774,7 +774,19 @@
       "tagHint_cpu": "Toimii suorittimella ja jättää näytönohjaimen pelin käyttöön. Ladataan istunnon alkaessa.",
       "noteNativeXAsr": "Kirjoittaa puheesi tekstiksi reaaliajassa pelkällä suorittimella, ilman näyttömuistia: käyttää noin viidesosan yhden ytimen tehosta. Tukee vain kiinaa ja englantia. Oman sanaston sanoja ei anneta sille etukäteen, mutta tunnistettu teksti korjataan silti ääntämyksen perusteella.",
       "noteStreamRevise": "Kääntää jo toisen puhuessa ja kääntää koko lauseen uudelleen sen päätyttyä. Tukee vain kiinaa, englantia ja japania.",
-      "noteNativeSenseVoiceCpu": "Käyttää vain suoritinta, ei näytönohjaimen muistia. Suunnilleen yhtä tarkka kuin näytönohjaimella toimiva SenseVoice. Tukee kiinaa, kantoninkiinaa, englantia, japania ja koreaa. Oman sanaston sanoja ei anneta sille etukäteen, mutta tunnistettu teksti korjataan silti ääntämyksen perusteella."
+      "noteNativeSenseVoiceCpu": "Käyttää vain suoritinta, ei näytönohjaimen muistia. Suunnilleen yhtä tarkka kuin näytönohjaimella toimiva SenseVoice. Tukee kiinaa, kantoninkiinaa, englantia, japania ja koreaa. Oman sanaston sanoja ei anneta sille etukäteen, mutta tunnistettu teksti korjataan silti ääntämyksen perusteella.",
+      "apiServiceEdge": "Edgen verkkoäänet (ilmainen)",
+      "speakKey": "Puhemallin API-avain",
+      "nativeVoiceReady": "Puhemoottori on valmis.",
+      "nativeVoiceWarmingShort": "Käynnistetään puhemoottoria…",
+      "nativeVoiceFailedShort": "Puhemoottorin käynnistys epäonnistui.",
+      "nativeVoiceUnsupported": "Tämä järjestelmä ei vielä tue paikallista puhemoottoria. Vaihda ääneenluvun kortissa valinnaksi \"API-malli\".",
+      "nativeVoiceMissing": "Puhemallia ei ole vielä ladattu. Lataa se, niin voit aloittaa.",
+      "nativeVoiceUpdating": "Puhemoottoria päivitetään. Voit aloittaa päivityksen valmistuttua.",
+      "nativeVoiceFailed": "Puhemoottorin käynnistys epäonnistui. Paina ääneenluvun kortissa \"Yritä uudelleen\" tai valitse toinen malli.",
+      "voiceUnnamed": "Puhemallia ei ole vielä määritetty. Anna mallin nimi ääneenluvun kortissa.",
+      "noteQwen3Tts": "Luonnollisin ääni, ja puhe alkaa heti. Testattu japaniksi, kiinaksi ja englanniksi ilman lukuvirheitä. Käyttää noin 3 GB näyttömuistia ja tukee 10 kieltä.",
+      "noteIrodori": "Vain japaniksi. Testeissä ei lukuvirheitä, noin puoli sekuntia lausetta kohti. Käyttää noin 1.7 GB näyttömuistia."
     }
   },
   "logsPanel": {
@@ -1739,8 +1751,6 @@
     "furigana": "Furigana kanjimerkkien yläpuolella (japani)",
     "romanization": "Näytä latinalaistus",
     "pinyin": "Pinyin kiinankielisen tekstin yläpuolella",
-    "echoCancellationApp": "Vain Kotomimi",
-    "echoCancellationAppTooltip": "Vain Kotomimi — poistaa vain Kotomimin oman toistoäänen, jolloin oma äänesi kuuluu selkeimmin. Sopii kuulokkeille tai VR-laseille. Kaiuttimien kanssa tätä voi käyttää Molemmat-tilassa. Valitse tämä, jos mikrofonina on virtuaalinen äänikortti (VB-Cable, BlackHole).",
     "speechDetection": {
       "title": "Puheen havaitseminen"
     },
@@ -2113,6 +2123,40 @@
     "apart": {
       "split": "Oma puhe kuuluviin muualla",
       "merge": "Molemmat puolet kuuluviin samassa paikassa"
-    }
+    },
+    "voice": {
+      "stage": "Ääneenluku",
+      "stageTooltip": "Lukee käännöksesi ääneen. Voit myös kuunnella minkä tahansa keskustelurivin painamalla sen kaiutinpainiketta.",
+      "on": "Lue ääneen",
+      "toMeLocked": "”Minulle” ei ole nyt käytettävissä. Kun ääni otetaan koko järjestelmästä, Kotomimi tulkitsee ääneen luetun käännöksen toisen osapuolen puheeksi. Valitse äänilähteeksi yksi sovellus, kuten VRChat.",
+      "toThemTooltip": "Kun käännös luetaan toiselle osapuolelle, ääni ohjataan virtuaalimikrofoniin. Valitse se mikrofoniksi VRChatissa tai kokoussovelluksessa (Windowsissa nimellä CABLE Output).",
+      "myVoiceToo": "Lähetä myös oma ääneni",
+      "myVoiceTooTooltip": "Kun tämä on pois päältä, toinen osapuoli kuulee vain ääneen luetun käännöksen.",
+      "needsSpeaker": "Ääneenluku lukee sen, mitä sanot tai kirjoitat. Vaihda tilaksi \"Minä\" tai \"Molemmat\".",
+      "modelPlaceholder": "Mallin nimi, esim. tts-1",
+      "voice": "Ääni",
+      "voiceOf": "Ääni: {{language}}",
+      "sample": "Kuuntele näyte",
+      "cannotSpeak": "{{name}} ei tue kieltä {{language}}.",
+      "sayLine": "Lue tämä rivi ääneen",
+      "stopLine": "Pysäytä",
+      "lineFailed": "Tämän rivin ääneenluku epäonnistui",
+      "woman": "Naisääni",
+      "man": "Miesääni",
+      "hearers": "Lue käännökset automaattisesti ääneen",
+      "hearNone": "Pois",
+      "hearMe": "Minulle",
+      "hearThem": "Muille",
+      "hearBoth": "Molemmille",
+      "volumeMine": "Äänenvoimakkuus itselle",
+      "volumeTheirs": "Äänenvoimakkuus toiselle osapuolelle",
+      "meetingDevice": "Lähetä ääni keskustelukumppanille tästä laitteesta",
+      "meetingDeviceAuto": "Virtuaalimikrofoni (automaattinen)",
+      "meetingDeviceTooltip": "Kotomimi toistaa käännökset ääneen tällä laitteella, ja puhelusovellus käyttää sitä mikrofonina. Jos äänikorttisi osaa miksata ääntä itse, valitse yksi sen toistokanavista ja yhdistä sen ääni mikrofonisi ääneen äänikortilla. Näin oma äänesi ei kulje ohjelmiston kautta."
+    },
+    "echoCancellationGate": "Äänenvoimakkuuden mukaan",
+    "echoCancellationGateTooltip": "Äänenvoimakkuuden mukaan — kaiuttimia käytettäessä kaiuttimista mikrofoniin vuotava ääni on paljon hiljaisempi kuin puheesi, joten se suodatetaan pois äänenvoimakkuuden perusteella ilman, että äänesi muuttuu.",
+    "echoCancellationOff": "Pois käytöstä",
+    "echoCancellationOffTooltip": "Pois käytöstä – mikrofoni sellaisenaan tunnistukseen. Käytä kuulokkeilla: mikrofoniin ei vuoda ääntä."
   }
 }

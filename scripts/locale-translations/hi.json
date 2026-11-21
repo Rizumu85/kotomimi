@@ -203,6 +203,26 @@
     "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
     "text": "केवल Kotomimi — सिर्फ़ Kotomimi की अपनी चलाई हुई आवाज़ हटाता है, जिससे आपकी आवाज़ सबसे साफ़ सुनाई देती है। हेडफ़ोन या VR हेडसेट के लिए सही है; स्पीकर के साथ \"दोनों\" मोड में भी काम करता है। माइक्रोफ़ोन के तौर पर वर्चुअल साउंड कार्ड (VB-Cable, BlackHole आदि) इस्तेमाल कर रहे हों तो इसे चुनें।"
   },
+  "fork.echoCancellationGate": {
+    "en": "By loudness",
+    "text": "वॉल्यूम के हिसाब से"
+  },
+  "fork.echoCancellationGateTooltip": {
+    "en": "By loudness — for loudspeakers: what they play comes back into the microphone far quieter than your voice, so it is kept out by its loudness and your voice is left as it is.",
+    "text": "आवाज़ की तीव्रता के आधार पर — स्पीकर के लिए: स्पीकर से आने वाली आवाज़ माइक्रोफ़ोन में आपकी आवाज़ से बहुत धीमी लौटती है, इसलिए उसकी तीव्रता के आधार पर उसे रोक दिया जाता है और आपकी आवाज़ पर कोई असर नहीं पड़ता।"
+  },
+  "fork.echoCancellationOff": {
+    "en": "Off",
+    "text": "बंद"
+  },
+  "fork.echoCancellationOffTooltip": {
+    "en": "Off — the microphone as it is. For headphones: nothing plays into it.",
+    "text": "बंद — माइक्रोफ़ोन की आवाज़ जैसी है वैसी ही पहचान के लिए भेजी जाती है। हेडफ़ोन पहनने पर इस्तेमाल करें: कोई आवाज़ माइक्रोफ़ोन में नहीं जाएगी।"
+  },
+  "fork.echoCancellationPassthrough": {
+    "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
+    "text": "मूल ऑडियो पासथ्रू चालू होने पर केवल आवाज़ के स्तर के अनुसार तरीका काम करता है: बाकी तरीके आपकी अपनी आवाज़ को गूँज समझकर हटा देंगे।"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "फिर से खोजें"
@@ -991,6 +1011,134 @@
     "en": "What you want to say — Enter translates",
     "text": "अपनी बात लिखें, अनुवाद के लिए Enter दबाएँ"
   },
+  "fork.voice.auto": {
+    "en": "Read my translations as they come",
+    "text": "मेरे बोलने के बाद अनुवाद अपने आप पढ़ें"
+  },
+  "fork.voice.cannotSpeak": {
+    "en": "{{name}} cannot speak {{language}}.",
+    "text": "{{name}}, {{language}} नहीं बोल सकता।"
+  },
+  "fork.voice.hearBoth": {
+    "en": "To both",
+    "text": "दोनों को सुनाएँ"
+  },
+  "fork.voice.hearers": {
+    "en": "Read my translations aloud",
+    "text": "अनुवाद अपने आप पढ़कर सुनाएँ"
+  },
+  "fork.voice.hearMe": {
+    "en": "To me",
+    "text": "मुझे सुनाएँ"
+  },
+  "fork.voice.hearNone": {
+    "en": "Off",
+    "text": "बंद"
+  },
+  "fork.voice.hearThem": {
+    "en": "To them",
+    "text": "सामने वाले को सुनाएँ"
+  },
+  "fork.voice.lineFailed": {
+    "en": "This line could not be read aloud",
+    "text": "यह पंक्ति पढ़कर नहीं सुनाई जा सकी"
+  },
+  "fork.voice.man": {
+    "en": "Male voice",
+    "text": "पुरुष की आवाज़"
+  },
+  "fork.voice.meetingDevice": {
+    "en": "Output for the other side",
+    "text": "सामने वाले के लिए ऑडियो आउटपुट"
+  },
+  "fork.voice.meetingDeviceAuto": {
+    "en": "Virtual microphone (automatic)",
+    "text": "वर्चुअल माइक्रोफ़ोन (अपने आप)"
+  },
+  "fork.voice.meetingDeviceTooltip": {
+    "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
+    "text": "अनुवाद की आवाज़ इस डिवाइस पर चलेगी। सामने वाले को यह माइक्रोफ़ोन की आवाज़ की तरह सुनाई देगी। अगर आपके साउंड कार्ड में मिक्सिंग की सुविधा है, तो उसका कोई प्लेबैक चैनल चुनें और कार्ड में ही उसकी आवाज़ को अपने माइक्रोफ़ोन की आवाज़ के साथ मिलाएँ। इससे आपकी अपनी आवाज़ सॉफ़्टवेयर से होकर नहीं गुज़रेगी।"
+  },
+  "fork.voice.modelPlaceholder": {
+    "en": "The model's name, e.g. tts-1",
+    "text": "मॉडल का नाम, जैसे tts-1"
+  },
+  "fork.voice.myVoiceToo": {
+    "en": "My own voice goes too",
+    "text": "मेरी असली आवाज़ भी भेजें"
+  },
+  "fork.voice.myVoiceTooTooltip": {
+    "en": "Off: they hear only the voice reading your translation.",
+    "text": "बंद होने पर सामने वाले को सिर्फ़ पढ़कर सुनाया गया अनुवाद सुनाई देगा।"
+  },
+  "fork.voice.needsSpeaker": {
+    "en": "It reads what you say or type. Switch the mode to \"Me\" or \"Both\".",
+    "text": "यह आपकी बोली या लिखी हुई बात पढ़कर सुनाता है। मोड \"मैं\" या \"दोनों\" पर बदलें।"
+  },
+  "fork.voice.on": {
+    "en": "Read aloud",
+    "text": "पढ़कर सुनाना चालू करें"
+  },
+  "fork.voice.sample": {
+    "en": "Play a sample",
+    "text": "नमूना सुनें"
+  },
+  "fork.voice.sayLine": {
+    "en": "Read this line aloud",
+    "text": "यह पंक्ति पढ़कर सुनाएँ"
+  },
+  "fork.voice.stage": {
+    "en": "Voice",
+    "text": "पढ़कर सुनाएँ"
+  },
+  "fork.voice.stageTooltip": {
+    "en": "Reads your translations aloud. Any line of the conversation can be heard too: press its speaker button.",
+    "text": "आपके अनुवाद पढ़कर सुनाता है। बातचीत की कोई भी पंक्ति सुनने के लिए उसका स्पीकर बटन दबाएँ।"
+  },
+  "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "रोकें"
+  },
+  "fork.voice.toMe": {
+    "en": "I hear it",
+    "text": "मुझे सुनाएँ"
+  },
+  "fork.voice.toMeFix": {
+    "en": "Choose",
+    "text": "चुनें"
+  },
+  "fork.voice.toMeLocked": {
+    "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
+    "text": "‘मुझे सुनाएँ’ अभी उपलब्ध नहीं है। पूरे सिस्टम की आवाज़ लेने पर ऐप अनुवाद की आवाज़ को भी सामने वाले की आवाज़ समझ लेगा। सामने वाले की आवाज़ के लिए कोई एक ऐप चुनें, जैसे VRChat।"
+  },
+  "fork.voice.toThem": {
+    "en": "The other side hears it",
+    "text": "सामने वाले को सुनाएँ"
+  },
+  "fork.voice.toThemTooltip": {
+    "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
+    "text": "सामने वाले को पढ़कर सुनाते समय आवाज़ वर्चुअल माइक्रोफ़ोन में भेजी जाती है। VRChat या अपने मीटिंग ऐप में इसे माइक्रोफ़ोन के तौर पर चुनें (Windows पर इसका नाम CABLE Output है)।"
+  },
+  "fork.voice.voice": {
+    "en": "Voice",
+    "text": "आवाज़"
+  },
+  "fork.voice.voiceOf": {
+    "en": "{{language}} voice",
+    "text": "{{language}} की आवाज़"
+  },
+  "fork.voice.volumeMine": {
+    "en": "Volume for me",
+    "text": "मेरे लिए वॉल्यूम"
+  },
+  "fork.voice.volumeTheirs": {
+    "en": "Volume for them",
+    "text": "दूसरे व्यक्ति के लिए वॉल्यूम"
+  },
+  "fork.voice.woman": {
+    "en": "Female voice",
+    "text": "महिला की आवाज़"
+  },
   "fork.vr.back": {
     "en": "Back",
     "text": "वापस"
@@ -1459,6 +1607,10 @@
     "en": "Custom address",
     "text": "अपना पता"
   },
+  "providers.localai.apiServiceEdge": {
+    "en": "Edge online voices (free)",
+    "text": "Edge ऑनलाइन आवाज़ें (मुफ़्त)"
+  },
   "providers.localai.apiServiceModel": {
     "en": "Choose from the list on the right, or type a name",
     "text": "दाईं ओर की सूची से चुनें या नाम लिखें"
@@ -1851,6 +2003,34 @@
     "en": "Updating the speech recognition engine. You can start once it is done.",
     "text": "वाक् पहचान इंजन अपडेट हो रहा है। पूरा होने पर आप शुरू कर सकते हैं।"
   },
+  "providers.localai.nativeVoiceFailed": {
+    "en": "The voice engine could not start. In the Voice card, press \"Try again\" — or choose another model.",
+    "text": "पढ़कर सुनाने वाला इंजन शुरू नहीं हो सका। \"पढ़कर सुनाएँ\" कार्ड में \"फिर कोशिश करें\" दबाएँ या दूसरा मॉडल चुनें।"
+  },
+  "providers.localai.nativeVoiceFailedShort": {
+    "en": "The voice engine could not start.",
+    "text": "पढ़कर सुनाने वाला इंजन शुरू नहीं हो सका।"
+  },
+  "providers.localai.nativeVoiceMissing": {
+    "en": "The voice model is not downloaded yet. Download it to start.",
+    "text": "पढ़कर सुनाने वाला मॉडल अभी डाउनलोड नहीं हुआ है। शुरू करने के लिए इसे डाउनलोड करें।"
+  },
+  "providers.localai.nativeVoiceReady": {
+    "en": "The voice engine is ready.",
+    "text": "पढ़कर सुनाने वाला इंजन तैयार है।"
+  },
+  "providers.localai.nativeVoiceUnsupported": {
+    "en": "The native voice engine is not available for this system. In the Voice card, switch to \"API model\".",
+    "text": "इस सिस्टम पर अभी मूल वाचन इंजन उपलब्ध नहीं है। \"पढ़कर सुनाएँ\" कार्ड में \"API मॉडल\" चुनें।"
+  },
+  "providers.localai.nativeVoiceUpdating": {
+    "en": "Updating the voice engine. You can start once it is done.",
+    "text": "पढ़कर सुनाने वाला इंजन अपडेट हो रहा है। पूरा होने पर शुरू कर सकते हैं।"
+  },
+  "providers.localai.nativeVoiceWarmingShort": {
+    "en": "Starting the voice engine…",
+    "text": "पढ़कर सुनाने वाला इंजन शुरू हो रहा है…"
+  },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
     "text": "आवाज़ पहचान इंजन अभी शुरू हो रहा है। कंप्यूटर चालू करने के बाद पहली बार करीब आधा मिनट लगता है। तैयार होते ही आप शुरू कर सकते हैं।"
@@ -1890,6 +2070,14 @@
   "providers.localai.noteIndexTranslate": {
     "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
     "text": "जापानी से चीनी अनुवाद के परीक्षण में 30 वाक्यों में करीब 3 गंभीर गलतियाँ मिलीं, जो जाँचे गए मॉडलों में सबसे अच्छा नतीजा है। हर वाक्य में करीब 0.1 सेकंड लगता है। करीब 2 GB ग्राफ़िक्स मेमोरी लेता है और सौ से ज़्यादा भाषाओं का समर्थन करता है।"
+  },
+  "providers.localai.noteIrodori": {
+    "en": "Japanese only. Measured: nothing misread, about half a second a sentence. About 1.7 GB of video memory.",
+    "text": "सिर्फ़ जापानी में बोलता है। जाँच में कोई शब्द गलत नहीं पढ़ा, हर वाक्य में लगभग आधा सेकंड लगा। लगभग 1.7 GB वीडियो मेमोरी लेता है।"
+  },
+  "providers.localai.noteKokoro": {
+    "en": "Light: runs on the processor and takes no video memory. Less natural, Japanese most of all.",
+    "text": "हल्का: सिर्फ़ प्रोसेसर पर चलता है, वीडियो मेमोरी नहीं लेता। आवाज़ कम स्वाभाविक है, खासकर जापानी में।"
   },
   "providers.localai.noteMoonshineJa": {
     "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
@@ -1938,6 +2126,10 @@
   "providers.localai.noteQwen17": {
     "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
     "text": "जापानी बातचीत के परीक्षण में करीब 19% अक्षर गलत मिले। वाक्य पूरा होने के बाद ही टेक्स्ट लिखता है (करीब 10 सेकंड पीछे); ऊपर वाला GGUF संस्करण बोलते समय ही लिखता है।"
+  },
+  "providers.localai.noteQwen3Tts": {
+    "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
+    "text": "सबसे स्वाभाविक आवाज़, बोलना तुरंत शुरू होता है। जाँच में जापानी, चीनी और अंग्रेज़ी में कोई शब्द गलत नहीं पढ़ा। लगभग 3 GB वीडियो मेमोरी लेता है, 10 भाषाओं में बोल सकता है।"
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
@@ -2114,6 +2306,10 @@
   "providers.localai.sourceAuto": {
     "en": "The language cannot be detected with this setup. Choose the language you speak.",
     "text": "इस सेटअप में भाषा अपने आप नहीं पहचानी जा सकती। अपनी बोलने की भाषा चुनें।"
+  },
+  "providers.localai.speakKey": {
+    "en": "API key of the voice",
+    "text": "पढ़कर सुनाने वाले मॉडल की API कुंजी"
   },
   "providers.localai.speedAbout": {
     "en": "About {{seconds}} s",
@@ -2323,6 +2519,10 @@
     "en": "API model",
     "text": "API मॉडल"
   },
+  "providers.localai.voiceUnnamed": {
+    "en": "The voice has no model to run yet. Name one in the Voice card.",
+    "text": "पढ़कर सुनाने के लिए अभी कोई मॉडल नहीं दिया गया है। \"पढ़कर सुनाएँ\" कार्ड में मॉडल का नाम भरें।"
+  },
   "providers.openai_live.name": {
     "en": "OpenAI Live",
     "text": "OpenAI Live"
@@ -2422,6 +2622,10 @@
   "settings.glossaryWritten": {
     "en": "Word",
     "text": "शब्द"
+  },
+  "settings.noiseSuppressionTooltip.off": {
+    "en": "Off — no noise suppression: the microphone as it is. Best in a quiet room.",
+    "text": "बंद — शोर कम नहीं किया जाएगा: माइक्रोफ़ोन की आवाज़ जैसी है, वैसी ही रहेगी। शांत कमरे में सबसे अच्छा।"
   },
   "settings.transcriptKeywordsPlaceholder": {
     "en": "Sokuji, Kizuna AI, PulseAudio",

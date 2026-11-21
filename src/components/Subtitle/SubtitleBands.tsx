@@ -1,5 +1,6 @@
 import { useMemo, type CSSProperties } from 'react';
 import type { LegName, SegmentId } from '../../lib/conversation/types';
+import type { Beside } from '../../lib/subtitle/session';
 import type { Entry } from '../../lib/projection/types';
 import { displayItems, type LegFilters } from '../../lib/view/filter';
 import { ConversationList, type ConversationListProps } from '../Conversation/ConversationList';
@@ -34,6 +35,10 @@ export interface SubtitleBodyProps {
   onHeight?(height: number, least: number): void;
   /** The run's languages, for the room the lanes keep for reading aids. */
   pair?: { source: string; target: string };
+  /** Fork: the translations a sentence of the user's has beyond the first, where the host knows (`SubtitleLanes`). */
+  also?: number;
+  /** Fork: the languages each side may speak beside the pair's (`SubtitleSession.beside`), for the same room. */
+  beside?: Beside;
 }
 
 const NO_REPLAY: ReadonlySet<LegName> = new Set();
@@ -49,7 +54,7 @@ const noReplay = () => {};
  * for both (`--subtitle-*` for the lanes, `--conversation-*` for the list).
  */
 export function SubtitleBody(props: SubtitleBodyProps) {
-  const { lit, compact, fontSize, filters, sourceTextColor, translationTextColor, bgOpacity, notes, noticeAction, onHeight, pair } = props;
+  const { lit, compact, fontSize, filters, sourceTextColor, translationTextColor, bgOpacity, notes, noticeAction, onHeight, pair, also, beside } = props;
   // The panel notes join the expanded list only (the same merge MainPanel does).
   const listed = useMemo(
     () => (compact || !notes || notes.length === 0 ? props.entries : [...props.entries, ...notes]),
@@ -90,7 +95,7 @@ export function SubtitleBody(props: SubtitleBodyProps) {
   return (
     <div className={`subtitle-stream ${compact ? 'compact' : 'expanded'}`} data-align={align} data-edge={edged} data-panel={panel} style={style}>
       {compact ? (
-        <SubtitleLanes entries={entries} lit={lit} legs={legs} filters={filters} fontSize={fontSize} onHeight={onHeight} pair={pair} {...(props.held ? { held: props.held } : {})} />
+        <SubtitleLanes entries={entries} lit={lit} legs={legs} filters={filters} fontSize={fontSize} onHeight={onHeight} pair={pair} beside={beside} {...(also ? { also } : {})} {...(props.held ? { held: props.held } : {})} />
       ) : (
         <ConversationList
           items={items}

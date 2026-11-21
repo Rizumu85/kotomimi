@@ -207,6 +207,26 @@
     "en": "Kotomimi only — removes only the sound Kotomimi itself plays, so your own voice comes through clearest. Best with headphones or a VR headset; on loudspeakers it also works in \"Both\" mode. Choose this when the microphone is a virtual cable (VB-Cable, BlackHole).",
     "text": "Endast Kotomimi — tar bara bort ljud som Kotomimi själv spelar upp, så att din röst hörs så tydligt som möjligt. Passar med hörlurar eller VR-headset. Med högtalare fungerar det också i läget ”Båda”. Välj detta om mikrofonen är ett virtuellt ljudkort (VB-Cable, BlackHole)."
   },
+  "fork.echoCancellationGate": {
+    "en": "By loudness",
+    "text": "Efter ljudnivå"
+  },
+  "fork.echoCancellationGateTooltip": {
+    "en": "By loudness — for loudspeakers: what they play comes back into the microphone far quieter than your voice, so it is kept out by its loudness and your voice is left as it is.",
+    "text": "Efter ljudstyrka — för högtalare: ljudet de spelar upp kommer tillbaka till mikrofonen mycket svagare än din röst, så det filtreras bort efter ljudstyrka medan din röst lämnas oförändrad."
+  },
+  "fork.echoCancellationOff": {
+    "en": "Off",
+    "text": "Av"
+  },
+  "fork.echoCancellationOffTooltip": {
+    "en": "Off — the microphone as it is. For headphones: nothing plays into it.",
+    "text": "Av — mikrofonen skickas oförändrad till igenkänningen. Använd med hörlurar: inget ljud läcker in i mikrofonen."
+  },
+  "fork.echoCancellationPassthrough": {
+    "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
+    "text": "När originalljudet släpps igenom fungerar bara ljudstyrka: de andra tar din egen röst för eko och tar bort den."
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Sök igen"
@@ -995,6 +1015,134 @@
     "en": "What you want to say — Enter translates",
     "text": "Det du vill säga – Enter översätter"
   },
+  "fork.voice.auto": {
+    "en": "Read my translations as they come",
+    "text": "Läs upp översättningen automatiskt när jag pratat klart"
+  },
+  "fork.voice.cannotSpeak": {
+    "en": "{{name}} cannot speak {{language}}.",
+    "text": "{{name}} kan inte tala {{language}}."
+  },
+  "fork.voice.hearBoth": {
+    "en": "To both",
+    "text": "För alla"
+  },
+  "fork.voice.hearers": {
+    "en": "Read my translations aloud",
+    "text": "Läs upp översättningar automatiskt"
+  },
+  "fork.voice.hearMe": {
+    "en": "To me",
+    "text": "För mig"
+  },
+  "fork.voice.hearNone": {
+    "en": "Off",
+    "text": "Av"
+  },
+  "fork.voice.hearThem": {
+    "en": "To them",
+    "text": "För andra"
+  },
+  "fork.voice.lineFailed": {
+    "en": "This line could not be read aloud",
+    "text": "Den här raden kunde inte läsas upp"
+  },
+  "fork.voice.man": {
+    "en": "Male voice",
+    "text": "Manlig röst"
+  },
+  "fork.voice.meetingDevice": {
+    "en": "Output for the other side",
+    "text": "Skicka samtalsljudet till"
+  },
+  "fork.voice.meetingDeviceAuto": {
+    "en": "Virtual microphone (automatic)",
+    "text": "Virtuell mikrofon (automatiskt)"
+  },
+  "fork.voice.meetingDeviceTooltip": {
+    "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
+    "text": "Upplästa översättningar spelas upp på den här enheten, som fungerar som mikrofon så att den andra parten hör dem. Om ljudkortet har inbyggd mixning kan du välja en av dess uppspelningskanaler och blanda ljudet från den med mikrofonsignalen direkt i ljudkortet. Då går din egen röst inte via någon programvara."
+  },
+  "fork.voice.modelPlaceholder": {
+    "en": "The model's name, e.g. tts-1",
+    "text": "Modellnamn, t.ex. tts-1"
+  },
+  "fork.voice.myVoiceToo": {
+    "en": "My own voice goes too",
+    "text": "Skicka även min egen röst"
+  },
+  "fork.voice.myVoiceTooTooltip": {
+    "en": "Off: they hear only the voice reading your translation.",
+    "text": "När detta är avstängt hör den andra bara den upplästa översättningen."
+  },
+  "fork.voice.needsSpeaker": {
+    "en": "It reads what you say or type. Switch the mode to \"Me\" or \"Both\".",
+    "text": "Uppläsningen läser det du säger och skriver. Byt läge till \"Jag\" eller \"Båda\"."
+  },
+  "fork.voice.on": {
+    "en": "Read aloud",
+    "text": "Aktivera uppläsning"
+  },
+  "fork.voice.sample": {
+    "en": "Play a sample",
+    "text": "Provlyssna"
+  },
+  "fork.voice.sayLine": {
+    "en": "Read this line aloud",
+    "text": "Läs upp den här raden"
+  },
+  "fork.voice.stage": {
+    "en": "Voice",
+    "text": "Uppläsning"
+  },
+  "fork.voice.stageTooltip": {
+    "en": "Reads your translations aloud. Any line of the conversation can be heard too: press its speaker button.",
+    "text": "Läser upp dina översättningar. Du kan också lyssna på valfri rad i samtalet: tryck på högtalarknappen."
+  },
+  "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "Stoppa"
+  },
+  "fork.voice.toMe": {
+    "en": "I hear it",
+    "text": "Jag hör"
+  },
+  "fork.voice.toMeFix": {
+    "en": "Choose",
+    "text": "Välj app"
+  },
+  "fork.voice.toMeLocked": {
+    "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
+    "text": "”För mig” är inte tillgängligt just nu. När ljudet hämtas från hela systemet tolkar Kotomimi uppläsningen som tal från den andra personen. Välj en enskild app, till exempel VRChat, som ljudkälla."
+  },
+  "fork.voice.toThem": {
+    "en": "The other side hears it",
+    "text": "Den andra hör"
+  },
+  "fork.voice.toThemTooltip": {
+    "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
+    "text": "När du läser upp för den andra skickas ljudet till den virtuella mikrofonen. Välj den som mikrofon i VRChat eller din mötesapp (i Windows heter den CABLE Output)."
+  },
+  "fork.voice.voice": {
+    "en": "Voice",
+    "text": "Röst"
+  },
+  "fork.voice.voiceOf": {
+    "en": "{{language}} voice",
+    "text": "Röst för {{language}}"
+  },
+  "fork.voice.volumeMine": {
+    "en": "Volume for me",
+    "text": "Volym för mig"
+  },
+  "fork.voice.volumeTheirs": {
+    "en": "Volume for them",
+    "text": "Volym för den andra"
+  },
+  "fork.voice.woman": {
+    "en": "Female voice",
+    "text": "Kvinnlig röst"
+  },
   "fork.vr.back": {
     "en": "Back",
     "text": "Tillbaka"
@@ -1495,6 +1643,10 @@
     "en": "Custom address",
     "text": "Egen adress"
   },
+  "providers.localai.apiServiceEdge": {
+    "en": "Edge online voices (free)",
+    "text": "Edge-röster online (gratis)"
+  },
   "providers.localai.apiServiceModel": {
     "en": "Choose from the list on the right, or type a name",
     "text": "Välj i listan till höger eller skriv ett namn"
@@ -1887,6 +2039,34 @@
     "en": "Updating the speech recognition engine. You can start once it is done.",
     "text": "Uppdaterar taligenkänningsmotorn. Du kan börja när det är klart."
   },
+  "providers.localai.nativeVoiceFailed": {
+    "en": "The voice engine could not start. In the Voice card, press \"Try again\" — or choose another model.",
+    "text": "Uppläsningsmotorn kunde inte starta. Tryck på \"Försök igen\" under \"Uppläsning\" eller välj en annan modell."
+  },
+  "providers.localai.nativeVoiceFailedShort": {
+    "en": "The voice engine could not start.",
+    "text": "Uppläsningsmotorn kunde inte starta."
+  },
+  "providers.localai.nativeVoiceMissing": {
+    "en": "The voice model is not downloaded yet. Download it to start.",
+    "text": "Uppläsningsmodellen har inte laddats ner än. Ladda ner den för att börja."
+  },
+  "providers.localai.nativeVoiceReady": {
+    "en": "The voice engine is ready.",
+    "text": "Uppläsningsmotorn är redo."
+  },
+  "providers.localai.nativeVoiceUnsupported": {
+    "en": "The native voice engine is not available for this system. In the Voice card, switch to \"API model\".",
+    "text": "Systemet stöder inte den inbyggda uppläsningsmotorn ännu. Byt till \"API-modell\" under \"Uppläsning\"."
+  },
+  "providers.localai.nativeVoiceUpdating": {
+    "en": "Updating the voice engine. You can start once it is done.",
+    "text": "Uppdaterar uppläsningsmotorn. Du kan börja när uppdateringen är klar."
+  },
+  "providers.localai.nativeVoiceWarmingShort": {
+    "en": "Starting the voice engine…",
+    "text": "Startar uppläsningsmotorn…"
+  },
   "providers.localai.nativeWarming": {
     "en": "The recognition engine is still starting — about half a minute the first time after the computer boots. You can start as soon as it is ready.",
     "text": "Taligenkänningsmotorn startar fortfarande. Första gången efter att datorn startats tar det ungefär en halv minut. Du kan börja så snart den är redo."
@@ -1926,6 +2106,14 @@
   "providers.localai.noteIndexTranslate": {
     "en": "Japanese into Chinese, measured: serious mistakes in about 3 of 30 sentences, the best measured; about 0.1 s a sentence. About 2 GB of video memory, over a hundred languages.",
     "text": "Test av japanska till kinesiska: allvarliga fel i ungefär 3 av 30 meningar, bäst av de testade modellerna. Ungefär 0.1 s per mening. Använder ungefär 2 GB grafikminne och stöder över 100 språk."
+  },
+  "providers.localai.noteIrodori": {
+    "en": "Japanese only. Measured: nothing misread, about half a second a sentence. About 1.7 GB of video memory.",
+    "text": "Talar bara japanska. Inga felläsningar i tester, cirka en halv sekund per mening. Använder cirka 1.7 GB grafikminne."
+  },
+  "providers.localai.noteKokoro": {
+    "en": "Light: runs on the processor and takes no video memory. Less natural, Japanese most of all.",
+    "text": "Lättdriven: använder bara processorn och inget grafikminne. Låter mindre naturligt, särskilt på japanska."
   },
   "providers.localai.noteMoonshineJa": {
     "en": "Measured on Japanese VRChat talk: about 70% of the characters wrong. Only for a computer whose graphics card cannot be used at all.",
@@ -1974,6 +2162,10 @@
   "providers.localai.noteQwen17": {
     "en": "Japanese talk, measured: about 19% of the characters wrong. It writes only once a sentence has ended (about 10 s behind); the GGUF version above writes as you speak.",
     "text": "Uppmätt vid japanskt småprat: ungefär 19% felaktiga tecken. Texten visas först när en mening är färdig (ungefär 10 s efter). GGUF-versionen ovan skriver medan du talar."
+  },
+  "providers.localai.noteQwen3Tts": {
+    "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
+    "text": "Naturligast och börjar tala direkt. Inga felläsningar i tester på japanska, kinesiska och engelska. Använder cirka 3 GB grafikminne och stöder 10 språk."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",
@@ -2150,6 +2342,10 @@
   "providers.localai.sourceAuto": {
     "en": "The language cannot be detected with this setup. Choose the language you speak.",
     "text": "Språket kan inte identifieras automatiskt med den här kombinationen. Välj språket du talar."
+  },
+  "providers.localai.speakKey": {
+    "en": "API key of the voice",
+    "text": "API-nyckel för uppläsningsmodellen"
   },
   "providers.localai.speedAbout": {
     "en": "About {{seconds}} s",
@@ -2359,6 +2555,10 @@
     "en": "API model",
     "text": "API-modell"
   },
+  "providers.localai.voiceUnnamed": {
+    "en": "The voice has no model to run yet. Name one in the Voice card.",
+    "text": "Ingen uppläsningsmodell har angetts än. Ange en under \"Uppläsning\"."
+  },
   "providers.openai_live.name": {
     "en": "OpenAI Live",
     "text": "OpenAI Live"
@@ -2474,6 +2674,10 @@
   "settings.noiseSuppressionMode.standard": {
     "en": "Standard",
     "text": "Standard"
+  },
+  "settings.noiseSuppressionTooltip.off": {
+    "en": "Off — no noise suppression: the microphone as it is. Best in a quiet room.",
+    "text": "Av – ingen brusreducering: mikrofonen används som den är. Bäst i ett tyst rum."
   },
   "settings.normal": {
     "en": "Normal",

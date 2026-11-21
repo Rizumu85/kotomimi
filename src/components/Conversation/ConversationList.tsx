@@ -14,6 +14,8 @@ import { SystemRow, type NoticeAction } from './SystemRow';
 import { useFollowLatest } from './useFollowLatest';
 import { WordFix } from './WordFix';
 import { RowMark } from './RowMark';
+import { RowSay } from './RowSay';
+import { useLineVoiceStore } from '../../stores/lineVoiceStore';
 import '../MainPanel/MainPanel.scss';
 import '../MainPanel/ConversationRow.scss';
 import '../../styles/karaoke.scss';
@@ -67,6 +69,10 @@ export function ConversationList({
   // stops that, and the row below the list brings them back.
   const { docked, resume } = useFollowLatest(display, items, items.length === 0);
 
+  // Fork: whether a voice is there to say a line aloud, and the languages it speaks (`src/app/lineVoice.ts`).
+  const voiceReady = useLineVoiceStore((s) => s.ready);
+  const voiceLanguages = useLineVoiceStore((s) => s.languages);
+
   // One stable callback identity for RowBubble's memo, whatever identity `onReplay` holds this render.
   const onReplayRef = useRef(onReplay);
   onReplayRef.current = onReplay;
@@ -96,6 +102,8 @@ export function ConversationList({
               // re-renders for a replay-state change (plan 1e-3b-1 ruling 14).
               const slot = !compact && item.row.side === 'translation' && item.row.purpose !== 'feedback' && item.endsSegment && replayLegs.has(item.leg);
               const id = item.row.segmentId;
+              // Fork: a line can be said aloud where a voice is there (`lineVoiceStore`): the row says for which language.
+              const sayable = !compact && voiceReady;
               return (
                 <RowBubble
                   key={item.row.key}
@@ -109,6 +117,10 @@ export function ConversationList({
                   onReplay={replay}
                   compact={compact}
                   markLines={markLines}
+                  sayable={sayable}
+                  sayLanguages={voiceLanguages}
+                  // What gates a replay gates a line said aloud too: both play on the real device.
+                  sayBlocked={sayable ? replayBlocked ?? null : null}
                 />
               );
             })}
@@ -145,9 +157,14 @@ interface RowBubbleProps {
   onReplay(leg: LegName, segmentId: SegmentId): void;
   compact: boolean;
   markLines: boolean;
+  /** Fork: a voice is there: once final, a row in a language it speaks (`sayLanguages`; null: any) can be said aloud. */
+  sayable?: boolean;
+  sayLanguages?: readonly string[] | null;
+  /** …but not now, and why: what is played on the real device would be captured as the other side's. */
+  sayBlocked?: string | null;
 }
 
-const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, replayingThis, replayingOther, blocked, onReplay, compact, markLines }: RowBubbleProps) {
+const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, replayingThis, replayingOther, blocked, onReplay, compact, markLines, sayable = false, sayLanguages = null, sayBlocked = null }: RowBubbleProps) {
   const { t } = useTranslation();
   const { row, leg, languages } = item;
   const isTranslation = row.side === 'translation';
@@ -175,6 +192,8 @@ const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, r
   const isFeedback = row.purpose === 'feedback' || (row.purpose === undefined && isTranslation && leg === 'speaker' && coached);
   const fix = isFeedback && item.answers ? fixOf(item.answers.said, item.answers.saidLanguage, item.answers.answer, row.purpose === 'feedback' ? undefined : languages.target) : null;
   if (fix && row.start > 0) return null;
+  // Fork: the language of what is read aloud: a corrected sentence's is the one it was said in, not the feedback's.
+  const saidIn = fix ? item.answers?.saidLanguage ?? lang : lang;
   const segmentId = row.segmentId;
   // The tint marks only the row that holds the karaoke boundary — not every
   // row of a segment lit is on, or a row karaoke has already passed.
@@ -232,6 +251,15 @@ const RowBubble = memo(function RowBubble({ item, upTo, replaySlot, canReplay, r
           >
             <Play size={10} />
           </button>
+        )}
+        {/* Fork: any finished line, said aloud for the user alone; a corrected sentence as it should have been said. */}
+        {sayable && row.final && !row.misheard && !video && text !== '' && (!isFeedback || fix) && (sayLanguages === null || sayLanguages.includes(saidIn.split('-')[0].toLowerCase())) && (
+          <RowSay
+            id={row.key}
+            text={fix ? fix.parts.filter((part) => part.kind !== 'gone').map((part) => part.text).join('') : text}
+            language={saidIn}
+            blocked={sayBlocked}
+          />
         )}
         {markable && <RowMark leg={leg} t={item.t} />}
       </div>

@@ -14,6 +14,9 @@ import type { LocalInferenceConfig } from '../localInference/config';
 import { AUTO } from '../../lib/provider/languages';
 import { APPLE_PREFIX, NATIVE_MODELS } from './localaiNative';
 import type { NativeLimits } from './nativeAsr';
+import type { LocalAIModel } from './localaiModels';
+import type { Place } from './localaiDevice';
+import { serverBilingual } from './serverRecognizers';
 
 /** The settings that cut a leg into sentences. */
 export interface SpeechDetectionSettings {
@@ -58,18 +61,38 @@ const baseOf = (code: string): string => code.trim().toLowerCase().split(/[-_]/)
 
 export type HearingLeg = 'speaker' | 'participant';
 
+export type Telling = { by: 'naming' } | { by: 'pairing'; most: number } | { by: 'told' };
+
+/** With no model selected, a host can supply a paired family for the first two requested languages. */
+export function defaultPairedModel(input: Omit<Parameters<typeof pairedLanguages>[0], 'most' | 'has'>, models: readonly LocalAIModel[]): string {
+  const second = pairedLanguages({ ...input, most: 2 })[0];
+  return second ? serverBilingual('', { source: input.told, target: second }, models)?.model ?? '' : '';
+}
+
+/** Apple Speech uses one recognizer for each language heard at once. */
+export function tellingOf(place: Place, model: string, listed: readonly LocalAIModel[] = []): Telling {
+  const apple = model === 'apple-speech' || model.startsWith(APPLE_PREFIX);
+  const family = listed.filter((m) => m.id.startsWith(APPLE_PREFIX) && !m.from);
+  if (apple) {
+    return { by: 'pairing', most: place === 'device' || (place === 'server' && family.some((m) => m.trilingual)) ? 3 : 2 };
+  }
+  const names = listed.some((m) => m.kind === 'asr' && (!model || m.id === model) && m.languages?.includes(AUTO));
+  return names || NATIVE_MODELS.some((m) => m.id === model && m.detects) ? { by: 'naming' } : { by: 'told' };
+}
+
 /** The other of a pair's two languages, from the side of `told` (by base: `zh-CN` is `zh`). */
 export function otherOfPair(told: string, pair: { source: string; target: string }): string {
   return baseOf(told) === baseOf(pair.source) ? pair.target : pair.source;
 }
 
-/** The extra languages a recognizer hears beside `told`, in priority order, with at most two extras. */
+/** The extra languages a recognizer hears beside `told`, in priority order. */
 export function pairedLanguages(input: {
+  most: number;
   leg: HearingLeg;
   told: string;
   pair: { source: string; target: string };
   theirLit?: readonly string[];
-  alsoFirst?: string;
+  alsoSpoken?: readonly string[];
   has?: (language: string) => boolean;
 }): string[] {
   const own = baseOf(input.told);
@@ -86,11 +109,12 @@ export function pairedLanguages(input: {
     if (lit && baseOf(lit) !== 'auto') add(lit);
     add(otherOfPair(input.told, input.pair));
   } else {
-    const also = input.alsoFirst;
-    add(also && baseOf(also) !== 'auto' && baseOf(also) !== own ? also : otherOfPair(input.told, input.pair));
+    add(input.alsoSpoken?.find((code) => baseOf(code) === baseOf(input.pair.target)));
+    for (const code of input.alsoSpoken ?? []) add(code);
+    if (!extras.length) add(otherOfPair(input.told, input.pair));
   }
   const has = input.has ?? (() => true);
-  return has(own) ? extras.filter(has).slice(0, 2) : [];
+  return has(own) ? extras.filter(has).slice(0, input.most - 1) : [];
 }
 
 /**

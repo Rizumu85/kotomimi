@@ -48,7 +48,7 @@
     "noiseReduction": "Rauschunterdrückung",
     "noiseSuppression": "Rauschunterdrückung",
     "noiseSuppressionTooltip": {
-      "off": "Aus — Nur die integrierte Rauschbehandlung des Browsers.",
+      "off": "Aus – keine Rauschunterdrückung: Das Mikrofon wird unverändert zur Erkennung übertragen. Am besten in einem ruhigen Raum.",
       "standard": "Standard (RNNoise) — Leichtgewichtige KI-Rauschunterdrückung mit geringer Latenz.",
       "enhanced": "Erweitert (GTCRN) — Hochwertige KI-Rauschunterdrückung, ideal für komplexe Geräuschumgebungen."
     },
@@ -774,7 +774,19 @@
       "tagHint_cpu": "Läuft auf dem Prozessor und lässt die Grafikkarte fürs Spiel frei. Wird beim Sitzungsstart geladen.",
       "noteNativeXAsr": "Schreibt beim Sprechen mit und nutzt nur den Prozessor, keinen Grafikspeicher: etwa ein Fünftel eines Prozessorkerns. Unterstützt nur Chinesisch und Englisch. Wörter aus dem persönlichen Wörterbuch werden nicht vorab übergeben, aber nach der Erkennung anhand der Aussprache korrigiert.",
       "noteStreamRevise": "Übersetzt schon, während die andere Person spricht, und übersetzt am Satzende den ganzen Satz noch einmal. Nur für Chinesisch, Englisch und Japanisch.",
-      "noteNativeSenseVoiceCpu": "Läuft nur auf dem Prozessor und belegt keinen Grafikspeicher. Etwa so genau wie SenseVoice auf der Grafikkarte. Unterstützt Chinesisch, Kantonesisch, Englisch, Japanisch und Koreanisch. Wörter aus deinem persönlichen Wörterbuch werden nicht vorab übermittelt, aber nach der Erkennung anhand der Aussprache korrigiert."
+      "noteNativeSenseVoiceCpu": "Läuft nur auf dem Prozessor und belegt keinen Grafikspeicher. Etwa so genau wie SenseVoice auf der Grafikkarte. Unterstützt Chinesisch, Kantonesisch, Englisch, Japanisch und Koreanisch. Wörter aus deinem persönlichen Wörterbuch werden nicht vorab übermittelt, aber nach der Erkennung anhand der Aussprache korrigiert.",
+      "apiServiceEdge": "Edge-Onlinestimmen (kostenlos)",
+      "speakKey": "API-Schlüssel des Vorlesemodells",
+      "nativeVoiceReady": "Die Sprachausgabe ist bereit.",
+      "nativeVoiceWarmingShort": "Sprachausgabe wird gestartet…",
+      "nativeVoiceFailedShort": "Die Sprachausgabe konnte nicht starten.",
+      "nativeVoiceUnsupported": "Dieses System unterstützt die native Sprachausgabe noch nicht. Wähle im Bereich „Vorlesen“ die Option „API-Modell“.",
+      "nativeVoiceMissing": "Das Vorlesemodell wurde noch nicht heruntergeladen. Lade es herunter, um zu starten.",
+      "nativeVoiceUpdating": "Die Sprachausgabe wird aktualisiert. Danach kannst du starten.",
+      "nativeVoiceFailed": "Die Sprachausgabe konnte nicht starten. Klicke im Bereich „Vorlesen“ auf „Erneut versuchen“ oder wähle ein anderes Modell.",
+      "voiceUnnamed": "Es ist noch kein Vorlesemodell eingetragen. Trage es im Bereich „Vorlesen“ ein.",
+      "noteQwen3Tts": "Klingt am natürlichsten und spricht sofort los. In Tests mit Japanisch, Chinesisch und Englisch keine Aussprachefehler. Benötigt etwa 3 GB Grafikspeicher, unterstützt 10 Sprachen.",
+      "noteIrodori": "Nur Japanisch. In Tests keine Aussprachefehler, etwa eine halbe Sekunde pro Satz. Benötigt etwa 1.7 GB Grafikspeicher."
     }
   },
   "logsPanel": {
@@ -1739,8 +1751,6 @@
     "furigana": "Furigana über Kanji (Japanisch)",
     "romanization": "Umschrift anzeigen",
     "pinyin": "Pinyin über chinesischem Text",
-    "echoCancellationApp": "Nur Kotomimi",
-    "echoCancellationAppTooltip": "Nur Kotomimi — unterdrückt nur den Ton, den Kotomimi selbst abspielt. So wird deine Stimme am klarsten erfasst. Geeignet für Kopfhörer oder ein VR-Headset; mit Lautsprechern funktioniert es auch im Modus „Beide“. Wähle diese Option, wenn du eine virtuelle Soundkarte (VB-Cable, BlackHole usw.) als Mikrofon nutzt.",
     "speechDetection": {
       "title": "Spracherkennung"
     },
@@ -2113,6 +2123,40 @@
     "apart": {
       "split": "Meine Seite woanders hören",
       "merge": "Beide Seiten an einem Ort hören"
-    }
+    },
+    "voice": {
+      "stage": "Vorlesen",
+      "stageTooltip": "Liest deine Übersetzungen vor. Du kannst auch jede Zeile im Gespräch anhören: Klicke auf das Lautsprechersymbol daneben.",
+      "on": "Vorlesen aktivieren",
+      "toMeLocked": "„Für mich“ ist gerade nicht verfügbar. Wenn der Ton des gesamten Systems erfasst wird, hält Kotomimi die Vorlesestimme für die Stimme deines Gegenübers. Wähle eine einzelne App als Tonquelle, zum Beispiel VRChat.",
+      "toThemTooltip": "Beim Vorlesen für dein Gegenüber wird der Ton an das virtuelle Mikrofon gesendet. Wähle es in VRChat oder deiner Konferenz-App als Mikrofon aus (unter Windows: CABLE Output).",
+      "myVoiceToo": "Meine eigene Stimme mitsenden",
+      "myVoiceTooTooltip": "Wenn ausgeschaltet, hört die Gegenseite nur die vorgelesene Übersetzung.",
+      "needsSpeaker": "Vorgelesen wird, was du sagst oder eintippst. Wähle den Modus „Ich“ oder „Beide“.",
+      "modelPlaceholder": "Modellname, z. B. tts-1",
+      "voice": "Stimme",
+      "voiceOf": "Stimme für {{language}}",
+      "sample": "Probehören",
+      "cannotSpeak": "{{name}} kann kein {{language}} sprechen.",
+      "sayLine": "Diese Zeile vorlesen",
+      "stopLine": "Stoppen",
+      "lineFailed": "Diese Zeile konnte nicht vorgelesen werden",
+      "woman": "Weibliche Stimme",
+      "man": "Männliche Stimme",
+      "hearers": "Übersetzungen automatisch vorlesen",
+      "hearNone": "Aus",
+      "hearMe": "Für mich",
+      "hearThem": "Für andere",
+      "hearBoth": "Für beide",
+      "volumeMine": "Lautstärke für mich",
+      "volumeTheirs": "Lautstärke fürs Gegenüber",
+      "meetingDevice": "Audio fürs Gegenüber ausgeben über",
+      "meetingDeviceAuto": "Virtuelles Mikrofon (automatisch)",
+      "meetingDeviceTooltip": "Die vorgelesene Übersetzung wird über dieses Gerät ausgegeben. Dein Gegenüber hört sie so, als käme sie von deinem Mikrofon. Wenn deine Soundkarte Hardware-Mixing unterstützt, wähle einen ihrer Wiedergabekanäle und mische ihn direkt auf der Soundkarte mit deinem Mikrofonsignal. So läuft deine Stimme nicht durch die Software."
+    },
+    "echoCancellationGate": "Nach Lautstärke",
+    "echoCancellationGateTooltip": "Nach Lautstärke – für Lautsprecher: Der Ton aus den Lautsprechern gelangt viel leiser als deine Stimme ins Mikrofon und wird deshalb nach Lautstärke ausgefiltert. Deine Stimme bleibt unverändert.",
+    "echoCancellationOff": "Aus",
+    "echoCancellationOffTooltip": "Aus – Das Mikrofon wird unverändert zur Erkennung übertragen. Für Kopfhörer: Es dringt kein Ton ins Mikrofon."
   }
 }
