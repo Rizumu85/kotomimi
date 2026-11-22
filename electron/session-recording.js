@@ -2,17 +2,21 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const RATE = 16000;
-const TRACKS = ['speaker', 'participant', 'raw'];
+// The system's playout, what the loudspeakers play, stays stereo: the echo canceller is measured against it.
+const CHANNELS = { speaker: 1, participant: 1, raw: 1, playout: 2 };
+const TRACKS = Object.keys(CHANNELS);
 const finite = (n) => typeof n === 'number' && Number.isFinite(n) && n >= 0;
 const object = (v) => v && typeof v === 'object' && !Array.isArray(v);
 const json = (v) => object(v) && Buffer.byteLength(JSON.stringify(v)) <= 1024 * 1024;
 
-function wavHeader(samples) {
+/** `samples` counts frames: one sample per channel. */
+function wavHeader(samples, channels = 1) {
+  const bytes = samples * 2 * channels;
   const b = Buffer.alloc(44);
-  b.write('RIFF'); b.writeUInt32LE(36 + samples * 2, 4); b.write('WAVEfmt ', 8);
-  b.writeUInt32LE(16, 16); b.writeUInt16LE(1, 20); b.writeUInt16LE(1, 22);
-  b.writeUInt32LE(RATE, 24); b.writeUInt32LE(RATE * 2, 28);
-  b.writeUInt16LE(2, 32); b.writeUInt16LE(16, 34); b.write('data', 36); b.writeUInt32LE(samples * 2, 40);
+  b.write('RIFF'); b.writeUInt32LE(36 + bytes, 4); b.write('WAVEfmt ', 8);
+  b.writeUInt32LE(16, 16); b.writeUInt16LE(1, 20); b.writeUInt16LE(channels, 22);
+  b.writeUInt32LE(RATE, 24); b.writeUInt32LE(RATE * 2 * channels, 28);
+  b.writeUInt16LE(2 * channels, 32); b.writeUInt16LE(16, 34); b.write('data', 36); b.writeUInt32LE(bytes, 40);
   return b;
 }
 
@@ -27,6 +31,21 @@ function resample(pcm, rate) {
     for (let j = Math.floor(a); j < b; j++) sum += pcm[j] * (Math.min(j + 1, b) - Math.max(j, a));
     out.writeInt16LE(Math.round(sum / (b - a)), i * 2);
   }
+  return out;
+}
+
+/** Interleaved frames, each channel resampled on its own. */
+function resampleFrames(pcm, rate, channels) {
+  if (channels === 1) return resample(pcm, rate);
+  const parts = [];
+  for (let c = 0; c < channels; c++) {
+    const one = new Int16Array(pcm.length / channels);
+    for (let i = 0; i < one.length; i++) one[i] = pcm[i * channels + c];
+    parts.push(resample(one, rate));
+  }
+  const frames = parts[0].length / 2;
+  const out = Buffer.alloc(frames * 2 * channels);
+  for (let i = 0; i < frames; i++) for (let c = 0; c < channels; c++) out.writeInt16LE(parts[c].readInt16LE(i * 2), (i * channels + c) * 2);
   return out;
 }
 
@@ -93,9 +112,9 @@ function createSessionRecording({ userData, appVersion, platform }) {
         save();
         for (const leg of TRACKS) {
           const fd = fs.openSync(path.join(dir, `${leg}.wav`), 'wx');
-          active.tracks[leg] = { fd, samples: 0 };
+          active.tracks[leg] = { fd, samples: 0, channels: CHANNELS[leg] };
           // A crash may leave these lengths unpatched. ffmpeg can still read the PCM to EOF.
-          writeAll(fd, wavHeader(0), 0);
+          writeAll(fd, wavHeader(0, CHANNELS[leg]), 0);
         }
         for (const file of ['lines.jsonl', 'marks.jsonl']) fs.writeFileSync(path.join(dir, file), '');
       } catch (cause) { close(); throw cause; }
@@ -106,18 +125,20 @@ function createSessionRecording({ userData, appVersion, platform }) {
       if (!active) throw new Error('No recording is open.');
       if (p.kind === 'pcm') {
         if (!TRACKS.includes(p.leg) || !finite(p.ms) || p.ms > 36 * 3600000 || !Number.isInteger(p.rate)
-          || p.rate < RATE || p.rate > 192000 || !(p.pcm instanceof Int16Array) || !p.pcm.length || p.pcm.length > p.rate * 2) throw new Error('Invalid PCM chunk.');
+          || p.rate < RATE || p.rate > 192000 || !(p.pcm instanceof Int16Array) || !p.pcm.length
+          || p.pcm.length % CHANNELS[p.leg] || p.pcm.length > p.rate * 2 * CHANNELS[p.leg]) throw new Error('Invalid PCM chunk.');
         const track = active.tracks[p.leg];
-        const pcm = resample(p.pcm, p.rate);
+        const frame = 2 * track.channels;
+        const pcm = resampleFrames(p.pcm, p.rate, track.channels);
         // Arrival marks the END of a chunk. Snap small jitter, keep real pauses and restarts.
-        let start = Math.round(p.ms * RATE / 1000) - pcm.length / 2;
+        let start = Math.round(p.ms * RATE / 1000) - pcm.length / frame;
         if (Math.abs(start - track.samples) <= RATE * 0.02) start = track.samples;
         const skip = Math.max(0, track.samples - start, -start);
         start += skip;
-        if (skip * 2 < pcm.length) {
+        if (skip * frame < pcm.length) {
           // Positional writes make holes read as silence without buffering a gap in memory.
-          writeAll(track.fd, pcm.subarray(skip * 2), 44 + start * 2);
-          track.samples = start + pcm.length / 2 - skip;
+          writeAll(track.fd, pcm.subarray(skip * frame), 44 + start * frame);
+          track.samples = start + pcm.length / frame - skip;
         }
       } else {
         if (!json(p.data)) throw new Error('Invalid recording data.');
@@ -133,8 +154,8 @@ function createSessionRecording({ userData, appVersion, platform }) {
       try {
         const samples = Math.max(Math.round(p.durationMs * RATE / 1000), ...Object.values(active.tracks).map((t) => t.samples));
         for (const track of Object.values(active.tracks)) {
-          fs.ftruncateSync(track.fd, 44 + samples * 2);
-          writeAll(track.fd, wavHeader(samples), 0);
+          fs.ftruncateSync(track.fd, 44 + samples * 2 * track.channels);
+          writeAll(track.fd, wavHeader(samples, track.channels), 0);
         }
         active.meta.endedAt = p.endedAt;
         active.meta.durationMs = p.durationMs;

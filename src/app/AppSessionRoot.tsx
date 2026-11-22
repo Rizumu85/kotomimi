@@ -7,6 +7,7 @@
  */
 import { useEffect } from 'react';
 import { useUserProfile } from '../contexts/UserProfileContext';
+import { keepOwnVoice } from '../lib/audio/appAudio';
 import { getAppSession } from './session';
 import { useAppSessionBridges } from './useAppSession';
 
@@ -15,5 +16,7 @@ export function AppSessionRoot(): null {
   // Today's MainPanel refetched the whole profile after a session (`refetchAll`).
   useAppSessionBridges(refetchAll);
   useEffect(() => getAppSession().attach(), []);
+  // Fork: the user's own voice reaches the virtual microphone before any session.
+  useEffect(() => keepOwnVoice(), []);
   return null;
 }

@@ -11,6 +11,7 @@ vi.mock('../services/ServiceFactory', () => ({
   },
 }));
 vi.mock('../lib/audio/appAudio', () => ({
+  keepOwnVoice: () => () => {},
   getAppAudio: vi.fn(async () => {
     const queue = { position: () => null, pending: 0, subscribe: () => () => {} };
     return {

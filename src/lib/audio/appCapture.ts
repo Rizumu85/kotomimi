@@ -13,7 +13,7 @@ import { getEnvironment } from '../../utils/environment';
 import { createEchoWatch, type EchoWatch } from './capture/echoWatch';
 import { createEchoFollower } from './capture/echoFollow';
 import { openMic, type MicSettings } from './capture/mic';
-import { createPlayoutReference } from './capture/playoutReference';
+import { createPlayoutReference, type PlayoutChunk } from './capture/playoutReference';
 import { openSystemAudio, type SystemAudioSettings } from './capture/systemAudio';
 import { openTab, type TabSettings } from './capture/tab';
 import { createLevelMeter, type LevelMeter } from './levelMeter';
@@ -104,6 +104,8 @@ function withCleanup(source: Source, cleanup: () => Promise<void> | void): Sourc
 
 export interface AppCaptureOptions {
   onPcm?(leg: LegName, pcm: Int16Array): void;
+  /** The whole system's playout, while one is captured (Windows, echo cancellation by loudness, or the participant is the whole system). */
+  onPlayout?(chunk: PlayoutChunk): void;
   onMicTrack?: MicSettings['trackOpened'];
   /** Checked per chunk: false, and the leg's meter reads flat. Absent: every chunk moves it. */
   meterGate?(leg: LegName): boolean;
@@ -113,7 +115,7 @@ export function createAppCapture(playback: Playback, platform: Platform = getEnv
   const { meterGate } = options;
   const echo = createEchoWatch(playback.ttsTap);
   const follower = createEchoFollower();
-  const reference = createPlayoutReference(follower);
+  const reference = createPlayoutReference(follower, options.onPlayout);
   let participantWhole = false;
   let micSignal: AbortSignal | null = null;
   // macOS shares one Core Audio helper and Linux manages a PipeWire tap and monitor
@@ -136,7 +138,10 @@ export function createAppCapture(playback: Playback, platform: Platform = getEnv
         const handoff = syncReference();
         if (inUse) return handoff;
       },
-      playout: (pcm) => follower.played(pcm),
+      playout: (chunk) => {
+        follower.played(chunk.mono);
+        options.onPlayout?.(chunk);
+      },
     }, signal);
     if (platform === 'extension') return openTab(tabSettings(), signal);
     return Promise.reject(new Error('This build has no participant source.'));

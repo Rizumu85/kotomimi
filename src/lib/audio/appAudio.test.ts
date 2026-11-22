@@ -248,3 +248,42 @@ describe('createAppRouting', () => {
     expect(routing.get().passthrough).toEqual({ on: true, ratio: 1, gate: 'idle' });
   });
 });
+
+describe('keepOwnVoice (fork)', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('builds the audio only once the own voice is set to go to a virtual microphone, and only in Electron', async () => {
+    let constructed = 0;
+    class CountedContext extends FakeAudioContext {
+      audioWorklet = { addModule: vi.fn(async () => {}) };
+      constructor() {
+        super();
+        constructed += 1;
+      }
+    }
+    vi.stubGlobal('AudioContext', CountedContext);
+    vi.stubGlobal('Audio', class extends FakeSink { constructor() { super(null); } });
+    vi.stubGlobal('AudioWorkletNode', class {
+      constructor(_ctx: unknown, name: string, options: { processorOptions: { chunk: number } }) {
+        return new FakeWorkletNode(name, options.processorOptions.chunk);
+      }
+    });
+
+    vi.resetModules();
+    const { keepOwnVoice } = await import('./appAudio');
+    const { default: audioStore } = await import('../../stores/audioStore');
+    audioStore.setState({ isRealVoicePassthroughEnabled: false, audioMonitorDevices: AUDIO.audioMonitorDevices });
+
+    keepOwnVoice('web');
+    const off = keepOwnVoice('electron');
+    audioStore.setState({ isRealVoicePassthroughEnabled: true, realVoicePassthroughVolume: 1, audioMonitorDevices: [AUDIO.audioMonitorDevices[0]] });
+    expect(constructed).toBe(0);
+    audioStore.setState({ audioMonitorDevices: AUDIO.audioMonitorDevices });
+    expect(constructed).toBe(1);
+    audioStore.setState({ realVoicePassthroughVolume: 0.5 });
+    expect(constructed).toBe(1);
+    off();
+  });
+});

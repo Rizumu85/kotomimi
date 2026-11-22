@@ -7,6 +7,7 @@
  * read live from `audioStore`, `routingStore` and `turnModeStore`.
  */
 import { SAMPLE_RATE } from '../contract/adapter';
+import { describeCause, reportWarning } from '../diagnostics/report';
 import { monitorHeard, participantSpeechHeard } from '../modern-audio/participantSource';
 import type { Platform } from '../provider/types';
 import type { TurnMode } from '../session/types';
@@ -14,9 +15,10 @@ import useAudioStore from '../../stores/audioStore';
 import { useRoutingStore } from '../../stores/routingStore';
 import { useTurnModeStore } from '../../stores/turnModeStore';
 import { getEnvironment } from '../../utils/environment';
+import { standingMic } from './capture/standingMic';
 import { createAudioGraph, type VirtualOutput } from './graph';
 import { createPlayback, type Playback, type PreviewClip, type RoutingSource } from './playback';
-import type { RoutingSettings } from './routes';
+import { routesFor, type RoutingSettings } from './routes';
 import { sendToTabs, targetTabIdFromSearch, toPcmDataMessage, type TabsApi } from './tabMicrophone';
 import { loadTestTone } from './testTone';
 import { findVirtualSpeaker } from './virtualSpeaker';
@@ -149,6 +151,14 @@ async function build(): Promise<AppAudio> {
     throw error;
   }
   const playback = createPlayback(graph, createAppRouting(platform));
+  // Fork: the user's own voice goes to the virtual microphone outside a session too (`Playback.standing`).
+  if (platform === 'electron') {
+    playback.standing(standingMic({
+      deviceId: () => useAudioStore.getState().selectedInputDevice?.deviceId,
+      muted: () => useAudioStore.getState().isMicMuted,
+      subscribe: (listener) => useAudioStore.subscribe(() => listener()),
+    }));
+  }
   let tone: Promise<PreviewClip> | null = null;
   return {
     playback,
@@ -169,6 +179,27 @@ async function build(): Promise<AppAudio> {
 }
 
 let appAudio: Promise<AppAudio> | null = null;
+
+/**
+ * Fork: builds the page's audio once the user's own voice is set to go to a virtual microphone, so that it goes
+ * there before any session (`Playback.standing`). Until then nothing is built before its first use, as ever.
+ */
+export function keepOwnVoice(platform: Platform = getEnvironment()): () => void {
+  if (platform !== 'electron') return () => {};
+  const routing = createAppRouting(platform);
+  let built = false;
+  const look = () => {
+    const settings = routing.get();
+    if (built || settings.sinks.virtual === undefined || !routesFor(settings, false).some((edge) => edge.from === 'passthrough')) return;
+    built = true;
+    getAppAudio().catch((error: unknown) => {
+      reportWarning('AppAudio', `The audio could not be built for the microphone outside a session: ${describeCause(error)}`, { cause: error, dedupeKey: 'app-audio:standing' });
+    });
+  };
+  const off = routing.subscribe(look);
+  look();
+  return off;
+}
 
 /** The page's one playback, built on first use; a failed build is retried on the next call. */
 export function getAppAudio(): Promise<AppAudio> {

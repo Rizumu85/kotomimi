@@ -5,7 +5,10 @@ import type { EchoFollower } from './echoFollow';
 
 /** The Windows loopback recorder uses the display-media handler directly. Connecting or
  * disconnecting a second participant source over IPC would stop the application helper. */
-export function createPlayoutReference(follower: EchoFollower) {
+/** A chunk of the system's playout; both channels when the capture is stereo. */
+export type PlayoutChunk = { mono: Int16Array; left?: Int16Array; right?: Int16Array };
+
+export function createPlayoutReference(follower: EchoFollower, heard?: (chunk: PlayoutChunk) => void) {
   let wanted = false;
   let active = false;
   let recorder: LoopbackRecorder | null = null;
@@ -36,8 +39,10 @@ export function createPlayoutReference(follower: EchoFollower) {
           recorder = new LoopbackRecorder(SAMPLE_RATE);
           if (!(await recorder.begin())) throw new Error('Loopback capture did not start.');
           if (!wanted) return;
-          await recorder.record(({ mono }) => {
-            if (wanted && active) follower.played(mono);
+          await recorder.record((chunk) => {
+            if (!wanted || !active) return;
+            follower.played(chunk.mono);
+            heard?.(chunk);
           });
           follower.reset();
           active = true;

@@ -24,7 +24,7 @@ import type { LocalAISettings as S } from './localai';
 import { coachesAtOwnDevice, coachesOnShared, deviceLanguage, hearingPlace, hearsAtOwnDevice, needsServer, PLACE_FIELDS, PLACES, translatePlace, translatesAtOwnDevice, type DeviceNeed, type Place } from './localaiDevice';
 import { NATIVE_MODELS, hearingPick, isApple, isAutoLanguage, nativeDownloaded, nativeEither, nativeEngineOf, nativeHears, nativeModel, nativeModelFor, nativePicked } from './localaiNative';
 import { chooseNativeRow, nativeChoiceFix, nativeChoiceRows, nativeRowChoice } from './nativeChoices';
-import { alsoFirst, alsoSpoken, detectsOther, heardBy, HEARING_FIELDS, hearingOf, speaksBoth, type HearingChoice } from './localaiDevice';
+import { alsoFirst, alsoSpoken, theirsInto, detectsOther, heardBy, HEARING_FIELDS, hearingOf, speaksBoth, type HearingChoice } from './localaiDevice';
 import { languageLabel } from '../../lib/language/label';
 import { NativeEngineCard, nativeStoreOf, type NativeCardModel, type NativeKind } from './NativeEngineCard';
 import { NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator } from './nativeTranslators';
@@ -786,8 +786,8 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   // Fork: the voice stage's choice, written whole (`settings.localai.speak`).
   const voice: VoiceChoice = settings.speak;
   const putVoice = (asked: Partial<VoiceChoice>) => put({ speak: { ...latest.current.speak, ...asked } } as Partial<S>);
-  // What it speaks in a run: the other side's language, and the ones the user types to them in besides.
-  const voiceLanguagesShown = [pair.target, ...alsoSpoken(settings, pair)];
+  // What it speaks in a run: the other side's languages lit, and the ones the user types to them in besides.
+  const voiceLanguagesShown = [...theirsInto(settings, pair), ...alsoSpoken(settings, pair)];
   const voiceService = voice.at === 'api' ? serviceOf(voice.apiBaseUrl, 'voice') : undefined;
   const voiceStatus = nativeStoreOf('voice')((one) => one.status);
   // Something to ask now: this computer's model downloaded, or an API named.

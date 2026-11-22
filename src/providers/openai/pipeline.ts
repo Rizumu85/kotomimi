@@ -160,9 +160,10 @@ export interface Stages {
    */
   leakCheck?: true;
   /**
-   * Fork: what speaks (`voice.ts`), on a leg whose context says it speaks: each translation into the other side's
-   * language, when it is whole, and what the speaker typed in that language as it is. Not a second answer into another
-   * language, a translation back into the speaker's own, or feedback: those are read, not heard.
+   * Fork: what speaks (`voice.ts`), on a leg whose context says it speaks: each translation into a language of the
+   * other side's, when it is whole — their main one, the second lit beside it (`into`), the other lit one of a sentence
+   * said in one of theirs (`cross`) — and what the speaker typed in a language of theirs as it is. Not a translation
+   * back into the speaker's own, or feedback: those are read, not heard.
    */
   voice?: VoiceStage;
 }
@@ -1130,9 +1131,10 @@ class PipelineLeg implements AdapterSession {
       // `served`: the model that answered, where the server says (another Kotomimi chooses a blank one itself).
       this.frame('in', 'text.done', { stage: stage.kind, model: stage.model, served: answer.model ?? stage.model, firstMs: answer.firstMs ?? null, totalMs: answer.totalMs, chars: final.length, ...where });
       if (opened) this.events.segmentClosed({ ref });
-      // Fork: a translation into the other side's language is spoken, where this leg speaks (`Stages.voice`).
-      const into = this.request.context.direction.target;
-      if (opened && final && stage.kind === 'translate' && baseOf(stage.language ?? into) === baseOf(into)) this.say(ref, final, stage.language ?? into);
+      // Fork: a translation into a language of the other side's is spoken, where this leg speaks (`Stages.voice`):
+      // every one but the one back into the speaker's own (told by its stage: Chinese into Chinese, simplified into
+      // traditional, is a translation for them too).
+      if (opened && final && stage.kind === 'translate' && stage !== this.stages.back?.stage) this.say(ref, final, stage.language ?? this.request.context.direction.target);
       // A model that said nothing: feedback with nothing to say is no fault; a translation with none is — also where
       // what was written while the sentence was said stays in its place.
       if (stage.kind === 'translate' && (!opened || !final)) this.unanswered(job, 'the model answered with no text');

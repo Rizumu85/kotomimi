@@ -64,7 +64,7 @@ import { buildRealtime } from './config';
 import { glossaryRecognitionTerms } from '../../lib/glossary/glossary';
 import { recognizerAsked, serverBilingual } from './serverRecognizers';
 import { phoneBase, plainAddress } from '../../lib/lan/discover';
-import { alsoFirst, alsoInto, alsoListed, alsoLit, alsoSpoken, backInto, crossings, myRow, theirRow, theirLitLanguages, theyLitOf, deviceLanguage, canDetectOther, hearingOf, type HearingChoice, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, hearsNatively, needsServer, serverDetects, PLACE_FIELDS, PLACES, translatesNatively, type AsrHere, type Place } from './localaiDevice';
+import { alsoFirst, alsoInto, theirsInto, alsoListed, alsoLit, alsoSpoken, backInto, crossings, myRow, theirRow, theirLitLanguages, theyLitOf, deviceLanguage, canDetectOther, hearingOf, type HearingChoice, shownAsSaid, speaksBoth, coachIs, coachesAtOwnDevice, coachesNatively, cutsSentencesHere, hearingPlace, hearsAtOwnDevice, translatesAtOwnDevice, translatePlace, detectsOther, heardBy, hearsNatively, needsServer, serverDetects, PLACE_FIELDS, PLACES, translatesNatively, type AsrHere, type Place } from './localaiDevice';
 import { NATIVE_MODELS, isApple, preferNative, type NativeModel, type NativePick } from './localaiNative';
 import { NATIVE_DEFAULT_MODEL, appleExtraGap, downloadedAppleLanguages, coachBaseUrl, coachGap, coachIdle, coachUp, hearingPick, hearsByDownloaded, holdNativeForRun, nativeEither, nativeGap, nativeUp, restNative, translatorUp, nativeIdle, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_COACH_EXTRA, NATIVE_COACHES, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
@@ -1095,8 +1095,14 @@ function nativeHearing(s: LocalAISettings, legs: readonly LegName[]): { s: Local
   return here.length > 0 ? { s: hearingOf(s, here[0]), legs: here } : null;
 }
 
-function voicesTarget(choice: VoiceChoice, target: string): boolean {
-  return speaksAlong(choice) && voiceSpeaks(choice, target);
+/**
+ * Fork: whether a run speaks by itself: the stage set to, and its voice speaking one of the languages the user's
+ * sentences go into (`theirsInto`). The check and the engines' needs ask it of the settings alone: a run that puts
+ * nothing into their second language after all (a coached speaker's, one the other device's own session answers)
+ * still has a voice that speaks only that one checked and loaded.
+ */
+function voicesAny(choice: VoiceChoice, into: readonly string[]): boolean {
+  return speaksAlong(choice) && into.some((language) => voiceSpeaks(choice, language));
 }
 
 function nativeNeeds(s: LocalAISettings, pair: { source: string; target: string }, legs: readonly ('speaker' | 'participant')[]): NativeNeeds {
@@ -1107,7 +1113,7 @@ function nativeNeeds(s: LocalAISettings, pair: { source: string; target: string 
     ...(translatesNatively(s) && legs.some((leg) => !shownAsSaid(s, pair, leg)) ? { translates: s.translateNativeModel } : {}),
     ...(coachesNatively(s) && legs.includes('speaker') ? { coaches: s.coachNativeModel } : {}),
     // Only the speaker's leg speaks.
-    ...(legs.includes('speaker') && voicesTarget(s.speak, pair.target) && speaksNatively(s.speak) ? { speaks: s.speak.nativeModel } : {}),
+    ...(legs.includes('speaker') && voicesAny(s.speak, theirsInto(s, pair)) && speaksNatively(s.speak) ? { speaks: s.speak.nativeModel } : {}),
   };
 }
 
@@ -1259,7 +1265,7 @@ export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISe
   }
   let speaks: ReturnType<typeof voiceGap> | null = null;
   // Only where a run speaks by itself: a stage kept for lines said on demand loads its model when one is asked for.
-  const usesVoice = ctx.legs.includes('speaker') && voicesTarget(s.speak, ctx.pair.target);
+  const usesVoice = ctx.legs.includes('speaker') && voicesAny(s.speak, theirsInto(s, ctx.pair));
   if (usesVoice && speaksNatively(s.speak)) {
     speaks = (native.voiceGap ?? voiceGap)(s.speak.nativeModel);
     speaks.catch(() => undefined);
@@ -1574,11 +1580,11 @@ export function buildLocalAI(asked: SessionContext, all: LocalAISettings, shared
   // The speaker's microphone: the other side's sound, come back through loudspeakers, is told from their own voice by
   // the other leg hearing it at the same moment (`leakCheck` in pipeline.ts). The other side's leg is that sound.
   if (stages && !shared.reversed(asked.direction)) stages = { ...stages, leakCheck: true };
-  // Fork: the speaker's leg speaks its translations into the other side's language, and what they type in a language
-  // of the other side's, where the voice stage is on (`context.speech`, by `speaks`). A leg the other device's own
+  // Fork: the speaker's leg speaks its translations into the other side's languages (their main one, and the second
+  // lit beside it), and what they type in a language of the other side's, where the voice stage is on (`context.speech`, by `speaks`). A leg the other device's own
   // session answers has no stage of its own: it is given the voice alone, and its session's translations are spoken.
-  if (asked.speech && (asked.leg ? asked.leg === 'speaker' : !participant) && voicesTarget(s.speak, target)) {
-    const voice = voiceStageOf(s.speak, [target, ...also]);
+  if (asked.speech && (asked.leg ? asked.leg === 'speaker' : !participant) && voicesAny(s.speak, lit ? [target, lit] : [target])) {
+    const voice = voiceStageOf(s.speak, [target, ...(lit ? [lit] : []), ...also]);
     if (!voice) return { refused: 'No voice API is named.', code: 'voice_unnamed' };
     stages = { ...(stages ?? { speech: null, typed: null }), voice };
   }

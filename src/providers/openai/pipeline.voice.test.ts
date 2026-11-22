@@ -7,7 +7,7 @@ import type { SessionContext } from '../../lib/contract/adapter';
 import { recordEvents, type AdapterEvent } from '../../lib/contract/events';
 import { fakeSockets } from '../../lib/contract/testing/fakeSocket';
 import { trackedClock } from '../../lib/contract/testing/trackedClock';
-import { buildLocalAI, LOCALAI_DEFAULTS, type LocalAICredentials, type LocalAISettings } from './localai';
+import { buildLocalAI, LOCALAI_DEFAULTS, type LocalAIConfig, type LocalAICredentials, type LocalAISettings } from './localai';
 import { createPipelineAdapter, FIRST_REF } from './pipeline';
 import { exchange, SHARED } from './testing';
 import type { VoiceDeps } from './voice';
@@ -32,9 +32,10 @@ const sse = (...pieces: string[]) => new Response(
 const stops: Array<() => Promise<void>> = [];
 afterEach(async () => { for (const stop of stops.splice(0)) await stop(); });
 
-async function live(context: SessionContext, patch: Partial<LocalAISettings>, answers: Response[], voice: Partial<Pick<VoiceDeps, 'decode' | 'native' | 'edge'>> = {}) {
+async function live(context: SessionContext, patch: Partial<LocalAISettings>, answers: Response[], voice: Partial<Pick<VoiceDeps, 'decode' | 'native' | 'edge'>> = {}, adjust?: (config: LocalAIConfig) => void) {
   const config = buildLocalAI(context, { ...LOCALAI_DEFAULTS, ...patch }, shared);
   if ('refused' in config) throw new Error(config.refused);
+  adjust?.(config);
   const sockets = fakeSockets();
   const { clock } = trackedClock();
   const { events, log } = recordEvents();
@@ -85,6 +86,75 @@ describe('a leg that speaks (fork)', () => {
     expect(h.of('audio')[0].payload.ref).toBe(translation);
     expect(h.of('audio')[0].payload.pcm).toBeInstanceOf(Int16Array);
     expect(h.frames('voice.done')).toHaveLength(1);
+  });
+
+  describe('with a second language of theirs lit', () => {
+    const TWO: Partial<LocalAISettings> = { ...EDGE_ON, theyAlso: ['en'], theyLit: 'en', asrDetectOther: true };
+    // Without the loudspeaker check, which legs of earlier tests would hold a sentence for.
+    const unchecked = (config: LocalAIConfig) => { delete config.stages!.leakCheck; };
+
+    it('speaks the translation into each of their languages, the main one first, each in its own voice', async () => {
+      const h = await live(SPEAKS, TWO, [sse('次のワールドに行こう。'), sse("Let's go to the next world.")], {}, unchecked);
+      expect(h.config.stages?.voice?.voices).toMatchObject({ ja: 'ja-JP-NanamiNeural', en: expect.stringMatching(/^en-/) });
+      h.receive(...heard('a', '我们去下一个世界吧。'));
+      await vi.waitFor(() => expect(h.of('audio')).toHaveLength(2));
+      expect(h.said.map((one) => one.text)).toEqual(['次のワールドに行こう。', "Let's go to the next world."]);
+      expect(h.said[1].voice).toMatch(/^en-/);
+      // Each on its own translation's segment.
+      const refs = h.of('segmentOpened').filter((e) => e.payload.side === 'translation').map((e) => e.payload.ref);
+      expect(h.of('audio').map((e) => e.payload.ref)).toEqual(refs);
+    });
+
+    it('speaks a sentence said in one of theirs in the other, and never the one back into the user\'s own', async () => {
+      const crossing = (config: LocalAIConfig) => {
+        delete config.stages!.leakCheck;
+        Object.assign(config.stages!, {
+          heard: 'auto',
+          back: { stage: { kind: 'translate', model: 'back', baseUrl: '', system: 'Translate into zh-CN', language: 'zh-CN' }, language: 'ja', own: 'zh-CN', languages: ['ja'] },
+          cross: [{ language: 'ja', stage: { kind: 'translate', model: 'across', baseUrl: '', system: 'Translate into en', language: 'en' } }],
+        });
+      };
+      const h = await live(SPEAKS, TWO, [sse("Let's go to the next world."), sse('我们去下一个世界吧。')], {}, crossing);
+      h.receive(...heard('a', '次のワールドに行こう'));
+      await vi.waitFor(() => expect(h.frames('text.done')).toHaveLength(2));
+      await vi.waitFor(() => expect(h.of('audio')).toHaveLength(1));
+      expect(h.said.map((one) => one.text)).toEqual(["Let's go to the next world."]);
+      expect(h.frames('voice.request')).toHaveLength(1);
+    });
+
+    it('holds each language to its own count when the voice falls behind: neither is left out for the other', async () => {
+      const release: Array<() => void> = [];
+      const spoken: string[] = [];
+      const answers = ['一', '二', '三', '四'].flatMap((n, i) => [sse(`${n}。`), sse(`${['One', 'Two', 'Three', 'Four'][i]}.`)]);
+      const h = await live(SPEAKS, TWO, answers, {
+        edge: (request) => new Promise((resolve) => { spoken.push(request.text); release.push(() => resolve(new ArrayBuffer(8))); }),
+      }, unchecked);
+      for (const [id, text] of [['a', '第一句。'], ['b', '第二句。'], ['c', '第三句。'], ['d', '第四句。']] as const) h.receive(...heard(id, text));
+      // 一 is being made, and held: of each language two wait behind it, the oldest gone — 二; One, then Two.
+      await vi.waitFor(() => expect(h.frames('voice.skipped')).toHaveLength(3));
+      for (let i = 0; i < 5; i += 1) { await vi.waitFor(() => expect(release.length).toBeGreaterThan(i)); release[i](); }
+      await vi.waitFor(() => expect(h.of('audio')).toHaveLength(5));
+      expect(spoken.filter((text) => /。$/.test(text))).toEqual(['一。', '三。', '四。']);
+      expect(spoken.filter((text) => /\.$/.test(text))).toEqual(['Three.', 'Four.']);
+    });
+
+    it('is built where the voice speaks only their second language', () => {
+      // Irodori speaks Japanese alone: their main language is English, Japanese lit beside it.
+      const english: SessionContext = { ...SPEAKS, direction: { source: 'zh-CN', target: 'en' } };
+      const irodori: Partial<LocalAISettings> = { translateServerModel: 'hy-mt2-1.8b', speak: { ...LOCALAI_DEFAULTS.speak, on: true, at: 'device', nativeModel: 'irodori-tts-v4.1-small-mf-q8' }, theyAlso: ['ja'], theyLit: 'ja', asrDetectOther: true };
+      const built = buildLocalAI(english, { ...LOCALAI_DEFAULTS, ...irodori }, { ...shared, reversed: (d: SessionContext['direction']) => d.source === 'en' });
+      expect('refused' in built ? built : built.stages?.voice).toMatchObject({ engine: true, languages: ['ja'] });
+      const alone = buildLocalAI(english, { ...LOCALAI_DEFAULTS, ...irodori, theyLit: '', asrDetectOther: false }, { ...shared, reversed: (d: SessionContext['direction']) => d.source === 'en' });
+      expect('refused' in alone ? alone : alone.stages?.voice).toBeUndefined();
+    });
+  });
+
+  it('speaks a translation between two writings of one language: simplified into traditional', async () => {
+    const traditional: SessionContext = { ...SPEAKS, direction: { source: 'zh-CN', target: 'zh-TW' } };
+    const h = await live(traditional, EDGE_ON, [sse('軟體已經更新了。')]);
+    h.receive(...heard('a', '软件已经更新了。'));
+    await vi.waitFor(() => expect(h.of('audio')).toHaveLength(1));
+    expect(h.said.map((one) => one.text)).toEqual(['軟體已經更新了。']);
   });
 
   it('says a typed sentence\'s translation too', async () => {

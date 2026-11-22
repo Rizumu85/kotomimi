@@ -40,6 +40,24 @@ describe('session recording files', () => {
     expect(meta).toMatchObject({ startedAt: at, endedAt: at + 600, appVersion: 'test-version', platform: 'win32', sampleRate: 16000 });
   });
 
+  it('keeps the playout stereo, each channel resampled and every track the same length', () => {
+    const r = make(), at = start(r);
+    const frames = new Int16Array(4800);
+    for (let i = 0; i < 2400; i++) { frames[i * 2] = 700; frames[i * 2 + 1] = -700; }
+    r.write({ kind: 'pcm', leg: 'playout', pcm: frames, rate: 24000, ms: 100 });
+    expect(() => r.write({ kind: 'pcm', leg: 'playout', pcm: new Int16Array(3), rate: 24000, ms: 200 })).toThrow('Invalid PCM chunk.');
+    r.end({ endedAt: at + 200, durationMs: 200 });
+    const file = fs.readFileSync(path.join(folder(r), 'playout.wav'));
+    expect(file.readUInt16LE(22)).toBe(2);
+    expect(file.readUInt32LE(28)).toBe(64000);
+    expect(file.readUInt16LE(32)).toBe(4);
+    expect(file.readUInt32LE(40)).toBe(3200 * 4);
+    expect(file.readUInt32LE(4)).toBe(file.length - 8);
+    expect([file.readInt16LE(44), file.readInt16LE(46), file.readInt16LE(44 + 1599 * 4 + 2)]).toEqual([700, -700, -700]);
+    expect(file.readInt16LE(44 + 1600 * 4)).toBe(0);
+    expect(fs.readFileSync(path.join(folder(r), 'raw.wav')).readUInt32LE(40)).toBe(3200 * 2);
+  });
+
   it('averages samples when resampling, snaps jitter, and trims pre-start audio', () => {
     const result = resample(Int16Array.from([0, 300, 600, 900, 1200, 1500]), 48000);
     expect([result.readInt16LE(0), result.readInt16LE(2)]).toEqual([300, 1200]);

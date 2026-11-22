@@ -240,6 +240,15 @@ export function alsoInto(s: Lit, pair: { source: string; target: string }): stri
 }
 
 /**
+ * Fork: the languages the user's sentences are put into for the other side: their main one, and the second lit beside
+ * it (`alsoInto`). What a run reads aloud by itself (`Stages.voice`) is a translation into any of these.
+ */
+export function theirsInto(s: Lit, pair: { source: string; target: string }): string[] {
+  const second = alsoInto(s, pair);
+  return second ? [pair.target, second] : [pair.target];
+}
+
+/**
  * Fork: the one of the other side's languages lit beside the pair's target (`theyLit`), switched by hand: they are
  * heard in either — their language left to be detected (`asrDetectOther`) — and the user's speech is translated into
  * it as well, unless it is `auto`. '' none: they are heard in the pair's target alone. A build that followed them by

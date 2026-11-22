@@ -335,6 +335,73 @@ describe('createPlayback — passthrough', () => {
   });
 });
 
+describe('createPlayback — the microphone outside a run (fork)', () => {
+  const VIRTUAL: RoutingSettings = { ...ROUTING, passthrough: { on: true, ratio: 1 }, sinks: { real: 'monitor-1', virtual: 'cable-1' } };
+  /** A microphone that opens when listened to and is let go when not. */
+  function standing() {
+    const mic = { id: 'standing' } as MediaStream;
+    const listen = vi.fn((receive: (stream: MediaStream | null) => void) => {
+      receive(mic);
+      return vi.fn();
+    });
+    return { mic, listen, released: (n: number) => listen.mock.results[n].value };
+  }
+
+  it('is carried with no run live, where the route is open and there is a virtual device', async () => {
+    const { graph } = fakeGraph();
+    const route = routing({ ...VIRTUAL, passthrough: { on: false, ratio: 1 } });
+    const playback = createPlayback(graph, route.source);
+    const { mic, listen, released } = standing();
+    playback.standing(listen);
+    expect(listen).not.toHaveBeenCalled();
+    route.set({ passthrough: { on: true, ratio: 1 } });
+    expect(listen).toHaveBeenCalledOnce();
+    expect(graph.connectMicrophone).toHaveBeenCalledWith(mic);
+    const disconnect = vi.mocked(graph.connectMicrophone).mock.results[0].value;
+    route.set({ sinks: { real: 'monitor-1' } });
+    expect(released(0)).toHaveBeenCalledOnce();
+    expect(disconnect).toHaveBeenCalledOnce();
+    await playback.dispose();
+  });
+
+  it('is never opened where the app has no virtual device', () => {
+    const { playback } = build({ ...ROUTING, passthrough: { on: true, ratio: 1 } });
+    const { listen } = standing();
+    playback.standing(listen);
+    expect(listen).not.toHaveBeenCalled();
+  });
+
+  it("goes on into a run until the run's own microphone is there, and comes back when the run ends", () => {
+    const { playback, graph } = build(VIRTUAL);
+    const connect = vi.mocked(graph.connectMicrophone);
+    const { mic, listen, released } = standing();
+    const own = { id: 'own' } as MediaStream;
+    playback.standing(listen);
+    playback.live(true);
+    expect(connect).toHaveBeenLastCalledWith(mic);
+    expect(released(0)).not.toHaveBeenCalled();
+    playback.passthrough(own);
+    expect(connect).toHaveBeenLastCalledWith(own);
+    expect(released(0)).toHaveBeenCalledOnce();
+    playback.live(false);
+    expect(listen).toHaveBeenCalledTimes(2);
+    expect(connect).toHaveBeenLastCalledWith(mic);
+  });
+
+  it('keeps the graph from resting while it is carried', () => {
+    const { graph } = fakeGraph();
+    const clock = createVirtualClock(0);
+    const route = routing(VIRTUAL);
+    const playback = createPlayback(graph, route.source, clock);
+    playback.standing(standing().listen);
+    clock.advance(QUIET_MS);
+    expect(graph.suspended).toBe(0);
+    route.set({ passthrough: { on: false, ratio: 1 } });
+    clock.advance(QUIET_MS);
+    expect(graph.suspended).toBe(1);
+  });
+});
+
 describe('createPlayback — resting', () => {
   it('suspends the graph once quiet for QUIET_MS, never while live or while something is queued', async () => {
     const { playback, graph, clock } = build();

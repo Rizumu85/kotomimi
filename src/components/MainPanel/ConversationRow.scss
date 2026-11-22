@@ -226,7 +226,16 @@
   opacity: 0;
   background: transparent;
 
-  .conversation-row:hover &,
+  // One that cannot be pressed now is as quiet as the rest: the play button's dimmed look only under the pointer.
+  &:disabled {
+    opacity: 0;
+  }
+
+  .conversation-row:hover &:disabled {
+    opacity: 0.4;
+  }
+
+  .conversation-row:hover &:not(:disabled),
   &:focus-visible,
   &.is-loading,
   &.is-playing,

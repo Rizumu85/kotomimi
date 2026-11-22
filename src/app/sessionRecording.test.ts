@@ -178,6 +178,18 @@ describe('session recorder driver', () => {
     f.off(); await f.recording.settled();
   });
 
+  it('interleaves both channels of the playout, and doubles a mono chunk', async () => {
+    const f = fixture();
+    f.state.setState({ phase: 'starting', step: 'checking' });
+    await drain();
+    f.recording.playout({ mono: Int16Array.from([0, 0]), left: Int16Array.from([1, 2]), right: Int16Array.from([3, 4]) });
+    f.recording.playout({ mono: Int16Array.from([5]) });
+    await drain();
+    const chunks = writes('pcm').filter((w) => w.leg === 'playout');
+    expect(chunks.map((w) => Array.from(w.pcm))).toEqual([[1, 3, 2, 4], [5, 5]]);
+    f.off(); await f.recording.settled();
+  });
+
   it.each([['disabled', false, true], ['web', true, false]] as const)('does nothing when %s', async (_name, enabled, electron) => {
     mocks.enabled = enabled; mocks.electron = electron;
     const f = fixture(); f.state.setState({ phase: 'starting', step: 'checking' });

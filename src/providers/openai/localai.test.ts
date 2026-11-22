@@ -124,6 +124,13 @@ describe("LocalAI Realtime's stage keys", () => {
     await prepareLocalAI(ctx(), s, { hears: vi.fn(), translates: vi.fn(), coaches: vi.fn(), speaks, rest: vi.fn() });
     expect(voiceGap).not.toHaveBeenCalled();
     expect(speaks).not.toHaveBeenCalled();
+    // Fork: lit beside their main language, one it speaks: translations into that one are read aloud, so it is both.
+    const lit = { ...s, theyAlso: ['ja'], theyLit: 'ja', asrDetectOther: true };
+    const english = { ...ctx(), pair: { source: 'zh-CN', target: 'en' } };
+    await checkLocalAIWithNative(K, lit, english, async () => ({ ok: true }), { gap: vi.fn(), idle: vi.fn(), voiceGap });
+    await prepareLocalAI(english, lit, { hears: vi.fn(), translates: vi.fn(), coaches: vi.fn(), speaks, rest: vi.fn() });
+    expect(voiceGap).toHaveBeenCalledWith('irodori-tts-v4.1-small-mf-q8');
+    expect(speaks).toHaveBeenCalledTimes(1);
     const built = buildLocalAI({ ...AUTO, leg: 'speaker', speech: true }, s, SERVER_MODELS);
     expect(built).not.toHaveProperty('refused');
     expect(built).not.toHaveProperty('stages.voice');

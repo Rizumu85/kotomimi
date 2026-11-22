@@ -12,13 +12,15 @@ vi.mock('./capture/mic', () => ({ openMic: vi.fn() }));
 vi.mock('../modern-audio/LoopbackRecorder', () => ({ LoopbackRecorder: vi.fn() }));
 vi.mock('../modern-audio/AppAudioRecorder', () => ({ AppAudioRecorder: vi.fn() }));
 
+const stereo = { mono: Int16Array.of(16000), left: Int16Array.of(20000), right: Int16Array.of(12000) };
+
 function recorder() {
-  let push: (chunk: { mono: Int16Array }) => void = () => {};
+  let push: (chunk: { mono: Int16Array; left?: Int16Array; right?: Int16Array }) => void = () => {};
   return {
     begin: vi.fn(async () => true),
     record: vi.fn(async (fn: typeof push) => { push = fn; return true; }),
     end: vi.fn(async () => {}),
-    push: () => push({ mono: Int16Array.of(16000) }),
+    push: () => push(stereo),
   };
 }
 
@@ -39,10 +41,11 @@ function setup(platform: 'electron' | 'extension' | 'web' = 'electron', os = 'wi
   const mic = createSourceCore({ muted: () => false, release: async () => {} });
   vi.mocked(openMic).mockResolvedValue(mic);
   const onPcm = vi.fn();
+  const onPlayout = vi.fn();
   const playback = { ttsTap: { read: () => new Float32Array() } } as unknown as Playback;
-  const capture = createAppCapture(playback, platform, { onPcm });
+  const capture = createAppCapture(playback, platform, { onPcm, onPlayout });
   const voiced = () => vi.mocked(openMic).mock.lastCall![0].voiced!(quiet);
-  return { capture, loop, application, mic, onPcm, voiced, invoke };
+  return { capture, loop, application, mic, onPcm, onPlayout, voiced, invoke };
 }
 
 describe('the microphone gate playout reference', () => {
@@ -54,7 +57,7 @@ describe('the microphone gate playout reference', () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it('uses only system playout for the gate while translating an application, even with the participant muted', async () => {
-    const { capture, loop, application, onPcm, voiced, invoke } = setup();
+    const { capture, loop, application, onPcm, onPlayout, voiced, invoke } = setup();
     const participant = await capture.openSource('participant', live());
     expect(loop.begin).not.toHaveBeenCalled();
     const speaker = await capture.openSource('speaker', live());
@@ -70,6 +73,8 @@ describe('the microphone gate playout reference', () => {
     expect(voiced()).toBe(false);
     expect(heard).toHaveBeenCalledOnce();
     expect(onPcm).toHaveBeenCalledOnce();
+    // The recording takes the reference's two channels, not the application's chunk.
+    expect(onPlayout.mock.calls).toEqual([[stereo]]);
     expect(capture.levels.participant.heard()).toBe(false);
     expect(capture.levels.speaker.heard()).toBe(false);
     await speaker.stop();
@@ -79,7 +84,7 @@ describe('the microphone gate playout reference', () => {
 
   it('shares a whole-system participant even on parallel open and follows live source switches', async () => {
     select(whole);
-    const { capture, loop, onPcm, voiced } = setup();
+    const { capture, loop, onPcm, onPlayout, voiced } = setup();
     const [speaker, participant] = await Promise.all([
       capture.openSource('speaker', live()), capture.openSource('participant', live()),
     ]);
@@ -88,6 +93,7 @@ describe('the microphone gate playout reference', () => {
     loop.push();
     expect(voiced()).toBe(false);
     expect(onPcm).not.toHaveBeenCalled();
+    expect(onPlayout).toHaveBeenCalledWith(stereo);
     select('app-waiting:Zoom');
     await vi.waitFor(() => expect(loop.record).toHaveBeenCalledTimes(2));
     expect(loop.end).toHaveBeenCalledTimes(1);

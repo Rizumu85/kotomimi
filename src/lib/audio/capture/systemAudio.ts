@@ -14,6 +14,7 @@ import { LoopbackRecorder } from '../../modern-audio/LoopbackRecorder';
 import { SourceOpenError, type Source } from '../../session/source';
 import { createSourceCore } from './core';
 import { participantSplit, type ParticipantSplit, type StereoChunk } from './stereoSplit';
+import type { PlayoutChunk } from './playoutReference';
 
 export const APP_CAPTURE_LOST = 'app_capture_lost_using_system_audio';
 export const APP_MONITOR_MISSING = 'app_capture_monitor_missing';
@@ -33,7 +34,7 @@ export interface SystemAudioSettings {
   /** Hand the whole-system loopback between this leg and the microphone's reference. */
   wholeSystem?(inUse: boolean): Promise<void> | void;
   /** The whole-system mix before the participant's channel split or mute. */
-  playout?(pcm: Int16Array): void;
+  playout?(chunk: PlayoutChunk): void;
 }
 
 /** The part of a participant recorder this source drives. */
@@ -200,7 +201,7 @@ export async function openSystemAudio(
     unwatch = core.watch(next.getStream?.() ?? null);
     const split = deps.split;
     await next.record((data) => {
-      if (id === 'desktop-audio-loopback' && !core.stopped && !core.ended) settings.playout?.(data.mono);
+      if (id === 'desktop-audio-loopback' && !core.stopped && !core.ended) settings.playout?.(data);
       core.deliver(split ? split.take(data) : data.mono);
     });
   };

@@ -15,7 +15,7 @@ export { EDGE_BASE };
 export interface VoiceChoice {
   /** The stage is on: any line can be said aloud on demand, and — with `auto` — translations are spoken as they come. */
   on: boolean;
-  /** Each translation into the other side's language is spoken when it is whole. Off: lines are said only when asked for. */
+  /** Each translation into a language of the other side's is spoken when it is whole. Off: lines are said only when asked for. */
   auto: boolean;
   /** Where the voice is made: this computer's engine, or an API (Edge's online voices among them). */
   at: Place;

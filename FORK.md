@@ -41,7 +41,7 @@ Speech recognition, translation, optional grammar feedback and an optional voice
 | Grammar feedback | Downloaded native feedback model | An OpenAI-compatible chat endpoint | A shared feedback or chat model |
 | Voice | Downloaded native voice model | An OpenAI-compatible speech endpoint, or Edge's online voices | Not offered |
 
-This computer always means the native engines: `migrateLocalAISettings` (`localai.ts`) reads the local-runner fields of any older settings as `native`. External LocalAI services are reached through the API and Another device choices; Kotomimi does not install, start, stop or proxy one. The voice speaks the speaker's translations into the other side's language (`speaker.ts`).
+This computer always means the native engines: `migrateLocalAISettings` (`localai.ts`) reads the local-runner fields of any older settings as `native`. External LocalAI services are reached through the API and Another device choices; Kotomimi does not install, start, stop or proxy one. The voice speaks the speaker's translations into each language lit for the other side (`speaker.ts`).
 
 ### Settings
 

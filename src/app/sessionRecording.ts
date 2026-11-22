@@ -7,6 +7,7 @@ import type { LegName } from '../lib/conversation/types';
 import type { Entry, Row } from '../lib/projection/types';
 import type { RunState } from '../lib/session/types';
 import type { Readable } from '../lib/view/conversationView';
+import type { PlayoutChunk } from '../lib/audio/capture/playoutReference';
 import { describeCause, reportError } from '../lib/diagnostics/report';
 import { isElectron } from '../utils/environment';
 
@@ -59,7 +60,7 @@ export function createSessionRecording() {
       } finally { run.pendingBytes -= bytes; }
     });
   };
-  const pcm = (leg: LegName | 'raw', chunk: Int16Array, rate = SAMPLE_RATE) => {
+  const pcm = (leg: LegName | 'raw' | 'playout', chunk: Int16Array, rate = SAMPLE_RATE) => {
     const run = current;
     if (!run?.accepting) return;
     if (run.pendingBytes + chunk.byteLength > 8 * 1024 * 1024) {
@@ -70,6 +71,14 @@ export function createSessionRecording() {
       return;
     }
     enqueue(run, 'session-recording:write', { kind: 'pcm', leg, pcm: chunk.slice(), rate, ms: ms(run) }, chunk.byteLength);
+  };
+  /** What the loudspeakers play, both channels, beside the microphone: the material an echo canceller is measured on. */
+  const playout = ({ mono, left, right }: PlayoutChunk) => {
+    if (!current?.accepting) return;
+    const l = left ?? mono, r = right ?? mono;
+    const frames = new Int16Array(l.length * 2);
+    for (let i = 0; i < l.length; i++) { frames[i * 2] = l[i]; frames[i * 2 + 1] = r[i]; }
+    pcm('playout', frames);
   };
   const track = (data: Record<string, unknown>) => {
     const run = current;
@@ -123,7 +132,7 @@ export function createSessionRecording() {
     return settled;
   };
   return {
-    pcm, track, settled: () => settled,
+    pcm, playout, track, settled: () => settled,
     drive(deps: {
       runner: { state: { getState(): RunState; subscribe(fn: () => void): () => void } };
       view: Readable<{ entries: readonly Entry[] }> & { flush(): void };

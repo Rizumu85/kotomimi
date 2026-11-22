@@ -1095,3 +1095,16 @@ describe('a phone that lends its text models: the "another device" of the transl
     expect(screen.getByText('providers.localai.serverSilent')).toBeTruthy();
   });
 });
+
+describe('the voice card: a voice for every language it reads aloud (fork)', () => {
+  const EDGE: Partial<LocalAISettings> = { speak: { ...LOCALAI_DEFAULTS.speak, on: true, at: 'api' } };
+  const voices = (card: ReturnType<typeof within>) => card.queryAllByRole('combobox', { name: 'fork.voice.voiceOf' });
+
+  it('has one for their main language, and one more for the second lit beside it', () => {
+    const one = draw({ settings: EDGE });
+    expect(voices(one.card('fork.voice.stage'))).toHaveLength(1);
+    one.unmount();
+    const two = draw({ settings: { ...EDGE, theyAlso: ['en'], theyLit: 'en', asrDetectOther: true } });
+    expect(voices(two.card('fork.voice.stage'))).toHaveLength(2);
+  });
+});

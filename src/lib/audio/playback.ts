@@ -59,6 +59,12 @@ export interface Playback extends PlaybackPort {
   passthrough(stream: MediaStream | null): void;
   /** Listen to a capture source only while the run's passthrough route is open. */
   passthrough(listen: NonNullable<Source['onStream']>): () => void;
+  /**
+   * Fork: the microphone outside a run, so that a game or a meeting that takes the virtual device as its microphone
+   * hears the user whether a session runs or not. Listened to only while the passthrough route is open, there is a
+   * virtual device, and no run carries a microphone of its own.
+   */
+  standing(listen: NonNullable<Source['onStream']>): () => void;
   /** The translated speech as played, before any route: the echo monitor's reference. */
   readonly ttsTap: PcmTap;
   /** What a bus carries. Direct desktop microphone output bypasses the virtual bus. */
@@ -85,7 +91,9 @@ export function createPlayback(graph: AudioGraph, routing: RoutingSource, clock:
   let rest: (() => void) | null = null;
   let disposing: Promise<void> | null = null;
 
-  const quiet = () => !live && current === null
+  let disconnectMic: (() => void) | undefined;
+  // A microphone carried outside a run (`standing`) is sound too: where it goes through this graph, a rest would cut it.
+  const quiet = () => !live && current === null && disconnectMic === undefined
     && queues.speaker.pending === 0 && queues.participant.pending === 0 && replayQueue.pending === 0;
 
   /** Rests the graph once it has stayed quiet for QUIET_MS; anything that plays resumes it. */
@@ -99,19 +107,28 @@ export function createPlayback(graph: AudioGraph, routing: RoutingSource, clock:
 
   let passthroughOpen = false;
   let microphone: MediaStream | null = null;
-  let disconnectMic: (() => void) | undefined;
   let followMic: ((active: boolean) => void) | undefined;
+  /** Fork: the microphone outside a run (`standing`), and whether there is a virtual device for it to go to. */
+  let standingMic: MediaStream | null = null;
+  let followStanding: ((active: boolean) => void) | undefined;
+  let virtualThere = false;
   const syncMic = () => {
+    const carried = disconnectMic !== undefined;
     disconnectMic?.();
     disconnectMic = undefined;
-    if (!microphone || !live || !passthroughOpen) return;
-    try {
-      disconnectMic = graph.connectMicrophone(microphone);
-      void graph.resume();
-    } catch (error) {
-      reportWarning('Playback', `Could not connect microphone passthrough: ${describeCause(error)}`, { cause: error, dedupeKey: 'playback:mic' });
+    // A run carries its own microphone; until it has one, and outside it, the standing one goes on.
+    const stream = live && microphone ? microphone : standingMic;
+    if (stream && passthroughOpen) {
+      try {
+        disconnectMic = graph.connectMicrophone(stream);
+        void graph.resume();
+      } catch (error) {
+        reportWarning('Playback', `Could not connect microphone passthrough: ${describeCause(error)}`, { cause: error, dedupeKey: 'playback:mic' });
+      }
     }
+    if (carried && !disconnectMic && quiet()) restLater();
   };
+  const syncStanding = () => followStanding?.(passthroughOpen && virtualThere && !(live && microphone));
 
   function passthrough(stream: MediaStream | null): void;
   function passthrough(listen: NonNullable<Source['onStream']>): () => void;
@@ -137,6 +154,32 @@ export function createPlayback(graph: AudioGraph, routing: RoutingSource, clock:
     if (microphone === input) return;
     microphone = input;
     syncMic();
+    syncStanding();
+  }
+
+  function standing(listen: NonNullable<Source['onStream']>): () => void {
+    followStanding?.(false);
+    let off: (() => void) | undefined;
+    const receive = (stream: MediaStream | null) => {
+      if (standingMic === stream) return;
+      standingMic = stream;
+      syncMic();
+    };
+    const follow = (active: boolean) => {
+      if (active) {
+        off ??= listen(receive);
+      } else {
+        off?.();
+        off = undefined;
+        receive(null);
+      }
+    };
+    followStanding = follow;
+    syncStanding();
+    return () => {
+      if (followStanding === follow) followStanding = undefined;
+      follow(false);
+    };
   }
 
   const apply = () => {
@@ -145,11 +188,13 @@ export function createPlayback(graph: AudioGraph, routing: RoutingSource, clock:
     const open = edges.some((e) => e.from === 'passthrough');
     void graph.setSinks(settings.sinks);
     graph.route(edges);
+    virtualThere = settings.sinks.virtual !== undefined;
     if (passthroughOpen !== open) {
       passthroughOpen = open;
       syncMic();
       followMic?.(live && open);
     }
+    syncStanding();
   };
   apply();
   const unsubscribeRouting = routing.subscribe(apply);
@@ -196,6 +241,7 @@ export function createPlayback(graph: AudioGraph, routing: RoutingSource, clock:
       live = on;
       syncMic();
       followMic?.(live && passthroughOpen);
+      syncStanding();
       if (!on) restLater();
     },
 
@@ -248,6 +294,8 @@ export function createPlayback(graph: AudioGraph, routing: RoutingSource, clock:
 
     passthrough,
 
+    standing,
+
     ttsTap: graph.ttsTap,
 
     meter: (bus) => graph.meter(bus),
@@ -264,8 +312,12 @@ export function createPlayback(graph: AudioGraph, routing: RoutingSource, clock:
         live = false;
         followMic?.(false);
         followMic = undefined;
+        followStanding?.(false);
+        followStanding = undefined;
         microphone = null;
         syncMic();
+        // A microphone let go just now armed a rest: nothing rests after the close.
+        rest?.();
         stopPreview();
         await graph.close();
       })();

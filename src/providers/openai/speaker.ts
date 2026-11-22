@@ -2,7 +2,8 @@
  * Fork: what speaks a leg's sentences (`voice.ts`), whichever way the leg is answered: by stages of its own
  * (`PipelineLeg`), or by the other device's session, which writes its translations itself (`speakingEvents`). One
  * sentence at a time, in the order they were finished, each handed on as its sound is made; a voice slower than the
- * talk drops the oldest sentence still waiting, so that what is heard is never far behind what is read.
+ * talk drops the oldest sentence still waiting in the same language, so that what is heard is never far behind what is
+ * read, and no language's listeners are left out for another's.
  */
 import { SAMPLE_RATE, type AdapterEvents, type Ref } from '../../lib/contract/adapter';
 import type { Clock } from '../../lib/contract/clock';
@@ -12,7 +13,7 @@ import { framePayload } from '../../lib/contract/framePayload';
 import { sameSpeech } from '../../lib/language/script';
 import { speakText, speaksLanguage, type VoiceDeps, type VoiceStage } from './voice';
 
-/** No more sentences than this wait behind the one being made. */
+/** No more sentences than this wait, in one language, behind the one being made. */
 export const SAYINGS_MOST = 2;
 
 interface Saying { ref?: Ref; text: string; language: string }
@@ -50,9 +51,12 @@ export class Speaker {
       if (this.recent.some((one) => sameSpeech(text, one.text))) return;
     }
     this.waiting.push({ ...(ref !== undefined ? { ref } : {}), text, language });
-    while (this.waiting.length > SAYINGS_MOST) {
-      const dropped = this.waiting.shift();
-      this.frame('out', 'voice.skipped', { chars: dropped?.text.length ?? 0 });
+    // A sentence put into two languages waits twice: each language is held to its own count.
+    const base = (code: string) => code.split('-')[0].toLowerCase();
+    const alike = (one: Saying) => base(one.language) === base(language);
+    while (this.waiting.filter(alike).length > SAYINGS_MOST) {
+      const [dropped] = this.waiting.splice(this.waiting.findIndex(alike), 1);
+      this.frame('out', 'voice.skipped', { chars: dropped.text.length });
     }
     this.next();
   }
