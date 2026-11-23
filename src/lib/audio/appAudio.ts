@@ -1,7 +1,7 @@
 /**
  * The page's playback — the one module in `src/lib/audio` that reads the
  * stores, as `session/appShape.ts` is for the runner. One graph per page, on
- * a 24 kHz context; `<audio>` elements as its outputs; the tap worklet from
+ * a 24 kHz context; its outputs a context on each device on the desktop (`contextSink.ts`) and `<audio>` elements elsewhere; the tap worklet from
  * the platform's URL; the virtual output per platform (Electron's meeting
  * device, the extension's tabs, nothing on the web); the routing settings
  * read live from `audioStore`, `routingStore` and `turnModeStore`.
@@ -16,6 +16,7 @@ import { useRoutingStore } from '../../stores/routingStore';
 import { useTurnModeStore } from '../../stores/turnModeStore';
 import { getEnvironment } from '../../utils/environment';
 import { standingMic } from './capture/standingMic';
+import { contextSink } from './contextSink';
 import { createAudioGraph, type VirtualOutput } from './graph';
 import { createPlayback, type Playback, type PreviewClip, type RoutingSource } from './playback';
 import { routesFor, type RoutingSettings } from './routes';
@@ -137,6 +138,8 @@ async function build(): Promise<AppAudio> {
       addTapModule: (ctx) => ctx.audioWorklet.addModule(tapModuleUrl(platform)),
       createTapNode: (ctx, chunk) => new AudioWorkletNode(ctx, 'pcm-tap-processor', { processorOptions: { chunk } }),
       createSink: (stream) => {
+        // Fork: on the desktop an output is a context on its device: an element playing the graph's stream starves in stretches.
+        if (platform === 'electron') return contextSink(stream);
         const element = new Audio();
         element.srcObject = stream;
         return element;

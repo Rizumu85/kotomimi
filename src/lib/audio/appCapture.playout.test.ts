@@ -42,10 +42,11 @@ function setup(platform: 'electron' | 'extension' | 'web' = 'electron', os = 'wi
   vi.mocked(openMic).mockResolvedValue(mic);
   const onPcm = vi.fn();
   const onPlayout = vi.fn();
-  const playback = { ttsTap: { read: () => new Float32Array() } } as unknown as Playback;
+  let played: (chunk: Float32Array) => void = () => {};
+  const playback = { ttsTap: { read: () => new Float32Array() }, onPlayed: (listener: (chunk: Float32Array) => void) => { played = listener; return () => {}; } } as unknown as Playback;
   const capture = createAppCapture(playback, platform, { onPcm, onPlayout });
   const voiced = () => vi.mocked(openMic).mock.lastCall![0].voiced!(quiet);
-  return { capture, loop, application, mic, onPcm, onPlayout, voiced, invoke };
+  return { capture, loop, application, mic, onPcm, onPlayout, voiced, invoke, played: (chunk: Float32Array) => played(chunk) };
 }
 
 describe('the microphone gate playout reference', () => {
@@ -66,7 +67,7 @@ describe('the microphone gate playout reference', () => {
     participant.onPcm(heard);
     application.push();
     expect(heard).toHaveBeenCalledOnce();
-    expect(voiced()).toBe(true);
+    expect(voiced()).toBeNull();
     useAudioStore.setState({ isParticipantMuted: true });
     capture.levels.participant.reset();
     loop.push();
@@ -123,6 +124,16 @@ describe('the microphone gate playout reference', () => {
     await vi.waitFor(() => expect(loop.end).toHaveBeenCalledTimes(2));
     await speaker.stop();
     expect(loop.end).toHaveBeenCalledTimes(2);
+  });
+
+  it('follows what the app itself plays, with the microphone alone and no capture of the system', async () => {
+    const { capture, loop, voiced, played } = setup('electron', 'darwin');
+    const speaker = await capture.openSource('speaker', live());
+    expect(loop.begin).not.toHaveBeenCalled();
+    expect(voiced()).toBeNull();
+    played(new Float32Array(2400).fill(0.1));
+    expect(voiced()).toBe(false);
+    await speaker.stop();
   });
 
   it('releases a late permission grant after the microphone stops', async () => {

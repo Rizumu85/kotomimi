@@ -43,6 +43,7 @@ function fakeGraph() {
     route: (edges) => { routes.push([...edges]); },
     setSinks: async (s) => { sinks.push(s); },
     ttsTap: createPcmTap(),
+    onPlayed: () => () => {},
     meter: () => null,
     resume: async () => { resumed += 1; },
     suspend: async () => { suspendedCount += 1; },

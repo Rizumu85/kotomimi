@@ -2,7 +2,8 @@
  * One Web Audio graph for everything the app plays (spec: "Playback"): five
  * feeds, two buses, the route table applied as a diff of gain edges, and a
  * tap of the translated speech for the echo monitor. Translated speech leaves
- * through `<audio>` elements so the browser's echo canceller sees it. Desktop
+ * through an output per bus (`SinkElement`): an `<audio>` element, or on the
+ * desktop a context on the bus's device (`contextSink.ts`). Desktop
  * microphone passthrough goes directly to the cable at its own rate. A
  * context the renderer wedges is rebuilt on a fresh one (#246), behind the
  * same graph object.
@@ -14,7 +15,7 @@ import type { AudioTimeline } from './clipQueue';
 import { createPcmTap, TAP_CHUNK_SAMPLES, type PcmTap } from './pcmTap';
 import type { Bus, Edge, Feed } from './routes';
 
-/** An output element: an `HTMLAudioElement` in the app. */
+/** An output: an `HTMLAudioElement`, or what stands for one (`contextSink.ts`). */
 export interface SinkElement {
   srcObject: MediaProvider | null;
   readonly paused: boolean;
@@ -68,6 +69,11 @@ export interface AudioGraph {
   /** The translated speech the graph plays (speaker, participant, replay), before any route: the echo monitor's reference. */
   readonly ttsTap: PcmTap;
   /**
+   * Fork: what the real bus carries, after its routes' volumes, in the tap's chunks: everything of the app's own
+   * that the user's device plays. The microphone's echo gate follows it. Returns the unsubscribe.
+   */
+  onPlayed(listener: (chunk: Float32Array) => void): () => void;
+  /**
    * An `AnalyserNode` on `bus`, pulled through the muted path like a tap;
    * null where this platform lacks the bus. The same object every time it is
    * asked for, and it keeps reading across a rebuild (#246).
@@ -96,6 +102,14 @@ export const MAX_REBUILDS = 3;
 export const CLOSE_WAIT_MS = 1_000;
 /** How long a bus's device switch holds the next one: a wedged sink may never settle `setSinkId` (#246). */
 export const SINK_SWITCH_DEADLINE_MS = 1_500;
+/**
+ * Fork: what the context's own output is given so that it is never silent: far under what any device can play.
+ * Everything heard leaves through the buses' outputs, and a context whose own output stays silent for 30 s is taken
+ * off its device by the browser and paced by a timer instead, on Windows at two thirds of real time: the buses then
+ * get two thirds of their sound, and every spoken translation crackles (measured 2026-11-21: the context's clock at
+ * 0.66 from the 30th second on, 1.00 with this).
+ */
+export const KEEP_AWAKE_LEVEL = 1e-7;
 
 interface Built {
   ctx: AudioContext;
@@ -120,6 +134,7 @@ export async function createAudioGraph(deps: GraphDeps): Promise<AudioGraph> {
   await deps.addTapModule(deps.context);
 
   const ttsTap = createPcmTap();
+  const played = new Set<(chunk: Float32Array) => void>();
   const virtual = deps.virtual;
   /** Created by the first build; a rebuild's swap points them at the new streams, so they keep their devices. */
   const elements: Partial<Record<Bus, SinkElement>> = {};
@@ -145,6 +160,10 @@ export async function createAudioGraph(deps: GraphDeps): Promise<AudioGraph> {
     // this muted path to the destination, which the user never hears.
     const muted = gain(0);
     muted.connect(ctx.destination);
+    const awake = ctx.createConstantSource();
+    awake.offset.value = KEEP_AWAKE_LEVEL;
+    awake.connect(ctx.destination);
+    awake.start();
     const taps: AudioWorkletNode[] = [];
     const tapInto = (from: AudioNode, onChunk: (chunk: Float32Array) => void) => {
       const node = deps.createTapNode(ctx, TAP_CHUNK_SAMPLES);
@@ -185,6 +204,7 @@ export async function createAudioGraph(deps: GraphDeps): Promise<AudioGraph> {
       buses.virtual = node;
       tapInto(node, (chunk) => virtual.send(chunk));
     }
+    tapInto(buses.real!, (chunk) => { for (const listener of played) listener(chunk); });
 
     const built: Built = { ctx, muted, feeds, buses, outs, taps, analysers: {} };
     for (const bus of metered) wireAnalyser(built, bus);
@@ -596,6 +616,11 @@ export async function createAudioGraph(deps: GraphDeps): Promise<AudioGraph> {
     },
 
     ttsTap,
+
+    onPlayed(listener) {
+      played.add(listener);
+      return () => { played.delete(listener); };
+    },
 
     async resume() {
       // A resume never loses to a suspend in flight: let it land, then undo it.

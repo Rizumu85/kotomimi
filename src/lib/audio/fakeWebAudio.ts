@@ -29,6 +29,15 @@ export class FakeGain extends FakeNode {
   };
 }
 
+export class FakeConstantSource extends FakeNode {
+  readonly offset = { value: 1 };
+  started = false;
+
+  start(): void {
+    this.started = true;
+  }
+}
+
 export class FakeBuffer {
   private readonly data: Float32Array;
 
@@ -151,6 +160,14 @@ export class FakeAudioContext {
 
   createGain(): FakeGain {
     return new FakeGain();
+  }
+
+  readonly constants: FakeConstantSource[] = [];
+
+  createConstantSource(): FakeConstantSource {
+    const source = new FakeConstantSource();
+    this.constants.push(source);
+    return source;
   }
 
   createBuffer(channels: number, length: number, sampleRate: number): FakeBuffer {

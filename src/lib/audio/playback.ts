@@ -67,6 +67,8 @@ export interface Playback extends PlaybackPort {
   standing(listen: NonNullable<Source['onStream']>): () => void;
   /** The translated speech as played, before any route: the echo monitor's reference. */
   readonly ttsTap: PcmTap;
+  /** Fork: what the user's device plays of the app's own, chunk by chunk (`AudioGraph.onPlayed`). */
+  onPlayed(listener: (chunk: Float32Array) => void): () => void;
   /** What a bus carries. Direct desktop microphone output bypasses the virtual bus. */
   meter(bus: Bus): BusMeter | null;
   dispose(): Promise<void>;
@@ -297,6 +299,8 @@ export function createPlayback(graph: AudioGraph, routing: RoutingSource, clock:
     standing,
 
     ttsTap: graph.ttsTap,
+
+    onPlayed: (listener) => graph.onPlayed(listener),
 
     meter: (bus) => graph.meter(bus),
 

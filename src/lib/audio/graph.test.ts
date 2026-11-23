@@ -4,7 +4,7 @@ import { LEAD_S } from './clipQueue';
 import {
   FakeAudioContext, FakeSink, FakeWorkletNode, reaches, type FakeBufferSource, type FakeGain, type FakeNode,
 } from './fakeWebAudio';
-import { CLOSE_WAIT_MS, createAudioGraph, MAX_REBUILDS, SINK_SWITCH_DEADLINE_MS } from './graph';
+import { CLOSE_WAIT_MS, createAudioGraph, KEEP_AWAKE_LEVEL, MAX_REBUILDS, SINK_SWITCH_DEADLINE_MS } from './graph';
 import { createPlayback, type RoutingSource } from './playback';
 
 const reportWarningSpy = vi.hoisted(() => vi.fn());
@@ -458,10 +458,42 @@ describe('createAudioGraph — the tts tap', () => {
     expect([...graph.ttsTap.read()]).toEqual([0.5, 0.25, 0.125]);
   });
 
-  it('asks the worklet for 100 ms chunks, and pulls both taps through a muted path', async () => {
+  it('asks the worklet for 100 ms chunks, and pulls every tap through a muted path', async () => {
     const { ctx, taps } = await setup('tabs');
-    expect(taps.map((t) => t.chunk)).toEqual([2400, 2400]);
+    expect(taps.map((t) => t.chunk)).toEqual([2400, 2400, 2400]);
     for (const tap of taps) expect(reaches(tap, ctx.destination)).toBe(true);
+  });
+});
+
+describe('createAudioGraph — what the user’s device plays', () => {
+  it('tells its listeners what the real bus carries, and nothing of the virtual one', async () => {
+    const { graph, taps, clip } = await setup();
+    // The tts tap is created first; the real bus's is the last.
+    const played = taps[taps.length - 1];
+    graph.route([{ from: 'speaker', to: 'virtual', gain: 1 }, { from: 'replay', to: 'real', gain: 1 }]);
+    expect(reaches(clip('speaker'), played)).toBe(false);
+    expect(reaches(clip('replay'), played)).toBe(true);
+    graph.route([{ from: 'speaker', to: 'real', gain: 1 }]);
+    expect(reaches(clip('speaker'), played)).toBe(true);
+
+    const heard: Float32Array[] = [];
+    const off = graph.onPlayed((chunk) => heard.push(chunk));
+    played.emit(Float32Array.of(0.5));
+    off();
+    played.emit(Float32Array.of(0.25));
+    expect(heard).toEqual([Float32Array.of(0.5)]);
+  });
+});
+
+describe('createAudioGraph — the context kept on its device (fork)', () => {
+  it("gives the context's own output a level no device can play, so that it is never silent", async () => {
+    const { ctx } = await setup();
+    expect(ctx.constants).toHaveLength(1);
+    const [awake] = ctx.constants;
+    expect(awake.offset.value).toBe(KEEP_AWAKE_LEVEL);
+    expect(KEEP_AWAKE_LEVEL).toBeLessThan(2 ** -23);
+    expect(awake.started).toBe(true);
+    expect([...awake.outputs]).toEqual([ctx.destination]);
   });
 });
 

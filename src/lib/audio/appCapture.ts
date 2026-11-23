@@ -1,8 +1,9 @@
 /**
  * The page's capture — with `appAudio.ts`, the only modules in `src/lib/audio`
  * that read the stores. Opens each leg's source for the platform, feeds the
- * microphone into playback's passthrough route and both legs into the echo
- * watch, and reads the settings the sources follow, live, from `audioStore`.
+ * microphone into playback's passthrough route, both legs into the echo
+ * watch and what sounds into the microphone's echo gate, and reads the
+ * settings the sources follow, live, from `audioStore`.
  */
 import type { LegName } from '../conversation/types';
 import type { Platform } from '../provider/types';
@@ -113,8 +114,15 @@ export interface AppCaptureOptions {
 
 export function createAppCapture(playback: Playback, platform: Platform = getEnvironment(), options: AppCaptureOptions = {}): AppCapture {
   const { meterGate } = options;
-  const echo = createEchoWatch(playback.ttsTap);
-  const follower = createEchoFollower();
+  const watch = createEchoWatch(playback.ttsTap);
+  // The echo watch's opt-in diagnostics (the `sokuji.echoDiagnostics` flag) tell the gate's onsets too: information, not a failure.
+  let diagnostics = false;
+  const echo: EchoWatch = { ...watch, setDiagnostics(enabled) { diagnostics = enabled; watch.setDiagnostics(enabled); } };
+  const follower = createEchoFollower(undefined, (line) => { if (diagnostics) console.info(`[Sokuji] [EchoFollow] ${line}`); });
+  // The app's own voice on the user's device comes back through the microphone like any other sound, and no
+  // capture but the whole system's holds it: with the microphone alone on a Mac, every spoken translation was
+  // heard as the user's. A whole-system capture hears it a second time, which changes nothing: the louder counts.
+  playback.onPlayed((chunk) => follower.played(chunk));
   const reference = createPlayoutReference(follower, options.onPlayout);
   let participantWhole = false;
   let micSignal: AbortSignal | null = null;

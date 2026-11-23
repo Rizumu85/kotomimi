@@ -32,7 +32,7 @@ import { openMic } from './capture/mic';
 import type { Playback } from './playback';
 
 function fakePlayback() {
-  return { passthrough: vi.fn(), ttsTap: { read: () => new Float32Array(0) } } as unknown as Playback & { passthrough: ReturnType<typeof vi.fn> };
+  return { passthrough: vi.fn(), ttsTap: { read: () => new Float32Array(0) }, onPlayed: () => () => {} } as unknown as Playback & { passthrough: ReturnType<typeof vi.fn> };
 }
 
 const clock = createVirtualClock(0);
@@ -56,7 +56,7 @@ describe('createAppCapture', () => {
     opened.sources.push(createFakeSource(clock, { voiced: true }));
     const other = await createAppCapture(fakePlayback(), 'electron').openSource('participant', live());
     clock.advance(100);
-    expect(voiced(quiet)).toBe(true);
+    expect(voiced(quiet)).toBeNull();
     useAudioStore.setState({ echoCancellationMode: 'off' });
     opened.sources.push(createFakeSource(clock, { voiced: true }));
     const participant = await capture.openSource('participant', live());
@@ -67,7 +67,7 @@ describe('createAppCapture', () => {
     await other.stop();
     expect(voiced(quiet)).toBe(false);
     await participant.stop();
-    expect(voiced(quiet)).toBe(true);
+    expect(voiced(quiet)).toBeNull();
     await speaker.stop();
   });
 

@@ -20,7 +20,7 @@ vi.mock('../../lib/audio/appAudio', () => ({
         queues: { speaker: queue, participant: queue, replay: queue },
         audio() {}, held() {}, clear() {}, live() {}, passthrough() {},
         replay() {}, stopReplay() {}, preview: async () => {}, stopPreview() {},
-        ttsTap: { read: () => new Float32Array(0) },
+        ttsTap: { read: () => new Float32Array(0) }, onPlayed: () => () => {},
         meter: () => null,
       },
       testTone: async () => {},
