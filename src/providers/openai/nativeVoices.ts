@@ -80,6 +80,15 @@ export const NATIVE_VOICES: readonly NativeVoiceModel[] = [
     any: [],
     clones: true,
   },
+  {
+    id: 'qwen3-tts-0.6b-base-q8',
+    name: 'Qwen3-TTS 0.6B Base',
+    bytes: 1991217728,
+    languages: ['zh', 'en', 'ja', 'ko', 'de', 'fr', 'ru', 'pt', 'es', 'it'],
+    voices: {},
+    any: [],
+    clones: true,
+  },
 ];
 
 export const NATIVE_DEFAULT_VOICE = NATIVE_VOICES[0].id;

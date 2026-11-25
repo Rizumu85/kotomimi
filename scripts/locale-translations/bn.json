@@ -1019,6 +1019,10 @@
     "en": "Add a language to {{name}}",
     "text": "「{{name}}」-এর জন্য আরেকটি ভাষায় রেকর্ড করুন"
   },
+  "fork.voice.addTone": {
+    "en": "Add a tone to {{name}}",
+    "text": "‘{{name}}’-এ নতুন ভঙ্গি যোগ করুন"
+  },
   "fork.voice.addVoice": {
     "en": "Add a voice",
     "text": "কণ্ঠ যোগ করুন"
@@ -1050,6 +1054,10 @@
   "fork.voice.clipSilent": {
     "en": "No voice was heard.",
     "text": "কোনো কণ্ঠ শোনা যায়নি।"
+  },
+  "fork.voice.clipTone": {
+    "en": "Tone",
+    "text": "কথার ভঙ্গি"
   },
   "fork.voice.clipTooLong": {
     "en": "Too long: no more than {{seconds}} seconds with its words.",
@@ -1163,6 +1171,10 @@
     "en": "Remove the {{language}} recording of {{name}}",
     "text": "「{{name}}」-এর {{language}} রেকর্ডিং মুছুন"
   },
+  "fork.voice.removeToneTake": {
+    "en": "Remove the {{tone}} {{language}} recording of {{name}}",
+    "text": "‘{{name}}’-এর {{tone}} ভঙ্গির {{language}} রেকর্ডিং মুছুন"
+  },
   "fork.voice.removeVoice": {
     "en": "Remove {{name}}",
     "text": "‘{{name}}’ মুছে ফেলুন"
@@ -1214,6 +1226,30 @@
   "fork.voice.toMeLocked": {
     "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
     "text": "‘আমি শুনি’ এখন ব্যবহার করা যাচ্ছে না। পুরো সিস্টেম থেকে শব্দ নেওয়ায় অ্যাপের পড়ে শোনানো কথাও অপর পক্ষের কথা হিসেবে ধরা পড়বে। অপর পক্ষের শব্দের উৎস হিসেবে একটি অ্যাপ বেছে নিন (যেমন VRChat)।"
+  },
+  "fork.voice.tones.angry": {
+    "en": "Angry",
+    "text": "রাগী"
+  },
+  "fork.voice.tones.gentle": {
+    "en": "Gentle",
+    "text": "কোমল"
+  },
+  "fork.voice.tones.laugh": {
+    "en": "Laughing",
+    "text": "হো হো হাসি"
+  },
+  "fork.voice.tones.lively": {
+    "en": "Lively",
+    "text": "খুশি"
+  },
+  "fork.voice.tones.plain": {
+    "en": "Plain",
+    "text": "স্বাভাবিক"
+  },
+  "fork.voice.tones.serious": {
+    "en": "Serious",
+    "text": "গম্ভীর"
   },
   "fork.voice.toThem": {
     "en": "The other side hears it",
@@ -1670,6 +1706,10 @@
   "models.namedGroup": {
     "en": "Needs the language set",
     "text": "ভাষা নির্ধারণ করতে হবে"
+  },
+  "notices.tts_slow": {
+    "en": "Spoken translation cannot keep up, so each sentence now plays once it is complete. The graphics card may be busy.",
+    "text": "পড়ে শোনানোর গতি তাল মেলাতে পারছে না। এখন থেকে প্রতিটি বাক্য পুরোটা তৈরি হলে তবেই শোনানো হবে। গ্রাফিক্স কার্ড ব্যস্ত থাকতে পারে।"
   },
   "providers.gemini.name": {
     "en": "Google Gemini",
@@ -2258,6 +2298,10 @@
   "providers.localai.noteQwen3TtsBase": {
     "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
     "text": "আপনার নিজের কণ্ঠে পড়ে শোনায়। কণ্ঠ ক্লোন করতে প্রায় 10 সেকেন্ডের রেকর্ডিংই যথেষ্ট। প্রতিটি কণ্ঠ প্রথমবার ব্যবহার করলে কয়েক সেকেন্ড থেকে 20 সেকেন্ডের কিছু বেশি সময় লাগতে পারে। এরপর সঙ্গে সঙ্গেই পড়া শুরু হয়। প্রায় 3 GB ভিডিও মেমরি লাগে। 10টি ভাষা সমর্থিত।"
+  },
+  "providers.localai.noteQwen3TtsBaseSmall": {
+    "en": "Reads in your own voice like the 1.7B, lighter and faster, and measured just as like you. About 2 GB of video memory, ten languages.",
+    "text": "1.7B-এর মতোই আপনার কণ্ঠে পড়ে শোনায়। এটি আরও হালকা ও দ্রুত, আর পরীক্ষায় কণ্ঠের মিলও একই রকম ছিল। প্রায় 2 GB ভিডিও মেমরি লাগে। 10টি ভাষা সমর্থন করে।"
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

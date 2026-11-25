@@ -1023,6 +1023,10 @@
     "en": "Add a language to {{name}}",
     "text": "Opname in een extra taal toevoegen aan ‘{{name}}’"
   },
+  "fork.voice.addTone": {
+    "en": "Add a tone to {{name}}",
+    "text": "Voeg een toon toe aan ‘{{name}}’"
+  },
   "fork.voice.addVoice": {
     "en": "Add a voice",
     "text": "Stem toevoegen"
@@ -1054,6 +1058,10 @@
   "fork.voice.clipSilent": {
     "en": "No voice was heard.",
     "text": "Er is geen stem te horen."
+  },
+  "fork.voice.clipTone": {
+    "en": "Tone",
+    "text": "Toon"
   },
   "fork.voice.clipTooLong": {
     "en": "Too long: no more than {{seconds}} seconds with its words.",
@@ -1167,6 +1175,10 @@
     "en": "Remove the {{language}} recording of {{name}}",
     "text": "Opname van ‘{{name}}’ in het {{language}} verwijderen"
   },
+  "fork.voice.removeToneTake": {
+    "en": "Remove the {{tone}} {{language}} recording of {{name}}",
+    "text": "Verwijder de opname van ‘{{name}}’ in het {{language}} met de toon ‘{{tone}}’"
+  },
   "fork.voice.removeVoice": {
     "en": "Remove {{name}}",
     "text": "‘{{name}}’ verwijderen"
@@ -1218,6 +1230,30 @@
   "fork.voice.toMeLocked": {
     "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
     "text": "‘Voor mij’ is niet beschikbaar. Kotomimi neemt al het systeemgeluid op en hoort daardoor de voorgelezen tekst alsof de ander die uitspreekt. Kies één app als geluidsbron, bijvoorbeeld VRChat."
+  },
+  "fork.voice.tones.angry": {
+    "en": "Angry",
+    "text": "Boos"
+  },
+  "fork.voice.tones.gentle": {
+    "en": "Gentle",
+    "text": "Zachtaardig"
+  },
+  "fork.voice.tones.laugh": {
+    "en": "Laughing",
+    "text": "Hard lachend"
+  },
+  "fork.voice.tones.lively": {
+    "en": "Lively",
+    "text": "Blij"
+  },
+  "fork.voice.tones.plain": {
+    "en": "Plain",
+    "text": "Normaal"
+  },
+  "fork.voice.tones.serious": {
+    "en": "Serious",
+    "text": "Serieus"
   },
   "fork.voice.toThem": {
     "en": "The other side hears it",
@@ -1710,6 +1746,10 @@
   "models.online": {
     "en": "Online",
     "text": "Online"
+  },
+  "notices.tts_slow": {
+    "en": "Spoken translation cannot keep up, so each sentence now plays once it is complete. The graphics card may be busy.",
+    "text": "Het voorlezen loopt achter. Elke zin wordt nu pas afgespeeld zodra die helemaal klaar is. De videokaart is mogelijk druk bezig."
   },
   "providers.gemini.name": {
     "en": "Google Gemini",
@@ -2298,6 +2338,10 @@
   "providers.localai.noteQwen3TtsBase": {
     "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
     "text": "Leest voor met je eigen stem. Een opname van ongeveer tien seconden is genoeg om je stem te klonen. De eerste keer dat je een stem gebruikt, duurt het een paar seconden tot bijna een halve minuut voordat je iets hoort. Daarna begint het voorlezen meteen. Gebruikt ongeveer 3 GB videogeheugen en ondersteunt 10 talen."
+  },
+  "providers.localai.noteQwen3TtsBaseSmall": {
+    "en": "Reads in your own voice like the 1.7B, lighter and faster, and measured just as like you. About 2 GB of video memory, ten languages.",
+    "text": "Leest net als 1.7B voor met je eigen stem. Lichter en sneller, en klinkt in tests even goed als jouw stem. Gebruikt ongeveer 2 GB videogeheugen en ondersteunt 10 talen."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

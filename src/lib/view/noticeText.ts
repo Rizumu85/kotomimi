@@ -74,6 +74,7 @@ export const NOTICE_WORDS: Readonly<Record<string, string>> = {
   // The adapters' degradations (CLIENT_DIAGNOSTICS).
   parse_error: "A message from the provider couldn't be read; the session continues.",
   tts_degraded: 'Speech playback is degraded; the translated text still arrives.',
+  tts_slow: 'Spoken translation cannot keep up, so each sentence now plays once it is complete. The graphics card may be busy.',
   resume_attempt_failed: 'Reconnecting failed; trying again.',
   voice_fallback: 'The chosen voice was unavailable, so another voice is used.',
   // A failed leg's API error type (the adapter's code).

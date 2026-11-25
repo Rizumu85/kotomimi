@@ -32,8 +32,8 @@ const { WebSocketServer } = require('ws');
 
 /** A request's JSON body may be this long: a chat request carries a sentence, not a file. */
 const MAX_BODY_BYTES = 1024 * 1024;
-/** But for a recording handed over (`/v1/audio/voices`): twenty seconds of a voice as base64, with room to spare. */
-const MAX_VOICE_BODY_BYTES = 4 * 1024 * 1024;
+/** But for a recording handed over (`/v1/audio/voices`): the largest one there may be, as base64, and its words. */
+const MAX_VOICE_BODY_BYTES = Math.ceil(require('./lent-voices').MOST_WAV_BYTES / 3) * 4 + 64 * 1024;
 const VOICES_PATH = '/v1/audio/voices';
 /** Recordings being handed over at once: each is megabytes held in memory until it is whole. */
 const MAX_VOICE_UPLOADS = 2;

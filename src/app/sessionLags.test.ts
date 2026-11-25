@@ -11,40 +11,44 @@ const models: LagModels = { speaker: 'mine', participant: 'theirs', translation:
 afterEach(() => vi.useRealTimers());
 
 describe('session lag measurement', () => {
-  it('requires five samples strictly above the threshold and reports only once for the session', () => {
+  it('requires ten samples, eight strictly above the threshold, and reports only once for the session', () => {
     const lags = createSessionLags();
     lags.begin();
-    for (let i = 0; i < 4; i++) lags.sample('speaker', 'mine', 2200);
+    for (let i = 0; i < 9; i++) lags.sample('speaker', 'mine', 2200);
     expect(lags.state.getState().notice).toBeNull();
     lags.sample('speaker', 'mine', 2200);
     const first = lags.state.getState().notice;
     expect(first).toEqual({ stage: 'speaker', model: 'mine', averageMS: 2200 });
-    for (let i = 0; i < 5; i++) lags.sample('translation', 'translator', 4000);
+    for (let i = 0; i < 10; i++) lags.sample('translation', 'translator', 4000);
     expect(lags.state.getState().notice).toBe(first);
     expect(lags.state.getState().fallingBehind.translation?.model).toBe('translator');
-    for (let i = 0; i < 5; i++) lags.sample('speaker', 'new', 8000);
+    for (let i = 0; i < 10; i++) lags.sample('speaker', 'new', 8000);
     expect(lags.state.getState().fallingBehind.speaker).toBe(first);
   });
   it('gives no notice for a stage that is not one of this computer’s own models, and still knows it falls behind (fork)', () => {
     const lags = createSessionLags(); lags.begin();
     const planned = new Set(['translation'] as const);
     // Another device hears: there is no lighter plan to offer for it.
-    for (let i = 0; i < 5; i++) lags.sample('speaker', 'apple-speech', 2600, planned);
+    for (let i = 0; i < 10; i++) lags.sample('speaker', 'apple-speech', 2600, planned);
     expect(lags.state.getState().notice).toBeNull();
     expect(lags.state.getState().fallingBehind.speaker).toEqual({ stage: 'speaker', model: 'apple-speech', averageMS: 2600 });
     // This computer translates: that one is said.
-    for (let i = 0; i < 5; i++) lags.sample('translation', 'translator', 4000, planned);
+    for (let i = 0; i < 10; i++) lags.sample('translation', 'translator', 4000, planned);
     expect(lags.state.getState().notice).toMatchObject({ stage: 'translation', model: 'translator' });
   });
-  it('uses exactly the latest five, isolated by side and model', () => {
+  it('averages the latest five, and falls behind only when eight of the latest ten are slow, by side and model', () => {
     const lags = createSessionLags(); lags.begin();
-    for (let i = 0; i < 5; i++) lags.sample('participant', 'same', 2000);
+    for (let i = 0; i < 10; i++) lags.sample('participant', 'same', 2000);
     expect(lags.state.getState().notice).toBeNull();
     lags.sample('speaker', 'same', 10000);
     lags.sample('participant', 'different', 10000);
-    expect(lags.state.getState().notice).toBeNull();
     lags.sample('participant', 'same', 3000);
     expect(lags.average('participant', 'same')).toBe(2200);
+    // Slow now and then is no falling behind, however slow the average of five.
+    for (let i = 0; i < 6; i++) lags.sample('participant', 'same', 3000);
+    expect(lags.average('participant', 'same')).toBe(3000);
+    expect(lags.state.getState().notice).toBeNull();
+    lags.sample('participant', 'same', 3000);
     expect(lags.state.getState().notice?.stage).toBe('participant');
     expect(lags.average('speaker', 'missing')).toBeUndefined();
   });
@@ -94,14 +98,16 @@ describe('session lag measurement', () => {
     lags.begin();
     for (const value of [-1, NaN, Infinity]) lags.sample('speaker', 'mine', value);
     expect(lags.state.getState().averages).toEqual({});
-    for (let i = 0; i < 5; i++) lags.sample('translation', 'translator', 3000);
+    for (let i = 0; i < 10; i++) lags.sample('translation', 'translator', 3000);
+    expect(lags.state.getState().notice).toBeNull();
+    for (let i = 0; i < 7; i++) lags.sample('translation', 'translator', 4000);
     expect(lags.state.getState().notice).toBeNull();
     lags.sample('translation', 'translator', 4000);
     expect(lags.state.getState().notice).not.toBeNull();
     lags.end();
     expect(lags.state.getState()).toEqual({ averages: {}, fallingBehind: {}, notice: null });
     lags.begin();
-    for (let i = 0; i < 5; i++) lags.sample('speaker', 'mine', 2500);
+    for (let i = 0; i < 10; i++) lags.sample('speaker', 'mine', 2500);
     expect(lags.state.getState().notice?.model).toBe('mine');
   });
 });

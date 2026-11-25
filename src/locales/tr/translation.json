@@ -787,7 +787,8 @@
       "voiceUnnamed": "Seslendirme modeli henüz girilmedi. \"Seslendirme\" kartına model adını girin.",
       "noteQwen3Tts": "En doğal ses, anında konuşmaya başlar. Japonca, Çince ve İngilizce testlerinde hiç okuma hatası yapmadı. Yaklaşık 3 GB ekran kartı belleği kullanır, 10 dili destekler.",
       "noteIrodori": "Yalnızca Japonca konuşur. Testlerde hiç okuma hatası yapmadı, cümle başına yaklaşık yarım saniye sürdü. Yaklaşık 1.7 GB ekran kartı belleği kullanır.",
-      "noteQwen3TtsBase": "Yaklaşık on saniyelik bir kayıtla sesini klonlar ve metni senin sesinle okur. Her ses ilk kullanımda birkaç saniye ile otuz saniyeye yakın bir süre arasında bekletebilir. Sonraki kullanımlarda hemen okumaya başlar. Yaklaşık 3 GB ekran kartı belleği kullanır ve 10 dili destekler."
+      "noteQwen3TtsBase": "Yaklaşık on saniyelik bir kayıtla sesini klonlar ve metni senin sesinle okur. Her ses ilk kullanımda birkaç saniye ile otuz saniyeye yakın bir süre arasında bekletebilir. Sonraki kullanımlarda hemen okumaya başlar. Yaklaşık 3 GB ekran kartı belleği kullanır ve 10 dili destekler.",
+      "noteQwen3TtsBaseSmall": "1.7B gibi kendi sesinizle okur. Daha hafif ve daha hızlı, testlerde de sesinize 1.7B kadar yakın. Yaklaşık 2 GB ekran kartı belleği kullanır ve 10 dili destekler."
     }
   },
   "logsPanel": {
@@ -1637,7 +1638,8 @@
     "mic_in_use": "“{{device}}” mikrofonu şu anda kullanımda ({{apps}}). Yeniden başlatmadan önce kapatın: {{apps}}. Ya da başka bir mikrofon seçin.",
     "mic_unreadable": "Windows “{{device}}” mikrofonunu açamadı. Başka bir uygulama kullanıyor olabilir veya sürücüsü yanıt vermiyor olabilir. Mikrofonu kullanan uygulamaları kapatın veya mikrofonu yeniden bağlayın, ardından yeniden başlatın.",
     "mic_blocked": "Windows, Sokuji'nin mikrofonu kullanmasına izin vermiyor. Ayarlar › Gizlilik ve güvenlik › Mikrofon bölümünden masaüstü uygulamalarının mikrofon erişimini açın, ardından yeniden başlatın.",
-    "noise_suppression_fallback": "Seçilen gürültü azaltma kullanılamıyor. Daha düşük bir düzey kullanılıyor; mikrofon ayarlarını kontrol edin."
+    "noise_suppression_fallback": "Seçilen gürültü azaltma kullanılamıyor. Daha düşük bir düzey kullanılıyor; mikrofon ayarlarını kontrol edin.",
+    "tts_slow": "Seslendirme yetişemiyor. Artık her cümle hazır olduğunda seslendirilecek. Ekran kartı meşgul olabilir."
   },
   "viewer": {
     "title": "Sokuji altyazıları",
@@ -2185,7 +2187,18 @@
       "importVoice": "Ses dosyasını içe aktar",
       "useVoice": "“{{name}}” sesiyle oku",
       "addShort": "Ekle",
-      "importShort": "İçe aktar"
+      "importShort": "İçe aktar",
+      "clipTone": "Ses tonu",
+      "addTone": "“{{name}}” için bir ses tonu ekle",
+      "removeToneTake": "“{{name}}” için {{tone}} tonundaki {{language}} ses kaydını sil",
+      "tones": {
+        "plain": "Normal",
+        "lively": "Neşeli",
+        "laugh": "Kahkahalı",
+        "gentle": "Yumuşak",
+        "serious": "Ciddi",
+        "angry": "Kızgın"
+      }
     },
     "echoCancellationGate": "Ses düzeyine göre",
     "echoCancellationGateTooltip": "Ses yüksekliğine göre — hoparlörler için: çaldıkları ses mikrofona sesinizden çok daha kısık döner; bu nedenle ses yüksekliğine göre engellenir ve sesiniz olduğu gibi kalır.",

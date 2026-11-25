@@ -1023,6 +1023,10 @@
     "en": "Add a language to {{name}}",
     "text": "Spela in på ett till språk för ”{{name}}”"
   },
+  "fork.voice.addTone": {
+    "en": "Add a tone to {{name}}",
+    "text": "Lägg till ett tonfall för ”{{name}}”"
+  },
   "fork.voice.addVoice": {
     "en": "Add a voice",
     "text": "Lägg till en röst"
@@ -1054,6 +1058,10 @@
   "fork.voice.clipSilent": {
     "en": "No voice was heard.",
     "text": "Ingen röst hördes."
+  },
+  "fork.voice.clipTone": {
+    "en": "Tone",
+    "text": "Tonfall"
   },
   "fork.voice.clipTooLong": {
     "en": "Too long: no more than {{seconds}} seconds with its words.",
@@ -1167,6 +1175,10 @@
     "en": "Remove the {{language}} recording of {{name}}",
     "text": "Ta bort inspelningen på {{language}} för ”{{name}}”"
   },
+  "fork.voice.removeToneTake": {
+    "en": "Remove the {{tone}} {{language}} recording of {{name}}",
+    "text": "Ta bort inspelningen av ”{{name}}” på {{language}} med tonfallet ”{{tone}}”"
+  },
   "fork.voice.removeVoice": {
     "en": "Remove {{name}}",
     "text": "Ta bort ”{{name}}”"
@@ -1218,6 +1230,30 @@
   "fork.voice.toMeLocked": {
     "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
     "text": "”För mig” är inte tillgängligt just nu. När ljudet hämtas från hela systemet tolkar Kotomimi uppläsningen som tal från den andra personen. Välj en enskild app, till exempel VRChat, som ljudkälla."
+  },
+  "fork.voice.tones.angry": {
+    "en": "Angry",
+    "text": "Arg"
+  },
+  "fork.voice.tones.gentle": {
+    "en": "Gentle",
+    "text": "Mild"
+  },
+  "fork.voice.tones.laugh": {
+    "en": "Laughing",
+    "text": "Skrattar högt"
+  },
+  "fork.voice.tones.lively": {
+    "en": "Lively",
+    "text": "Glad"
+  },
+  "fork.voice.tones.plain": {
+    "en": "Plain",
+    "text": "Neutral"
+  },
+  "fork.voice.tones.serious": {
+    "en": "Serious",
+    "text": "Allvarlig"
   },
   "fork.voice.toThem": {
     "en": "The other side hears it",
@@ -1706,6 +1742,10 @@
   "models.online": {
     "en": "Online",
     "text": "Online"
+  },
+  "notices.tts_slow": {
+    "en": "Spoken translation cannot keep up, so each sentence now plays once it is complete. The graphics card may be busy.",
+    "text": "Uppläsningen hinner inte med. Från och med nu spelas varje mening upp först när hela ljudet är klart. Grafikkortet kan vara upptaget."
   },
   "providers.gemini.name": {
     "en": "Google Gemini",
@@ -2294,6 +2334,10 @@
   "providers.localai.noteQwen3TtsBase": {
     "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
     "text": "Läser upp text med din egen röst. Spela in ungefär tio sekunder tal för att klona rösten. Första gången du använder en röst kan det ta allt från några sekunder till närmare en halv minut. Därefter börjar uppläsningen direkt. Använder cirka 3 GB grafikminne och stöder 10 språk."
+  },
+  "providers.localai.noteQwen3TtsBaseSmall": {
+    "en": "Reads in your own voice like the 1.7B, lighter and faster, and measured just as like you. About 2 GB of video memory, ten languages.",
+    "text": "Läser upp text med din egen röst, precis som 1.7B. Modellen är lättare och snabbare, och i tester låter den lika mycket som du. Använder cirka 2 GB grafikminne och stöder 10 språk."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

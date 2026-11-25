@@ -787,7 +787,8 @@
       "voiceUnnamed": "Es ist noch kein Vorlesemodell eingetragen. Trage es im Bereich „Vorlesen“ ein.",
       "noteQwen3Tts": "Klingt am natürlichsten und spricht sofort los. In Tests mit Japanisch, Chinesisch und Englisch keine Aussprachefehler. Benötigt etwa 3 GB Grafikspeicher, unterstützt 10 Sprachen.",
       "noteIrodori": "Nur Japanisch. In Tests keine Aussprachefehler, etwa eine halbe Sekunde pro Satz. Benötigt etwa 1.7 GB Grafikspeicher.",
-      "noteQwen3TtsBase": "Liest mit deiner eigenen Stimme vor. Zum Klonen reicht eine Aufnahme von etwa zehn Sekunden. Beim ersten Einsatz jeder Stimme dauert es ein paar Sekunden bis knapp eine halbe Minute, bis sie zu sprechen beginnt. Danach spricht sie sofort. Benötigt etwa 3 GB Grafikspeicher und unterstützt 10 Sprachen."
+      "noteQwen3TtsBase": "Liest mit deiner eigenen Stimme vor. Zum Klonen reicht eine Aufnahme von etwa zehn Sekunden. Beim ersten Einsatz jeder Stimme dauert es ein paar Sekunden bis knapp eine halbe Minute, bis sie zu sprechen beginnt. Danach spricht sie sofort. Benötigt etwa 3 GB Grafikspeicher und unterstützt 10 Sprachen.",
+      "noteQwen3TtsBaseSmall": "Liest wie das 1.7B-Modell mit deiner eigenen Stimme vor, braucht aber weniger Ressourcen und ist schneller. Im Test klang die Stimme genauso ähnlich wie beim 1.7B-Modell. Benötigt etwa 2 GB Grafikspeicher und unterstützt 10 Sprachen."
     }
   },
   "logsPanel": {
@@ -1637,7 +1638,8 @@
     "mic_in_use": "Das Mikrofon „{{device}}“ wird von {{apps}} verwendet. Schließen Sie {{apps}} und starten Sie erneut, oder wählen Sie ein anderes Mikrofon.",
     "mic_unreadable": "Windows konnte das Mikrofon „{{device}}“ nicht öffnen. Möglicherweise belegt es eine andere App, oder sein Treiber reagiert nicht mehr. Schließen Sie Apps, die es verwenden, oder schließen Sie es neu an, und starten Sie dann erneut.",
     "mic_blocked": "Windows erlaubt Sokuji nicht, das Mikrofon zu verwenden. Aktivieren Sie den Mikrofonzugriff für Desktop-Apps unter Einstellungen › Datenschutz und Sicherheit › Mikrofon, und starten Sie dann erneut.",
-    "noise_suppression_fallback": "Die gewählte Rauschunterdrückung ist nicht verfügbar. Eine niedrigere Stufe wird verwendet; prüfe die Mikrofoneinstellungen."
+    "noise_suppression_fallback": "Die gewählte Rauschunterdrückung ist nicht verfügbar. Eine niedrigere Stufe wird verwendet; prüfe die Mikrofoneinstellungen.",
+    "tts_slow": "Die Sprachausgabe kommt nicht hinterher. Ab jetzt wird jeder Satz erst abgespielt, wenn die Audioerzeugung dafür abgeschlossen ist. Die Grafikkarte ist möglicherweise ausgelastet."
   },
   "viewer": {
     "title": "Sokuji-Untertitel",
@@ -2185,7 +2187,18 @@
       "importVoice": "Stimmdatei importieren",
       "useVoice": "Mit „{{name}}“ vorlesen",
       "addShort": "Hinzufügen",
-      "importShort": "Importieren"
+      "importShort": "Importieren",
+      "clipTone": "Tonfall",
+      "addTone": "Tonfall für „{{name}}“ hinzufügen",
+      "removeToneTake": "Aufnahme von „{{name}}“ löschen (Tonfall: {{tone}}, Sprache: {{language}})",
+      "tones": {
+        "plain": "Neutral",
+        "lively": "Fröhlich",
+        "laugh": "Laut lachend",
+        "gentle": "Sanft",
+        "serious": "Ernst",
+        "angry": "Wütend"
+      }
     },
     "echoCancellationGate": "Nach Lautstärke",
     "echoCancellationGateTooltip": "Nach Lautstärke – für Lautsprecher: Der Ton aus den Lautsprechern gelangt viel leiser als deine Stimme ins Mikrofon und wird deshalb nach Lautstärke ausgefiltert. Deine Stimme bleibt unverändert.",

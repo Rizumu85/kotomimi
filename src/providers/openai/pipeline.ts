@@ -53,6 +53,7 @@ import { recognitionLimits } from './hearingPlan';
 import { atServer, type VoiceDeps, type VoiceStage } from './voice';
 import { Speaker, speakingEvents } from './speaker';
 import { liveVoiceDeps } from '../../lib/voice/liveVoice';
+import { toneOf } from '../../lib/voice/tone';
 
 /** The credential a stage's endpoint is called with, by its field. */
 export type StageKey = 'translateKey' | 'coachKey' | 'apiKey' | 'asrKey';
@@ -235,7 +236,7 @@ export interface PipelineDeps {
   /** The native engine, when a leg hears by it: the main process's by default, stand-ins in tests. */
   native: { bridge: NativeBridge; start(model: string): Promise<NativeEngineStatus>; /** Where a native text engine answers now, up with this model, and the key its present run asks for. Rejects when it is not up and cannot be brought up. */ base?(engine: 'translator' | 'coach', model: string): Promise<EngineAddress> };
   /** What a voice is asked through (`voice.ts`): the page's own by default, stand-ins in tests. Its clock and `fetch` are the leg's. */
-  voice: Pick<VoiceDeps, 'decode' | 'native' | 'edge'>;
+  voice: Pick<VoiceDeps, 'decode' | 'native' | 'edge' | 'recording'>;
 }
 
 /** A native text engine's chat base URL, and the key of its run where it asks for one: both are new each time it starts. */
@@ -296,9 +297,6 @@ function forgetHeard(now: number): void {
     if (h.until !== null && now - h.until > HEARD_KEPT_MS) heardLately.splice(i, 1);
   }
 }
-/** Fork: how long the app's own voice is taken to last before its sound is made: a moment to begin, and this long a letter. */
-const VOICED_LEAD_MS = 1500;
-const VOICED_MS_A_CHAR = 250;
 /** Two recognizers do not hear one voice begin at the same instant. */
 const HEARD_SLACK_MS = 1000;
 /** A stretch is closed by the pause after it: a sentence begun in the last of that pause is an answer, not the same voice. */
@@ -391,10 +389,10 @@ class PipelineLeg implements AdapterSession {
     private readonly events: AdapterEvents,
     private readonly doFetch: typeof fetch,
     private readonly engineBase: (engine: 'translator' | 'coach', model: string) => Promise<EngineAddress> = engineBaseNow,
-    voice: Pick<VoiceDeps, 'decode' | 'native' | 'edge'> = liveVoiceDeps,
+    voice: Pick<VoiceDeps, 'decode' | 'native' | 'edge' | 'recording'> = liveVoiceDeps,
   ) {
     this.inner = eventsFrom((e) => this.onInner(e));
-    this.speaker = speakerOf(request, stages.voice, events, doFetch, voice, (text, untilAtLeast) => this.voiced(text, untilAtLeast));
+    this.speaker = speakerOf(request, stages.voice, events, doFetch, voice, (text, from) => this.voiced(text, from));
     this.phones = watchPhones({
       fetch: doFetch,
       clock: request.clock,
@@ -1134,7 +1132,7 @@ class PipelineLeg implements AdapterSession {
       // Fork: a translation into a language of the other side's is spoken, where this leg speaks (`Stages.voice`):
       // every one but the one back into the speaker's own (told by its stage: Chinese into Chinese, simplified into
       // traditional, is a translation for them too).
-      if (opened && final && stage.kind === 'translate' && stage !== this.stages.back?.stage) this.say(ref, final, stage.language ?? this.request.context.direction.target);
+      if (opened && final && stage.kind === 'translate' && stage !== this.stages.back?.stage) this.say(ref, final, stage.language ?? this.request.context.direction.target, toneOf(job.text, final));
       // A model that said nothing: feedback with nothing to say is no fault; a translation with none is — also where
       // what was written while the sentence was said stays in its place.
       if (stage.kind === 'translate' && (!opened || !final)) this.unanswered(job, 'the model answered with no text');
@@ -1212,24 +1210,19 @@ class PipelineLeg implements AdapterSession {
   private readonly ownVoice = {};
 
   /**
-   * Fork: a sentence this leg is saying aloud, kept with what the legs have lately heard: played on loudspeakers it
-   * comes back through the microphone, and a sentence heard then that reads as it does is the app's own voice, not
-   * the user's (`heardElsewhere`). Until its sound is made it is taken to last as long as its text suggests.
+   * The app's own words can return through the microphone during playback (`heardElsewhere`). The speaker gives
+   * the first piece's scheduled start, then extends the window through each piece before handing it to playback.
    */
-  private voiced(text: string, untilAtLeast: number): (until: number | null) => void {
-    const from = this.request.clock.now();
-    forgetHeard(from);
-    const entry: Heard = { leg: this.ownVoice, ref: -1, text, from, until: untilAtLeast + VOICED_LEAD_MS + text.length * VOICED_MS_A_CHAR, voiced: true };
+  private voiced(text: string, from: number): (until: number) => void {
+    forgetHeard(this.request.clock.now());
+    const entry: Heard = { leg: this.ownVoice, ref: -1, text, from, until: null, voiced: true };
     heardLately.push(entry);
-    return (until) => {
-      if (until === null) { const at = heardLately.indexOf(entry); if (at >= 0) heardLately.splice(at, 1); return; }
-      entry.until = until;
-    };
+    return (until) => { entry.until = until; };
   }
 
   /** Fork: a sentence, spoken, where this leg speaks (`Stages.voice`). */
-  private say(ref: Ref | undefined, text: string, language: string): void {
-    if (!this.ended) this.speaker?.say(ref, text, language);
+  private say(ref: Ref | undefined, text: string, language: string, tone?: string): void {
+    if (!this.ended) this.speaker?.say(ref, text, language, tone);
   }
 
   private sayBusy(): void {
@@ -1249,7 +1242,11 @@ class PipelineLeg implements AdapterSession {
 const baseOf = (code: string): string => code.split('-')[0];
 
 /** Fork: what speaks a leg's sentences: its voice stage, where there is one and the leg's context says it speaks. */
-function speakerOf(request: StartRequest<PipelineConfig, PipelineCredentials>, stage: VoiceStage | undefined, events: AdapterEvents, doFetch: typeof fetch, voice: Pick<VoiceDeps, 'decode' | 'native' | 'edge'>, saying?: (text: string, untilAtLeast: number) => (until: number | null) => void): Speaker | null {
+function speakerOf(
+  request: StartRequest<PipelineConfig, PipelineCredentials>, stage: VoiceStage | undefined, events: AdapterEvents,
+  doFetch: typeof fetch, voice: Pick<VoiceDeps, 'decode' | 'native' | 'edge' | 'recording'>,
+  saying?: (text: string, from: number) => (until: number) => void,
+): Speaker | null {
   if (!stage || !request.context.speech) return null;
   // The shared device's access key is the Realtime credential's own.
   const key = (stage.key === 'serverKey' ? request.credentials.apiKey : stage.key ? request.credentials[stage.key] : undefined) || undefined;

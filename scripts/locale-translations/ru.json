@@ -1015,6 +1015,10 @@
     "en": "Add a language to {{name}}",
     "text": "Записать «{{name}}» на другом языке"
   },
+  "fork.voice.addTone": {
+    "en": "Add a tone to {{name}}",
+    "text": "Добавить интонацию для «{{name}}»"
+  },
   "fork.voice.addVoice": {
     "en": "Add a voice",
     "text": "Добавить голос"
@@ -1046,6 +1050,10 @@
   "fork.voice.clipSilent": {
     "en": "No voice was heard.",
     "text": "Голос не слышен."
+  },
+  "fork.voice.clipTone": {
+    "en": "Tone",
+    "text": "Интонация"
   },
   "fork.voice.clipTooLong": {
     "en": "Too long: no more than {{seconds}} seconds with its words.",
@@ -1159,6 +1167,10 @@
     "en": "Remove the {{language}} recording of {{name}}",
     "text": "Удалить запись «{{name}}» (язык: {{language}})"
   },
+  "fork.voice.removeToneTake": {
+    "en": "Remove the {{tone}} {{language}} recording of {{name}}",
+    "text": "Удалить запись «{{name}}» (язык: {{language}}, интонация: {{tone}})"
+  },
   "fork.voice.removeVoice": {
     "en": "Remove {{name}}",
     "text": "Удалить «{{name}}»"
@@ -1210,6 +1222,30 @@
   "fork.voice.toMeLocked": {
     "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
     "text": "Режим «Для меня» недоступен: Kotomimi получает звук из всей системы и может принять озвучку за речь собеседника. Выберите отдельное приложение, например VRChat, как источник звука собеседника."
+  },
+  "fork.voice.tones.angry": {
+    "en": "Angry",
+    "text": "Сердитая"
+  },
+  "fork.voice.tones.gentle": {
+    "en": "Gentle",
+    "text": "Нежная"
+  },
+  "fork.voice.tones.laugh": {
+    "en": "Laughing",
+    "text": "Громкий смех"
+  },
+  "fork.voice.tones.lively": {
+    "en": "Lively",
+    "text": "Радостная"
+  },
+  "fork.voice.tones.plain": {
+    "en": "Plain",
+    "text": "Обычная"
+  },
+  "fork.voice.tones.serious": {
+    "en": "Serious",
+    "text": "Серьёзная"
   },
   "fork.voice.toThem": {
     "en": "The other side hears it",
@@ -1666,6 +1702,10 @@
   "models.namedGroup": {
     "en": "Needs the language set",
     "text": "Нужно указать язык"
+  },
+  "notices.tts_slow": {
+    "en": "Spoken translation cannot keep up, so each sentence now plays once it is complete. The graphics card may be busy.",
+    "text": "Озвучка не успевает. Теперь каждое предложение будет звучать, только когда вся фраза будет готова. Возможно, видеокарта занята."
   },
   "providers.gemini.name": {
     "en": "Google Gemini",
@@ -2254,6 +2294,10 @@
   "providers.localai.noteQwen3TtsBase": {
     "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
     "text": "Читает текст вашим голосом. Для клонирования достаточно записи речи длиной около десяти секунд. При первом использовании каждого голоса озвучка начнётся через несколько секунд, иногда ожидание может занять чуть больше двадцати секунд. Дальше озвучка начинается сразу. Требуется около 3 ГБ видеопамяти. Поддерживается 10 языков."
+  },
+  "providers.localai.noteQwen3TtsBaseSmall": {
+    "en": "Reads in your own voice like the 1.7B, lighter and faster, and measured just as like you. About 2 GB of video memory, ten languages.",
+    "text": "Читает текст вашим голосом, как и 1.7B. Модель легче и быстрее, а по результатам тестов сходство с вашим голосом такое же. Занимает около 2 GB видеопамяти и поддерживает 10 языков."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

@@ -92,7 +92,10 @@ jobs:
           electron/lan-server.test.js
           electron/voice-library.test.js
           electron/lent-voices.test.js
-          src/lib/voice/clip.test.ts
+          src/lib/voice
+          electron/native-voice.test.js
+          src/app/sessionLags.test.ts
+          src/lib/view/noticeText.test.ts
           electron/lan-firewall.test.js
           electron/lan-discover.test.js
           electron/window-maximize.test.js

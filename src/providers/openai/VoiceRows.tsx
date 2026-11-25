@@ -3,9 +3,10 @@
  * spoken in, chosen from what the place offers, and a button that says a sample in it. A place that is not asked
  * what voices it has (an API, a model of the other device's this build does not know) gets one typed name for every language. A language the place cannot speak says so in its row.
  * A cloning model speaks in the user's own voices: its rows offer those, and under them they are listed, with the
- * way to add one (`AddVoiceDialog`), hand one to someone else, or remove it.
+ * way to add one (`AddVoiceDialog`), hand one to someone else, or remove it. A voice may have recordings in other
+ * tones than its plain one (`tone.ts`): each tone is then a row of its own, with the languages it was read in.
  */
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { Download, Loader, Plus, Square, Trash2, Upload, Volume2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { filterVoicesByLanguage, getEdgeTtsVoices } from '../../lib/edge-tts/voiceList';
@@ -15,7 +16,8 @@ import { previewSampleFor } from '../../lib/tts/previewSample';
 import { useLineVoiceStore } from '../../stores/lineVoiceStore';
 import { useVoiceLibraryStore, type LibraryVoice } from '../../stores/voiceLibraryStore';
 import { AddVoiceDialog } from './AddVoiceDialog';
-import { FILE_MOST_BYTES } from '../../lib/voice/recordClip';
+import { PACK_MOST_BYTES } from '../../lib/voice/recordClip';
+import { TONES } from '../../lib/voice/tone';
 import { chosenVoice, voiceBook, voiceSource, voiceSpeaks, withVoice, withoutVoice, type VoiceChoice } from './localaiVoice';
 import type { LocalAIModel } from './localaiModels';
 import { nativeVoicesFor } from './nativeVoices';
@@ -92,8 +94,8 @@ export function VoiceRows({ choice, lent = [], languages, ownLanguage = 'en', pl
   const clones = source.by === 'catalog' && source.model.clones === true;
   const mine = useVoiceLibraryStore((s) => s.voices);
   const asked = useVoiceLibraryStore((s) => s.asked);
-  /** The dialog a recording is added in: a new voice's (`into` null), or one more of a voice there is. */
-  const [adding, setAdding] = useState<{ into: LibraryVoice | null } | null>(null);
+  /** The dialog a recording is added in: a new voice's (`into` null), or one more of a voice there is, in a tone. */
+  const [adding, setAdding] = useState<{ into: LibraryVoice | null; tone?: string } | null>(null);
   /** A voice someone handed over as a file (what the download button of a voice makes): added as it is. */
   const packs = useRef<HTMLInputElement>(null);
   const [unread, setUnread] = useState(false);
@@ -101,7 +103,7 @@ export function VoiceRows({ choice, lent = [], languages, ownLanguage = 'en', pl
     if (!file) return;
     setUnread(false);
     // A voice is a few megabytes: anything far larger is not one, and is not read into memory to find out.
-    const added = file.size > FILE_MOST_BYTES ? { ok: false as const } : await useVoiceLibraryStore.getState().addPack(new Uint8Array(await file.arrayBuffer()));
+    const added = file.size > PACK_MOST_BYTES ? { ok: false as const } : await useVoiceLibraryStore.getState().addPack(new Uint8Array(await file.arrayBuffer()));
     if (!added.ok) { setUnread(true); return; }
     // The first voice there is reads every language.
     if (!useVoiceLibraryStore.getState().voices.some((one) => one.id !== added.voice.id && one.id === choice.voices[voiceBook(choice, lent)]?.['*'])) onChange(withVoice(choice, '*', added.voice.id, lent));
@@ -157,6 +159,16 @@ export function VoiceRows({ choice, lent = [], languages, ownLanguage = 'en', pl
   const inVoice = (id: string): VoiceChoice => ({ ...choice, voices: { ...choice.voices, [book]: { '*': id } } });
   const picked = clones && (mine.length > 1 || (mine.length === 1 && !every));
   const perLanguage = clones && mine.length > 1 && spoken.length > 1;
+  /** One more tone of a voice: the dialog opens on the first it has none of. */
+  const addTone = (voice: LibraryVoice) => {
+    const label = t('fork.voice.addTone', { name: voice.name, defaultValue: 'Add a tone to {{name}}' });
+    return (
+      <button type="button" className="kt-myvoices__more kt-myvoices__more--tone" onClick={() => setAdding({ into: voice, tone: TONES.find((one) => !voice.tones.some((had) => had.tone === one)) ?? TONES[0] })} disabled={disabled} aria-label={label} title={label}>
+        <Plus size={11} />
+        <span>{t('fork.voice.clipTone', 'Tone')}</span>
+      </button>
+    );
+  };
   /** The user's own voices: each by its name, with what is done to it, the languages it has, and the ways to one more. */
   const library = clones && (
     <div className="kt-myvoices">
@@ -206,21 +218,38 @@ export function VoiceRows({ choice, lent = [], languages, ownLanguage = 'en', pl
               <Trash2 size={13} />
             </button>
           </div>
-          <div className="kt-myvoices__langs">
-            {voice.languages.map((code, i) => {
-              const said = languageLabel(code, i18n.language);
-              // The first is what the voice is; a recording more can be taken away, and its language is then read from the first.
-              if (i === 0) return <span key={code} className="kt-myvoices__lang">{said}</span>;
-              const label = t('fork.voice.removeTake', { name: voice.name, language: said, defaultValue: 'Remove the {{language}} recording of {{name}}' });
+          {/* Its recordings: the plain ones, then a row for each tone it was read in once it has any. */}
+          <div className={`kt-myvoices__takes${voice.tones.length > 0 ? ' has-tones' : ''}`}>
+            {[{ tone: '', languages: voice.languages }, ...voice.tones].map((row) => {
+              const toneName = t(`fork.voice.tones.${row.tone || 'plain'}`, row.tone || 'Plain');
+              const more = `${t('fork.voice.addTake', { name: voice.name, defaultValue: 'Add a language to {{name}}' })}${row.tone ? ` · ${toneName}` : ''}`;
               return (
-                <button key={code} type="button" className="kt-myvoices__lang" onClick={() => { void useVoiceLibraryStore.getState().removeTake(voice.id, code); }} disabled={disabled} aria-label={label} title={label}>
-                  {said}<X size={10} />
-                </button>
+                <Fragment key={row.tone}>
+                  {voice.tones.length > 0 && <span className="kt-myvoices__tone">{toneName}</span>}
+                  <div className="kt-myvoices__langs">
+                    {row.languages.map((code, i) => {
+                      const said = languageLabel(code, i18n.language);
+                      // The first plain one is what the voice is; any other can be taken away, and what it read is
+                      // then read from what is left.
+                      if (i === 0 && !row.tone) return <span key={code} className="kt-myvoices__lang">{said}</span>;
+                      const label = row.tone
+                        ? t('fork.voice.removeToneTake', { name: voice.name, language: said, tone: toneName, defaultValue: 'Remove the {{tone}} {{language}} recording of {{name}}' })
+                        : t('fork.voice.removeTake', { name: voice.name, language: said, defaultValue: 'Remove the {{language}} recording of {{name}}' });
+                      return (
+                        <button key={code} type="button" className="kt-myvoices__lang" onClick={() => { void useVoiceLibraryStore.getState().removeTake(voice.id, code, row.tone); }} disabled={disabled} aria-label={label} title={label}>
+                          {said}<X size={10} />
+                        </button>
+                      );
+                    })}
+                    <button type="button" className="kt-myvoices__more" onClick={() => setAdding({ into: voice, tone: row.tone })} disabled={disabled} aria-label={more} title={more}>
+                      <Plus size={11} />
+                    </button>
+                    {voice.tones.length === 0 && addTone(voice)}
+                  </div>
+                </Fragment>
               );
             })}
-            <button type="button" className="kt-myvoices__more" onClick={() => setAdding({ into: voice })} disabled={disabled} aria-label={t('fork.voice.addTake', { name: voice.name, defaultValue: 'Add a language to {{name}}' })} title={t('fork.voice.addTake', { name: voice.name, defaultValue: 'Add a language to {{name}}' })}>
-              <Plus size={11} />
-            </button>
+            {voice.tones.length > 0 && voice.tones.length < TONES.length && <><span /><div className="kt-myvoices__langs">{addTone(voice)}</div></>}
           </div>
         </div>
       ))}
@@ -228,6 +257,7 @@ export function VoiceRows({ choice, lent = [], languages, ownLanguage = 'en', pl
       <AddVoiceDialog
         open={adding !== null}
         into={adding?.into ?? null}
+        tone={adding?.tone ?? ''}
         suggest={rows}
         language={ownLanguage}
         languages={source.by === 'catalog' ? source.model.languages : []}

@@ -1019,6 +1019,10 @@
     "en": "Add a language to {{name}}",
     "text": "‘{{name}}’에 다른 언어 녹음 추가"
   },
+  "fork.voice.addTone": {
+    "en": "Add a tone to {{name}}",
+    "text": "「{{name}}」에 말투 추가"
+  },
   "fork.voice.addVoice": {
     "en": "Add a voice",
     "text": "음성 추가"
@@ -1050,6 +1054,10 @@
   "fork.voice.clipSilent": {
     "en": "No voice was heard.",
     "text": "목소리가 들리지 않아요."
+  },
+  "fork.voice.clipTone": {
+    "en": "Tone",
+    "text": "말투"
   },
   "fork.voice.clipTooLong": {
     "en": "Too long: no more than {{seconds}} seconds with its words.",
@@ -1163,6 +1171,10 @@
     "en": "Remove the {{language}} recording of {{name}}",
     "text": "‘{{name}}’의 {{language}} 녹음 삭제"
   },
+  "fork.voice.removeToneTake": {
+    "en": "Remove the {{tone}} {{language}} recording of {{name}}",
+    "text": "「{{name}}」의 {{tone}} 말투로 녹음한 {{language}} 음성 삭제"
+  },
   "fork.voice.removeVoice": {
     "en": "Remove {{name}}",
     "text": "‘{{name}}’ 삭제"
@@ -1214,6 +1226,30 @@
   "fork.voice.toMeLocked": {
     "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
     "text": "지금은 ‘내가 듣기’를 사용할 수 없어요. 시스템 전체 소리를 가져오면 앱이 번역을 읽어 주는 소리도 상대방 말로 인식해요. 상대방 소리를 가져올 앱을 하나만 선택하세요(예: VRChat)."
+  },
+  "fork.voice.tones.angry": {
+    "en": "Angry",
+    "text": "화난"
+  },
+  "fork.voice.tones.gentle": {
+    "en": "Gentle",
+    "text": "부드러운"
+  },
+  "fork.voice.tones.laugh": {
+    "en": "Laughing",
+    "text": "크게 웃는"
+  },
+  "fork.voice.tones.lively": {
+    "en": "Lively",
+    "text": "기쁜"
+  },
+  "fork.voice.tones.plain": {
+    "en": "Plain",
+    "text": "평소"
+  },
+  "fork.voice.tones.serious": {
+    "en": "Serious",
+    "text": "진지한"
   },
   "fork.voice.toThem": {
     "en": "The other side hears it",
@@ -1670,6 +1706,10 @@
   "models.namedGroup": {
     "en": "Needs the language set",
     "text": "언어 지정 필요"
+  },
+  "notices.tts_slow": {
+    "en": "Spoken translation cannot keep up, so each sentence now plays once it is complete. The graphics card may be busy.",
+    "text": "읽어 주는 속도가 느려 이제부터는 문장마다 음성이 준비되면 재생해요. 그래픽 카드가 바쁠 수 있어요."
   },
   "providers.kizunaai_soniox.name": {
     "en": "KizunaAI",
@@ -2254,6 +2294,10 @@
   "providers.localai.noteQwen3TtsBase": {
     "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
     "text": "10초 정도 말한 내용을 녹음하면 내 목소리를 복제해 글을 읽어 줍니다. 목소리마다 처음 사용할 때는 몇 초에서 20여 초 걸리고, 그다음부터는 말하자마자 소리가 나옵니다. 그래픽 메모리를 약 3 GB 사용하며 10개 언어를 지원합니다."
+  },
+  "providers.localai.noteQwen3TtsBaseSmall": {
+    "en": "Reads in your own voice like the 1.7B, lighter and faster, and measured just as like you. About 2 GB of video memory, ten languages.",
+    "text": "1.7B처럼 내 목소리로 읽어 줍니다. 더 가볍고 빠르며, 테스트에서도 1.7B만큼 내 목소리와 비슷했습니다. 그래픽 메모리는 약 2 GB를 사용하며, 10개 언어를 지원합니다."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

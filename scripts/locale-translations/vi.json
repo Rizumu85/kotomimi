@@ -1023,6 +1023,10 @@
     "en": "Add a language to {{name}}",
     "text": "Ghi âm thêm một ngôn ngữ cho «{{name}}»"
   },
+  "fork.voice.addTone": {
+    "en": "Add a tone to {{name}}",
+    "text": "Thêm giọng điệu cho «{{name}}»"
+  },
   "fork.voice.addVoice": {
     "en": "Add a voice",
     "text": "Thêm giọng"
@@ -1054,6 +1058,10 @@
   "fork.voice.clipSilent": {
     "en": "No voice was heard.",
     "text": "Không nghe thấy tiếng nói."
+  },
+  "fork.voice.clipTone": {
+    "en": "Tone",
+    "text": "Giọng điệu"
   },
   "fork.voice.clipTooLong": {
     "en": "Too long: no more than {{seconds}} seconds with its words.",
@@ -1167,6 +1175,10 @@
     "en": "Remove the {{language}} recording of {{name}}",
     "text": "Xóa bản ghi âm bằng {{language}} của «{{name}}»"
   },
+  "fork.voice.removeToneTake": {
+    "en": "Remove the {{tone}} {{language}} recording of {{name}}",
+    "text": "Xóa bản thu bằng {{language}} của «{{name}}» với giọng điệu {{tone}}"
+  },
   "fork.voice.removeVoice": {
     "en": "Remove {{name}}",
     "text": "Xóa «{{name}}»"
@@ -1218,6 +1230,30 @@
   "fork.voice.toMeLocked": {
     "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
     "text": "Chưa dùng được mục «Tôi nghe». Âm thanh của người bên kia đang được thu từ toàn bộ hệ thống, nên ứng dụng sẽ nhầm giọng đọc bản dịch với lời họ nói. Hãy chọn một ứng dụng cụ thể làm nguồn âm thanh, ví dụ VRChat."
+  },
+  "fork.voice.tones.angry": {
+    "en": "Angry",
+    "text": "Tức giận"
+  },
+  "fork.voice.tones.gentle": {
+    "en": "Gentle",
+    "text": "Dịu dàng"
+  },
+  "fork.voice.tones.laugh": {
+    "en": "Laughing",
+    "text": "Cười lớn"
+  },
+  "fork.voice.tones.lively": {
+    "en": "Lively",
+    "text": "Vui vẻ"
+  },
+  "fork.voice.tones.plain": {
+    "en": "Plain",
+    "text": "Bình thường"
+  },
+  "fork.voice.tones.serious": {
+    "en": "Serious",
+    "text": "Nghiêm túc"
   },
   "fork.voice.toThem": {
     "en": "The other side hears it",
@@ -1674,6 +1710,10 @@
   "models.namedGroup": {
     "en": "Needs the language set",
     "text": "Cần chọn ngôn ngữ"
+  },
+  "notices.tts_slow": {
+    "en": "Spoken translation cannot keep up, so each sentence now plays once it is complete. The graphics card may be busy.",
+    "text": "Tính năng đọc bản dịch không theo kịp. Từ giờ, ứng dụng sẽ tạo xong lời đọc cho từng câu rồi mới phát. Card đồ họa có thể đang bận."
   },
   "providers.gemini.name": {
     "en": "Google Gemini",
@@ -2262,6 +2302,10 @@
   "providers.localai.noteQwen3TtsBase": {
     "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
     "text": "Chỉ cần ghi âm khoảng mười giây để tạo bản sao giọng của bạn và dùng giọng đó để đọc văn bản. Lần đầu dùng mỗi giọng, bạn cần chờ từ vài giây đến hơn hai mươi giây. Những lần sau, giọng sẽ phát ngay. Dùng khoảng 3 GB bộ nhớ đồ họa và hỗ trợ 10 ngôn ngữ."
+  },
+  "providers.localai.noteQwen3TtsBaseSmall": {
+    "en": "Reads in your own voice like the 1.7B, lighter and faster, and measured just as like you. About 2 GB of video memory, ten languages.",
+    "text": "Đọc bằng chính giọng của bạn như bản 1.7B. Bản này nhẹ hơn, nhanh hơn và qua thử nghiệm vẫn giống giọng bạn như bản 1.7B. Dùng khoảng 2 GB bộ nhớ đồ họa, hỗ trợ 10 ngôn ngữ."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

@@ -13,7 +13,7 @@ One manager, `createNativeEngine` in `electron/native-engine.js`, runs four engi
 | Feedback | llama.cpp | `COACHES` | `native-coach` |
 | Voice | audio.cpp | `VOICES` | `native-voice` |
 
-- Runtimes are the projects' release archives: Vulkan on Windows x64, Metal on Apple silicon.
+- Runtimes are the projects' release archives: Vulkan on Windows x64 (audio.cpp: CUDA on NVIDIA, driver 580+), Metal on Apple silicon.
 - Address, size and SHA-256 of every file are fixed in code. The page names a model by id and nothing else.
 - A server listens on 127.0.0.1, on a port picked at each start. It is ready after the health endpoint answers and one warm-up: a second of faint noise, or one short answer.
 

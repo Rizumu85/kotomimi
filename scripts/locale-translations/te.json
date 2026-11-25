@@ -1019,6 +1019,10 @@
     "en": "Add a language to {{name}}",
     "text": "“{{name}}” కోసం మరో భాషలో రికార్డ్ చేయండి"
   },
+  "fork.voice.addTone": {
+    "en": "Add a tone to {{name}}",
+    "text": "‘{{name}}’కి మరో మాట్లాడే తీరు జోడించండి"
+  },
   "fork.voice.addVoice": {
     "en": "Add a voice",
     "text": "గొంతు జోడించండి"
@@ -1050,6 +1054,10 @@
   "fork.voice.clipSilent": {
     "en": "No voice was heard.",
     "text": "గొంతు వినిపించలేదు."
+  },
+  "fork.voice.clipTone": {
+    "en": "Tone",
+    "text": "మాట్లాడే తీరు"
   },
   "fork.voice.clipTooLong": {
     "en": "Too long: no more than {{seconds}} seconds with its words.",
@@ -1163,6 +1171,10 @@
     "en": "Remove the {{language}} recording of {{name}}",
     "text": "“{{name}}” యొక్క {{language}} రికార్డింగ్‌ను తొలగించండి"
   },
+  "fork.voice.removeToneTake": {
+    "en": "Remove the {{tone}} {{language}} recording of {{name}}",
+    "text": "‘{{name}}’కి చెందిన {{language}} రికార్డింగ్‌ను ({{tone}}) తొలగించండి"
+  },
   "fork.voice.removeVoice": {
     "en": "Remove {{name}}",
     "text": "‘{{name}}’ను తొలగించండి"
@@ -1214,6 +1226,30 @@
   "fork.voice.toMeLocked": {
     "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
     "text": "‘నాకు వినిపించు’ ఇప్పుడు అందుబాటులో లేదు. సిస్టమ్‌లోని శబ్దమంతా తీసుకోవడం వల్ల, యాప్ చదివి వినిపించే మాటలను కూడా అవతలి వ్యక్తి అన్నట్టుగా గుర్తిస్తుంది. వారి మాటల కోసం VRChat లాంటి ఒక్క యాప్‌ను ఎంచుకోండి."
+  },
+  "fork.voice.tones.angry": {
+    "en": "Angry",
+    "text": "కోపంగా"
+  },
+  "fork.voice.tones.gentle": {
+    "en": "Gentle",
+    "text": "మృదువుగా"
+  },
+  "fork.voice.tones.laugh": {
+    "en": "Laughing",
+    "text": "గట్టిగా నవ్వుతూ"
+  },
+  "fork.voice.tones.lively": {
+    "en": "Lively",
+    "text": "సంతోషంగా"
+  },
+  "fork.voice.tones.plain": {
+    "en": "Plain",
+    "text": "మామూలుగా"
+  },
+  "fork.voice.tones.serious": {
+    "en": "Serious",
+    "text": "గంభీరంగా"
   },
   "fork.voice.toThem": {
     "en": "The other side hears it",
@@ -1670,6 +1706,10 @@
   "models.namedGroup": {
     "en": "Needs the language set",
     "text": "భాషను పేర్కొనాలి"
+  },
+  "notices.tts_slow": {
+    "en": "Spoken translation cannot keep up, so each sentence now plays once it is complete. The graphics card may be busy.",
+    "text": "అనువాదాన్ని చదివి వినిపించడంలో ఆలస్యమవుతోంది. ఇకపై ప్రతి వాక్యానికి ఆడియో సిద్ధమైన తర్వాతే వినిపిస్తుంది. గ్రాఫిక్స్ కార్డ్ బిజీగా ఉండవచ్చు."
   },
   "providers.gemini.name": {
     "en": "Google Gemini",
@@ -2258,6 +2298,10 @@
   "providers.localai.noteQwen3TtsBase": {
     "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
     "text": "మీ సొంత గొంతుతో చదివి వినిపిస్తుంది. మీ గొంతును క్లోన్ చేయడానికి దాదాపు పది సెకన్ల మాట రికార్డు చేస్తే చాలు. ఒక్కో గొంతును మొదటిసారి వాడినప్పుడు కొన్ని సెకన్ల నుంచి ఇరవై పైచిలుకు సెకన్ల వరకు పట్టొచ్చు. ఆ తర్వాత మాట్లాడగానే శబ్దం వస్తుంది. దాదాపు 3 GB వీడియో మెమరీ వాడుతుంది. 10 భాషల్లో పనిచేస్తుంది."
+  },
+  "providers.localai.noteQwen3TtsBaseSmall": {
+    "en": "Reads in your own voice like the 1.7B, lighter and faster, and measured just as like you. About 2 GB of video memory, ten languages.",
+    "text": "1.7B లాగే మీ సొంత గొంతుతో చదివి వినిపిస్తుంది. ఇది తక్కువ వనరులతో మరింత వేగంగా పనిచేస్తుంది. పరీక్షల్లో దీని గొంతు కూడా మీ గొంతులాగే వినిపించింది. సుమారు 2 GB వీడియో మెమరీ వాడుతుంది, 10 భాషలకు మద్దతు ఇస్తుంది."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

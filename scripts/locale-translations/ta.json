@@ -1019,6 +1019,10 @@
     "en": "Add a language to {{name}}",
     "text": "«{{name}}»க்கு இன்னொரு மொழியில் பதிவு செய்"
   },
+  "fork.voice.addTone": {
+    "en": "Add a tone to {{name}}",
+    "text": "‘{{name}}’க்கு ஒரு தொனியைச் சேர்"
+  },
   "fork.voice.addVoice": {
     "en": "Add a voice",
     "text": "குரலைச் சேர்"
@@ -1050,6 +1054,10 @@
   "fork.voice.clipSilent": {
     "en": "No voice was heard.",
     "text": "குரல் எதுவும் கேட்கவில்லை."
+  },
+  "fork.voice.clipTone": {
+    "en": "Tone",
+    "text": "பேசும் தொனி"
   },
   "fork.voice.clipTooLong": {
     "en": "Too long: no more than {{seconds}} seconds with its words.",
@@ -1163,6 +1171,10 @@
     "en": "Remove the {{language}} recording of {{name}}",
     "text": "«{{name}}» இன் {{language}} மொழிப் பதிவை நீக்கு"
   },
+  "fork.voice.removeToneTake": {
+    "en": "Remove the {{tone}} {{language}} recording of {{name}}",
+    "text": "‘{{name}}’க்கான {{tone}} தொனியிலான {{language}} பதிவை நீக்கு"
+  },
   "fork.voice.removeVoice": {
     "en": "Remove {{name}}",
     "text": "«{{name}}» குரலை நீக்கு"
@@ -1214,6 +1226,30 @@
   "fork.voice.toMeLocked": {
     "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
     "text": "«நான் கேட்க» இப்போது கிடைக்காது. கணினியின் எல்லா ஒலியும் பிடிக்கப்படுவதால், செயலி வாசிப்பதையும் மறுமுனையில் இருப்பவர் பேசுவதாக எடுத்துக்கொள்ளும். இதைப் பயன்படுத்த, மறுமுனை ஒலிக்கு ஒரே ஒரு செயலியைத் தேர்வு செய்யுங்கள் (எ.கா. VRChat)."
+  },
+  "fork.voice.tones.angry": {
+    "en": "Angry",
+    "text": "கோபம்"
+  },
+  "fork.voice.tones.gentle": {
+    "en": "Gentle",
+    "text": "மென்மை"
+  },
+  "fork.voice.tones.laugh": {
+    "en": "Laughing",
+    "text": "உரத்த சிரிப்பு"
+  },
+  "fork.voice.tones.lively": {
+    "en": "Lively",
+    "text": "மகிழ்ச்சி"
+  },
+  "fork.voice.tones.plain": {
+    "en": "Plain",
+    "text": "இயல்பு"
+  },
+  "fork.voice.tones.serious": {
+    "en": "Serious",
+    "text": "தீவிரம்"
   },
   "fork.voice.toThem": {
     "en": "The other side hears it",
@@ -1670,6 +1706,10 @@
   "models.namedGroup": {
     "en": "Needs the language set",
     "text": "மொழியை அமைக்க வேண்டும்"
+  },
+  "notices.tts_slow": {
+    "en": "Spoken translation cannot keep up, so each sentence now plays once it is complete. The graphics card may be busy.",
+    "text": "குரல் வாசிப்பு வேகம் போதவில்லை. இனி ஒவ்வொரு வாக்கியத்துக்குமான குரலும் முழுமையாகத் தயாரான பிறகே ஒலிக்கும். கிராபிக்ஸ் கார்டு வேறு பணியில் இருக்கலாம்."
   },
   "providers.gemini.name": {
     "en": "Google Gemini",
@@ -2258,6 +2298,10 @@
   "providers.localai.noteQwen3TtsBase": {
     "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
     "text": "உங்கள் குரலிலேயே வாசிக்கும். அதற்கு சுமார் பத்து விநாடிகள் பேசிப் பதிவு செய்தால் போதும். ஒவ்வொரு குரலையும் முதல் முறை பயன்படுத்தும்போது சில விநாடிகள் முதல் இருபதுக்கும் மேற்பட்ட விநாடிகள் வரை காத்திருக்க வேண்டியிருக்கும். அதன் பிறகு உடனே பேசத் தொடங்கும். சுமார் 3 GB கிராபிக்ஸ் நினைவகம் தேவை. 10 மொழிகளை ஆதரிக்கிறது."
+  },
+  "providers.localai.noteQwen3TtsBaseSmall": {
+    "en": "Reads in your own voice like the 1.7B, lighter and faster, and measured just as like you. About 2 GB of video memory, ten languages.",
+    "text": "1.7B போலவே உங்கள் குரலில் வாசிக்கும். இது இலகுவானது, வேகமானது. குரலும் 1.7B அளவுக்கே உங்கள் குரலைப் போல இருப்பது சோதனையில் தெரிந்தது. சுமார் 2 GB கிராபிக்ஸ் நினைவகம் தேவை. 10 மொழிகளை ஆதரிக்கும்."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

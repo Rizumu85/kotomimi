@@ -1019,6 +1019,10 @@
     "en": "Add a language to {{name}}",
     "text": "「{{name}}」に別の言語の録音を追加"
   },
+  "fork.voice.addTone": {
+    "en": "Add a tone to {{name}}",
+    "text": "「{{name}}」に口調を追加"
+  },
   "fork.voice.addVoice": {
     "en": "Add a voice",
     "text": "声を追加"
@@ -1050,6 +1054,10 @@
   "fork.voice.clipSilent": {
     "en": "No voice was heard.",
     "text": "話し声が検出されませんでした。"
+  },
+  "fork.voice.clipTone": {
+    "en": "Tone",
+    "text": "口調"
   },
   "fork.voice.clipTooLong": {
     "en": "Too long: no more than {{seconds}} seconds with its words.",
@@ -1163,6 +1171,10 @@
     "en": "Remove the {{language}} recording of {{name}}",
     "text": "「{{name}}」の{{language}}の録音を削除"
   },
+  "fork.voice.removeToneTake": {
+    "en": "Remove the {{tone}} {{language}} recording of {{name}}",
+    "text": "「{{name}}」の{{language}}の録音（{{tone}}）を削除"
+  },
   "fork.voice.removeVoice": {
     "en": "Remove {{name}}",
     "text": "「{{name}}」を削除"
@@ -1214,6 +1226,30 @@
   "fork.voice.toMeLocked": {
     "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
     "text": "「自分に読み上げ」は使えません。システム全体の音を拾う設定では、読み上げ音声も相手の声として拾ってしまいます。相手の音声元に VRChat などのアプリを1つ選ぶと使えます。"
+  },
+  "fork.voice.tones.angry": {
+    "en": "Angry",
+    "text": "怒り"
+  },
+  "fork.voice.tones.gentle": {
+    "en": "Gentle",
+    "text": "やさしい"
+  },
+  "fork.voice.tones.laugh": {
+    "en": "Laughing",
+    "text": "大笑い"
+  },
+  "fork.voice.tones.lively": {
+    "en": "Lively",
+    "text": "うれしそう"
+  },
+  "fork.voice.tones.plain": {
+    "en": "Plain",
+    "text": "ふつう"
+  },
+  "fork.voice.tones.serious": {
+    "en": "Serious",
+    "text": "真剣"
   },
   "fork.voice.toThem": {
     "en": "The other side hears it",
@@ -1670,6 +1706,10 @@
   "models.namedGroup": {
     "en": "Needs the language set",
     "text": "言語の指定が必要"
+  },
+  "notices.tts_slow": {
+    "en": "Spoken translation cannot keep up, so each sentence now plays once it is complete. The graphics card may be busy.",
+    "text": "読み上げが追いつかないため、以降は文ごとに音声の生成が終わってから再生します。グラフィックカードに負荷がかかっている可能性があります。"
   },
   "providers.gemini.name": {
     "en": "Google Gemini",
@@ -2258,6 +2298,10 @@
   "providers.localai.noteQwen3TtsBase": {
     "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
     "text": "10秒ほど話した声を録音するだけで、自分の声を再現して読み上げられます。ボイスごとに初回は読み上げまで数秒から20数秒かかりますが、次からはすぐに読み上げが始まります。GPUメモリを約3 GB使用し、10言語に対応しています。"
+  },
+  "providers.localai.noteQwen3TtsBaseSmall": {
+    "en": "Reads in your own voice like the 1.7B, lighter and faster, and measured just as like you. About 2 GB of video memory, ten languages.",
+    "text": "1.7B と同じように自分の声で読み上げます。より軽くて速く、実測でも声の再現度は同等です。ビデオメモリは約 2 GB 使用し、10 言語に対応します。"
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

@@ -331,6 +331,20 @@ input.kt-myvoices__name {
   }
 }
 
+// A voice's recordings: one row, or a row for each tone once it has any, the tones' names in a column.
+.kt-myvoices__takes.has-tones {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.kt-myvoices__tone {
+  font-size: vars.$font-caption;
+  color: vars.$text-muted;
+  white-space: nowrap;
+}
+
 .kt-myvoices__langs {
   display: flex;
   flex-wrap: wrap;
@@ -393,4 +407,11 @@ button.kt-myvoices__lang {
     opacity: vars.$disabled-opacity;
     cursor: not-allowed;
   }
+}
+
+// One more tone: the same outline, with the word.
+.kt-myvoices__more--tone {
+  gap: 2px;
+  width: auto;
+  padding: 0 8px 0 6px;
 }

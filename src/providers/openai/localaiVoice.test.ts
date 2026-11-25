@@ -164,8 +164,7 @@ describe('the voice on the other device', () => {
   });
 });
 
-describe('a model that speaks in the user\'s own voice', () => {
-  const BASE = 'qwen3-tts-1.7b-base-q8';
+describe.each(['qwen3-tts-1.7b-base-q8', 'qwen3-tts-0.6b-base-q8'])('%s speaks in the user\'s own voice', (BASE) => {
   const MINE: VoiceChoice = { ...VOICE_DEFAULTS, on: true, at: 'device', nativeModel: BASE };
 
   it('speaks in the voice chosen for a language, else the one for every language, and in none where none is chosen', () => {
@@ -191,12 +190,12 @@ describe('a model that speaks in the user\'s own voice', () => {
   });
 
   it('is the same on another Kotomimi that lends the model: the user\'s own voices, handed to it', () => {
-    const lent = [{ id: BASE, kind: 'voice' as const, host: 'kotomimi', languages: ['zh', 'ja', 'en'] }];
+    const lent = [{ id: BASE, kind: 'voice' as const, host: 'kotomimi' as const, languages: ['zh', 'ja', 'en'] }];
     const there: VoiceChoice = { ...withVoice(MINE, '*', 'aaa111'), at: 'server', serverModel: BASE };
     expect(voiceStageOf(there, ['ja'], lent)).toMatchObject({ server: true, model: BASE, voices: { ja: 'aaa111' }, streams: true, tellsLanguage: true, ownVoices: true, patient: true });
     expect(clonedVoices(there, ['ja'], lent)).toMatchObject({ voices: ['aaa111'], missing: false });
     // A server that is no Kotomimi is handed no recording, whatever it calls its model.
-    expect(voiceStageOf(there, ['ja'], [{ ...lent[0], host: 'localai' }])).not.toHaveProperty('ownVoices');
+    expect(voiceStageOf(there, ['ja'], [{ ...lent[0], host: undefined }])).not.toHaveProperty('ownVoices');
     // A model with voices of its own is asked by their names, as before.
     expect(voiceStageOf({ ...HERE, at: 'server', serverModel: 'qwen3-tts-1.7b-customvoice-q8' }, ['ja'], [{ ...lent[0], id: 'qwen3-tts-1.7b-customvoice-q8' }])).not.toHaveProperty('ownVoices');
   });

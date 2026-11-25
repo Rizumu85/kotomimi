@@ -1071,6 +1071,10 @@
     "en": "Add a language to {{name}}",
     "text": "Magrekord sa ibang wika para kay {{name}}"
   },
+  "fork.voice.addTone": {
+    "en": "Add a tone to {{name}}",
+    "text": "Magdagdag ng tono para sa “{{name}}”"
+  },
   "fork.voice.addVoice": {
     "en": "Add a voice",
     "text": "Magdagdag ng boses"
@@ -1102,6 +1106,10 @@
   "fork.voice.clipSilent": {
     "en": "No voice was heard.",
     "text": "Walang narinig na boses."
+  },
+  "fork.voice.clipTone": {
+    "en": "Tone",
+    "text": "Tono"
   },
   "fork.voice.clipTooLong": {
     "en": "Too long: no more than {{seconds}} seconds with its words.",
@@ -1215,6 +1223,10 @@
     "en": "Remove the {{language}} recording of {{name}}",
     "text": "Burahin ang rekording ni {{name}} sa {{language}}"
   },
+  "fork.voice.removeToneTake": {
+    "en": "Remove the {{tone}} {{language}} recording of {{name}}",
+    "text": "Burahin ang rekording ng “{{name}}” sa {{language}} na may tonong {{tone}}"
+  },
   "fork.voice.removeVoice": {
     "en": "Remove {{name}}",
     "text": "Alisin ang «{{name}}»"
@@ -1266,6 +1278,30 @@
   "fork.voice.toMeLocked": {
     "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
     "text": "Hindi magagamit ngayon ang \"Pakinggan ko\". Kinukuha ang tunog ng kausap sa buong sistema, kaya mapagkakamalang boses niya ang binabasang salin. Pumili ng isang app bilang pinagmulan ng tunog ng kausap (hal. VRChat)."
+  },
+  "fork.voice.tones.angry": {
+    "en": "Angry",
+    "text": "Galit"
+  },
+  "fork.voice.tones.gentle": {
+    "en": "Gentle",
+    "text": "Malumanay"
+  },
+  "fork.voice.tones.laugh": {
+    "en": "Laughing",
+    "text": "Humahalakhak"
+  },
+  "fork.voice.tones.lively": {
+    "en": "Lively",
+    "text": "Masaya"
+  },
+  "fork.voice.tones.plain": {
+    "en": "Plain",
+    "text": "Normal"
+  },
+  "fork.voice.tones.serious": {
+    "en": "Serious",
+    "text": "Seryoso"
   },
   "fork.voice.toThem": {
     "en": "The other side hears it",
@@ -1798,6 +1834,10 @@
   "models.online": {
     "en": "Online",
     "text": "Online"
+  },
+  "notices.tts_slow": {
+    "en": "Spoken translation cannot keep up, so each sentence now plays once it is complete. The graphics card may be busy.",
+    "text": "Hindi makahabol ang pagbasa ng salin. Tutugtog na lang ang audio ng bawat pangungusap kapag handa na ito. Baka abala ang graphics card."
   },
   "providers.gemini.name": {
     "en": "Google Gemini",
@@ -2386,6 +2426,10 @@
   "providers.localai.noteQwen3TtsBase": {
     "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
     "text": "Nagbabasa gamit ang sarili mong boses. Mag-record lang ng mga sampung segundo ng pagsasalita para makopya ang boses mo. Sa unang gamit ng bawat boses, maghintay ng ilang segundo hanggang mahigit dalawampung segundo. Sa mga susunod, magsasalita ito agad. Gumagamit ng humigit-kumulang 3 GB ng memory ng video card at sumusuporta sa 10 wika."
+  },
+  "providers.localai.noteQwen3TtsBaseSmall": {
+    "en": "Reads in your own voice like the 1.7B, lighter and faster, and measured just as like you. About 2 GB of video memory, ten languages.",
+    "text": "Gaya ng 1.7B, nagbabasa ito gamit ang sarili mong boses. Mas magaan at mas mabilis ito, at sa pagsubok, kasinglapit din ng 1.7B ang tunog sa boses mo. Gumagamit ng humigit-kumulang 2 GB ng video memory at sumusuporta sa 10 wika."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

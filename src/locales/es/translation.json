@@ -787,7 +787,8 @@
       "voiceUnnamed": "Falta el nombre del modelo de voz. Introdúcelo en el panel «Lectura en voz alta».",
       "noteQwen3Tts": "La voz más natural, con respuesta inmediata. En las pruebas de japonés, chino e inglés no hubo errores de pronunciación. Usa unos 3 GB de memoria de vídeo y admite 10 idiomas.",
       "noteIrodori": "Solo japonés. En las pruebas no hubo errores de pronunciación: tarda alrededor de medio segundo por frase. Usa unos 1.7 GB de memoria de vídeo.",
-      "noteQwen3TtsBase": "Lee en voz alta con tu propia voz. Basta con grabar unos diez segundos de habla para clonarla. La primera vez que usas cada voz, tarda entre unos segundos y veintitantos en empezar a hablar. Después, habla al instante. Usa unos 3 GB de memoria gráfica y admite 10 idiomas."
+      "noteQwen3TtsBase": "Lee en voz alta con tu propia voz. Basta con grabar unos diez segundos de habla para clonarla. La primera vez que usas cada voz, tarda entre unos segundos y veintitantos en empezar a hablar. Después, habla al instante. Usa unos 3 GB de memoria gráfica y admite 10 idiomas.",
+      "noteQwen3TtsBaseSmall": "Lee en voz alta con tu propia voz, igual que el modelo 1.7B. Es más ligero y rápido y, en las pruebas, suena igual de parecido a ti. Usa unos 2 GB de memoria gráfica y admite 10 idiomas."
     }
   },
   "logsPanel": {
@@ -1637,7 +1638,8 @@
     "mic_in_use": "El micrófono «{{device}}» está ocupado por {{apps}}. Cierra {{apps}} y vuelve a empezar, o elige otro micrófono.",
     "mic_unreadable": "Windows no pudo abrir el micrófono «{{device}}». Puede que otra aplicación lo esté usando o que su controlador haya dejado de responder. Cierra las aplicaciones que lo usan o vuelve a conectarlo y vuelve a empezar.",
     "mic_blocked": "Windows no permite que Sokuji use el micrófono. Activa el acceso al micrófono para las aplicaciones de escritorio en Configuración › Privacidad y seguridad › Micrófono y vuelve a empezar.",
-    "noise_suppression_fallback": "La supresión de ruido seleccionada no está disponible. Se usa un nivel inferior; revisa los ajustes del micrófono."
+    "noise_suppression_fallback": "La supresión de ruido seleccionada no está disponible. Se usa un nivel inferior; revisa los ajustes del micrófono.",
+    "tts_slow": "La lectura en voz alta no da abasto. A partir de ahora, cada frase se reproducirá cuando termine de generarse. Puede que la tarjeta gráfica esté ocupada."
   },
   "viewer": {
     "title": "Subtítulos de Sokuji",
@@ -2185,7 +2187,18 @@
       "importVoice": "Importar archivo de voz",
       "useVoice": "Leer con la voz de {{name}}",
       "addShort": "Añadir",
-      "importShort": "Importar"
+      "importShort": "Importar",
+      "clipTone": "Tono",
+      "addTone": "Añadir un tono a «{{name}}»",
+      "removeToneTake": "Eliminar la grabación de «{{name}}» en {{language}} con el tono «{{tone}}»",
+      "tones": {
+        "plain": "Normal",
+        "lively": "Alegre",
+        "laugh": "A carcajadas",
+        "gentle": "Tierno",
+        "serious": "Serio",
+        "angry": "Enfadado"
+      }
     },
     "echoCancellationGate": "Por volumen",
     "echoCancellationGateTooltip": "Por volumen — para altavoces: el sonido que reproducen se filtra al micrófono mucho más bajo que tu voz, así que se bloquea por su volumen y tu voz queda intacta.",

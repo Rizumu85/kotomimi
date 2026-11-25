@@ -1023,6 +1023,10 @@
     "en": "Add a language to {{name}}",
     "text": "Enregistrer « {{name}} » dans une autre langue"
   },
+  "fork.voice.addTone": {
+    "en": "Add a tone to {{name}}",
+    "text": "Ajouter un ton à « {{name}} »"
+  },
   "fork.voice.addVoice": {
     "en": "Add a voice",
     "text": "Ajouter une voix"
@@ -1054,6 +1058,10 @@
   "fork.voice.clipSilent": {
     "en": "No voice was heard.",
     "text": "Aucune voix détectée."
+  },
+  "fork.voice.clipTone": {
+    "en": "Tone",
+    "text": "Ton"
   },
   "fork.voice.clipTooLong": {
     "en": "Too long: no more than {{seconds}} seconds with its words.",
@@ -1167,6 +1175,10 @@
     "en": "Remove the {{language}} recording of {{name}}",
     "text": "Supprimer l’enregistrement en {{language}} de « {{name}} »"
   },
+  "fork.voice.removeToneTake": {
+    "en": "Remove the {{tone}} {{language}} recording of {{name}}",
+    "text": "Supprimer l’enregistrement de « {{name}} » ({{language}}, ton {{tone}})"
+  },
   "fork.voice.removeVoice": {
     "en": "Remove {{name}}",
     "text": "Supprimer « {{name}} »"
@@ -1218,6 +1230,30 @@
   "fork.voice.toMeLocked": {
     "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
     "text": "« Pour moi » est indisponible. Kotomimi capte tout le son du système et prendrait la voix de synthèse pour celle de votre interlocuteur. Choisissez une seule application comme source audio, par exemple VRChat."
+  },
+  "fork.voice.tones.angry": {
+    "en": "Angry",
+    "text": "En colère"
+  },
+  "fork.voice.tones.gentle": {
+    "en": "Gentle",
+    "text": "Doux"
+  },
+  "fork.voice.tones.laugh": {
+    "en": "Laughing",
+    "text": "Éclat de rire"
+  },
+  "fork.voice.tones.lively": {
+    "en": "Lively",
+    "text": "Joyeux"
+  },
+  "fork.voice.tones.plain": {
+    "en": "Plain",
+    "text": "Neutre"
+  },
+  "fork.voice.tones.serious": {
+    "en": "Serious",
+    "text": "Sérieux"
   },
   "fork.voice.toThem": {
     "en": "The other side hears it",
@@ -1690,6 +1726,10 @@
   "modePicker.deviceMic": {
     "en": "Microphone",
     "text": "Microphone"
+  },
+  "notices.tts_slow": {
+    "en": "Spoken translation cannot keep up, so each sentence now plays once it is complete. The graphics card may be busy.",
+    "text": "La lecture à voix haute ne suit plus le rythme. Désormais, chaque phrase sera lue une fois entièrement générée. La carte graphique est peut-être occupée."
   },
   "providers.gemini.name": {
     "en": "Google Gemini",
@@ -2278,6 +2318,10 @@
   "providers.localai.noteQwen3TtsBase": {
     "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
     "text": "Lit à voix haute avec votre propre voix. Un enregistrement d’environ dix secondes suffit pour la cloner. À la première utilisation de chaque voix, comptez quelques secondes à un peu moins de trente secondes d’attente. Ensuite, la lecture démarre aussitôt. Utilise environ 3 Go de mémoire vidéo et prend en charge 10 langues."
+  },
+  "providers.localai.noteQwen3TtsBaseSmall": {
+    "en": "Reads in your own voice like the 1.7B, lighter and faster, and measured just as like you. About 2 GB of video memory, ten languages.",
+    "text": "Lit le texte à voix haute avec votre propre voix, comme le 1.7B. Plus léger et plus rapide, il reproduit votre voix avec la même fidélité lors des tests. Environ 2 Go de mémoire vidéo. Compatible avec 10 langues."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

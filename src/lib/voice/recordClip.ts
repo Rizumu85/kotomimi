@@ -78,6 +78,9 @@ export async function recordClip(deviceId?: string): Promise<ClipRecording> {
 /** The largest file of sound looked at: a recording of a voice is far under it, and all of it is decoded into memory. */
 export const FILE_MOST_BYTES = 30 * 1024 * 1024;
 
+/** The largest voice handed over as a file: one with every recording a voice can have is under it (`MOST_PACK_BYTES`). */
+export const PACK_MOST_BYTES = 48 * 1024 * 1024;
+
 /** A file of sound the browser can read (WAV, MP3, M4A, OGG…), at `CLIP_RATE`. Rejects one too large to be a recording. */
 export async function fileClip(file: Blob): Promise<Int16Array> {
   if (file.size > FILE_MOST_BYTES) throw new Error('The file is too large to be a recording of a voice.');

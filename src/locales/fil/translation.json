@@ -787,7 +787,8 @@
       "voiceUnnamed": "Wala pang nakalagay na modelo sa pagbasa. Ilagay ito sa seksyong \"Pagbasa\".",
       "noteQwen3Tts": "Pinakanatural, at agad nagsasalita. Sa pagsubok sa Japanese, Chinese at English, walang maling bigkas. Gumagamit ng humigit-kumulang 3 GB ng video memory at may suporta sa 10 wika.",
       "noteIrodori": "Japanese lang. Sa pagsubok, walang maling bigkas at humigit-kumulang kalahating segundo bawat pangungusap. Gumagamit ng humigit-kumulang 1.7 GB ng video memory.",
-      "noteQwen3TtsBase": "Nagbabasa gamit ang sarili mong boses. Mag-record lang ng mga sampung segundo ng pagsasalita para makopya ang boses mo. Sa unang gamit ng bawat boses, maghintay ng ilang segundo hanggang mahigit dalawampung segundo. Sa mga susunod, magsasalita ito agad. Gumagamit ng humigit-kumulang 3 GB ng memory ng video card at sumusuporta sa 10 wika."
+      "noteQwen3TtsBase": "Nagbabasa gamit ang sarili mong boses. Mag-record lang ng mga sampung segundo ng pagsasalita para makopya ang boses mo. Sa unang gamit ng bawat boses, maghintay ng ilang segundo hanggang mahigit dalawampung segundo. Sa mga susunod, magsasalita ito agad. Gumagamit ng humigit-kumulang 3 GB ng memory ng video card at sumusuporta sa 10 wika.",
+      "noteQwen3TtsBaseSmall": "Gaya ng 1.7B, nagbabasa ito gamit ang sarili mong boses. Mas magaan at mas mabilis ito, at sa pagsubok, kasinglapit din ng 1.7B ang tunog sa boses mo. Gumagamit ng humigit-kumulang 2 GB ng video memory at sumusuporta sa 10 wika."
     }
   },
   "logsPanel": {
@@ -1637,7 +1638,8 @@
     "mic_in_use": "Ginagamit ng {{apps}} ang mikroponong “{{device}}”. Isara ang {{apps}} at magsimula ulit, o pumili ng ibang mikropono.",
     "mic_unreadable": "Hindi mabuksan ng Windows ang mikroponong “{{device}}”. Maaaring ginagamit ito ng ibang app, o hindi na tumutugon ang driver nito. Isara ang mga app na gumagamit nito o ikonekta itong muli, pagkatapos ay magsimula ulit.",
     "mic_blocked": "Hindi pinapayagan ng Windows ang Sokuji na gamitin ang mikropono. I-on ang access sa mikropono para sa mga desktop app sa Settings › Privacy & security › Microphone, pagkatapos ay magsimula ulit.",
-    "noise_suppression_fallback": "Hindi available ang napiling noise suppression. Mas mababang antas ang ginagamit; tingnan ang mga setting ng mikropono."
+    "noise_suppression_fallback": "Hindi available ang napiling noise suppression. Mas mababang antas ang ginagamit; tingnan ang mga setting ng mikropono.",
+    "tts_slow": "Hindi makahabol ang pagbasa ng salin. Tutugtog na lang ang audio ng bawat pangungusap kapag handa na ito. Baka abala ang graphics card."
   },
   "viewer": {
     "title": "Mga subtitle ng Sokuji",
@@ -2185,7 +2187,18 @@
       "importVoice": "Mag-import ng file ng boses",
       "useVoice": "Basahin gamit ang boses na “{{name}}”",
       "addShort": "Idagdag",
-      "importShort": "I-import"
+      "importShort": "I-import",
+      "clipTone": "Tono",
+      "addTone": "Magdagdag ng tono para sa “{{name}}”",
+      "removeToneTake": "Burahin ang rekording ng “{{name}}” sa {{language}} na may tonong {{tone}}",
+      "tones": {
+        "plain": "Normal",
+        "lively": "Masaya",
+        "laugh": "Humahalakhak",
+        "gentle": "Malumanay",
+        "serious": "Seryoso",
+        "angry": "Galit"
+      }
     },
     "echoCancellationGate": "Batay sa lakas ng tunog",
     "echoCancellationGateTooltip": "Ayon sa lakas ng tunog — para sa mga speaker: ang pinapatugtog ng mga ito ay mas mahina pagbalik sa mikropono kaysa sa boses mo, kaya hinaharangan ito batay sa lakas at hindi naaapektuhan ang boses mo.",

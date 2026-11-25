@@ -58,6 +58,7 @@ const NOTES: Readonly<Record<string, string>> = {
   'qwen3-tts-1.7b-customvoice-q8': 'noteQwen3Tts',
   'irodori-tts-v4.1-small-mf-q8': 'noteIrodori',
   'qwen3-tts-1.7b-base-q8': 'noteQwen3TtsBase',
+  'qwen3-tts-0.6b-base-q8': 'noteQwen3TtsBaseSmall',
 };
 
 /** The note of a model's card. A model of one family to a language (the Mac's recognition) shares its family's. */

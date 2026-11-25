@@ -24,6 +24,7 @@ import useAudioStore from '../stores/audioStore';
 import { getEnvironment } from '../utils/environment';
 import { replayBlocked } from '../components/MainPanel/panel/replayGate';
 import { getAppSession } from './session';
+import { toneOf } from '../lib/voice/tone';
 
 const LOCALAI = 'localai';
 
@@ -113,7 +114,8 @@ export async function sayLine(id: string, text: string, language: string, using?
     if (stage.engine) await voiceUp(stage.model);
     if (control.signal.aborted) return;
     const key = stage.server ? server?.key : stage.key ? useProviderStore.getState().entries[LOCALAI]?.credentials[stage.key] : undefined;
-    await speakText(stage, { text: said, language }, key, { ...liveVoiceDeps, fetch: (input, init) => fetch(input, init), clock: realClock }, control.signal, (pcm) => {
+    // In the tone the run would read it in: only the line itself is at hand here, and the cues are in every language.
+    await speakText(stage, { text: said, language, tone: toneOf('', said) }, key, { ...liveVoiceDeps, fetch: (input, init) => fetch(input, init), clock: realClock }, control.signal, (pcm) => {
       if (control.signal.aborted) return;
       if (queue.clears !== mine) { control.abort(new Error('another clip took its place')); return; }
       if (lineBlocked()) { control.abort(); audio.playback.stopReplay(); return; }

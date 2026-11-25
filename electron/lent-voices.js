@@ -8,11 +8,13 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
-const { wavInfo, MOST_SECONDS } = require('./voice-library');
+const { wavInfo, MOST_REFERENCE_BYTES, MOST_REFERENCE_SECONDS, MOST_REFERENCE_WORDS } = require('./voice-library');
 
-/** A recording as it is handed over: base64 in a JSON body, which the door bounds; and what it may be once read. */
-const MOST_WAV_BYTES = 3 * 1024 * 1024;
-const MOST_WORDS = 400;
+/**
+ * A recording as it is handed over: base64 in a JSON body, which the door bounds; and what it may be once read.
+ * Whatever the borrower's library may hold and hand over, so that no voice of its own is refused here.
+ */
+const MOST_WAV_BYTES = MOST_REFERENCE_BYTES;
 /** Kept at once: a run's few voices and languages, of a device or two. */
 const MOST_KEPT = 12;
 
@@ -32,9 +34,14 @@ function createLentVoices({ dir, files = fs, most = MOST_KEPT }) {
       bytes = null;
     }
     const info = bytes && bytes.length <= MOST_WAV_BYTES ? wavInfo(bytes) : null;
-    if (!info || info.seconds < 1 || info.seconds > MOST_SECONDS) return { error: 'The recording is not a 16-bit WAV of a voice.', code: 'voice_ref_unreadable' };
+    if (!info || info.seconds < 1 || info.seconds > MOST_REFERENCE_SECONDS) {
+      return { error: 'The recording is not a 16-bit WAV of a voice.', code: 'voice_ref_unreadable' };
+    }
     // Before anything is written: what a device sends as words may be anything at all.
-    const said = { text: (typeof text === 'string' ? text : '').replace(/\s+/g, ' ').trim().slice(0, MOST_WORDS), language: languageOf(language) };
+    const said = {
+      text: (typeof text === 'string' ? text : '').replace(/\s+/g, ' ').trim().slice(0, MOST_REFERENCE_WORDS),
+      language: languageOf(language),
+    };
     const id = crypto.createHash('sha256').update(bytes).digest('hex');
     try {
       files.mkdirSync(dir, { recursive: true });

@@ -19,6 +19,7 @@ vi.mock('../../lib/voice/recordClip', () => ({
   },
   fileClip: async () => recorded.pcm,
   FILE_MOST_BYTES: 30 * 1024 * 1024,
+  PACK_MOST_BYTES: 48 * 1024 * 1024,
 }));
 vi.mock('react-i18next', async (importOriginal) => ({
   ...(await importOriginal<typeof import('react-i18next')>()),
@@ -27,7 +28,7 @@ vi.mock('react-i18next', async (importOriginal) => ({
 
 const BASE = 'qwen3-tts-1.7b-base-q8';
 const MINE: VoiceChoice = { ...VOICE_DEFAULTS, on: true, at: 'device', nativeModel: BASE };
-const voice = (id: string, name: string, language = 'zh', more: string[] = []): LibraryVoice => ({ id, name, text: 'x', language, seconds: 5, createdAt: 1, languages: [language, ...more] });
+const voice = (id: string, name: string, language = 'zh', more: string[] = []): LibraryVoice => ({ id, name, text: 'x', language, seconds: 5, createdAt: 1, languages: [language, ...more], tones: [] });
 /** `seconds` of a voice: a tone loud enough to be one. */
 const spoken = (seconds: number) => Int16Array.from({ length: Math.round(seconds * CLIP_RATE) }, (_one, i) => Math.round(9000 * Math.sin(i / 12)));
 
@@ -378,7 +379,85 @@ describe('adding a voice', () => {
     const chip = screen.getByRole('button', { name: 'fork.voice.renameVoice:我的声音' }).closest('.kt-myvoices__voice') as HTMLElement;
     expect([...chip.querySelectorAll('.kt-myvoices__lang')].map((one) => one.tagName)).toEqual(['SPAN', 'BUTTON']);
     fireEvent.click(screen.getByRole('button', { name: 'fork.voice.removeTake:我的声音' }));
-    expect(library.removeTake).toHaveBeenCalledWith('aaa111', 'ja');
+    expect(library.removeTake).toHaveBeenCalledWith('aaa111', 'ja', '');
+  });
+
+  it('gives each tone a voice was read in a row of its own, any recording of which can be taken away', () => {
+    useVoiceLibraryStore.setState({ voices: [{ ...voice('aaa111', '我的声音', 'zh', ['ja']), tones: [{ tone: 'laugh', languages: ['zh'] }] }] });
+    draw({ ...MINE, voices: { [BASE]: { '*': 'aaa111' } } });
+    const chip = screen.getByRole('button', { name: 'fork.voice.renameVoice:我的声音' }).closest('.kt-myvoices__voice') as HTMLElement;
+    expect([...chip.querySelectorAll('.kt-myvoices__tone')].map((one) => one.textContent)).toEqual(['fork.voice.tones.plain', 'fork.voice.tones.laugh']);
+    fireEvent.click(screen.getByRole('button', { name: 'fork.voice.removeToneTake:我的声音' }));
+    expect(library.removeTake).toHaveBeenCalledWith('aaa111', 'zh', 'laugh');
+  });
+
+  it('adds a tone to a voice: its own sentence, read in the voice\'s language, kept as that voice\'s in that tone', async () => {
+    useVoiceLibraryStore.setState({ voices: [voice('aaa111', '我的声音')] });
+    library.add.mockResolvedValue({ ok: true, voice: { ...voice('aaa111', '我的声音'), tones: [{ tone: 'lively', languages: ['zh'] }] } });
+    recorded.pcm = spoken(4);
+    const { onChange } = draw({ ...MINE, voices: { [BASE]: { '*': 'aaa111' } } });
+    fireEvent.click(screen.getByRole('button', { name: 'fork.voice.addTone:我的声音' }));
+    const dialog = within(screen.getByRole('dialog'));
+    // The first tone it has none of, in the language the voice is: there the recording is spoken on from.
+    expect((dialog.getByRole('combobox', { name: 'fork.voice.clipTone' }) as HTMLSelectElement).value).toBe('lively');
+    expect((dialog.getByRole('combobox', { name: 'fork.voice.clipLanguage' }) as HTMLSelectElement).value).toBe('zh');
+    expect(dialog.getByText(readAloud('zh', 'short', 'lively').text)).toBeTruthy();
+    // Another tone is another sentence.
+    fireEvent.change(dialog.getByRole('combobox', { name: 'fork.voice.clipTone' }), { target: { value: 'laugh' } });
+    expect(dialog.getByText(readAloud('zh', 'short', 'laugh').text)).toBeTruthy();
+    fireEvent.click(dialog.getByRole('button', { name: 'fork.voice.record' }));
+    await waitFor(() => expect(dialog.getByRole('button', { name: 'fork.voice.stopRecording' })).toBeTruthy());
+    fireEvent.click(dialog.getByRole('button', { name: 'fork.voice.stopRecording' }));
+    await waitFor(() => expect(dialog.getByRole('button', { name: 'fork.voice.saveVoice' })).toBeTruthy());
+    await act(async () => { fireEvent.click(dialog.getByRole('button', { name: 'fork.voice.saveVoice' })); });
+    expect(library.add).toHaveBeenCalledTimes(1);
+    expect(library.add.mock.calls[0][0]).toMatchObject({ text: readAloud('zh', 'short', 'laugh').text, language: 'zh', to: 'aaa111', tone: 'laugh' });
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('takes a laugh as short as one comes, and any other tone no shorter than a sentence', async () => {
+    useVoiceLibraryStore.setState({ voices: [voice('aaa111', '我的声音')] });
+    recorded.pcm = spoken(2.4);
+    draw({ ...MINE, voices: { [BASE]: { '*': 'aaa111' } } });
+    fireEvent.click(screen.getByRole('button', { name: 'fork.voice.addTone:我的声音' }));
+    const dialog = within(screen.getByRole('dialog'));
+    const read = async () => {
+      fireEvent.click(dialog.getByRole('button', { name: 'fork.voice.record' }));
+      await waitFor(() => expect(dialog.getByRole('button', { name: 'fork.voice.stopRecording' })).toBeTruthy());
+      fireEvent.click(dialog.getByRole('button', { name: 'fork.voice.stopRecording' }));
+      await waitFor(() => expect(dialog.queryByRole('button', { name: 'fork.voice.stopRecording' })).toBeNull());
+    };
+    await read();
+    await waitFor(() => expect(dialog.getByText('fork.voice.clipTooShort')).toBeTruthy());
+    expect(document.querySelectorAll('.kt-addvoice__take')).toHaveLength(0);
+    fireEvent.change(dialog.getByRole('combobox', { name: 'fork.voice.clipTone' }), { target: { value: 'laugh' } });
+    await read();
+    await waitFor(() => expect(document.querySelectorAll('.kt-addvoice__take')).toHaveLength(1));
+  });
+
+  it('offers a new voice its tones once it has a plain recording, which is the one the voice is made from', async () => {
+    const made = voice('ccc333', 'fork.voice.myVoice');
+    library.add.mockResolvedValue({ ok: true, voice: made });
+    const { dialog } = open();
+    expect(dialog.queryByRole('combobox', { name: 'fork.voice.clipTone' })).toBeNull();
+    const read = async () => {
+      fireEvent.click(dialog.getByRole('button', { name: 'fork.voice.record' }));
+      await waitFor(() => expect(dialog.getByRole('button', { name: 'fork.voice.stopRecording' })).toBeTruthy());
+      fireEvent.click(dialog.getByRole('button', { name: 'fork.voice.stopRecording' }));
+      await waitFor(() => expect(dialog.queryByRole('button', { name: 'fork.voice.stopRecording' })).toBeNull());
+    };
+    await read();
+    fireEvent.change(await waitFor(() => dialog.getByRole('combobox', { name: 'fork.voice.clipTone' })), { target: { value: 'angry' } });
+    expect(dialog.getByText(readAloud('zh', 'short', 'angry').text)).toBeTruthy();
+    await read();
+    await waitFor(() => expect(document.querySelectorAll('.kt-addvoice__take')).toHaveLength(2));
+    await act(async () => { fireEvent.click(dialog.getByRole('button', { name: 'fork.voice.saveVoice' })); });
+    const [own, more] = library.add.mock.calls.map((call) => call[0] as Record<string, unknown>);
+    expect(own).toMatchObject({ language: 'zh', text: readAloud('zh').text });
+    expect(own).not.toHaveProperty('to');
+    expect(own).not.toHaveProperty('tone');
+    expect(more).toMatchObject({ language: 'zh', to: 'ccc333', tone: 'angry' });
   });
 
   it('leaves a second recording in the first one\'s language to be chosen by hand', async () => {

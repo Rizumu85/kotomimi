@@ -787,7 +787,8 @@
       "voiceUnnamed": "Chưa nhập mô hình đọc. Hãy nhập trong mục \"Đọc thành tiếng\".",
       "noteQwen3Tts": "Tự nhiên nhất, phát giọng ngay khi bắt đầu. Thử nghiệm với tiếng Nhật, tiếng Trung và tiếng Anh đều không đọc sai. Dùng khoảng 3 GB bộ nhớ đồ họa, hỗ trợ 10 ngôn ngữ.",
       "noteIrodori": "Chỉ hỗ trợ tiếng Nhật. Thử nghiệm không đọc sai, mỗi câu mất khoảng nửa giây. Dùng khoảng 1.7 GB bộ nhớ đồ họa.",
-      "noteQwen3TtsBase": "Chỉ cần ghi âm khoảng mười giây để tạo bản sao giọng của bạn và dùng giọng đó để đọc văn bản. Lần đầu dùng mỗi giọng, bạn cần chờ từ vài giây đến hơn hai mươi giây. Những lần sau, giọng sẽ phát ngay. Dùng khoảng 3 GB bộ nhớ đồ họa và hỗ trợ 10 ngôn ngữ."
+      "noteQwen3TtsBase": "Chỉ cần ghi âm khoảng mười giây để tạo bản sao giọng của bạn và dùng giọng đó để đọc văn bản. Lần đầu dùng mỗi giọng, bạn cần chờ từ vài giây đến hơn hai mươi giây. Những lần sau, giọng sẽ phát ngay. Dùng khoảng 3 GB bộ nhớ đồ họa và hỗ trợ 10 ngôn ngữ.",
+      "noteQwen3TtsBaseSmall": "Đọc bằng chính giọng của bạn như bản 1.7B. Bản này nhẹ hơn, nhanh hơn và qua thử nghiệm vẫn giống giọng bạn như bản 1.7B. Dùng khoảng 2 GB bộ nhớ đồ họa, hỗ trợ 10 ngôn ngữ."
     }
   },
   "logsPanel": {
@@ -1637,7 +1638,8 @@
     "mic_in_use": "Micrô “{{device}}” đang được {{apps}} sử dụng. Hãy đóng {{apps}} rồi bắt đầu lại, hoặc chọn micrô khác.",
     "mic_unreadable": "Windows không mở được micrô “{{device}}”. Có thể một ứng dụng khác đang dùng nó, hoặc trình điều khiển của nó không phản hồi. Hãy đóng các ứng dụng đang dùng nó hoặc kết nối lại, rồi bắt đầu lại.",
     "mic_blocked": "Windows không cho phép Sokuji dùng micrô. Hãy bật quyền truy cập micrô cho ứng dụng máy tính trong Cài đặt › Quyền riêng tư & bảo mật › Micrô, rồi bắt đầu lại.",
-    "noise_suppression_fallback": "Chế độ giảm ồn đã chọn không khả dụng. Đang dùng mức thấp hơn; hãy kiểm tra cài đặt micrô."
+    "noise_suppression_fallback": "Chế độ giảm ồn đã chọn không khả dụng. Đang dùng mức thấp hơn; hãy kiểm tra cài đặt micrô.",
+    "tts_slow": "Tính năng đọc bản dịch không theo kịp. Từ giờ, ứng dụng sẽ tạo xong lời đọc cho từng câu rồi mới phát. Card đồ họa có thể đang bận."
   },
   "viewer": {
     "title": "Phụ đề Sokuji",
@@ -2185,7 +2187,18 @@
       "importVoice": "Nhập tệp giọng nói",
       "useVoice": "Đọc bằng giọng {{name}}",
       "addShort": "Thêm",
-      "importShort": "Nhập"
+      "importShort": "Nhập",
+      "clipTone": "Giọng điệu",
+      "addTone": "Thêm giọng điệu cho «{{name}}»",
+      "removeToneTake": "Xóa bản thu bằng {{language}} của «{{name}}» với giọng điệu {{tone}}",
+      "tones": {
+        "plain": "Bình thường",
+        "lively": "Vui vẻ",
+        "laugh": "Cười lớn",
+        "gentle": "Dịu dàng",
+        "serious": "Nghiêm túc",
+        "angry": "Tức giận"
+      }
     },
     "echoCancellationGate": "Theo âm lượng",
     "echoCancellationGateTooltip": "Theo âm lượng — khi dùng loa: âm thanh từ loa lọt vào mic nhỏ hơn nhiều so với giọng bạn, nên được chặn theo âm lượng và giọng bạn không bị ảnh hưởng.",

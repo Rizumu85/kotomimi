@@ -9,6 +9,7 @@ import { fakeSockets } from '../../lib/contract/testing/fakeSocket';
 import { trackedClock } from '../../lib/contract/testing/trackedClock';
 import { buildLocalAI, LOCALAI_DEFAULTS, type LocalAIConfig, type LocalAICredentials, type LocalAISettings } from './localai';
 import { createPipelineAdapter, FIRST_REF } from './pipeline';
+import { Speaker } from './speaker';
 import { exchange, SHARED } from './testing';
 import type { VoiceDeps } from './voice';
 
@@ -31,6 +32,138 @@ const sse = (...pieces: string[]) => new Response(
 
 const stops: Array<() => Promise<void>> = [];
 afterEach(async () => { for (const stop of stops.splice(0)) await stop(); });
+
+describe('sentence playback on the request clock', () => {
+  function voice(withSaying = true) {
+    const { clock } = trackedClock();
+    let piece: (value: number) => void;
+    let finish: () => void;
+    const native: VoiceDeps['native'] = (_request, take) => new Promise<void>((resolve) => {
+      piece = (value) => take(new Int16Array(6000).fill(value), 24_000); // 250 ms
+      finish = resolve;
+    });
+    const audio = vi.fn();
+    const until = vi.fn();
+    const saying = vi.fn((_text: string, _from: number) => until);
+    const degraded = vi.fn();
+    const frame = vi.fn();
+    const speaker = new Speaker({ via: 'speech', engine: true, baseUrl: '', model: 'test', voices: {} }, undefined,
+      { clock, native, fetch: vi.fn(), decode: vi.fn(), edge: vi.fn() }, { audio, degraded, frame },
+      withSaying ? saying : undefined);
+    const say = (ref: number, text = `Sentence ${ref}`) => speaker.say(ref, text, 'en');
+    const done = async () => {
+      frame.mockClear();
+      finish();
+      await vi.waitFor(() => expect(frame).toHaveBeenCalledWith(expect.objectContaining({ type: 'voice.done' })));
+    };
+    return { clock, say, audio, saying, until, degraded, piece: (value: number) => piece(value), done };
+  }
+
+  it('streams at the margin and excludes the wait for the first piece', async () => {
+    const h = voice();
+    h.say(1);
+    h.clock.advance(3000);
+    expect(h.saying).not.toHaveBeenCalled();
+    h.piece(1);
+    expect(h.audio).toHaveBeenCalledTimes(1);
+    h.clock.advance(200);
+    h.piece(2);
+    expect(h.audio).toHaveBeenCalledTimes(2);
+    h.clock.advance(200); // 400 ms from first piece to end for 500 ms of sound
+    await h.done();
+    h.say(2);
+    h.piece(3);
+    expect(h.audio).toHaveBeenCalledTimes(3);
+    await h.done();
+    expect(h.degraded).not.toHaveBeenCalled();
+  });
+
+  it('counts a late piece even with a fast average and dates the echo from hand-on', async () => {
+    const h = voice();
+    h.say(1);
+    h.piece(1);
+    h.clock.advance(300);
+    h.piece(2);
+    await h.done();
+    expect(h.audio).toHaveBeenCalledTimes(2);
+    expect(h.until).toHaveBeenLastCalledWith(550);
+
+    h.say(2);
+    h.piece(3);
+    h.clock.advance(1000);
+    h.piece(4);
+    expect(h.audio).toHaveBeenCalledTimes(2);
+    expect(h.saying).toHaveBeenCalledTimes(1);
+    await h.done();
+    expect(h.audio).toHaveBeenCalledTimes(3);
+    const [{ ref, pcm }] = h.audio.mock.lastCall!;
+    expect(ref).toBe(2);
+    expect(pcm).toHaveLength(12000);
+    expect([pcm[0], pcm[5999], pcm[6000], pcm[11999]]).toEqual([3, 3, 4, 4]);
+    expect(h.saying).toHaveBeenLastCalledWith('Sentence 2', 1300);
+    expect(h.until).toHaveBeenLastCalledWith(1800);
+    h.say(3);
+    h.piece(5);
+    await h.done();
+    expect(h.saying).toHaveBeenLastCalledWith('Sentence 3', 1800);
+    expect(h.until).toHaveBeenLastCalledWith(2050);
+  });
+
+  it('holds above the margin, streams after three fast sentences, and warns only once', async () => {
+    const h = voice();
+    for (let ref = 1; ref <= 6; ref++) {
+      h.say(ref);
+      const before = h.audio.mock.calls.length;
+      h.piece(1);
+      const streaming = ref === 1 || ref === 5;
+      expect(h.audio.mock.calls.length - before).toBe(streaming ? 1 : 0);
+      h.clock.advance(100);
+      h.piece(2);
+      // No piece was late, but completing these sentences took 401 ms for 500 ms of sound.
+      if (streaming) h.clock.advance(301);
+      await h.done();
+      expect(h.audio.mock.calls.length - before).toBe(streaming ? 2 : 1);
+    }
+    expect(h.degraded.mock.calls).toEqual([[{ code: 'tts_slow', message: expect.any(String) }]]);
+  });
+
+  it('drops the oldest sentence waiting behind a held sentence', async () => {
+    const h = voice();
+    h.say(1);
+    h.piece(1);
+    h.clock.advance(300);
+    h.piece(2);
+    await h.done();
+    h.say(2);
+    h.piece(3);
+    h.say(3);
+    h.say(4);
+    h.say(5);
+    await h.done();
+    for (const value of [4, 5]) { h.piece(value); await h.done(); }
+    expect(h.audio.mock.calls.map(([event]) => event.ref)).toEqual([1, 1, 2, 4, 5]);
+  });
+
+  it('keeps a server echo for ten seconds after the held sound plays out', async () => {
+    const h = voice(false);
+    h.say(1);
+    h.piece(1);
+    h.clock.advance(300);
+    h.piece(2);
+    await h.done();
+    h.say(2, 'Hello again');
+    h.piece(3);
+    h.clock.advance(2000);
+    await h.done();
+    h.clock.advance(10_249);
+    h.say(3, 'Hello again');
+    h.clock.advance(1);
+    h.say(4, 'Hello again');
+    h.piece(4);
+    await h.done();
+    expect(h.audio.mock.calls.map(([event]) => event.ref)).toEqual([1, 1, 2, 4]);
+  });
+});
 
 async function live(context: SessionContext, patch: Partial<LocalAISettings>, answers: Response[], voice: Partial<Pick<VoiceDeps, 'decode' | 'native' | 'edge'>> = {}, adjust?: (config: LocalAIConfig) => void, credentials: LocalAICredentials = K) {
   const config = buildLocalAI(context, { ...LOCALAI_DEFAULTS, ...patch }, shared);
@@ -116,6 +249,16 @@ describe('a leg that speaks (fork)', () => {
     expect(h.of('audio')[0].payload.ref).toBe(translation);
     expect(h.of('audio')[0].payload.pcm).toBeInstanceOf(Int16Array);
     expect(h.frames('voice.done')).toHaveLength(1);
+  });
+
+  it('speaks each finished translation in the tone of its source or its final words', async () => {
+    const native = vi.fn<VoiceDeps['native']>(async (_request, piece) => { piece(new Int16Array(2400), 24000); });
+    const h = await live(SPEAKS, EDGE_ON, [sse('手紙が届いた。'), sse('ありが', 'とう。')], { native }, (config) => {
+      config.stages!.voice = { via: 'speech', engine: true, baseUrl: '', model: 'qwen3-tts-1.7b-base-q8', voices: { ja: 'aaa111' }, patient: true };
+    });
+    h.receive(...heard('a', '太好了，信到了。'), ...heard('b', '我收到了你的包裹。'));
+    await vi.waitFor(() => expect(h.of('audio')).toHaveLength(2));
+    expect(native.mock.calls.map(([{ text, tone }]) => [text, tone])).toEqual([['手紙が届いた。', 'lively'], ['ありがとう。', 'gentle']]);
   });
 
   describe('with a second language of theirs lit', () => {
@@ -247,6 +390,27 @@ describe('a leg that speaks (fork)', () => {
     h.receive(...heard('c', '谢谢。'));
     await vi.waitFor(() => expect(h.said.map((one) => one.text)).toEqual(['こんにちは。', 'ありがとう。']));
     expect(h.of('degraded')).toHaveLength(0);
+  });
+
+  it('recognizes an echo of a queued sentence during its playback window', async () => {
+    const speaker = await live(SPEAKS, EDGE_ON, [sse('Welcome.'), sse('Good morning.')], {
+      decode: async () => new Int16Array(72_000),
+    });
+    const participant = await live(OTHER_SIDE, EDGE_ON, [sse('First reply.'), sse('Later reply.')]);
+    speaker.session.appendText('First line.');
+    await vi.waitFor(() => expect(speaker.of('audio')).toHaveLength(1));
+    speaker.session.appendText('Second line.');
+    await vi.waitFor(() => expect(speaker.of('audio')).toHaveLength(2));
+
+    // Both clips were handed on at zero. The second plays from 3000 to 6000 ms.
+    participant.receive(...heard('early', 'Good morning.'));
+    await vi.waitFor(() => expect(participant.frames('text.done')).toHaveLength(1));
+    participant.clock.advance(5900);
+    participant.receive(...heard('echo', 'Good morning.'));
+    expect(participant.frames('speech.dropped')).toHaveLength(1);
+    participant.clock.advance(200);
+    participant.receive(...heard('later', 'Good morning.'));
+    await vi.waitFor(() => expect(participant.frames('text.done')).toHaveLength(2));
   });
 
   it('drops an audible piece of a failed stream on the participant leg, but not a later repetition', async () => {

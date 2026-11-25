@@ -1023,6 +1023,10 @@
     "en": "Add a language to {{name}}",
     "text": "Nagraj próbkę w kolejnym języku dla „{{name}}”"
   },
+  "fork.voice.addTone": {
+    "en": "Add a tone to {{name}}",
+    "text": "Dodaj ton głosu do „{{name}}”"
+  },
   "fork.voice.addVoice": {
     "en": "Add a voice",
     "text": "Dodaj głos"
@@ -1054,6 +1058,10 @@
   "fork.voice.clipSilent": {
     "en": "No voice was heard.",
     "text": "Nie wykryto głosu."
+  },
+  "fork.voice.clipTone": {
+    "en": "Tone",
+    "text": "Ton głosu"
   },
   "fork.voice.clipTooLong": {
     "en": "Too long: no more than {{seconds}} seconds with its words.",
@@ -1167,6 +1175,10 @@
     "en": "Remove the {{language}} recording of {{name}}",
     "text": "Usuń nagranie w języku {{language}} dla „{{name}}”"
   },
+  "fork.voice.removeToneTake": {
+    "en": "Remove the {{tone}} {{language}} recording of {{name}}",
+    "text": "Usuń nagranie „{{name}}” w języku {{language}} (ton: {{tone}})"
+  },
   "fork.voice.removeVoice": {
     "en": "Remove {{name}}",
     "text": "Usuń „{{name}}”"
@@ -1218,6 +1230,30 @@
   "fork.voice.toMeLocked": {
     "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
     "text": "Opcja „Do mnie” jest niedostępna. Kotomimi pobiera dźwięk z całego systemu, więc odczytane tłumaczenie zostałoby uznane za wypowiedź rozmówcy. Wybierz jedną aplikację (np. VRChat) jako źródło głosu rozmówcy."
+  },
+  "fork.voice.tones.angry": {
+    "en": "Angry",
+    "text": "Rozgniewany"
+  },
+  "fork.voice.tones.gentle": {
+    "en": "Gentle",
+    "text": "Łagodny"
+  },
+  "fork.voice.tones.laugh": {
+    "en": "Laughing",
+    "text": "Głośny śmiech"
+  },
+  "fork.voice.tones.lively": {
+    "en": "Lively",
+    "text": "Wesoły"
+  },
+  "fork.voice.tones.plain": {
+    "en": "Plain",
+    "text": "Zwykły"
+  },
+  "fork.voice.tones.serious": {
+    "en": "Serious",
+    "text": "Poważny"
   },
   "fork.voice.toThem": {
     "en": "The other side hears it",
@@ -1686,6 +1722,10 @@
   "models.online": {
     "en": "Online",
     "text": "Online"
+  },
+  "notices.tts_slow": {
+    "en": "Spoken translation cannot keep up, so each sentence now plays once it is complete. The graphics card may be busy.",
+    "text": "Odczyt na głos nie nadąża. Od teraz każde zdanie zostanie odtworzone dopiero po wygenerowaniu go w całości. Karta graficzna może być zajęta."
   },
   "providers.gemini.name": {
     "en": "Google Gemini",
@@ -2274,6 +2314,10 @@
   "providers.localai.noteQwen3TtsBase": {
     "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
     "text": "Czyta na głos Twoim głosem. Do sklonowania głosu wystarczy nagranie trwające około 10 sekund. Przy pierwszym użyciu każdego głosu odczyt zaczyna się po kilku do dwudziestu kilku sekundach. Później rusza od razu. Zużywa około 3 GB pamięci karty graficznej i obsługuje 10 języków."
+  },
+  "providers.localai.noteQwen3TtsBaseSmall": {
+    "en": "Reads in your own voice like the 1.7B, lighter and faster, and measured just as like you. About 2 GB of video memory, ten languages.",
+    "text": "Czyta tekst na głos Twoim głosem. Jest lżejszy i szybszy od 1.7B, a w testach równie wiernie oddawał Twój głos. Zajmuje ok. 2 GB pamięci karty graficznej i obsługuje 10 języków."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

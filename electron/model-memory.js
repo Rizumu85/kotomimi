@@ -20,14 +20,21 @@ function windowsMemory(stdout) {
       if (value) adapter[value[1].toLowerCase()] = value[2];
     }
   }
-  const sizes = adapters.flatMap((adapter) => {
-    if (/^(root|swd)\\/i.test(adapter.matchingdeviceid ?? '') || /software|basic render|remote display|indirect display/i.test(adapter.driverdesc ?? '')) return [];
+  let largest = null;
+  for (const adapter of adapters) {
+    const device = adapter.matchingdeviceid ?? '';
+    if (/^(root|swd)\\/i.test(device) ||
+        /software|basic render|remote display|indirect display/i.test(adapter.driverdesc ?? '')) continue;
     // The DWORD can be truncated above 4 GB: use it only if the QWORD is absent.
     const raw = adapter['hardwareinformation.qwmemorysize'] ?? adapter['hardwareinformation.memorysize'];
     const bytes = raw && /^(?:0x[\da-f]+|\d+)$/i.test(raw) ? Number(raw) : NaN;
-    return Number.isFinite(bytes) && bytes >= 0 ? [bytes / MB] : [];
-  });
-  return sizes.length ? Math.max(...sizes) : null;
+    if (!Number.isFinite(bytes) || bytes < 0 || (largest && bytes / MB <= largest.memoryMB)) continue;
+    // NVIDIA's 32.0.15.7742 is 577.42: the last digit of the third field and the four digits of the fourth.
+    const driver = /^\d+\.\d+\.\d*(\d)\.(\d{4})$/.exec(adapter.driverversion ?? '');
+    const cuda13 = /(?:^|\\|&)VEN_10DE(?:&|$)/i.test(device) && !!driver && Number(driver[1] + driver[2]) >= 58000;
+    largest = { memoryMB: bytes / MB, cuda13 };
+  }
+  return largest;
 }
 
 function createModelMemoryReader(deps = {}) {
@@ -37,7 +44,7 @@ function createModelMemoryReader(deps = {}) {
     try {
       if (platform === 'darwin') {
         const bytes = totalmem();
-        return Number.isFinite(bytes) && bytes > 0 ? bytes / 2 / MB : null;
+        return Number.isFinite(bytes) && bytes > 0 ? { memoryMB: bytes / 2 / MB, cuda13: false } : null;
       }
       if (platform !== 'win32') return null;
       const query = (key) => execute('reg.exe', ['query', key, '/reg:64'], {

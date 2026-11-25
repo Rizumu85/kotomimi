@@ -1015,6 +1015,10 @@
     "en": "Add a language to {{name}}",
     "text": "Äänitä näyte uudella kielellä ({{name}})"
   },
+  "fork.voice.addTone": {
+    "en": "Add a tone to {{name}}",
+    "text": "Lisää sävy: {{name}}"
+  },
   "fork.voice.addVoice": {
     "en": "Add a voice",
     "text": "Lisää ääni"
@@ -1046,6 +1050,10 @@
   "fork.voice.clipSilent": {
     "en": "No voice was heard.",
     "text": "Äänitteestä ei kuulunut ääntä."
+  },
+  "fork.voice.clipTone": {
+    "en": "Tone",
+    "text": "Sävy"
   },
   "fork.voice.clipTooLong": {
     "en": "Too long: no more than {{seconds}} seconds with its words.",
@@ -1159,6 +1167,10 @@
     "en": "Remove the {{language}} recording of {{name}}",
     "text": "Poista äänite ({{name}}, {{language}})"
   },
+  "fork.voice.removeToneTake": {
+    "en": "Remove the {{tone}} {{language}} recording of {{name}}",
+    "text": "Poista tallenne: {{name}} ({{language}}, sävy: {{tone}})"
+  },
   "fork.voice.removeVoice": {
     "en": "Remove {{name}}",
     "text": "Poista «{{name}}»"
@@ -1210,6 +1222,30 @@
   "fork.voice.toMeLocked": {
     "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
     "text": "”Minulle” ei ole nyt käytettävissä. Kun ääni otetaan koko järjestelmästä, Kotomimi tulkitsee ääneen luetun käännöksen toisen osapuolen puheeksi. Valitse äänilähteeksi yksi sovellus, kuten VRChat."
+  },
+  "fork.voice.tones.angry": {
+    "en": "Angry",
+    "text": "Vihainen"
+  },
+  "fork.voice.tones.gentle": {
+    "en": "Gentle",
+    "text": "Lempeä"
+  },
+  "fork.voice.tones.laugh": {
+    "en": "Laughing",
+    "text": "Naurava"
+  },
+  "fork.voice.tones.lively": {
+    "en": "Lively",
+    "text": "Iloinen"
+  },
+  "fork.voice.tones.plain": {
+    "en": "Plain",
+    "text": "Tavallinen"
+  },
+  "fork.voice.tones.serious": {
+    "en": "Serious",
+    "text": "Vakava"
   },
   "fork.voice.toThem": {
     "en": "The other side hears it",
@@ -1674,6 +1710,10 @@
   "models.namedGroup": {
     "en": "Needs the language set",
     "text": "Kieli on määritettävä"
+  },
+  "notices.tts_slow": {
+    "en": "Spoken translation cannot keep up, so each sentence now plays once it is complete. The graphics card may be busy.",
+    "text": "Ääneenluku ei pysy tahdissa, joten jatkossa lauseet toistetaan vasta, kun ne ovat valmiita. Näytönohjain saattaa olla kuormittunut."
   },
   "providers.gemini.name": {
     "en": "Google Gemini",
@@ -2262,6 +2302,10 @@
   "providers.localai.noteQwen3TtsBase": {
     "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
     "text": "Lukee tekstin omalla äänelläsi. Äänen kloonaamiseen riittää noin kymmenen sekunnin äänite. Uuden äänen ensimmäisellä käyttökerralla puhe alkaa muutaman sekunnin tai runsaan 20 sekunnin kuluttua. Sen jälkeen puhe alkaa heti. Vaatii noin 3 GB näyttömuistia ja tukee 10 kieltä."
+  },
+  "providers.localai.noteQwen3TtsBaseSmall": {
+    "en": "Reads in your own voice like the 1.7B, lighter and faster, and measured just as like you. About 2 GB of video memory, ten languages.",
+    "text": "Lukee tekstin ääneen omalla äänelläsi, kuten 1.7B. Malli on kevyempi ja nopeampi, ja testeissä ääni kuulosti yhtä paljon omalta ääneltäsi. Käyttää noin 2 GB näyttömuistia ja tukee 10 kieltä."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

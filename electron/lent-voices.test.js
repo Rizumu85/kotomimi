@@ -73,6 +73,26 @@ describe('a recording a device hands over', () => {
     expect(lent.get(third)).not.toBeNull();
   });
 
+  it('accepts the longest joined recording with both transcripts', () => {
+    const lent = createLentVoices({ dir });
+    const text = `${'a'.repeat(400)} ${'b'.repeat(400)}`;
+    const kept = lent.keep({ wav: b64(wav(34.25)), text, language: 'en' });
+    expect(lent.get(kept.id)).toMatchObject({ text, language: 'en' });
+    expect(lent.keep({ wav: b64(wav(34.26)) })).toMatchObject({ code: 'voice_ref_unreadable' });
+  });
+
+  it('takes the largest recording a library can hold: a 48 kHz stereo one with a laugh joined after it', () => {
+    const lent = createLentVoices({ dir });
+    const frames = Math.round(34.25 * 48000);
+    const data = Buffer.alloc(frames * 4, 1);
+    const head = Buffer.alloc(44);
+    head.write('RIFF', 0); head.writeUInt32LE(36 + data.length, 4); head.write('WAVEfmt ', 8); head.writeUInt32LE(16, 16);
+    head.writeUInt16LE(1, 20); head.writeUInt16LE(2, 22); head.writeUInt32LE(48000, 24); head.writeUInt32LE(192000, 28);
+    head.writeUInt16LE(4, 32); head.writeUInt16LE(16, 34); head.write('data', 36); head.writeUInt32LE(data.length, 40);
+    expect(frames * 4).toBeGreaterThan(6 * 1024 * 1024);
+    expect(lent.keep({ wav: b64(Buffer.concat([head, data])), text: 'Hello.', language: 'en' })).toMatchObject({ ok: true });
+  });
+
   it('is gone when sharing stops: nothing of another device is left', () => {
     const lent = createLentVoices({ dir });
     const { id } = lent.keep({ wav: b64(wav(4)) });

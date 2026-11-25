@@ -536,7 +536,7 @@ describe('a recording handed over for the cloning voice model (fork)', () => {
     expect(taken).toEqual([{ wav, text: '你好。', language: 'zh' }]);
     // What the keeper refuses is answered as it says; anything far too large is not read.
     expect((await fetch(`${base}/v1/audio/voices`, { method: 'POST', body: '{}' })).status).toBe(400);
-    expect((await fetch(`${base}/v1/audio/voices`, { method: 'POST', body: 'x'.repeat(4 * 1024 * 1024 + 10) })).status).toBe(413);
+    expect((await fetch(`${base}/v1/audio/voices`, { method: 'POST', body: 'x'.repeat(Math.ceil(require('./lent-voices.js').MOST_WAV_BYTES / 3) * 4 + 64 * 1024 + 10) })).status).toBe(413);
     // A sentence is still held to its own size.
     expect((await fetch(`${base}/v1/chat/completions`, { method: 'POST', body: 'x'.repeat(1024 * 1024 + 10) })).status).toBe(413);
   });

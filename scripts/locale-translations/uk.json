@@ -1015,6 +1015,10 @@
     "en": "Add a language to {{name}}",
     "text": "Записати «{{name}}» ще однією мовою"
   },
+  "fork.voice.addTone": {
+    "en": "Add a tone to {{name}}",
+    "text": "Додати тон для «{{name}}»"
+  },
   "fork.voice.addVoice": {
     "en": "Add a voice",
     "text": "Додати голос"
@@ -1046,6 +1050,10 @@
   "fork.voice.clipSilent": {
     "en": "No voice was heard.",
     "text": "На записі не чути голосу."
+  },
+  "fork.voice.clipTone": {
+    "en": "Tone",
+    "text": "Тон"
   },
   "fork.voice.clipTooLong": {
     "en": "Too long: no more than {{seconds}} seconds with its words.",
@@ -1159,6 +1167,10 @@
     "en": "Remove the {{language}} recording of {{name}}",
     "text": "Видалити запис «{{name}}» ({{language}})"
   },
+  "fork.voice.removeToneTake": {
+    "en": "Remove the {{tone}} {{language}} recording of {{name}}",
+    "text": "Видалити запис «{{name}}» (тон: {{tone}}, мова: {{language}})"
+  },
   "fork.voice.removeVoice": {
     "en": "Remove {{name}}",
     "text": "Видалити «{{name}}»"
@@ -1210,6 +1222,30 @@
   "fork.voice.toMeLocked": {
     "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
     "text": "«Для мене» зараз недоступне: звук співрозмовника береться з усієї системи, тому озвучення теж сприйматиметься як його мова. Виберіть окрему програму (наприклад, VRChat) як джерело звуку співрозмовника."
+  },
+  "fork.voice.tones.angry": {
+    "en": "Angry",
+    "text": "Сердитий"
+  },
+  "fork.voice.tones.gentle": {
+    "en": "Gentle",
+    "text": "Ніжний"
+  },
+  "fork.voice.tones.laugh": {
+    "en": "Laughing",
+    "text": "Гучний сміх"
+  },
+  "fork.voice.tones.lively": {
+    "en": "Lively",
+    "text": "Радісний"
+  },
+  "fork.voice.tones.plain": {
+    "en": "Plain",
+    "text": "Звичайний"
+  },
+  "fork.voice.tones.serious": {
+    "en": "Serious",
+    "text": "Серйозний"
   },
   "fork.voice.toThem": {
     "en": "The other side hears it",
@@ -1666,6 +1702,10 @@
   "models.namedGroup": {
     "en": "Needs the language set",
     "text": "Потрібно вказати мову"
+  },
+  "notices.tts_slow": {
+    "en": "Spoken translation cannot keep up, so each sentence now plays once it is complete. The graphics card may be busy.",
+    "text": "Озвучення не встигає. Тепер кожне речення відтворюватиметься, щойно буде готовий увесь його звук. Можливо, відеокарта зайнята."
   },
   "providers.gemini.name": {
     "en": "Google Gemini",
@@ -2254,6 +2294,10 @@
   "providers.localai.noteQwen3TtsBase": {
     "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
     "text": "Читає вашим голосом. Щоб його клонувати, достатньо записати приблизно десять секунд мовлення. Під час першого використання кожного голосу доведеться зачекати від кількох до двадцяти з лишком секунд. Далі озвучення починається одразу. Потребує близько 3 GB відеопам’яті й підтримує 10 мов."
+  },
+  "providers.localai.noteQwen3TtsBaseSmall": {
+    "en": "Reads in your own voice like the 1.7B, lighter and faster, and measured just as like you. About 2 GB of video memory, ten languages.",
+    "text": "Як і 1.7B, читає вголос вашим голосом, але працює швидше й потребує менше ресурсів. За тестами, відтворює ваш голос так само точно. Використовує близько 2 GB відеопам’яті й підтримує 10 мов."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

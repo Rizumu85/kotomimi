@@ -117,16 +117,21 @@ const speakEdge: VoiceDeps['edge'] = (request, signal) => {
 };
 
 /** One of the user's own voices' recordings, as another device is handed it: asked of the main process, which keeps them. */
-const recordingOf: NonNullable<VoiceDeps['recording']> = async (voice, language, bytes) => {
+const recordingOf: NonNullable<VoiceDeps['recording']> = async (voice, language, bytes, tone) => {
   const api = (typeof window === 'undefined' ? undefined : (window as unknown as { electron?: { invoke(channel: string, data?: unknown): Promise<unknown> } }).electron);
-  const answer = (await api?.invoke('voice-library:recording', { id: voice, language, bytes }).catch(() => null)) as { id?: unknown; text?: unknown; language?: unknown; wav?: unknown } | null | undefined;
+  const answer = (await api?.invoke('voice-library:recording', { id: voice, language, bytes, tone }).catch(() => null)) as { id?: unknown; text?: unknown; language?: unknown; wav?: unknown } | null | undefined;
   if (!answer || typeof answer.id !== 'string') return null;
   return { id: answer.id, text: typeof answer.text === 'string' ? answer.text : '', language: typeof answer.language === 'string' ? answer.language : '', ...(typeof answer.wav === 'string' ? { wav: answer.wav } : {}) };
 };
 
-export const liveVoiceDeps: Pick<VoiceDeps, 'decode' | 'native' | 'edge' | 'recording'> = {
+export const liveVoiceDeps: Omit<VoiceDeps, 'fetch' | 'clock'> = {
   decode: decodeToContract,
   native: speakNative,
   edge: speakEdge,
   recording: recordingOf,
+  warmReads: async (reads) => {
+    const answer = await electron()?.invoke('voice-library:warm-reads', { reads });
+    return Array.isArray(answer) ? answer.filter((one) =>
+      typeof one?.voice === 'string' && typeof one.language === 'string' && typeof one.tone === 'string') : [];
+  },
 };

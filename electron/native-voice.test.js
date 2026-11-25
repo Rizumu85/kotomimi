@@ -4,7 +4,7 @@
  * engine (`createNativeEngine` with `VOICE_RUNTIME`): how it is started and warmed, how a sentence is asked of it and
  * its sound handed on, and what is fetched for it.
  */
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { EventEmitter } from 'node:events';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -73,12 +73,16 @@ function computer({ sayIt, catalog = CATALOG } = {}) {
 }
 
 describe('the voice runtime', () => {
-  it('is started with its model as the one that speaks, and warmed by one short sentence in the model\'s own voice', async () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it.each([[1, 1], [5, 2], [8, 4], [12, 4]])(
+    'on %i logical processors starts with %i threads and warms the model in its own voice', async (logical, threads) => {
+    vi.spyOn(os, 'availableParallelism').mockReturnValue(logical);
     const { world, engine } = computer();
     await engine.download('v1');
     const after = await engine.start('v1');
     expect(after.run).toMatchObject({ state: 'ready', model: 'v1', port: 45123 });
-    expect(world.started[0].args).toEqual(['--config', 'server.json', '--no-ui']);
+    expect(world.started[0].args).toEqual(['--config', 'server.json', '--no-ui', '--threads', String(threads)]);
     expect(JSON.parse(fs.readFileSync(path.join(dir, 'models', 'server.json'), 'utf8'))).toEqual({
       host: '127.0.0.1', port: 45123, backend: 'vulkan', device: 0, lazy_load: false,
       models: [{ id: 'v1', family: 'qwen3_tts', path: 'v1.gguf', task: 'tts', mode: 'streaming', session_options: {} }],
@@ -283,6 +287,21 @@ describe('a sentence that comes whole', () => {
 });
 
 describe('what is fetched for the voice engine', () => {
+  // The 0.6B's file is 1899 MB: the speed mode wants that and 4096 MB more free when the voice starts.
+  it.each([
+    ['cuda', 5995, true], ['cuda', 5994, false], ['cuda', null, false], ['vulkan', 16384, false],
+    ['metal', 32768, false],
+  ])('uses the voice speed mode on %s with %s MB free: %s', (backend, freeMB, fast) => {
+    const id = 'qwen3-tts-0.6b-base-q8';
+    VOICE_RUNTIME.launch({
+      id, model: VOICES[id], port: 1234, build: { backend }, freeMB, modelsDir: dir, files: fs,
+    });
+    const config = JSON.parse(fs.readFileSync(path.join(dir, 'server.json')));
+    expect(config.backend).toBe(backend);
+    expect(config.models[0].session_options).toEqual({
+      'qwen3_tts.voice_prompt_cache_slots': 8, ...(fast ? { 'qwen3_tts.perf_mode': 'cuda_perf' } : {}),
+    });
+  });
   it('is the recognition engine\'s own runtime, and models pinned to a revision with their size and hash', () => {
     expect(ENGINE.builds['win32-x64'].url).toMatch(/audio\.cpp\/releases\/download\/v[\d.]+\//);
     for (const [id, model] of Object.entries(VOICES)) {
@@ -307,18 +326,24 @@ describe('a cloning model (fork)', () => {
   it('speaks on from the recording in the recording\'s own language, and takes only the sound of the voice in any other', () => {
     const mine = { path: 'C:/voices/abc001.wav', text: '今天天气真不错。', language: 'zh-CN' };
     // Its own language: the recording and its words.
-    expect(speechRequest(CLONE, 'abc001', 'zh', mine)).toEqual({
-      fields: { voice_ref: 'C:/voices/abc001.wav', reference_text: '今天天气真不错。' }, options: { language: 'zh' }, whole: false, timeoutMs: 180_000,
+    expect(speechRequest(CLONE, 'abc001', 'zh', '哈哈哈哈哈，你也太逗了吧！', mine)).toEqual({
+      fields: { voice_ref: mine.path, reference_text: mine.text }, options: { language: 'zh', max_tokens: 119 },
+      whole: false, timeoutMs: 180_000,
     });
     // Another: spoken on from, a Chinese recording carries its accent into Japanese.
-    expect(speechRequest(CLONE, 'abc001', 'ja-JP', mine)).toEqual({
-      fields: { voice_ref: 'C:/voices/abc001.wav' }, options: { language: 'ja', x_vector_only_mode: true }, whole: false, timeoutMs: 180_000,
+    expect(speechRequest(CLONE, 'abc001', 'ja-JP', 'あア한𠀀 A12!', mine)).toEqual({
+      fields: { voice_ref: mine.path }, options: { language: 'ja', x_vector_only_mode: true, max_tokens: 82 },
+      whole: false, timeoutMs: 180_000,
     });
     // A second recording, read in Japanese by someone sure of theirs: Japanese is spoken on from that one.
-    expect(speechRequest(CLONE, 'abc002', 'ja', { path: 'C:/voices/abc002.wav', text: '今日はいい天気ですね。', language: 'ja' }).fields).toEqual({ voice_ref: 'C:/voices/abc002.wav', reference_text: '今日はいい天気ですね。' });
+    const japanese = { path: 'C:/voices/abc002.wav', text: '今日はいい天気ですね。', language: 'ja' };
+    expect(speechRequest(CLONE, 'abc002', 'ja', 'はい。', japanese).fields)
+      .toEqual({ voice_ref: japanese.path, reference_text: japanese.text });
     // Words not known, or their language: the sound alone, whatever is read.
-    expect(speechRequest(CLONE, 'abc001', 'zh', { ...mine, text: '' }).options).toEqual({ language: 'zh', x_vector_only_mode: true });
-    expect(speechRequest(CLONE, 'abc001', 'zh', { ...mine, language: '' }).fields).toEqual({ voice_ref: 'C:/voices/abc001.wav' });
+    expect(speechRequest(CLONE, 'abc001', 'zh', 'A', { ...mine, text: '' }).options)
+      .toEqual({ language: 'zh', x_vector_only_mode: true, max_tokens: 53 });
+    expect(speechRequest(CLONE, 'abc001', 'zh', '。', { ...mine, language: '' }).fields)
+      .toEqual({ voice_ref: mine.path });
   });
 
   it('is not warmed in a voice it does not have, and says so when asked to speak with no recording', async () => {
@@ -332,6 +357,7 @@ describe('a cloning model (fork)', () => {
     expect(await engine.speak({ id: 1, model: 'v1', text: 'Hello.', language: 'en' })).toEqual({ error: 'This voice model has no recording to speak from.' });
     expect(await engine.speak({ id: 2, model: 'v1', text: 'Hello.', language: 'en', reference: { path: 'C:/voices/abc001.wav', text: 'hi', language: 'en-US' } })).toEqual({ ok: true });
     expect(world.said.map((one) => one.request.fields)).toEqual([{ voice_ref: 'C:/voices/abc001.wav', reference_text: 'hi' }]);
+    expect(world.said[0].request.options.max_tokens).toBe(61);
   });
 
   it('puts the recording at the top of the request, beside its options', async () => {
@@ -343,9 +369,11 @@ describe('a cloning model (fork)', () => {
     });
     await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
     try {
-      const request = speechRequest(CLONE, 'abc001', 'ja', { path: 'C:/voices/abc001.wav', text: 'hi', language: 'ja' });
+      const ref = { path: 'C:/voices/abc001.wav', text: 'hi', language: 'ja' };
+      const request = speechRequest(CLONE, 'abc001', 'ja', 'こんにちは。', ref);
       await speakLive({ port: server.address().port, model: 'v1', input: 'こんにちは。', ...request, sampleRate: 24000 }, () => {}).done;
-      expect(seen[0]).toMatchObject({ model: 'v1', input: 'こんにちは。', voice_ref: 'C:/voices/abc001.wav', reference_text: 'hi', stream: true, options: { language: 'ja' } });
+      expect(seen[0]).toMatchObject({ model: 'v1', input: 'こんにちは。', voice_ref: ref.path,
+        reference_text: 'hi', stream: true, options: { language: 'ja', max_tokens: 82 } });
       expect(seen[0]).not.toHaveProperty('voice');
     } finally {
       await new Promise((resolve) => server.close(resolve));

@@ -61,8 +61,9 @@ describe('a sentence spoken', () => {
       }),
     });
     const heard: Int16Array[] = [];
-    const spoken = await speakText(NATIVE, { text: 'こんにちは', language: 'ja' }, undefined, d, never, (pcm) => heard.push(pcm));
-    expect(d.native).toHaveBeenCalledWith({ model: NATIVE.model, text: 'こんにちは', voice: 'ono_anna', language: 'ja' }, expect.any(Function), expect.any(AbortSignal));
+    const clone: VoiceStage = { ...NATIVE, model: 'qwen3-tts-1.7b-base-q8', voices: { ja: 'aaa111' }, patient: true };
+    const spoken = await speakText(clone, { text: 'こんにちは', language: 'ja', tone: 'gentle' }, undefined, d, never, (pcm) => heard.push(pcm));
+    expect(d.native).toHaveBeenCalledWith({ model: clone.model, text: 'こんにちは', voice: 'aaa111', language: 'ja', tone: 'gentle' }, expect.any(Function), expect.any(AbortSignal));
     const total = heard.reduce((sum, pcm) => sum + pcm.length, 0);
     expect(Math.abs(total - SAMPLE_RATE)).toBeLessThan(200);
     expect(spoken.samples).toBe(total);
@@ -73,7 +74,7 @@ describe('a sentence spoken', () => {
     const fetch = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(new ArrayBuffer(44)));
     const d = deps({ fetch: fetch as unknown as typeof globalThis.fetch });
     const heard: Int16Array[] = [];
-    await speakText(API, { text: 'Hello there.', language: 'en' }, 'sk-voice', d, never, (pcm) => heard.push(pcm));
+    await speakText(API, { text: 'Hello there.', language: 'en', tone: 'gentle' }, 'sk-voice', d, never, (pcm) => heard.push(pcm));
     expect(String(fetch.mock.calls[0][0])).toBe('https://api.example.com/v1/audio/speech');
     const init = fetch.mock.calls[0][1] as RequestInit;
     expect((init.headers as Record<string, string>).Authorization).toBe('Bearer sk-voice');
@@ -111,17 +112,17 @@ describe('a sentence spoken', () => {
       const recording = vi.fn(async (_voice: string, _language: string, bytes: boolean) => ({ id: 'sha-ja', text: '今日はいい天気ですね。', language: 'ja', ...(bytes ? { wav: 'UklGRg==' } : {}) }));
       const d = deps({ fetch: fetch as unknown as typeof globalThis.fetch, recording });
       const stage = atServer(OWN, 'http://192.168.1.20:8790/v1');
-      await speakText(stage, { text: 'こんにちは', language: 'ja' }, 'door-key', d, never, () => undefined);
+      await speakText(stage, { text: 'こんにちは', language: 'ja', tone: 'gentle' }, 'door-key', d, never, () => undefined);
       // Asked, refused, handed over, asked again: the sentence names the recording, never the voice's own id.
       expect(fetch.mock.calls.map((call) => String(call[0]).replace('http://192.168.1.20:8790/v1', ''))).toEqual(['/audio/speech', '/audio/voices', '/audio/speech']);
       expect(JSON.parse(fetch.mock.calls[0][1]!.body as string)).toEqual({ model: OWN.model, input: 'こんにちは', voice_ref: 'sha-ja', response_format: 'pcm', language: 'ja' });
       expect(JSON.parse(fetch.mock.calls[1][1]!.body as string)).toEqual({ wav: 'UklGRg==', text: '今日はいい天気ですね。', language: 'ja' });
       expect((fetch.mock.calls[1][1]!.headers as Record<string, string>).Authorization).toBe('Bearer door-key');
-      expect(recording.mock.calls.map((call) => call[2])).toEqual([false, true]);
+      expect(recording.mock.calls).toEqual([['aaa111', 'ja', false, 'gentle'], ['aaa111', 'ja', true, 'gentle']]);
       // The next sentence finds it held: one request, and the recording itself is not read again.
       fetch.mockClear();
       recording.mockClear();
-      await speakText(stage, { text: 'ありがとう', language: 'ja' }, 'door-key', d, never, () => undefined);
+      await speakText(stage, { text: 'ありがとう', language: 'ja', tone: 'gentle' }, 'door-key', d, never, () => undefined);
       expect(fetch).toHaveBeenCalledTimes(1);
       expect(recording.mock.calls.map((call) => call[2])).toEqual([false]);
       // Refused for another reason, the recording is not handed over: only "I do not hold it" asks for it.
@@ -173,6 +174,21 @@ describe('a sentence spoken', () => {
       const warming = warmVoice(atServer(LENT, 'http://h/v1'), undefined, hang, never);
       hang.clock.advance(VOICE_WARM_MS);
       await expect(warming).resolves.toBeUndefined();
+    });
+
+    it('warms the four prompts chosen by the recording library on the lender in order', async () => {
+      const stage = { ...LENT, ownVoices: true as const, voices: { en: 'a', ja: 'b' } };
+      const plain = [{ voice: 'a', language: 'en' }, { voice: 'b', language: 'ja' }];
+      const reads = [...plain, { ...plain[1], tone: 'lively' }, { ...plain[0], tone: 'laugh' }];
+      const recording = vi.fn(async (voice: string, language: string, _bytes: boolean, tone?: string) =>
+        ({ id: voice + (tone ?? ''), text: 'Words.', language }));
+      const fetch = vi.fn(async (_url: RequestInfo | URL, _init?: RequestInit) => raw([bytesOf([1])]));
+      const warmReads = vi.fn(async () => reads);
+      const d = deps({ fetch, recording, warmReads });
+      await warmVoice(stage, 'k', d, never);
+      expect(warmReads).toHaveBeenCalledWith(plain);
+      expect(fetch.mock.calls.map(([, init]) => JSON.parse(String(init?.body)).voice_ref))
+        .toEqual(['a', 'b', 'blively', 'alaugh']);
     });
 
     it('decodes a file where the answer is one after all, and says what the device refused', async () => {

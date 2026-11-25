@@ -23,6 +23,16 @@ export interface SessionLagState {
 /** The stages whose model is one of this computer's own, which a plan can change. */
 export type LagPlanned = ReadonlySet<LagStage>;
 const EVERY_STAGE: LagPlanned = new Set<LagStage>(['speaker', 'participant', 'translation']);
+/** What is shown as a stage's delay: the average of its latest few lines. */
+const AVERAGE_OF = 5;
+/**
+ * A stage falls behind when most of its latest lines are slow, not when a few are: the time measured includes the
+ * pause that ends a sentence, and a recognizer that is quick most of the time has slow lines now and then. Measured
+ * on the user's records of 2026-11-21 to 24 (Qwen3-ASR 0.6B and 1.7B, Apple Speech; median 0.8-1.8 s, a tenth over
+ * 3 s): five averaged over 2 s flagged 13 of 23 runs, eight of ten over 2 s only the one whose median was 2.5 s.
+ */
+const BEHIND_OF = 10;
+const BEHIND_SLOW = 8;
 
 /** Session-owned measurements; all surfaces read the same averages. Times are milliseconds. */
 export function createSessionLags() {
@@ -42,11 +52,13 @@ export function createSessionLags() {
   const sample = (stage: LagStage, model: string, ms: number, planned: LagPlanned = EVERY_STAGE) => {
     if (!active || !Number.isFinite(ms) || ms < 0) return;
     const key = `${stage}:${model}`;
-    const list = [...(samples.get(key) ?? []), ms].slice(-5);
+    const list = [...(samples.get(key) ?? []), ms].slice(-BEHIND_OF);
     samples.set(key, list);
-    const averageMS = list.reduce((a, b) => a + b, 0) / list.length;
+    const latest = list.slice(-AVERAGE_OF);
+    const averageMS = latest.reduce((a, b) => a + b, 0) / latest.length;
     const previous = state.getState();
-    const behind = list.length === 5 && averageMS > (stage === 'translation' ? 3000 : 2000) && !previous.fallingBehind[stage]
+    const limit = stage === 'translation' ? 3000 : 2000;
+    const behind = list.length === BEHIND_OF && list.filter((one) => one > limit).length >= BEHIND_SLOW && !previous.fallingBehind[stage]
       ? { stage, model, averageMS } : null;
     state.setState({ averages: { ...previous.averages, [key]: averageMS },
       ...(behind ? { fallingBehind: { ...previous.fallingBehind, [stage]: behind }, notice: previous.notice ?? (planned.has(stage) ? behind : null) } : {}) });

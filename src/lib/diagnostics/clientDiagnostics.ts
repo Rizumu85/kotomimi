@@ -28,6 +28,8 @@ export const CLIENT_DIAGNOSTICS = {
   parse_error: { severity: 'warning' },
   /** Speech synthesis degraded or dropped; translation text still arrives. */
   tts_degraded: { severity: 'warning' },
+  /** Speech synthesis fell behind, so playback waits for whole sentences. */
+  tts_slow: { severity: 'warning' },
   /** An automatic resume attempt failed; further attempts may follow. */
   resume_attempt_failed: { severity: 'warning' },
   /** The requested voice was unavailable and a substitute was used. */

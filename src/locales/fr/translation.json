@@ -787,7 +787,8 @@
       "voiceUnnamed": "Aucun modèle vocal n’est renseigné. Indiquez-en un dans le panneau « Lecture à voix haute ».",
       "noteQwen3Tts": "Le plus naturel, avec une voix qui démarre immédiatement. Aucun mot mal lu lors des essais en japonais, chinois et anglais. Environ 3 GB de mémoire vidéo, 10 langues prises en charge.",
       "noteIrodori": "Uniquement en japonais. Aucun mot mal lu lors des essais, environ une demi-seconde par phrase. Environ 1.7 GB de mémoire vidéo.",
-      "noteQwen3TtsBase": "Lit à voix haute avec votre propre voix. Un enregistrement d’environ dix secondes suffit pour la cloner. À la première utilisation de chaque voix, comptez quelques secondes à un peu moins de trente secondes d’attente. Ensuite, la lecture démarre aussitôt. Utilise environ 3 Go de mémoire vidéo et prend en charge 10 langues."
+      "noteQwen3TtsBase": "Lit à voix haute avec votre propre voix. Un enregistrement d’environ dix secondes suffit pour la cloner. À la première utilisation de chaque voix, comptez quelques secondes à un peu moins de trente secondes d’attente. Ensuite, la lecture démarre aussitôt. Utilise environ 3 Go de mémoire vidéo et prend en charge 10 langues.",
+      "noteQwen3TtsBaseSmall": "Lit le texte à voix haute avec votre propre voix, comme le 1.7B. Plus léger et plus rapide, il reproduit votre voix avec la même fidélité lors des tests. Environ 2 Go de mémoire vidéo. Compatible avec 10 langues."
     }
   },
   "logsPanel": {
@@ -1637,7 +1638,8 @@
     "mic_in_use": "Le microphone « {{device}} » est utilisé par {{apps}}. Fermez {{apps}} puis relancez, ou choisissez un autre microphone.",
     "mic_unreadable": "Windows n’a pas pu ouvrir le microphone « {{device}} ». Une autre application l’utilise peut-être, ou son pilote ne répond plus. Fermez les applications qui l’utilisent ou reconnectez-le, puis relancez.",
     "mic_blocked": "Windows n’autorise pas Sokuji à utiliser le microphone. Activez l’accès au microphone pour les applications de bureau dans Paramètres › Confidentialité et sécurité › Microphone, puis relancez.",
-    "noise_suppression_fallback": "La suppression du bruit choisie n’est pas disponible. Un niveau inférieur est utilisé ; vérifiez les réglages du micro."
+    "noise_suppression_fallback": "La suppression du bruit choisie n’est pas disponible. Un niveau inférieur est utilisé ; vérifiez les réglages du micro.",
+    "tts_slow": "La lecture à voix haute ne suit plus le rythme. Désormais, chaque phrase sera lue une fois entièrement générée. La carte graphique est peut-être occupée."
   },
   "viewer": {
     "title": "Sous-titres Sokuji",
@@ -2185,7 +2187,18 @@
       "importVoice": "Importer un fichier de voix",
       "useVoice": "Lire avec la voix « {{name}} »",
       "addShort": "Ajouter",
-      "importShort": "Importer"
+      "importShort": "Importer",
+      "clipTone": "Ton",
+      "addTone": "Ajouter un ton à « {{name}} »",
+      "removeToneTake": "Supprimer l’enregistrement de « {{name}} » ({{language}}, ton {{tone}})",
+      "tones": {
+        "plain": "Neutre",
+        "lively": "Joyeux",
+        "laugh": "Éclat de rire",
+        "gentle": "Doux",
+        "serious": "Sérieux",
+        "angry": "En colère"
+      }
     },
     "echoCancellationGate": "Par volume",
     "echoCancellationGateTooltip": "Selon le volume — avec des haut-parleurs : le son qui revient dans le micro est bien moins fort que votre voix, il est donc écarté selon son volume, sans modifier votre voix.",

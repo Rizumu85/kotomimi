@@ -787,7 +787,8 @@
       "voiceUnnamed": "Model pembaca belum diisi. Isi namanya di panel \"Baca nyaring\".",
       "noteQwen3Tts": "Paling alami, langsung bersuara. Diuji dalam bahasa Jepang, Mandarin, dan Inggris: tidak ada salah baca. Memakai sekitar 3 GB memori grafis, mendukung 10 bahasa.",
       "noteIrodori": "Hanya bahasa Jepang. Hasil uji: tidak ada salah baca, sekitar setengah detik per kalimat. Memakai sekitar 1.7 GB memori grafis.",
-      "noteQwen3TtsBase": "Membacakan teks dengan suaramu sendiri. Cukup rekam sekitar sepuluh detik untuk mengkloning suaramu. Saat pertama kali memakai tiap suara, tunggu beberapa detik hingga dua puluh sekian detik. Setelah itu, suara langsung terdengar. Perlu sekitar 3 GB memori grafis dan mendukung 10 bahasa."
+      "noteQwen3TtsBase": "Membacakan teks dengan suaramu sendiri. Cukup rekam sekitar sepuluh detik untuk mengkloning suaramu. Saat pertama kali memakai tiap suara, tunggu beberapa detik hingga dua puluh sekian detik. Setelah itu, suara langsung terdengar. Perlu sekitar 3 GB memori grafis dan mendukung 10 bahasa.",
+      "noteQwen3TtsBaseSmall": "Membacakan teks dengan suara Anda seperti 1.7B. Lebih ringan dan cepat, dengan hasil yang sama miripnya dengan suara Anda dalam pengujian. Memakai sekitar 2 GB memori GPU dan mendukung 10 bahasa."
     }
   },
   "logsPanel": {
@@ -1637,7 +1638,8 @@
     "mic_in_use": "Mikrofon “{{device}}” sedang digunakan oleh {{apps}}. Tutup {{apps}} lalu mulai lagi, atau pilih mikrofon lain.",
     "mic_unreadable": "Windows tidak dapat membuka mikrofon “{{device}}”. Mungkin aplikasi lain sedang menggunakannya, atau drivernya berhenti merespons. Tutup aplikasi yang menggunakannya atau sambungkan ulang, lalu mulai lagi.",
     "mic_blocked": "Windows tidak mengizinkan Sokuji menggunakan mikrofon. Aktifkan akses mikrofon untuk aplikasi desktop di Pengaturan › Privasi & keamanan › Mikrofon, lalu mulai lagi.",
-    "noise_suppression_fallback": "Peredam bising yang dipilih tidak tersedia. Tingkat yang lebih rendah digunakan; periksa pengaturan mikrofon."
+    "noise_suppression_fallback": "Peredam bising yang dipilih tidak tersedia. Tingkat yang lebih rendah digunakan; periksa pengaturan mikrofon.",
+    "tts_slow": "Pembacaan terjemahan tertinggal. Mulai sekarang, tiap kalimat diputar setelah suaranya selesai dibuat. Kartu grafis mungkin sedang sibuk."
   },
   "viewer": {
     "title": "Subtitle Sokuji",
@@ -2185,7 +2187,18 @@
       "importVoice": "Impor file suara",
       "useVoice": "Bacakan dengan suara {{name}}",
       "addShort": "Tambah",
-      "importShort": "Impor"
+      "importShort": "Impor",
+      "clipTone": "Nada bicara",
+      "addTone": "Tambah nada bicara untuk «{{name}}»",
+      "removeToneTake": "Hapus rekaman {{language}} milik «{{name}}» dengan nada {{tone}}",
+      "tones": {
+        "plain": "Biasa",
+        "lively": "Gembira",
+        "laugh": "Tertawa lepas",
+        "gentle": "Lembut",
+        "serious": "Serius",
+        "angry": "Marah"
+      }
     },
     "echoCancellationGate": "Berdasarkan volume",
     "echoCancellationGateTooltip": "Berdasarkan volume — untuk pengeras suara: suara yang diputar masuk kembali ke mikrofon jauh lebih pelan daripada suara Anda, jadi disaring berdasarkan volumenya dan suara Anda tetap seperti semula.",

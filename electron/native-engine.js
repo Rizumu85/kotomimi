@@ -52,6 +52,17 @@ const bunzip2 = require('./bunzip2');
 const { pullWhole, relaysOf, hfMirrorOf, inMainlandChina, ANSWER_WITHIN_MS } = require('./fetch-file');
 
 const LOOPBACK = '127.0.0.1';
+const AUDIO_RELEASE = 'https://github.com/0xShug0/audio.cpp/releases/download/v0.9.4/audio-v0.9.4';
+const CUDA_ARCHIVES = [
+  {
+    url: `${AUDIO_RELEASE}-bin-windows-x64-cuda13.3.zip`, archive: 'engine.zip', bytes: 279188412,
+    sha256: 'b05eceb8aa0a29e618b3af87e0c2fd0fb665034d181096eb868ed856bf656b8b',
+  },
+  {
+    url: `${AUDIO_RELEASE}-cudart-windows-x64-cuda13.3.zip`, archive: 'cudart.zip', bytes: 575457454,
+    sha256: 'b93fa9b9cb875ccea1aa81cb09fd6b02c9afda133de73bd119a73ff5d8db6d96',
+  },
+];
 
 /** The runtime: audio.cpp's own release archives, as published. */
 const ENGINE = {
@@ -66,6 +77,10 @@ const ENGINE = {
       archive: 'engine.zip',
       exe: 'audiocpp_server.exe',
       backend: 'vulkan',
+      cuda: {
+        backend: 'cuda', exe: 'audiocpp_server.exe', archives: CUDA_ARCHIVES,
+        bytes: CUDA_ARCHIVES.reduce((sum, archive) => sum + archive.bytes, 0),
+      },
     },
     'darwin-arm64': {
       url: 'https://github.com/0xShug0/audio.cpp/releases/download/v0.9.4/audio-v0.9.4-bin-macos-arm64-metal.tar.gz',
@@ -338,6 +353,14 @@ const COACHES = {
  * MOSS-TTS-Nano (31.5/4.2/0 %), and Kokoro, whose Japanese and English need libraries the runtime does not carry
  * (MeCab, eSpeak-ng) and whose Chinese took 59 s for a 3 s sentence on the processor.
  */
+const QWEN_BASE = {
+  family: 'qwen3_tts', mode: 'streaming', sampleRate: 24000,
+  languages: ['zh', 'en', 'ja', 'ko', 'de', 'fr', 'ru', 'pt', 'es', 'it'],
+  options: { 'qwen3_tts.voice_prompt_cache_slots': 8 },
+  speech: { clone: true, languageAs: 'language' },
+};
+const QWEN_REPO = 'https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/047ec541cc3f7e50c583acd56e0177ae286c4078';
+const QWEN_SMALL = 'Qwen3-TTS-12Hz-0.6B-Base-GGUF/qwen3-tts-12hz-0.6b-base-q8_0.gguf';
 const VOICES = {
   'qwen3-tts-1.7b-customvoice-q8': {
     file: 'qwen3-tts-12hz-1.7b-customvoice-q8_0.gguf',
@@ -379,21 +402,25 @@ const VOICES = {
   // handed with each sentence (`voice-library.js`). Measured 2026-11-24 on the RTX 5070 Ti beside a running game, a
   // 4 s Chinese sentence as the recording: first sound about 80 ms, a sentence 2.5 times faster than it is said,
   // about 3 GB of video memory. A recording is read once before the first sentence in it — about 2.7 s for each
-  // second of it with its words, 4-6 s in all without — and kept, each way apart (`voice_prompt_cache_slots`), so a
-  // run's few voices are read once each. Spoken on from in another language than its own it misreads: a Chinese
-  // recording's Japanese 6-37 % wrong, a Japanese one's Chinese garbled; from its sound alone, 0 % (`speechRequest`).
+  // second of it with its words, 4-6 s in all without — and kept, each way apart (`voice_prompt_cache_slots`).
+  // A run may switch recordings for both tone and language. Spoken on from in another language than its own it
+  // misreads: a Chinese recording's Japanese 6-37 % wrong, a Japanese one's Chinese garbled; from its sound
+  // alone, 0 % (`speechRequest`).
   'qwen3-tts-1.7b-base-q8': {
     file: 'qwen3-tts-12hz-1.7b-base-q8_0_v2.gguf',
     url: 'https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/047ec541cc3f7e50c583acd56e0177ae286c4078/Qwen3-TTS-12Hz-1.7B-Base-GGUF/qwen3-tts-12hz-1.7b-base-q8_0_v2.gguf',
     mirror: 'https://modelscope.cn/models/audio-cpp/audio.cpp-gguf/resolve/master/Qwen3-TTS-12Hz-1.7B-Base-GGUF/qwen3-tts-12hz-1.7b-base-q8_0_v2.gguf',
     bytes: 2695186240,
     sha256: '92641a8022d521efd79a5db45e952589b3f2b781680f9abfcf26f075d37b86c6',
-    family: 'qwen3_tts',
-    mode: 'streaming',
-    sampleRate: 24000,
-    languages: ['zh', 'en', 'ja', 'ko', 'de', 'fr', 'ru', 'pt', 'es', 'it'],
-    options: { 'qwen3_tts.voice_prompt_cache_slots': 4 },
-    speech: { clone: true, languageAs: 'language' },
+    ...QWEN_BASE,
+  },
+  'qwen3-tts-0.6b-base-q8': {
+    file: 'qwen3-tts-12hz-0.6b-base-q8_0.gguf',
+    url: `${QWEN_REPO}/${QWEN_SMALL}`,
+    mirror: `https://modelscope.cn/models/audio-cpp/audio.cpp-gguf/resolve/master/${QWEN_SMALL}`,
+    bytes: 1991217728,
+    sha256: 'c7d0e6c9485a25ae1f6a4c0796f0023230a0051c44cbd2bd05d73770f2cce637',
+    ...QWEN_BASE,
   },
 };
 
@@ -687,14 +714,26 @@ function speakLive({ host = LOOPBACK, port, model, input, voice, options = {}, f
  * words or their language are not known. The first sentence in a recording waits while it is read: `timeoutMs` says
  * how long that may take.
  */
-function speechRequest(model, voice, language, reference) {
+function speechRequest(model, voice, language, text, reference) {
   const { voiceAs, languageAs, voices, options, clone } = model?.speech ?? {};
   const code = languageCode(language);
   if (clone) {
-    const spokenOn = Boolean(reference.text) && code !== null && languageCode(reference.language) === code;
+    const spokenOn = speaksFromWords(reference, language);
+    // With a laugh in the recording, 2 of 9 sentences ran to 8192 codes (655 s). At 12.5 codes/s,
+    // max_tokens of 40 gave 3.1 s of sound. The engine ignored max_new_tokens.
+    let cjk = 0;
+    let other = 0;
+    for (const character of text) {
+      if (/[\p{Script=Han}\p{Script=Hangul}\p{Script=Hiragana}\p{Script=Katakana}ーｰ]/u.test(character)) cjk++;
+      else if (/[\p{L}\p{Nd}]/u.test(character)) other++;
+    }
+    const maxTokens = Math.ceil((4 + 0.5 * (cjk + other / 3)) * 12.5);
     return {
       fields: { voice_ref: reference.path, ...(spokenOn ? { reference_text: reference.text } : {}) },
-      options: { ...(options ?? {}), ...(languageAs && code ? { [languageAs]: code } : {}), ...(spokenOn ? {} : { x_vector_only_mode: true }) },
+      options: {
+        ...options, ...(languageAs && code ? { [languageAs]: code } : {}),
+        ...(spokenOn ? {} : { x_vector_only_mode: true }), max_tokens: maxTokens,
+      },
       whole: false,
       timeoutMs: CLONE_TIMEOUT_MS,
     };
@@ -706,6 +745,11 @@ function speechRequest(model, voice, language, reference) {
     options: { ...(options ?? {}), ...(voiceAs && told ? { [voiceAs]: told } : {}), ...(languageAs && code ? { [languageAs]: code } : {}) },
     whole: model?.mode === 'offline',
   };
+}
+
+function speaksFromWords(reference, language) {
+  const code = languageCode(language);
+  return Boolean(reference.text) && code !== null && languageCode(reference.language) === code;
 }
 
 /** How long a sentence of a cloning model may take: its recording is read before the first one in it. */
@@ -723,16 +767,31 @@ function warmWords(model) {
  * sentence in the model's own voice.
  */
 const VOICE_RUNTIME = {
-  launch({ id, model, port, build, modelsDir, files }) {
+  launch({ id, model, port, build, modelsDir, files, freeMB }) {
+    // RTX 5070 Ti, Qwen3-TTS 1.7B: Vulkan/CUDA/cuda_perf took 0.36/0.21/0.15 of the sentence duration,
+    // or 0.58/0.68/0.43-0.53 beside another model. cuda_perf costs 0.8 GB on 1.7B and 1.2 GB on 0.6B. So it is
+    // used only where the card has room for it now, with what else runs on it (a game, the recognizer): the
+    // model's file, 2 GB for its runtime and the speed mode, and 2 GB left over for a game that grows.
+    const fast = build.backend === 'cuda' && model.family === 'qwen3_tts' && freeMB !== null
+      && freeMB >= model.bytes / 1024 ** 2 + FAST_VOICE_ROOM_MB;
+    const options = { ...model.options, ...(fast ? { 'qwen3_tts.perf_mode': 'cuda_perf' } : {}) };
     files.writeFileSync(path.join(modelsDir, 'server.json'), JSON.stringify({
       host: LOOPBACK,
       port,
       backend: build.backend,
       device: 0,
       lazy_load: false,
-      models: [{ id, family: model.family, path: model.file, task: 'tts', mode: model.mode, session_options: model.options ?? {}, ...(model.requestOptions ? { default_request_options: model.requestOptions } : {}) }],
+      models: [{
+        id, family: model.family, path: model.file, task: 'tts', mode: model.mode, session_options: options,
+        ...(model.requestOptions ? { default_request_options: model.requestOptions } : {}),
+      }],
     }, null, 1));
-    return ['--config', 'server.json', '--no-ui'];
+    // Both Qwen3-TTS prompt encoders run on the CPU even with Vulkan. On a Ryzen 5 5600X (6 cores, 12 logical),
+    // a 10 s recording with words took 25.3/15.2/8.8/7.5/7.3 s at 1/2/4/6/8 threads (qwen3_tts.voice_prompt_ms).
+    // Sound alone took 5.3/2.7/2.2 s at 1/4/6 threads. Sentence speed and likeness stayed the same.
+    // Half the available processors, up to four, leaves CPU time for a game during warm-up.
+    const threads = Math.max(1, Math.min(4, Math.floor(os.availableParallelism() / 2)));
+    return ['--config', 'server.json', '--no-ui', '--threads', String(threads)];
   },
   async warm({ port, id, model, say = speakLive, timeoutMs }) {
     // A cloning model has no voice to warm up in until it is handed a recording: the run's own are read as it
@@ -741,7 +800,9 @@ const VOICE_RUNTIME = {
     let heard = 0;
     const { language, text } = warmWords(model);
     try {
-      await say({ port, model: id, input: text, ...speechRequest(model, model.voice, language), sampleRate: model.sampleRate, timeoutMs }, (pcm) => { heard += pcm.length; }).done;
+      const request = speechRequest(model, model.voice, language, text);
+      await say({ port, model: id, input: text, ...request, sampleRate: model.sampleRate, timeoutMs },
+        (pcm) => { heard += pcm.length; }).done;
     } catch {
       return false;
     }
@@ -1319,13 +1380,61 @@ function openWindow({ port, pathname, model, sampleRate, language, context, time
   };
 }
 
+/** Both audio servers use the same decision, including after moving the models to another drive. */
+function audioBuildChoice(adapter, profile, version = ENGINE.version) {
+  const marker = path.join(profile, `audio-vulkan-${version}`);
+  return {
+    fallback: fs.existsSync(marker),
+    get cuda() { return Boolean(adapter?.cuda13) && !this.fallback; },
+    useVulkan() {
+      this.fallback = true;
+      try { fs.writeFileSync(marker, ''); } catch { /* The in-memory choice lasts for this run. */ }
+    },
+  };
+}
+
+/** Beyond a voice model's file, the room its speed mode is used with (`VOICE_RUNTIME`). */
+const FAST_VOICE_ROOM_MB = 4096;
+
+/**
+ * The video memory free now on the NVIDIA cards, in MB: the least of them, as the driver's own tool tells it; null
+ * where it cannot be told. CUDA's own count on Windows leaves out what other programs hold (15.7 GB "free" here
+ * while nvidia-smi saw 6.4 of 16 GB in use).
+ */
+function freeVideoMemory() {
+  return new Promise((resolve) => {
+    execFile('nvidia-smi', ['--query-gpu=memory.free', '--format=csv,noheader,nounits'], { windowsHide: true, timeout: 5_000 }, (error, out) => {
+      const free = error ? [] : String(out).split(/\r?\n/).filter((line) => /^\s*\d+\s*$/.test(line)).map(Number);
+      resolve(free.length ? Math.min(...free) : null);
+    });
+  });
+}
+
+function listsCudaDevice(exe) {
+  return new Promise((resolve) => {
+    execFile(exe, ['--backend', 'cuda', '--list-devices'], { windowsHide: true, timeout: 15_000 }, (error, out) => {
+      resolve(!error && /^CUDA:\d+\s+"[^"]+"\s+\[GPU\]/m.test(out));
+    });
+  });
+}
+
+// Managers share an installation by its destination, including its in-flight transfer.
+const runtimeInstalls = new Map();
+const runningImages = new Map();
+
 function createNativeEngine(deps = {}) {
   const {
     dir,
+    runtimeRoot = dir,
+    legacyRuntimeRoot,
     platform = process.platform,
     arch = process.arch,
     fetch: doFetch = (...args) => fetch(...args),
     spawn = nodeSpawn,
+    audio,
+    hasCudaDevice = listsCudaDevice,
+    /** The video memory free now, in MB, or null: asked as a CUDA runtime starts (`VOICE_RUNTIME`'s speed mode). */
+    videoMemoryFree = freeVideoMemory,
     extract = untar,
     hash = hashOf,
     freePort = freePortOf,
@@ -1371,14 +1480,29 @@ function createNativeEngine(deps = {}) {
   const MODELS_ = Object.assign(Object.create(null), Object.fromEntries(Object.entries(catalog.models).filter(([, model]) => !model.platforms || model.platforms.includes(system))));
 
   // A system with no model to run has no use for the runtime either.
-  const build = Object.keys(MODELS_).length > 0 ? ENGINE_.builds[system] ?? null : null;
-  const engineDir = path.join(dir, `engine-${ENGINE_.version}`);
+  const standard = Object.keys(MODELS_).length > 0 ? ENGINE_.builds[system] ?? null : null;
+  let build, engineDir, exe, unpackingMark;
+  function selectBuild() {
+    build = audio?.cuda && standard?.cuda ? standard.cuda : standard;
+    engineDir = path.resolve(runtimeRoot, `engine-${ENGINE_.version}${build?.backend === 'cuda' ? '-cuda' : ''}`);
+    exe = build && path.join(engineDir, build.exe);
+    unpackingMark = path.join(engineDir, '.unpacking');
+  }
+  selectBuild();
   const modelsDir = path.join(dir, 'models');
-  const exe = build ? path.join(engineDir, build.exe) : null;
   const partsOf = (id) => MODELS_[id].files ?? [MODELS_[id]];
   const modelHere = (id) => partsOf(id).every((part) => has(path.join(modelsDir, part.file)));
   const has = (file) => { try { return files.statSync(file).isFile(); } catch { return false; } };
   const sizeOf = (file) => { try { return files.statSync(file).size; } catch { return 0; } };
+  if (legacyRuntimeRoot && standard) {
+    const name = `engine-${ENGINE_.version}`;
+    const old = path.join(legacyRuntimeRoot, name);
+    const shared = path.join(runtimeRoot, name);
+    if (!files.existsSync(shared) && has(path.join(old, standard.exe)) && !has(path.join(old, '.unpacking'))) {
+      files.mkdirSync(runtimeRoot, { recursive: true });
+      try { files.renameSync(old, shared); } catch { /* A locked legacy copy can be fetched again. */ }
+    }
+  }
   /** The bytes free on the drive `at` is on, asked of its nearest folder that is there; null where that cannot be told. */
   const freeBytes = (at) => {
     if (typeof files.statfsSync !== 'function') return null;
@@ -1395,7 +1519,6 @@ function createNativeEngine(deps = {}) {
    * the disk full, the archive refused — can leave the program and not the libraries it needs: with this left
    * behind, that is not a runtime, and it is fetched again.
    */
-  const unpackingMark = build ? path.join(engineDir, '.unpacking') : null;
   const engineReady = () => Boolean(exe) && has(exe) && !has(unpackingMark);
   /** The runtime that is up, written down: what the next run of the app ends, should this one go without ending it. */
   const runFile = path.join(dir, 'run.json');
@@ -1409,8 +1532,7 @@ function createNativeEngine(deps = {}) {
   const fetching = new Map();
   /** The model whose download is fetching the runtime: stopping another's leaves it. */
   let engineFor = null;
-  /** The runtime's archive is here and being unpacked: still on its way, to whoever asks. */
-  let unpacking = false;
+  let joinedInstall = null;
   /** A model whose download fetched the runtime first, and the runtime's bytes: counted into the model's progress. */
   const carried = new Map();
   const failed = new Map();
@@ -1425,20 +1547,23 @@ function createNativeEngine(deps = {}) {
     if (busy) return { state: busy.verifying ? 'verifying' : 'downloading', received: busy.received + before, total: busy.total + before };
     // The runtime comes first, and it is what the model asked for waits on: its bytes are that model's progress, and the
     // others wait. Every model used to say 0 % through it, with nothing moving (a friend, 2026-10-31).
-    const runtime = fetching.get('engine');
-    if ((runtime || unpacking) && engineFor === id) {
+    const install = runtimeInstalls.get(engineDir);
+    if (joinedInstall && engineFor === id) {
       const model = modelHere(id) ? 0 : MODELS_[id].bytes;
       // `kept`: its own file is here, and only the runtime is coming — a new version of it, after the app's update.
-      return { state: 'downloading', runtime: true, received: runtime?.received ?? build.bytes, total: (runtime?.total ?? build.bytes) + model, ...(model === 0 ? { kept: true } : {}) };
+      return {
+        state: 'downloading', runtime: true, received: joinedInstall.received,
+        total: build.bytes + model, ...(model === 0 ? { kept: true } : {}),
+      };
     }
-    const waiting = runtime || unpacking ? { waiting: true } : {};
+    const waiting = install ? { waiting: true } : {};
     if (modelHere(id)) return { state: 'downloaded', received: MODELS_[id].bytes, total: MODELS_[id].bytes, ...waiting };
     const error = failed.get(id);
     return { state: error ? 'failed' : 'absent', received: partsOf(id).reduce((sum, part) => sum + sizeOf(path.join(modelsDir, part.file)) + sizeOf(path.join(modelsDir, `${part.file}.part`)), 0), total: MODELS_[id].bytes, ...(error ? { error } : {}), ...waiting };
   };
   const status = () => ({
     supported: Boolean(build),
-    engine: !build ? 'unsupported' : fetching.has('engine') || unpacking ? 'downloading' : engineReady() ? 'ready' : 'absent',
+    engine: !build ? 'unsupported' : runtimeInstalls.has(engineDir) ? 'downloading' : engineReady() ? 'ready' : 'absent',
     engineBytes: build?.bytes ?? 0,
     models: Object.fromEntries(Object.keys(MODELS_).map((id) => [id, modelState(id)])),
     run: { ...run },
@@ -1462,15 +1587,22 @@ function createNativeEngine(deps = {}) {
    * right. Where it has a mirror, the other address is asked when the first does not answer or breaks off — and goes
    * on from what the first brought, the file being the same.
    */
-  async function fetchFile(key, { url, mirror, bytes, sha256 }, dest, progressTotal = bytes) {
+  async function fetchFile(key, { url, mirror, bytes, sha256 }, dest, progressTotal = bytes, offset = 0, install = null) {
     const part = `${dest}.part`;
     const control = new AbortController();
     const state = { received: sizeOf(part), total: progressTotal, abort: () => control.abort(), verifying: false };
     // A part larger than the whole is no part of it.
     if (state.received > bytes) { files.rmSync(part, { force: true }); state.received = 0; }
-    fetching.set(key, state);
+    state.received += offset;
+    const notify = (force = true) => {
+      if (!install) return tell(force);
+      install.received = state.received;
+      for (const listener of install.listeners) listener(force);
+    };
+    if (install) install.abort = state.abort;
+    else fetching.set(key, state);
     failed.delete(key);
-    tell();
+    notify();
     // Its mirrors, then a public mirror of Hugging Face for a file published there: all the same file, by its hash.
     const mirrors = [...[].concat(mirror ?? []), ...hfMirrorOf(url)];
     const sources = mirrorFirst() ? [...mirrors, url] : [url, ...mirrors];
@@ -1480,12 +1612,12 @@ function createNativeEngine(deps = {}) {
         fetch: doFetch,
         signal: control.signal,
         name: path.basename(dest),
-        onReceived: (count) => { state.received = count; tell(false); },
-        onTurn: () => tell(),
+        onReceived: (count) => { state.received = offset + count; notify(false); },
+        onTurn: () => notify(),
         log: (line) => log?.(`[native-engine] ${line}\n`),
       });
       state.verifying = true;
-      tell();
+      notify();
       if (sizeOf(part) !== bytes || (await hash(part)) !== sha256) {
         files.rmSync(part, { force: true });
         throw new Error('The downloaded file is not the one expected, and was discarded.');
@@ -1496,42 +1628,82 @@ function createNativeEngine(deps = {}) {
     }
   }
 
-  async function ensureEngine() {
-    if (engineReady()) return;
+  async function installEngine(install) {
     files.mkdirSync(engineDir, { recursive: true });
-    const archive = path.join(engineDir, build.archive);
-    await fetchFile('engine', { ...build, mirror: build.mirror ?? relaysOf(build.url) }, archive);
-    unpacking = true;
-    tell();
+    const archives = build.archives ?? [build];
+    let offset = 0;
+    for (const archive of archives) {
+      const dest = path.join(engineDir, archive.archive);
+      // A previous download may have finished this archive before the next one stopped. Verify it again on reuse.
+      if (has(dest)) files.renameSync(dest, `${dest}.part`);
+      const mirror = archive.mirror ?? relaysOf(archive.url);
+      await fetchFile('engine', { ...archive, mirror }, dest, build.bytes, offset, install);
+      if (!install.listeners.size) return;
+      offset += archive.bytes;
+    }
     let whole = false;
     try {
       // What an unpacking that stopped halfway left is not built upon.
       for (const name of files.readdirSync(engineDir)) {
-        if (name !== build.archive) files.rmSync(path.join(engineDir, name), { recursive: true, force: true });
+        if (!archives.some((part) => part.archive === name)) {
+          files.rmSync(path.join(engineDir, name), { recursive: true, force: true });
+        }
       }
       files.writeFileSync(unpackingMark, '');
-      await extract(archive, engineDir);
+      for (const archive of archives) await extract(path.join(engineDir, archive.archive), engineDir);
       // The program itself, not a link to one somewhere else.
       whole = files.lstatSync(exe).isFile();
       if (whole) files.rmSync(unpackingMark, { force: true });
     } catch (error) {
       note(`The engine could not be unpacked: ${String(error?.message ?? error)}\n`);
     } finally {
-      unpacking = false;
-      files.rmSync(archive, { force: true });
+      for (const archive of archives) files.rmSync(path.join(engineDir, archive.archive), { force: true });
     }
     if (!whole) throw new Error('The engine could not be unpacked.');
     if (platform !== 'win32') { try { files.chmodSync(exe, 0o755); } catch { /* already runnable, or it will say so when run */ } }
     removeEarlierRuntimes();
   }
 
+  async function ensureEngine(download) {
+    const destination = engineDir;
+    let install = runtimeInstalls.get(destination);
+    if (install?.aborted) {
+      await install.done.catch(() => {});
+      if (!download.cancelled) await ensureEngine(download);
+      return;
+    }
+    if (!install && engineReady()) return;
+    if (!install) {
+      install = { listeners: new Set(), received: 0, abort: null, aborted: false, done: null };
+      runtimeInstalls.set(destination, install);
+      install.done = Promise.resolve().then(() => {
+        if (!install.aborted) return installEngine(install);
+      }).finally(() => runtimeInstalls.delete(destination));
+    }
+    joinedInstall = install;
+    install.listeners.add(tell);
+    try {
+      tell();
+      await install.done;
+    } finally {
+      install.listeners.delete(tell);
+      joinedInstall = null;
+    }
+  }
+
   /** The runtimes of earlier versions: no model runs on them any more, and each holds a hundred megabytes or more. */
   function removeEarlierRuntimes() {
-    try {
-      for (const name of files.readdirSync(dir)) {
-        if (/^engine-/.test(name) && path.join(dir, name) !== engineDir) files.rmSync(path.join(dir, name), { recursive: true, force: true });
-      }
-    } catch { /* a courtesy to the drive, never a condition */ }
+    if (build.backend === 'cuda' && audio?.fallback) return;
+    for (const root of [runtimeRoot, legacyRuntimeRoot].filter(Boolean)) {
+      try {
+        for (const name of files.readdirSync(root)) {
+          const candidate = path.resolve(root, name);
+          if (!name.startsWith('engine-') || candidate === engineDir || runtimeInstalls.has(candidate)
+              || [...runningImages.values()].includes(candidate)) continue;
+          files.rmSync(candidate, { recursive: true, force: true });
+        }
+      } catch { /* a courtesy to the drive, never a condition */ }
+    }
   }
 
   /** The runtime and a model, fetched: resolves with the state of things, which says what failed. */
@@ -1541,30 +1713,33 @@ function createNativeEngine(deps = {}) {
    * nothing is to be done: the runtime is here or on its way, or no model is.
    */
   function updateRuntime() {
+    if (!child && !starting && !downloads.size) selectBuild();
     // This version's runtime is here already (fetched by an earlier start): what an earlier one left goes.
-    if (build && engineReady() && !unpacking) removeEarlierRuntimes();
-    if (!build || engineReady() || fetching.has('engine') || unpacking) return null;
+    if (build && engineReady() && !runtimeInstalls.has(engineDir)) removeEarlierRuntimes();
+    if (!build || engineReady() || joinedInstall) return null;
     const kept = Object.keys(MODELS_).find(modelHere);
     return kept ? download(kept) : null;
   }
 
   async function download(id) {
-    if (!build || !MODELS_[id] || downloads.has(id) || fetching.has(id) || fetching.has('engine') || unpacking) return status();
+    if (!build || !MODELS_[id] || downloads.has(id) || fetching.has(id) || joinedInstall) return status();
     const download = { cancelled: false, done: null };
     let settled;
     download.done = new Promise((resolve) => { settled = resolve; });
     downloads.set(id, download);
     try {
-      engineFor = id;
-      const fetchesEngine = !engineReady();
+      if (!child && !starting) selectBuild();
+      const joining = runtimeInstalls.has(engineDir);
+      const fetchesEngine = joining || !engineReady();
+      if (fetchesEngine) engineFor = id;
       // Room for it, asked first: a drive that fills halfway through leaves a broken file and an error of the disk's.
       // The runtime counts twice (its archive, then what it unpacks to).
-      const needed = (fetchesEngine ? build.bytes * 2 : 0) + (modelHere(id) ? 0 : MODELS_[id].bytes - modelState(id).received);
+      const needed = (fetchesEngine && !joining ? build.bytes * 2 : 0) + (modelHere(id) ? 0 : MODELS_[id].bytes - modelState(id).received);
       const room = freeBytes(dir);
       if (room !== null && needed + ROOM_MARGIN > room) {
         throw new Error(`There is not enough room on the drive: ${(room / 1024 ** 3).toFixed(1)} GB free, ${(needed / 1024 ** 3).toFixed(1)} GB needed.`);
       }
-      await ensureEngine();
+      await ensureEngine(download);
       if (!download.cancelled && !modelHere(id)) {
         let before = fetchesEngine ? build.bytes : 0;
         files.mkdirSync(modelsDir, { recursive: true });
@@ -1591,7 +1766,13 @@ function createNativeEngine(deps = {}) {
   function cancel(id) {
     if (downloads.has(id)) downloads.get(id).cancelled = true;
     fetching.get(id)?.abort();
-    if (engineFor === id) fetching.get('engine')?.abort();
+    if (engineFor === id && joinedInstall) {
+      joinedInstall.listeners.delete(tell);
+      if (!joinedInstall.listeners.size) {
+        joinedInstall.aborted = true;
+        joinedInstall.abort?.();
+      }
+    }
     return status();
   }
 
@@ -1698,8 +1879,32 @@ function createNativeEngine(deps = {}) {
     await halt();
     await reaped;
     if (myTurn !== turn) return status();
+    // The other audio server may already have given up on CUDA while this one was idle.
+    if (standard.cuda && audio?.fallback && modelHere(id)) {
+      await Promise.all([...downloads.values()].map((one) => one.done));
+      if (myTurn !== turn) return status();
+      selectBuild();
+      if (!engineReady()) {
+        setRun({ state: 'starting', model: id, tail: '' });
+        await download(id);
+        if (myTurn !== turn) return status();
+        if (!engineReady()) return setRun({ state: 'failed', tail: failed.get(id) ?? 'The engine is not downloaded.' });
+      }
+      removeEarlierRuntimes();
+    }
     if (!engineReady() || !modelHere(id)) return setRun({ state: 'failed', model: id, tail: 'The model is not downloaded.' });
     tail = [];
+    const cuda = build.backend === 'cuda';
+    const fallBack = () => {
+      note('The CUDA runtime could not start. Using Vulkan.\n');
+      audio.useVulkan();
+      return bringUp(id);
+    };
+    if (cuda) {
+      const found = await hasCudaDevice(exe);
+      if (myTurn !== turn) return status();
+      if (!found) return fallBack();
+    }
     let port;
     try {
       port = await freePort();
@@ -1708,25 +1913,41 @@ function createNativeEngine(deps = {}) {
       return setRun({ state: 'failed', model: id, tail: String(error?.message ?? error) });
     }
     if (myTurn !== turn) return status();
+    if (cuda && audio.fallback) return bringUp(id);
     const key = runtime.keyed ? crypto.randomBytes(24).toString('hex') : null;
     setRun({ state: 'starting', model: id, port, key, tail: '' });
     const model = MODELS_[id];
-    let mine;
+    const freeMB = build.backend === 'cuda' ? await videoMemoryFree() : null;
+    if (myTurn !== turn) return status();
+    let args;
     try {
-      // A runtime of several programs says which one runs this model (`program`): else the build's own.
-      mine = spawn(runtime.program?.({ id, model, build, engineDir }) ?? exe, runtime.launch({ id, model, port, key, build, modelsDir, files }), { cwd: modelsDir, env: childEnv, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+      args = runtime.launch({ id, model, port, key, build, modelsDir, files, freeMB });
     } catch (error) {
       return setRun({ state: 'failed', tail: String(error?.message ?? error) });
     }
+    let mine;
+    try {
+      // A runtime of several programs says which one runs this model (`program`): else the build's own.
+      mine = spawn(runtime.program?.({ id, model, build, engineDir }) ?? exe, args, {
+        cwd: modelsDir, env: childEnv, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
+      });
+    } catch (error) {
+      if (cuda) return fallBack();
+      return setRun({ state: 'failed', tail: String(error?.message ?? error) });
+    }
     child = mine;
+    runningImages.set(mine, engineDir);
     if (mine.pid) { try { files.writeFileSync(runFile, JSON.stringify({ pid: mine.pid })); } catch { /* a note, not a condition */ } }
     let exited = false;
+    let healthy = false;
     const ended = (code) => {
       if (exited) return;
       exited = true;
+      runningImages.delete(mine);
       forget(mine.pid);
       if (child !== mine) return;
       child = null;
+      if (cuda && !healthy) return;
       for (const [streamId, stream] of streams) { stream.abort(); undump(streamId); onStream({ id: streamId, type: 'error', message: 'The recognition engine stopped.' }); }
       streams.clear();
       if (run.state !== 'stopped') setRun({ state: code === 0 ? 'stopped' : 'failed', tail: tail.join('\n') });
@@ -1745,8 +1966,12 @@ function createNativeEngine(deps = {}) {
 
     const deadline = now() + readyTimeoutMs;
     for (;;) {
-      if (child !== mine) return status();
-      if ((await get(port, '/health'))?.status === 200) break;
+      if (myTurn !== turn) return status();
+      if (exited) return cuda ? fallBack() : status();
+      const answer = await get(port, '/health');
+      if (myTurn !== turn) return status();
+      if (exited) return cuda ? fallBack() : status();
+      if (answer?.status === 200) { healthy = true; break; }
       if (now() > deadline) {
         note('The engine did not answer in time.');
         mine.kill();
@@ -1847,7 +2072,8 @@ function createNativeEngine(deps = {}) {
       // A cloning model speaks from a recording, or not at all.
       if (model.speech?.clone && !reference?.path) return { error: 'This voice model has no recording to speak from.' };
       const named = typeof voice === 'string' && /^[\w.()+-]{1,80}$/.test(voice) ? voice : model.voice;
-      const one = say({ port: run.port, model: run.model, input, ...speechRequest(model, named, language, reference), sampleRate: model.sampleRate }, onPcm);
+      const request = speechRequest(model, named, language, input, reference);
+      const one = say({ port: run.port, model: run.model, input, ...request, sampleRate: model.sampleRate }, onPcm);
       mine.abort = () => one.abort();
       await one.done;
       return { ok: true };
@@ -1865,4 +2091,10 @@ function createNativeEngine(deps = {}) {
   return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream, updateRuntime, speak, stopSpeaking };
 }
 
-module.exports = { createNativeEngine, openLive, openWindow, readWhole, wavOf, loopAt, unloop, unspaced, echoOf, endless, hintChecked, tidied, CONTEXT_LEAD, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears, translatorFits, systemTar, untar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, VOICES, AUDIO_RUNTIME, LLAMA_RUNTIME, VOICE_RUNTIME, speakLive, speechRequest, wavSound, LOOPBACK };
+module.exports = {
+  audioBuildChoice,
+  createNativeEngine, openLive, openWindow, readWhole, wavOf, loopAt, unloop, unspaced, echoOf, endless, hintChecked,
+  tidied, CONTEXT_LEAD, joinHalves, imageOfPid, quietMiddle, languageName, languageCode, languageLocale, modelHears,
+  translatorFits, systemTar, untar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, VOICES, AUDIO_RUNTIME, LLAMA_RUNTIME,
+  VOICE_RUNTIME, speakLive, speechRequest, speaksFromWords, wavSound, LOOPBACK,
+};

@@ -787,7 +787,8 @@
       "voiceUnnamed": "Model bacaan belum diisi. Masukkan namanya dalam kad Bacaan.",
       "noteQwen3Tts": "Paling semula jadi, terus bersuara tanpa menunggu. Diuji dalam bahasa Jepun, Cina dan Inggeris: tiada kesilapan sebutan. Menggunakan kira-kira 3 GB memori video, menyokong 10 bahasa.",
       "noteIrodori": "Bahasa Jepun sahaja. Diuji tanpa kesilapan sebutan, kira-kira setengah saat setiap ayat. Menggunakan kira-kira 1.7 GB memori video.",
-      "noteQwen3TtsBase": "Baca teks dengan suara sendiri. Rakaman kira-kira 10 saat sudah cukup untuk mengklon suara anda. Kali pertama menggunakan setiap suara, anda perlu tunggu beberapa saat hingga hampir 30 saat. Selepas itu, bacaan bermula serta-merta. Menggunakan kira-kira 3 GB memori grafik dan menyokong 10 bahasa."
+      "noteQwen3TtsBase": "Baca teks dengan suara sendiri. Rakaman kira-kira 10 saat sudah cukup untuk mengklon suara anda. Kali pertama menggunakan setiap suara, anda perlu tunggu beberapa saat hingga hampir 30 saat. Selepas itu, bacaan bermula serta-merta. Menggunakan kira-kira 3 GB memori grafik dan menyokong 10 bahasa.",
+      "noteQwen3TtsBaseSmall": "Membaca teks dengan suara anda sendiri seperti model 1.7B. Lebih ringan dan pantas, dan ujian menunjukkan suaranya sama mirip dengan suara anda. Menggunakan kira-kira 2 GB memori grafik dan menyokong 10 bahasa."
     }
   },
   "logsPanel": {
@@ -1637,7 +1638,8 @@
     "mic_in_use": "Mikrofon “{{device}}” sedang digunakan oleh {{apps}}. Tutup {{apps}} dan mula semula, atau pilih mikrofon lain.",
     "mic_unreadable": "Windows tidak dapat membuka mikrofon “{{device}}”. Mungkin apl lain sedang menggunakannya, atau pemacunya berhenti bertindak balas. Tutup apl yang menggunakannya atau sambungkan semula, kemudian mula semula.",
     "mic_blocked": "Windows tidak membenarkan Sokuji menggunakan mikrofon. Hidupkan akses mikrofon untuk apl desktop dalam Tetapan › Privasi & keselamatan › Mikrofon, kemudian mula semula.",
-    "noise_suppression_fallback": "Penindasan hingar yang dipilih tidak tersedia. Tahap lebih rendah digunakan; semak tetapan mikrofon."
+    "noise_suppression_fallback": "Penindasan hingar yang dipilih tidak tersedia. Tahap lebih rendah digunakan; semak tetapan mikrofon.",
+    "tts_slow": "Bacaan terjemahan terlalu perlahan. Mulai sekarang, setiap ayat akan dimainkan selepas audionya siap. Kad grafik mungkin sedang sibuk."
   },
   "viewer": {
     "title": "Sari kata Sokuji",
@@ -2185,7 +2187,18 @@
       "importVoice": "Import fail suara",
       "useVoice": "Baca dengan suara {{name}}",
       "addShort": "Tambah",
-      "importShort": "Import"
+      "importShort": "Import",
+      "clipTone": "Nada",
+      "addTone": "Tambah nada untuk “{{name}}”",
+      "removeToneTake": "Padam rakaman “{{name}}” dalam bahasa {{language}} dengan nada {{tone}}",
+      "tones": {
+        "plain": "Biasa",
+        "lively": "Gembira",
+        "laugh": "Ketawa terbahak-bahak",
+        "gentle": "Lembut",
+        "serious": "Serius",
+        "angry": "Marah"
+      }
     },
     "echoCancellationGate": "Ikut kelantangan",
     "echoCancellationGateTooltip": "Mengikut kelantangan — untuk pembesar suara: bunyi yang dimainkan masuk semula ke mikrofon jauh lebih perlahan daripada suara anda, jadi ia ditapis berdasarkan kelantangan tanpa menjejaskan suara anda.",

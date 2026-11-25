@@ -14,8 +14,9 @@ describe('memory for native model recommendations', () => {
       adapter('0001', '    HardwareInformation.qwMemorySize    REG_QWORD    0x400000000') +
       adapter('0001\\Settings', '    HardwareInformation.qwMemorySize    REG_QWORD    0x800000000') });
     const read = createModelMemoryReader({ platform: 'win32', execFile });
-    expect(await Promise.all([read(), read()])).toEqual([24576, 24576]);
-    expect(await read()).toBe(24576);
+    const card = { memoryMB: 24576, cuda13: false };
+    expect(await Promise.all([read(), read()])).toEqual([card, card]);
+    expect(await read()).toEqual(card);
     expect(execFile).toHaveBeenCalledTimes(3);
     expect(execFile).toHaveBeenNthCalledWith(1, 'reg.exe', ['query', ROOT, '/reg:64'], expect.objectContaining({ windowsHide: true, timeout: 10000 }));
     expect(execFile).toHaveBeenCalledWith('reg.exe', ['query', `${ROOT}\\0000`, '/reg:64'], expect.any(Object));
@@ -28,19 +29,19 @@ describe('memory for native model recommendations', () => {
       adapter('0001', '    MatchingDeviceId    REG_SZ    Root\\IndirectDisplay\n    HardwareInformation.qwMemorySize    REG_QWORD    0x800000000') +
       adapter('0002', '    DriverDesc    REG_SZ    Microsoft Basic Render Driver\n    HardwareInformation.qwMemorySize    REG_QWORD    0x800000000') +
       adapter('0003', '    HardwareInformation.qwMemorySize    REG_QWORD    invalid\n    HardwareInformation.MemorySize    REG_DWORD    0xffffffff') });
-    expect(await createModelMemoryReader({ platform: 'win32', execFile })()).toBe(2048);
+    expect(await createModelMemoryReader({ platform: 'win32', execFile })()).toEqual({ memoryMB: 2048, cuda13: false });
   });
 
   it('keeps a known zero as zero, without falling back to DWORD', async () => {
     const execFile = vi.fn().mockResolvedValue({ stdout: adapter('0000', '    HardwareInformation.qwMemorySize    REG_QWORD    0x0\n    HardwareInformation.MemorySize    REG_DWORD    0xffffffff') });
-    expect(await createModelMemoryReader({ platform: 'win32', execFile })()).toBe(0);
+    expect(await createModelMemoryReader({ platform: 'win32', execFile })()).toEqual({ memoryMB: 0, cuda13: false });
   });
 
   it('counts half of Mac memory, once, without querying Windows', async () => {
     const totalmem = vi.fn(() => 32 * 1024 ** 3), execFile = vi.fn();
     const read = createModelMemoryReader({ platform: 'darwin', totalmem, execFile });
-    expect(await read()).toBe(16384);
-    expect(await read()).toBe(16384);
+    expect(await read()).toEqual({ memoryMB: 16384, cuda13: false });
+    expect(await read()).toEqual({ memoryMB: 16384, cuda13: false });
     expect(totalmem).toHaveBeenCalledTimes(1);
     expect(execFile).not.toHaveBeenCalled();
   });
@@ -59,7 +60,7 @@ describe('memory for native model recommendations', () => {
       if (args[1] === `${ROOT}\\0001`) return { stdout: adapter('0001', '    HardwareInformation.qwMemorySize    REG_QWORD    0x400000000') };
       throw new Error('access denied');
     });
-    expect(await createModelMemoryReader({ platform: 'win32', execFile })()).toBe(16384);
+    expect((await createModelMemoryReader({ platform: 'win32', execFile })()).memoryMB).toBe(16384);
     expect(execFile).toHaveBeenCalledTimes(3);
   });
 
@@ -73,5 +74,19 @@ describe('memory for native model recommendations', () => {
     expect(totalmem).not.toHaveBeenCalled();
     expect(execFile).not.toHaveBeenCalled();
     expect(await createModelMemoryReader({ platform: 'darwin', totalmem })()).toBeNull();
+  });
+
+  it.each([
+    ['10de', '32.0.15.7742', false], ['10de', '32.0.15.7999', false], ['10de', '32.0.15.8000', true],
+    ['10de', '32.0.16.1742', true], ['10de', 'invalid', false], ['1002', '32.0.16.1742', false],
+  ])('uses the vendor %s and driver %s of the largest adapter', async (vendor, driver, cuda13) => {
+    const card = (id, bytes, ven, version) => adapter(id, [
+      `    HardwareInformation.qwMemorySize    REG_QWORD    ${bytes}`,
+      `    MatchingDeviceId    REG_SZ    PCI\\VEN_${ven}&DEV_1234`,
+      `    DriverVersion    REG_SZ    ${version}`,
+    ].join('\n'));
+    const stdout = card('0000', '0x40000000', '10DE', '32.0.16.1742') + card('0001', '0x300000000', vendor, driver);
+    const read = createModelMemoryReader({ platform: 'win32', execFile: async () => ({ stdout }) });
+    expect(await read()).toEqual({ memoryMB: 12288, cuda13 });
   });
 });

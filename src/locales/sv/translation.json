@@ -787,7 +787,8 @@
       "voiceUnnamed": "Ingen uppläsningsmodell har angetts än. Ange en under \"Uppläsning\".",
       "noteQwen3Tts": "Naturligast och börjar tala direkt. Inga felläsningar i tester på japanska, kinesiska och engelska. Använder cirka 3 GB grafikminne och stöder 10 språk.",
       "noteIrodori": "Talar bara japanska. Inga felläsningar i tester, cirka en halv sekund per mening. Använder cirka 1.7 GB grafikminne.",
-      "noteQwen3TtsBase": "Läser upp text med din egen röst. Spela in ungefär tio sekunder tal för att klona rösten. Första gången du använder en röst kan det ta allt från några sekunder till närmare en halv minut. Därefter börjar uppläsningen direkt. Använder cirka 3 GB grafikminne och stöder 10 språk."
+      "noteQwen3TtsBase": "Läser upp text med din egen röst. Spela in ungefär tio sekunder tal för att klona rösten. Första gången du använder en röst kan det ta allt från några sekunder till närmare en halv minut. Därefter börjar uppläsningen direkt. Använder cirka 3 GB grafikminne och stöder 10 språk.",
+      "noteQwen3TtsBaseSmall": "Läser upp text med din egen röst, precis som 1.7B. Modellen är lättare och snabbare, och i tester låter den lika mycket som du. Använder cirka 2 GB grafikminne och stöder 10 språk."
     }
   },
   "logsPanel": {
@@ -1637,7 +1638,8 @@
     "mic_in_use": "Mikrofonen ”{{device}}” används av {{apps}}. Stäng {{apps}} och starta igen, eller välj en annan mikrofon.",
     "mic_unreadable": "Windows kunde inte öppna mikrofonen ”{{device}}”. En annan app kanske använder den, eller så svarar inte dess drivrutin. Stäng appar som använder den eller anslut den igen och starta sedan igen.",
     "mic_blocked": "Windows låter inte Sokuji använda mikrofonen. Aktivera mikrofonåtkomst för skrivbordsappar under Inställningar › Sekretess och säkerhet › Mikrofon och starta sedan igen.",
-    "noise_suppression_fallback": "Den valda brusreduceringen är inte tillgänglig. En lägre nivå används; kontrollera mikrofoninställningarna."
+    "noise_suppression_fallback": "Den valda brusreduceringen är inte tillgänglig. En lägre nivå används; kontrollera mikrofoninställningarna.",
+    "tts_slow": "Uppläsningen hinner inte med. Från och med nu spelas varje mening upp först när hela ljudet är klart. Grafikkortet kan vara upptaget."
   },
   "viewer": {
     "title": "Sokuji-undertexter",
@@ -2185,7 +2187,18 @@
       "importVoice": "Importera röstfil",
       "useVoice": "Läs upp med {{name}}",
       "addShort": "Lägg till",
-      "importShort": "Importera"
+      "importShort": "Importera",
+      "clipTone": "Tonfall",
+      "addTone": "Lägg till ett tonfall för ”{{name}}”",
+      "removeToneTake": "Ta bort inspelningen av ”{{name}}” på {{language}} med tonfallet ”{{tone}}”",
+      "tones": {
+        "plain": "Neutral",
+        "lively": "Glad",
+        "laugh": "Skrattar högt",
+        "gentle": "Mild",
+        "serious": "Allvarlig",
+        "angry": "Arg"
+      }
     },
     "echoCancellationGate": "Efter ljudnivå",
     "echoCancellationGateTooltip": "Efter ljudstyrka — för högtalare: ljudet de spelar upp kommer tillbaka till mikrofonen mycket svagare än din röst, så det filtreras bort efter ljudstyrka medan din röst lämnas oförändrad.",

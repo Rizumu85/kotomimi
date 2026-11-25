@@ -1019,6 +1019,10 @@
     "en": "Add a language to {{name}}",
     "text": "ضبط صدا به زبانی دیگر برای «{{name}}»"
   },
+  "fork.voice.addTone": {
+    "en": "Add a tone to {{name}}",
+    "text": "افزودن لحن به «{{name}}»"
+  },
   "fork.voice.addVoice": {
     "en": "Add a voice",
     "text": "افزودن صدا"
@@ -1050,6 +1054,10 @@
   "fork.voice.clipSilent": {
     "en": "No voice was heard.",
     "text": "صدایی شنیده نشد."
+  },
+  "fork.voice.clipTone": {
+    "en": "Tone",
+    "text": "لحن"
   },
   "fork.voice.clipTooLong": {
     "en": "Too long: no more than {{seconds}} seconds with its words.",
@@ -1163,6 +1171,10 @@
     "en": "Remove the {{language}} recording of {{name}}",
     "text": "حذف صدای ضبط‌شدهٔ «{{name}}» به زبان {{language}}"
   },
+  "fork.voice.removeToneTake": {
+    "en": "Remove the {{tone}} {{language}} recording of {{name}}",
+    "text": "حذف ضبط «{{name}}» به زبان {{language}} با لحن {{tone}}"
+  },
   "fork.voice.removeVoice": {
     "en": "Remove {{name}}",
     "text": "حذف «{{name}}»"
@@ -1214,6 +1226,30 @@
   "fork.voice.toMeLocked": {
     "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
     "text": "«برای من» فعلاً در دسترس نیست. چون صدای طرف مقابل از کل سیستم گرفته می‌شود، برنامه ترجمهٔ خوانده‌شده را هم صدای طرف مقابل حساب می‌کند. برای فعال کردن این گزینه، یک برنامه مثل VRChat را به‌عنوان منبع صدای طرف مقابل انتخاب کنید."
+  },
+  "fork.voice.tones.angry": {
+    "en": "Angry",
+    "text": "عصبانی"
+  },
+  "fork.voice.tones.gentle": {
+    "en": "Gentle",
+    "text": "ملایم"
+  },
+  "fork.voice.tones.laugh": {
+    "en": "Laughing",
+    "text": "با خندهٔ بلند"
+  },
+  "fork.voice.tones.lively": {
+    "en": "Lively",
+    "text": "شاد"
+  },
+  "fork.voice.tones.plain": {
+    "en": "Plain",
+    "text": "عادی"
+  },
+  "fork.voice.tones.serious": {
+    "en": "Serious",
+    "text": "جدی"
   },
   "fork.voice.toThem": {
     "en": "The other side hears it",
@@ -1670,6 +1706,10 @@
   "models.namedGroup": {
     "en": "Needs the language set",
     "text": "باید زبان را مشخص کنید"
+  },
+  "notices.tts_slow": {
+    "en": "Spoken translation cannot keep up, so each sentence now plays once it is complete. The graphics card may be busy.",
+    "text": "خواندن ترجمه عقب می‌افتد. از این به بعد، صدای هر جمله پس از آماده شدن کامل پخش می‌شود. ممکن است کارت گرافیک مشغول باشد."
   },
   "providers.gemini.name": {
     "en": "Google Gemini",
@@ -2258,6 +2298,10 @@
   "providers.localai.noteQwen3TtsBase": {
     "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
     "text": "متن را با صدای خودتان می‌خواند. برای شبیه‌سازی صدایتان کافی است حدود ده ثانیه از آن را ضبط کنید. بار اول که از هر صدا استفاده می‌کنید، خواندن بعد از چند ثانیه تا کمی بیشتر از بیست ثانیه شروع می‌شود. دفعات بعد خواندن بلافاصله شروع می‌شود. حدود 3 GB از حافظهٔ کارت گرافیک را مصرف می‌کند و از 10 زبان پشتیبانی می‌کند."
+  },
+  "providers.localai.noteQwen3TtsBaseSmall": {
+    "en": "Reads in your own voice like the 1.7B, lighter and faster, and measured just as like you. About 2 GB of video memory, ten languages.",
+    "text": "مثل مدل 1.7B، متن را با صدای خودتان می‌خواند. سبک‌تر و سریع‌تر است و در آزمایش‌ها به همان اندازه به صدای شما شباهت داشت. حدود 2 GB از حافظهٔ کارت گرافیک را می‌گیرد و از 10 زبان پشتیبانی می‌کند."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

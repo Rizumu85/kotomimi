@@ -1019,6 +1019,10 @@
     "en": "Add a language to {{name}}",
     "text": "“{{name}}” için başka bir dilde kayıt ekle"
   },
+  "fork.voice.addTone": {
+    "en": "Add a tone to {{name}}",
+    "text": "“{{name}}” için bir ses tonu ekle"
+  },
   "fork.voice.addVoice": {
     "en": "Add a voice",
     "text": "Ses ekle"
@@ -1050,6 +1054,10 @@
   "fork.voice.clipSilent": {
     "en": "No voice was heard.",
     "text": "Kayıtta konuşma sesi duyulmadı."
+  },
+  "fork.voice.clipTone": {
+    "en": "Tone",
+    "text": "Ses tonu"
   },
   "fork.voice.clipTooLong": {
     "en": "Too long: no more than {{seconds}} seconds with its words.",
@@ -1163,6 +1171,10 @@
     "en": "Remove the {{language}} recording of {{name}}",
     "text": "“{{name}}” için {{language}} ses kaydını sil"
   },
+  "fork.voice.removeToneTake": {
+    "en": "Remove the {{tone}} {{language}} recording of {{name}}",
+    "text": "“{{name}}” için {{tone}} tonundaki {{language}} ses kaydını sil"
+  },
   "fork.voice.removeVoice": {
     "en": "Remove {{name}}",
     "text": "“{{name}}” sesini sil"
@@ -1214,6 +1226,30 @@
   "fork.voice.toMeLocked": {
     "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
     "text": "“Ben dinleyeyim” şu anda kullanılamıyor. Karşı tarafın sesi tüm sistemden alındığı için uygulama sesli okumayı da karşı tarafın konuşması sanır. Ses kaynağı olarak tek bir uygulama seç (örneğin VRChat)."
+  },
+  "fork.voice.tones.angry": {
+    "en": "Angry",
+    "text": "Kızgın"
+  },
+  "fork.voice.tones.gentle": {
+    "en": "Gentle",
+    "text": "Yumuşak"
+  },
+  "fork.voice.tones.laugh": {
+    "en": "Laughing",
+    "text": "Kahkahalı"
+  },
+  "fork.voice.tones.lively": {
+    "en": "Lively",
+    "text": "Neşeli"
+  },
+  "fork.voice.tones.plain": {
+    "en": "Plain",
+    "text": "Normal"
+  },
+  "fork.voice.tones.serious": {
+    "en": "Serious",
+    "text": "Ciddi"
   },
   "fork.voice.toThem": {
     "en": "The other side hears it",
@@ -1670,6 +1706,10 @@
   "models.namedGroup": {
     "en": "Needs the language set",
     "text": "Dil belirtilmeli"
+  },
+  "notices.tts_slow": {
+    "en": "Spoken translation cannot keep up, so each sentence now plays once it is complete. The graphics card may be busy.",
+    "text": "Seslendirme yetişemiyor. Artık her cümle hazır olduğunda seslendirilecek. Ekran kartı meşgul olabilir."
   },
   "providers.gemini.name": {
     "en": "Google Gemini",
@@ -2258,6 +2298,10 @@
   "providers.localai.noteQwen3TtsBase": {
     "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
     "text": "Yaklaşık on saniyelik bir kayıtla sesini klonlar ve metni senin sesinle okur. Her ses ilk kullanımda birkaç saniye ile otuz saniyeye yakın bir süre arasında bekletebilir. Sonraki kullanımlarda hemen okumaya başlar. Yaklaşık 3 GB ekran kartı belleği kullanır ve 10 dili destekler."
+  },
+  "providers.localai.noteQwen3TtsBaseSmall": {
+    "en": "Reads in your own voice like the 1.7B, lighter and faster, and measured just as like you. About 2 GB of video memory, ten languages.",
+    "text": "1.7B gibi kendi sesinizle okur. Daha hafif ve daha hızlı, testlerde de sesinize 1.7B kadar yakın. Yaklaşık 2 GB ekran kartı belleği kullanır ve 10 dili destekler."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

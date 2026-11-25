@@ -787,7 +787,8 @@
       "voiceUnnamed": "Er is nog geen voorleesmodel ingevuld. Vul er een in bij \"Voorlezen\".",
       "noteQwen3Tts": "Klinkt het natuurlijkst en begint meteen te spreken. Getest in het Japans, Chinees en Engels: alles correct uitgesproken. Gebruikt ongeveer 3 GB videogeheugen en ondersteunt 10 talen.",
       "noteIrodori": "Spreekt alleen Japans. Getest: alles correct uitgesproken, ongeveer een halve seconde per zin. Gebruikt ongeveer 1.7 GB videogeheugen.",
-      "noteQwen3TtsBase": "Leest voor met je eigen stem. Een opname van ongeveer tien seconden is genoeg om je stem te klonen. De eerste keer dat je een stem gebruikt, duurt het een paar seconden tot bijna een halve minuut voordat je iets hoort. Daarna begint het voorlezen meteen. Gebruikt ongeveer 3 GB videogeheugen en ondersteunt 10 talen."
+      "noteQwen3TtsBase": "Leest voor met je eigen stem. Een opname van ongeveer tien seconden is genoeg om je stem te klonen. De eerste keer dat je een stem gebruikt, duurt het een paar seconden tot bijna een halve minuut voordat je iets hoort. Daarna begint het voorlezen meteen. Gebruikt ongeveer 3 GB videogeheugen en ondersteunt 10 talen.",
+      "noteQwen3TtsBaseSmall": "Leest net als 1.7B voor met je eigen stem. Lichter en sneller, en klinkt in tests even goed als jouw stem. Gebruikt ongeveer 2 GB videogeheugen en ondersteunt 10 talen."
     }
   },
   "logsPanel": {
@@ -1637,7 +1638,8 @@
     "mic_in_use": "De microfoon “{{device}}” wordt gebruikt door {{apps}}. Sluit {{apps}} en start opnieuw, of kies een andere microfoon.",
     "mic_unreadable": "Windows kon de microfoon “{{device}}” niet openen. Mogelijk gebruikt een andere app hem, of reageert het stuurprogramma niet meer. Sluit apps die hem gebruiken of sluit hem opnieuw aan, en start dan opnieuw.",
     "mic_blocked": "Windows staat niet toe dat Sokuji de microfoon gebruikt. Zet microfoontoegang voor bureaublad-apps aan via Instellingen › Privacy en beveiliging › Microfoon, en start dan opnieuw.",
-    "noise_suppression_fallback": "De gekozen ruisonderdrukking is niet beschikbaar. Er wordt een lager niveau gebruikt; controleer de microfooninstellingen."
+    "noise_suppression_fallback": "De gekozen ruisonderdrukking is niet beschikbaar. Er wordt een lager niveau gebruikt; controleer de microfooninstellingen.",
+    "tts_slow": "Het voorlezen loopt achter. Elke zin wordt nu pas afgespeeld zodra die helemaal klaar is. De videokaart is mogelijk druk bezig."
   },
   "viewer": {
     "title": "Sokuji-ondertiteling",
@@ -2185,7 +2187,18 @@
       "importVoice": "Stembestand importeren",
       "useVoice": "Voorlezen met {{name}}",
       "addShort": "Toevoegen",
-      "importShort": "Importeren"
+      "importShort": "Importeren",
+      "clipTone": "Toon",
+      "addTone": "Voeg een toon toe aan ‘{{name}}’",
+      "removeToneTake": "Verwijder de opname van ‘{{name}}’ in het {{language}} met de toon ‘{{tone}}’",
+      "tones": {
+        "plain": "Normaal",
+        "lively": "Blij",
+        "laugh": "Hard lachend",
+        "gentle": "Zachtaardig",
+        "serious": "Serieus",
+        "angry": "Boos"
+      }
     },
     "echoCancellationGate": "Op volume",
     "echoCancellationGateTooltip": "Op volume — voor luidsprekers: wat ze afspelen komt veel zachter terug in de microfoon dan je stem, dus wordt het op volume tegengehouden en blijft je stem zoals die is.",

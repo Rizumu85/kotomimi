@@ -14,8 +14,9 @@ export interface LibraryVoice {
   language: string;
   seconds: number;
   createdAt: number;
-  /** The languages it has a recording in, by base code, its first recording's first: each is spoken on from its own. */
+  /** The languages with a plain recording, by base code, its first recording's first. */
   languages: readonly string[];
+  tones: readonly { tone: string; languages: readonly string[] }[];
 }
 
 /** Why a recording was not kept: the main process's code for it (`voice_too_short`, …), or `failed`. */
@@ -30,8 +31,10 @@ function voicesOf(value: unknown): LibraryVoice[] {
   return value.flatMap((one): LibraryVoice[] => {
     const v = one as Partial<LibraryVoice> | null;
     if (!v || typeof v.id !== 'string' || typeof v.name !== 'string') return [];
-    const languages = Array.isArray(v.languages) ? v.languages.filter((one): one is string => typeof one === 'string') : [];
-    return [{ id: v.id, name: v.name, text: typeof v.text === 'string' ? v.text : '', language: typeof v.language === 'string' ? v.language : '', seconds: Number(v.seconds) || 0, createdAt: Number(v.createdAt) || 0, languages }];
+    const languagesOf = (list: unknown): string[] => Array.isArray(list) ? list.filter((one): one is string => typeof one === 'string') : [];
+    const tones = Array.isArray(v.tones) ? v.tones.flatMap((one) =>
+      typeof one?.tone === 'string' && /^[a-z]{2,12}$/.test(one.tone) ? [{ tone: one.tone, languages: languagesOf(one.languages) }] : []) : [];
+    return [{ id: v.id, name: v.name, text: typeof v.text === 'string' ? v.text : '', language: typeof v.language === 'string' ? v.language : '', seconds: Number(v.seconds) || 0, createdAt: Number(v.createdAt) || 0, languages: languagesOf(v.languages), tones }];
   });
 }
 
@@ -40,13 +43,13 @@ interface VoiceLibraryState {
   /** The main process has said what there is. */
   asked: boolean;
   refresh(): Promise<void>;
-  /** `to`: the voice this is one more recording of, in another language (or in place of its recording in that one). */
-  add(voice: { name: string; text: string; language: string; wav: Uint8Array; to?: string }): Promise<VoiceAdded>;
+  /** `to`: the voice this recording belongs to, replacing any in the same language and tone. */
+  add(voice: { name: string; text: string; language: string; wav: Uint8Array; to?: string; tone?: string }): Promise<VoiceAdded>;
   /** A voice handed over as a file (`.kotovoice`). */
   addPack(bytes: Uint8Array): Promise<VoiceAdded>;
   remove(id: string): Promise<void>;
-  /** Takes away a voice's recording in a language other than its first: that language is then read from the first. */
-  removeTake(id: string, language: string): Promise<void>;
+  /** Takes away any recording but the voice's first. */
+  removeTake(id: string, language: string, tone?: string): Promise<void>;
   /** Calls one by another name. A blank one changes nothing. */
   rename(id: string, name: string): Promise<void>;
   /** Saves one as a file where the user says. */
@@ -86,8 +89,8 @@ export const useVoiceLibraryStore = create<VoiceLibraryState>()(
         await electron()?.invoke('voice-library:remove', { id }).catch(() => undefined);
         await get().refresh();
       },
-      removeTake: async (id, language) => {
-        await electron()?.invoke('voice-library:remove-take', { id, language }).catch(() => undefined);
+      removeTake: async (id, language, tone) => {
+        await electron()?.invoke('voice-library:remove-take', { id, language, tone }).catch(() => undefined);
         await get().refresh();
       },
       rename: async (id, name) => {

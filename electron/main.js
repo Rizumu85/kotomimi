@@ -26,11 +26,14 @@ const { createCloseHandshake } = require('./close-handshake.js');
 const { createWsHeaderRules } = require('./ws-header-rules.js');
 const { startLanServer } = require('./lan-server');
 const { createVoiceLibrary, MOST_WAV_BYTES, MOST_PACK_BYTES } = require('./voice-library');
+const { TONES } = require('../src/lib/voice/tone.ts');
 const { createLentVoices } = require('./lent-voices');
 const { keepMaximizeHonest, pageShift } = require('./window-maximize');
 const { firewallStatus, allowThroughFirewall } = require('./lan-firewall');
 const { discoverServers } = require('./lan-discover');
-const { createNativeEngine, ENGINE, LLAMA, TRANSLATORS, COACHES, VOICES, LLAMA_RUNTIME, VOICE_RUNTIME } = require('./native-engine');
+const {
+  createNativeEngine, audioBuildChoice, ENGINE, LLAMA, TRANSLATORS, COACHES, VOICES, LLAMA_RUNTIME, VOICE_RUNTIME,
+} = require('./native-engine');
 const { joinEngines } = require('./native-engines');
 const { createSherpaEngine } = require('./sherpa-engine');
 const { createRemoteEngine } = require('./remote-engine');
@@ -1468,7 +1471,11 @@ ipcMain.handle('lan:reply-voice', async (event, args) => {
   const reference = typeof args?.reference === 'string' ? getLentVoices().get(args.reference) : null;
   if (VOICES[args?.model]?.speech?.clone && !reference) return { error: 'The recording to speak from is not here.', sent: false, code: 'voice_ref_unknown' };
   let out = null;
-  const result = await getNativeVoice().speak({ id: `lan:${id}`, model: args?.model, text: args?.text, voice: args?.voice, language: args?.language, ...(reference ? { reference } : {}) }, (pcm, sampleRate) => {
+  const engine = await getNativeVoice();
+  const result = await engine.speak({
+    id: `lan:${id}`, model: args?.model, text: args?.text, voice: args?.voice,
+    language: args?.language, ...(reference ? { reference } : {}),
+  }, (pcm, sampleRate) => {
     out ??= lanServer?.stream(id, { contentType: `audio/pcm;rate=${sampleRate}` }) ?? null;
     out?.write(pcm);
   });
@@ -1541,21 +1548,28 @@ let modelStorage = null;
 const getModelStorage = () => modelStorage ??= createModelStorage({ userData: app.getPath('userData') });
 const nativeDirFixed = () => !app.isPackaged && Boolean(process.env.KOTOMIMI_NATIVE_DIR);
 const engineDir = (kind) => path.join(getModelStorage().root(), kind);
+const audioFolders = () => ({
+  runtimeRoot: nativeDirFixed() ? process.env.KOTOMIMI_NATIVE_DIR : engineDir('native-engine'),
+  legacyRuntimeRoot: nativeDirFixed() ? `${process.env.KOTOMIMI_NATIVE_DIR}-voice` : engineDir('native-voice'),
+});
 
 let nativeEngine = null;
-const modelMemory = createModelMemoryReader();
 // Start the cached read before settings open, without holding up the window.
-void modelMemory();
-ipcMain.handle('model-memory:get', () => modelMemory());
-const getNativeEngine = () => {
+const adapter = createModelMemoryReader()();
+const audioChoice = adapter.then((card) => audioBuildChoice(card, app.getPath('userData')));
+ipcMain.handle('model-memory:get', async () => (await adapter)?.memoryMB ?? null);
+const getNativeEngine = async () => {
+  const audio = await audioChoice;
   if (nativeEngine) return nativeEngine;
   const log = engineLog('native-engine.log');
   const toStatus = (status) => toPage('native-engine:status', status);
   const toStream = (event) => toPage('native-engine:stream', event);
   const { net } = require('electron');
+  const folders = audioFolders();
   const downloaded = (tell) => createNativeEngine({
+    audio,
     // An unpackaged run can keep it elsewhere (`KOTOMIMI_NATIVE_DIR`): gigabytes a test profile need not fetch again.
-    dir: nativeDirFixed() ? process.env.KOTOMIMI_NATIVE_DIR : engineDir('native-engine'),
+    ...folders, dir: folders.runtimeRoot,
     fetch: (url, init) => net.fetch(url, init),
     // An unpackaged run can keep what the engine was given to hear (`KOTOMIMI_NATIVE_DUMP`), to measure with.
     dumpDir: !app.isPackaged && process.env.KOTOMIMI_NATIVE_DUMP ? process.env.KOTOMIMI_NATIVE_DUMP : null,
@@ -1580,19 +1594,25 @@ const getNativeEngine = () => {
   nativeEngine = joinEngines([downloaded, sherpa], { onChange: toStatus, onStream: toStream, idleMs: Infinity });
   return nativeEngine;
 };
-ipcMain.handle('native-engine:get', () => getNativeEngine().status());
-ipcMain.handle('native-engine:download', (event, args) => getNativeEngine().download(String(args?.id ?? '')));
-ipcMain.handle('native-engine:cancel', (event, args) => getNativeEngine().cancel(String(args?.id ?? '')));
-ipcMain.handle('native-engine:remove', (event, args) => getNativeEngine().remove(String(args?.id ?? '')));
+ipcMain.handle('native-engine:get', async () => (await getNativeEngine()).status());
+ipcMain.handle('native-engine:download', async (_, args) => (await getNativeEngine()).download(String(args?.id ?? '')));
+ipcMain.handle('native-engine:cancel', async (_, args) => (await getNativeEngine()).cancel(String(args?.id ?? '')));
+ipcMain.handle('native-engine:remove', async (_, args) => (await getNativeEngine()).remove(String(args?.id ?? '')));
 ipcMain.handle('native-engine:start', async (event, args) => {
   await autostart.quiet;
-  return getNativeEngine().start(String(args?.id ?? ''));
+  return (await getNativeEngine()).start(String(args?.id ?? ''));
 });
-ipcMain.handle('native-engine:stop', () => getNativeEngine().stop());
-ipcMain.handle('native-engine:stream-open', (event, args) => getNativeEngine().openStream({ language: args?.language, ...(Array.isArray(args?.also) ? { also: args.also.filter((language) => typeof language === 'string') } : {}), ...(typeof args?.prefer === 'string' ? { prefer: args.prefer } : {}), ...(Array.isArray(args?.hints) ? { hints: args.hints.filter((hint) => typeof hint === 'string') } : {}), sampleRate: args?.sampleRate, model: typeof args?.model === 'string' ? args.model : undefined }));
-ipcMain.handle('native-engine:stream-audio', (event, args) => getNativeEngine().writeStream(args?.id, args?.pcm));
-ipcMain.handle('native-engine:stream-end', (event, args) => getNativeEngine().endStream(args?.id));
-ipcMain.handle('native-engine:stream-abort', (event, args) => getNativeEngine().abortStream(args?.id));
+ipcMain.handle('native-engine:stop', async () => (await getNativeEngine()).stop());
+ipcMain.handle('native-engine:stream-open', async (event, args) => (await getNativeEngine()).openStream({
+  language: args?.language,
+  ...(Array.isArray(args?.also) ? { also: args.also.filter((language) => typeof language === 'string') } : {}),
+  ...(typeof args?.prefer === 'string' ? { prefer: args.prefer } : {}),
+  ...(Array.isArray(args?.hints) ? { hints: args.hints.filter((hint) => typeof hint === 'string') } : {}),
+  sampleRate: args?.sampleRate, model: typeof args?.model === 'string' ? args.model : undefined,
+}));
+ipcMain.handle('native-engine:stream-audio', (event, args) => nativeEngine?.writeStream(args?.id, args?.pcm) ?? false);
+ipcMain.handle('native-engine:stream-end', (event, args) => nativeEngine?.endStream(args?.id) ?? false);
+ipcMain.handle('native-engine:stream-abort', (event, args) => nativeEngine?.abortStream(args?.id) ?? false);
 app.on('will-quit', () => { void nativeEngine?.stop(); });
 
 // Fork: a recognition engine on another device — a phone lent to this computer (electron/remote-engine.js). Its live
@@ -1666,12 +1686,15 @@ app.on('will-quit', () => { void nativeCoach?.stop(); });
 // own: the recognition engine runs one model, and a run that speaks needs both. It answers no page (it sends no CORS
 // headers), so a sentence is asked for here and its sound handed to the page as it is made.
 let nativeVoice = null;
-const getNativeVoice = () => {
+const getNativeVoice = async () => {
+  const audio = await audioChoice;
   if (nativeVoice) return nativeVoice;
   const log = engineLog('native-voice.log');
   const { net } = require('electron');
+  const folders = audioFolders();
   nativeVoice = createNativeEngine({
-    dir: nativeDirFixed() ? `${process.env.KOTOMIMI_NATIVE_DIR}-voice` : engineDir('native-voice'),
+    audio,
+    ...folders, dir: folders.legacyRuntimeRoot,
     catalog: { engine: ENGINE, models: VOICES },
     runtime: VOICE_RUNTIME,
     fetch: (url, init) => net.fetch(url, init),
@@ -1681,15 +1704,15 @@ const getNativeVoice = () => {
   });
   return nativeVoice;
 };
-ipcMain.handle('native-voice:get', () => getNativeVoice().status());
-ipcMain.handle('native-voice:download', (event, args) => getNativeVoice().download(String(args?.id ?? '')));
-ipcMain.handle('native-voice:cancel', (event, args) => getNativeVoice().cancel(String(args?.id ?? '')));
-ipcMain.handle('native-voice:remove', (event, args) => getNativeVoice().remove(String(args?.id ?? '')));
+ipcMain.handle('native-voice:get', async () => (await getNativeVoice()).status());
+ipcMain.handle('native-voice:download', async (_, args) => (await getNativeVoice()).download(String(args?.id ?? '')));
+ipcMain.handle('native-voice:cancel', async (_, args) => (await getNativeVoice()).cancel(String(args?.id ?? '')));
+ipcMain.handle('native-voice:remove', async (_, args) => (await getNativeVoice()).remove(String(args?.id ?? '')));
 ipcMain.handle('native-voice:start', async (event, args) => {
   await autostart.quiet;
-  return getNativeVoice().start(String(args?.id ?? ''));
+  return (await getNativeVoice()).start(String(args?.id ?? ''));
 });
-ipcMain.handle('native-voice:stop', () => getNativeVoice().stop());
+ipcMain.handle('native-voice:stop', async () => (await getNativeVoice()).stop());
 // Fork: the user's own voices (voice-library.js): recordings a cloning voice model speaks from. In the profile, not
 // with the models: they are the user's, and stay where their settings are when the models move to another disk.
 let voiceLibrary = null;
@@ -1697,26 +1720,24 @@ const getVoiceLibrary = () => {
   voiceLibrary ??= createVoiceLibrary({ dir: path.join(app.getPath('userData'), 'voices') });
   return voiceLibrary;
 };
-/** The recording a voice of the library is spoken from, where the voice named is one. */
-/** The recording a voice speaks `language` from: its own in that language where it has one, else its first. */
-const referenceOf = (voice, language) => (typeof voice === 'string' && /^[a-f0-9]{6,32}$/.test(voice) ? getVoiceLibrary().reference(voice, language) : null);
+/** The recording a library voice speaks this language and tone from. */
+const referenceOf = (voice, language, tone) => (typeof voice === 'string' && /^[a-f0-9]{6,32}$/.test(voice) ? getVoiceLibrary().reference(voice, language, tone) : null);
 ipcMain.handle('voice-library:list', () => getVoiceLibrary().list());
 ipcMain.handle('voice-library:add', (event, args) => {
   // A file someone handed over (`pack`), or a recording made or chosen here.
   const bytesOf = (value, most) => (value instanceof Uint8Array && value.byteLength <= most ? Buffer.from(value.buffer, value.byteOffset, value.byteLength) : null);
   if (args?.pack) return getVoiceLibrary().unpack(bytesOf(args.pack, MOST_PACK_BYTES));
-  // `to`: one more recording of a voice there is, in another language.
-  return getVoiceLibrary().add({ name: args?.name, text: args?.text, language: args?.language, wav: bytesOf(args?.wav, MOST_WAV_BYTES), ...(typeof args?.to === 'string' ? { to: args.to } : {}) });
+  return getVoiceLibrary().add({ name: args?.name, text: args?.text, language: args?.language, tone: args?.tone, wav: bytesOf(args?.wav, MOST_WAV_BYTES), ...(typeof args?.to === 'string' ? { to: args.to } : {}) });
 });
 ipcMain.handle('voice-library:remove', (event, args) => getVoiceLibrary().remove(String(args?.id ?? '')));
-ipcMain.handle('voice-library:remove-take', (event, args) => getVoiceLibrary().removeTake(String(args?.id ?? ''), String(args?.language ?? '')));
+ipcMain.handle('voice-library:remove-take', (event, args) => getVoiceLibrary().removeTake(String(args?.id ?? ''), String(args?.language ?? ''), args?.tone));
 /**
  * A recording of a voice as another device is handed it, where the voice is spoken by a Kotomimi that lends its
  * cloning model: the one the voice speaks `language` from, named by what it is, with its bytes only where asked for
  * (they go once; its name goes with every sentence).
  */
 ipcMain.handle('voice-library:recording', (event, args) => {
-  const reference = referenceOf(args?.id, args?.language);
+  const reference = referenceOf(args?.id, args?.language, args?.tone);
   if (!reference) return null;
   try {
     const bytes = require('fs').readFileSync(reference.path);
@@ -1742,27 +1763,40 @@ ipcMain.handle('voice-library:export', async (event, args) => {
   }
 });
 
-ipcMain.handle('native-voice:speak', (event, args) => {
+ipcMain.handle('native-voice:speak', async (event, args) => {
   const id = Number.isInteger(args?.id) ? args.id : 0;
-  return getNativeVoice().speak({ id, model: args?.model, text: args?.text, voice: args?.voice, language: args?.language, reference: referenceOf(args?.voice, args?.language) },
+  return (await getNativeVoice()).speak({
+    id, model: args?.model, text: args?.text, voice: args?.voice, language: args?.language,
+    reference: referenceOf(args?.voice, args?.language, args?.tone),
+  },
     // A copy: the piece is a view of the response's buffer, which is used again.
     (pcm, sampleRate) => toPage('native-voice:audio', { id, sampleRate, pcm: Uint8Array.from(pcm) }));
 });
 /**
- * Fork: the recordings a run will speak from, read by the engine as the run begins: one short word asked in each
- * voice in each language it will read (a recording is read one way for its own language and another for the rest)
- * and not listened to. A sentence said meanwhile waits its turn behind them. Not waited for by the page.
+ * The local and lent engines read the same plain and toned prompts in order, within their own limits.
+ * A run has at most one read per language the cloning model speaks.
  */
-ipcMain.handle('native-voice:warm', (event, args) => {
-  const reads = (Array.isArray(args?.reads) ? args.reads : []).filter((one) => typeof one?.voice === 'string' && typeof one?.language === 'string').slice(0, 6);
-  reads.forEach(({ voice, language }, i) => {
-    const reference = referenceOf(voice, language);
-    if (reference) void getNativeVoice().speak({ id: `warm:${i}:${voice}`, model: args?.model, text: 'Hello.', voice, language, reference });
-  });
+function warmReads(args, slots) {
+  const reads = Array.isArray(args?.reads) ? args.reads.slice(0, 10).filter((one) =>
+    typeof one?.voice === 'string' && typeof one?.language === 'string') : [];
+  return getVoiceLibrary().warmReads(reads, TONES, slots);
+}
+ipcMain.handle('voice-library:warm-reads', (event, args) =>
+  warmReads(args, 4).map(({ voice, language, tone }) => ({ voice, language, tone })));
+ipcMain.handle('native-voice:warm', async (event, args) => {
+  const slots = VOICES[args?.model]?.options?.['qwen3_tts.voice_prompt_cache_slots'];
+  if (!slots) return false;
+  // Queue one word at a time so a real sentence can follow the prompt currently being read.
+  for (const { voice, language, reference } of warmReads(args, slots)) {
+    await (await getNativeVoice()).speak({
+      id: `warm:${voice}`, model: args.model, text: 'Hello.', voice, language, reference,
+    });
+  }
   return true;
 });
-ipcMain.handle('native-voice:speak-stop', (event, args) => getNativeVoice().stopSpeaking(args?.id));
+ipcMain.handle('native-voice:speak-stop', async (event, args) => (await getNativeVoice()).stopSpeaking(args?.id));
 app.on('will-quit', () => { void nativeVoice?.stop(); });
+app.on('will-quit', () => voiceLibrary?.clearJoined());
 
 // Fork: the models' folder, and moving it. A move stops the engines first — their runtimes are in the folders that
 // move — and makes them afresh after, at the new folder; the page is told their states again. Nothing moves while a
@@ -1775,10 +1809,10 @@ const remakeEngines = async () => {
   nativeTranslator = null;
   nativeCoach = null;
   nativeVoice = null;
-  toPage('native-engine:status', await getNativeEngine().status());
+  toPage('native-engine:status', await (await getNativeEngine()).status());
   toPage('native-translator:status', await getNativeTranslator().status());
   toPage('native-coach:status', await getNativeCoach().status());
-  toPage('native-voice:status', await getNativeVoice().status());
+  toPage('native-voice:status', (await getNativeVoice()).status());
 };
 const downloading = async () => {
   for (const engine of [nativeEngine, nativeTranslator, nativeCoach, nativeVoice]) {

@@ -787,7 +787,8 @@
       "voiceUnnamed": "Puhemallia ei ole vielä määritetty. Anna mallin nimi ääneenluvun kortissa.",
       "noteQwen3Tts": "Luonnollisin ääni, ja puhe alkaa heti. Testattu japaniksi, kiinaksi ja englanniksi ilman lukuvirheitä. Käyttää noin 3 GB näyttömuistia ja tukee 10 kieltä.",
       "noteIrodori": "Vain japaniksi. Testeissä ei lukuvirheitä, noin puoli sekuntia lausetta kohti. Käyttää noin 1.7 GB näyttömuistia.",
-      "noteQwen3TtsBase": "Lukee tekstin omalla äänelläsi. Äänen kloonaamiseen riittää noin kymmenen sekunnin äänite. Uuden äänen ensimmäisellä käyttökerralla puhe alkaa muutaman sekunnin tai runsaan 20 sekunnin kuluttua. Sen jälkeen puhe alkaa heti. Vaatii noin 3 GB näyttömuistia ja tukee 10 kieltä."
+      "noteQwen3TtsBase": "Lukee tekstin omalla äänelläsi. Äänen kloonaamiseen riittää noin kymmenen sekunnin äänite. Uuden äänen ensimmäisellä käyttökerralla puhe alkaa muutaman sekunnin tai runsaan 20 sekunnin kuluttua. Sen jälkeen puhe alkaa heti. Vaatii noin 3 GB näyttömuistia ja tukee 10 kieltä.",
+      "noteQwen3TtsBaseSmall": "Lukee tekstin ääneen omalla äänelläsi, kuten 1.7B. Malli on kevyempi ja nopeampi, ja testeissä ääni kuulosti yhtä paljon omalta ääneltäsi. Käyttää noin 2 GB näyttömuistia ja tukee 10 kieltä."
     }
   },
   "logsPanel": {
@@ -1637,7 +1638,8 @@
     "mic_in_use": "Mikrofoni ”{{device}}” on käytössä ({{apps}}). Sulje {{apps}} ja aloita uudelleen, tai valitse toinen mikrofoni.",
     "mic_unreadable": "Windows ei voinut avata mikrofonia ”{{device}}”. Toinen sovellus saattaa käyttää sitä, tai sen ohjain on lakannut vastaamasta. Sulje sitä käyttävät sovellukset tai liitä se uudelleen ja aloita sitten uudelleen.",
     "mic_blocked": "Windows ei anna Sokujin käyttää mikrofonia. Salli työpöytäsovellusten mikrofonin käyttö kohdassa Asetukset › Tietosuoja ja suojaus › Mikrofoni ja aloita sitten uudelleen.",
-    "noise_suppression_fallback": "Valittu kohinanvaimennus ei ole käytettävissä. Käytössä on alempi taso; tarkista mikrofonin asetukset."
+    "noise_suppression_fallback": "Valittu kohinanvaimennus ei ole käytettävissä. Käytössä on alempi taso; tarkista mikrofonin asetukset.",
+    "tts_slow": "Ääneenluku ei pysy tahdissa, joten jatkossa lauseet toistetaan vasta, kun ne ovat valmiita. Näytönohjain saattaa olla kuormittunut."
   },
   "viewer": {
     "title": "Sokuji-tekstitys",
@@ -2185,7 +2187,18 @@
       "importVoice": "Tuo äänitiedosto",
       "useVoice": "Lue äänellä ”{{name}}”",
       "addShort": "Lisää",
-      "importShort": "Tuo"
+      "importShort": "Tuo",
+      "clipTone": "Sävy",
+      "addTone": "Lisää sävy: {{name}}",
+      "removeToneTake": "Poista tallenne: {{name}} ({{language}}, sävy: {{tone}})",
+      "tones": {
+        "plain": "Tavallinen",
+        "lively": "Iloinen",
+        "laugh": "Naurava",
+        "gentle": "Lempeä",
+        "serious": "Vakava",
+        "angry": "Vihainen"
+      }
     },
     "echoCancellationGate": "Äänenvoimakkuuden mukaan",
     "echoCancellationGateTooltip": "Äänenvoimakkuuden mukaan — kaiuttimia käytettäessä kaiuttimista mikrofoniin vuotava ääni on paljon hiljaisempi kuin puheesi, joten se suodatetaan pois äänenvoimakkuuden perusteella ilman, että äänesi muuttuu.",

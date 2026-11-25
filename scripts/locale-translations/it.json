@@ -1031,6 +1031,10 @@
     "en": "Add a language to {{name}}",
     "text": "Registra «{{name}}» in un’altra lingua"
   },
+  "fork.voice.addTone": {
+    "en": "Add a tone to {{name}}",
+    "text": "Aggiungi un tono a «{{name}}»"
+  },
   "fork.voice.addVoice": {
     "en": "Add a voice",
     "text": "Aggiungi voce"
@@ -1062,6 +1066,10 @@
   "fork.voice.clipSilent": {
     "en": "No voice was heard.",
     "text": "Non si sente alcuna voce."
+  },
+  "fork.voice.clipTone": {
+    "en": "Tone",
+    "text": "Tono"
   },
   "fork.voice.clipTooLong": {
     "en": "Too long: no more than {{seconds}} seconds with its words.",
@@ -1175,6 +1183,10 @@
     "en": "Remove the {{language}} recording of {{name}}",
     "text": "Elimina la registrazione in {{language}} di «{{name}}»"
   },
+  "fork.voice.removeToneTake": {
+    "en": "Remove the {{tone}} {{language}} recording of {{name}}",
+    "text": "Elimina la registrazione di «{{name}}» in {{language}} con il tono «{{tone}}»"
+  },
   "fork.voice.removeVoice": {
     "en": "Remove {{name}}",
     "text": "Elimina «{{name}}»"
@@ -1226,6 +1238,30 @@
   "fork.voice.toMeLocked": {
     "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
     "text": "«Ascolto» non è disponibile: l’app acquisisce tutto l’audio di sistema e scambierebbe la lettura ad alta voce per la voce dell’altra persona. Scegli una singola app come fonte audio (ad esempio VRChat)."
+  },
+  "fork.voice.tones.angry": {
+    "en": "Angry",
+    "text": "Arrabbiato"
+  },
+  "fork.voice.tones.gentle": {
+    "en": "Gentle",
+    "text": "Dolce"
+  },
+  "fork.voice.tones.laugh": {
+    "en": "Laughing",
+    "text": "Risata"
+  },
+  "fork.voice.tones.lively": {
+    "en": "Lively",
+    "text": "Allegro"
+  },
+  "fork.voice.tones.plain": {
+    "en": "Plain",
+    "text": "Normale"
+  },
+  "fork.voice.tones.serious": {
+    "en": "Serious",
+    "text": "Serio"
   },
   "fork.voice.toThem": {
     "en": "The other side hears it",
@@ -1718,6 +1754,10 @@
   "models.online": {
     "en": "Online",
     "text": "Online"
+  },
+  "notices.tts_slow": {
+    "en": "Spoken translation cannot keep up, so each sentence now plays once it is complete. The graphics card may be busy.",
+    "text": "La lettura ad alta voce non tiene il passo. Da ora, ogni frase verrà riprodotta solo quando l’audio sarà pronto. La scheda grafica potrebbe essere occupata."
   },
   "providers.gemini.name": {
     "en": "Google Gemini",
@@ -2306,6 +2346,10 @@
   "providers.localai.noteQwen3TtsBase": {
     "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
     "text": "Legge con la tua voce. Per clonarla basta registrare circa dieci secondi di parlato. Al primo utilizzo di una voce l’attesa va da pochi secondi a quasi mezzo minuto. Dopo, la lettura parte subito. Usa circa 3 GB di memoria video e supporta 10 lingue."
+  },
+  "providers.localai.noteQwen3TtsBaseSmall": {
+    "en": "Reads in your own voice like the 1.7B, lighter and faster, and measured just as like you. About 2 GB of video memory, ten languages.",
+    "text": "Legge ad alta voce con la tua voce, come il modello 1.7B. È più leggero e veloce e nei test ha riprodotto la tua voce altrettanto fedelmente. Usa circa 2 GB di memoria video e supporta 10 lingue."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

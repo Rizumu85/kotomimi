@@ -1,9 +1,8 @@
 /**
  * Fork: what speaks a leg's sentences (`voice.ts`), whichever way the leg is answered: by stages of its own
  * (`PipelineLeg`), or by the other device's session, which writes its translations itself (`speakingEvents`). One
- * sentence at a time, in the order they were finished, each handed on as its sound is made; a voice slower than the
- * talk drops the oldest sentence still waiting in the same language, so that what is heard is never far behind what is
- * read, and no language's listeners are left out for another's.
+ * sentence at a time, in the order they were finished. A voice that keeps up streams its sound. A slower one
+ * hands on whole sentences. The oldest sentence still waiting in the same language gives way when too many wait.
  */
 import { SAMPLE_RATE, type AdapterEvents, type Ref } from '../../lib/contract/adapter';
 import type { Clock } from '../../lib/contract/clock';
@@ -11,31 +10,37 @@ import { describeCause } from '../../lib/diagnostics/describeCause';
 import { eventsFrom } from '../../lib/contract/events';
 import { framePayload } from '../../lib/contract/framePayload';
 import { sameSpeech } from '../../lib/language/script';
-import { speakText, speaksLanguage, warmVoice, type VoiceDeps, type VoiceStage } from './voice';
+import { speakText, speaksLanguage, warmVoice, type VoiceDeps, type VoiceRequest, type VoiceStage } from './voice';
 
 /** No more sentences than this wait, in one language, behind the one being made. */
 export const SAYINGS_MOST = 2;
+/** Leave a fifth of the playing time for variation between pieces. */
+const STREAM_RATIO = 0.8;
+/** A slow sentence keeps the next three whole while the voice earns back its margin. */
+const SPEED_WINDOW = 3;
 
-interface Saying { ref?: Ref; text: string; language: string }
+interface Saying extends VoiceRequest { ref?: Ref }
 
 export class Speaker {
   private readonly waiting: Saying[] = [];
   private making: AbortController | null = null;
   private warming: AbortController | null = null;
   private stopped = false;
+  private readonly speeds: { ratio: number; gap: boolean }[] = [];
+  private slowNoticeSent = false;
 
   constructor(
     private readonly stage: VoiceStage,
     private readonly key: string | undefined,
-    private readonly deps: Pick<VoiceDeps, 'decode' | 'native' | 'edge'> & { fetch: typeof fetch; clock: Clock },
+    private readonly deps: Pick<VoiceDeps, 'decode' | 'native' | 'edge' | 'recording'> & { fetch: typeof fetch; clock: Clock },
     private readonly events: Pick<AdapterEvents, 'audio' | 'frame' | 'degraded'>,
     /**
-     * Told each sentence as its voice begins to be made, with when it will have been heard to its end at the
-     * earliest (the clock's ms); what it returns is told when it really will have — null when no sound came of it.
+     * Told each sentence when its first sound is handed on, with when it will start playing (the clock's ms).
+     * What it returns is told how far the sound handed on will play.
      * For whoever must know what the app itself is saying (`PipelineLeg`: its own voice come back through the
      * microphone is no sentence of the user's).
      */
-    private readonly saying?: (text: string, untilAtLeast: number) => (until: number | null) => void,
+    private readonly saying?: (text: string, from: number) => (until: number) => void,
   ) {}
 
   /** When what has been handed on so far will have been heard to its end: sentences play one after another. */
@@ -43,7 +48,7 @@ export class Speaker {
   private recent: { text: string; until: number }[] = [];
 
   /** A sentence to be spoken: on the translation's own segment, or — `ref` absent — on none (what the speaker typed, said as it is). One in a language the voice cannot speak is passed over. */
-  say(ref: Ref | undefined, text: string, language: string): void {
+  say(ref: Ref | undefined, text: string, language: string, tone?: string): void {
     if (this.stopped || !speaksLanguage(this.stage, language)) return;
     // A server that writes its own translations cannot retract a captured echo. Keep the row, but don't voice it again.
     if (!this.saying) {
@@ -51,7 +56,7 @@ export class Speaker {
       this.recent = this.recent.filter((one) => one.until > since);
       if (this.recent.some((one) => sameSpeech(text, one.text))) return;
     }
-    this.waiting.push({ ...(ref !== undefined ? { ref } : {}), text, language });
+    this.waiting.push({ ...(ref !== undefined ? { ref } : {}), text, language, tone });
     // A sentence put into two languages waits twice: each language is held to its own count.
     const base = (code: string) => code.split('-')[0].toLowerCase();
     const alike = (one: Saying) => base(one.language) === base(language);
@@ -88,30 +93,64 @@ export class Speaker {
     const { stage } = this;
     const control = new AbortController();
     this.making = control;
-    this.frame('out', 'voice.request', { via: stage.via, model: stage.model, language: saying.language, chars: saying.text.length });
-    const heard = this.saying?.(saying.text, Math.max(this.deps.clock.now(), this.heardUntil));
-    const clip = { text: saying.text, until: this.heardUntil };
-    let first: number | undefined;
-    let samples = 0;
-    void speakText(stage, saying, this.key, this.deps, control.signal, (pcm) => {
-      if (this.stopped) return;
-      if (first === undefined) {
-        first = Math.max(this.deps.clock.now(), this.heardUntil);
+    this.frame('out', 'voice.request', {
+      via: stage.via, model: stage.model, language: saying.language, chars: saying.text.length,
+    });
+    // A held sentence goes to playback in one piece, so the queue has no gap to fill within it.
+    const hold = this.speeds.some(({ ratio, gap }) => ratio > STREAM_RATIO || gap);
+    const held: Int16Array[] | null = hold ? [] : null;
+    if (hold && !this.slowNoticeSent) {
+      this.slowNoticeSent = true;
+      this.events.degraded({
+        code: 'tts_slow',
+        message: `Speech synthesis (${stage.model}) fell behind, so playback is buffering whole sentences.`,
+      });
+    }
+    let clip: { text: string; until: number } | undefined;
+    let heard: ((until: number) => void) | undefined;
+    const handOn = (pcm: Int16Array, from: number, until: number) => {
+      if (!clip) {
+        clip = { text: saying.text, until };
+        heard = this.saying?.(saying.text, from);
         if (!this.saying) this.recent.push(clip);
       }
+      this.heardUntil = clip.until = until;
+      heard?.(until);
       this.events.audio({ pcm, ...(saying.ref !== undefined ? { ref: saying.ref } : {}) });
-      samples += pcm.length;
-      clip.until = first + samples * 1000 / SAMPLE_RATE;
+    };
+    // Even while holding, measure whether these pieces could have played without a gap.
+    let streamUntil: number | undefined;
+    let gap = false;
+    void speakText(stage, saying, this.key, this.deps, control.signal, (pcm) => {
+      if (this.stopped) return;
+      const now = this.deps.clock.now();
+      if (streamUntil !== undefined && now > streamUntil) gap = true;
+      const from = Math.max(now, streamUntil ?? this.heardUntil);
+      streamUntil = from + pcm.length * 1000 / SAMPLE_RATE;
+      if (held) held.push(pcm);
+      else handOn(pcm, from, streamUntil);
     }).then((spoken) => {
-      this.frame('in', 'voice.done', { model: stage.model, firstMs: spoken.firstMs ?? null, totalMs: spoken.totalMs, audioMs: Math.round((spoken.samples / SAMPLE_RATE) * 1000) });
+      if (this.stopped) return;
+      const audioMs = spoken.samples * 1000 / SAMPLE_RATE;
+      if (spoken.firstMs !== undefined) {
+        this.speeds.push({ ratio: (spoken.totalMs - spoken.firstMs) / audioMs, gap });
+        if (this.speeds.length > SPEED_WINDOW) this.speeds.shift();
+        if (held) {
+          const whole = new Int16Array(spoken.samples);
+          let at = 0;
+          for (const piece of held) { whole.set(piece, at); at += piece.length; }
+          const from = Math.max(this.deps.clock.now(), this.heardUntil);
+          handOn(whole, from, from + audioMs);
+        }
+      }
+      this.frame('in', 'voice.done', {
+        model: stage.model, firstMs: spoken.firstMs ?? null, totalMs: spoken.totalMs, audioMs: Math.round(audioMs),
+      });
     }, (error) => {
       if (this.stopped) return;
       this.frame('in', 'voice.failed', { model: stage.model, message: describeCause(error) });
       this.events.degraded({ code: 'tts_degraded', message: `A sentence could not be spoken (${stage.model}): ${describeCause(error)}`, cause: error });
     }).finally(() => {
-      // A failed stream may already have put sound on the playback queue.
-      if (samples) this.heardUntil = clip.until;
-      heard?.(samples ? clip.until : null);
       if (this.making === control) this.making = null;
       this.next();
     });

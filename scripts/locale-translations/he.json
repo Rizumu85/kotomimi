@@ -1019,6 +1019,10 @@
     "en": "Add a language to {{name}}",
     "text": "להקליט את „{{name}}” בשפה נוספת"
   },
+  "fork.voice.addTone": {
+    "en": "Add a tone to {{name}}",
+    "text": "הוספת טון דיבור ל־״{{name}}״"
+  },
   "fork.voice.addVoice": {
     "en": "Add a voice",
     "text": "הוספת קול"
@@ -1050,6 +1054,10 @@
   "fork.voice.clipSilent": {
     "en": "No voice was heard.",
     "text": "לא נשמע קול בהקלטה."
+  },
+  "fork.voice.clipTone": {
+    "en": "Tone",
+    "text": "טון דיבור"
   },
   "fork.voice.clipTooLong": {
     "en": "Too long: no more than {{seconds}} seconds with its words.",
@@ -1163,6 +1171,10 @@
     "en": "Remove the {{language}} recording of {{name}}",
     "text": "למחוק את ההקלטה של „{{name}}” בשפה {{language}}"
   },
+  "fork.voice.removeToneTake": {
+    "en": "Remove the {{tone}} {{language}} recording of {{name}}",
+    "text": "מחיקת ההקלטה של ״{{name}}״ בשפה {{language}} בטון {{tone}}"
+  },
   "fork.voice.removeVoice": {
     "en": "Remove {{name}}",
     "text": "מחיקת „{{name}}”"
@@ -1214,6 +1226,30 @@
   "fork.voice.toMeLocked": {
     "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
     "text": "\"להשמיע לי\" לא זמין כרגע. הצליל של הצד השני נקלט מכל המערכת, ולכן ההקראה תזוהה כדיבור של הצד השני. כדי להפעיל את האפשרות, יש לבחור אפליקציה אחת כמקור השמע (למשל VRChat)."
+  },
+  "fork.voice.tones.angry": {
+    "en": "Angry",
+    "text": "כועס"
+  },
+  "fork.voice.tones.gentle": {
+    "en": "Gentle",
+    "text": "עדין"
+  },
+  "fork.voice.tones.laugh": {
+    "en": "Laughing",
+    "text": "צחוק מתגלגל"
+  },
+  "fork.voice.tones.lively": {
+    "en": "Lively",
+    "text": "שמח"
+  },
+  "fork.voice.tones.plain": {
+    "en": "Plain",
+    "text": "רגיל"
+  },
+  "fork.voice.tones.serious": {
+    "en": "Serious",
+    "text": "רציני"
   },
   "fork.voice.toThem": {
     "en": "The other side hears it",
@@ -1670,6 +1706,10 @@
   "models.namedGroup": {
     "en": "Needs the language set",
     "text": "יש להגדיר את השפה"
+  },
+  "notices.tts_slow": {
+    "en": "Spoken translation cannot keep up, so each sentence now plays once it is complete. The graphics card may be busy.",
+    "text": "ההקראה לא עומדת בקצב, ולכן מעכשיו כל משפט יושמע רק אחרי שההקראה שלו תהיה מוכנה במלואה. ייתכן שכרטיס המסך עמוס."
   },
   "providers.gemini.name": {
     "en": "Google Gemini",
@@ -2258,6 +2298,10 @@
   "providers.localai.noteQwen3TtsBase": {
     "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
     "text": "מקריא בקול שלך. כדי לשכפל אותו, מספיק להקליט כעשר שניות של דיבור. בשימוש הראשון בכל קול ההקראה מתחילה אחרי כמה שניות ועד כמעט חצי דקה. בהמשך היא מתחילה מיד. משתמש בכ־3 GB של זיכרון גרפי ותומך ב־10 שפות."
+  },
+  "providers.localai.noteQwen3TtsBaseSmall": {
+    "en": "Reads in your own voice like the 1.7B, lighter and faster, and measured just as like you. About 2 GB of video memory, ten languages.",
+    "text": "מקריא בקול שלך כמו 1.7B, אבל קל ומהיר יותר. בבדיקות, הקול נשמע דומה לשלך באותה מידה. משתמש בכ־2 GB של זיכרון גרפי ותומך ב־10 שפות."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

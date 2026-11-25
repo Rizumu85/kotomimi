@@ -787,7 +787,8 @@
       "voiceUnnamed": "Nenhum modelo de voz foi informado. Preencha o nome no painel \"Leitura em voz alta\".",
       "noteQwen3Tts": "A voz mais natural, com fala imediata. Nos testes em japonês, chinês e inglês, não houve erros de leitura. Usa cerca de 3 GB de memória de vídeo e oferece 10 idiomas.",
       "noteIrodori": "Somente japonês. Nos testes, não houve erros de leitura: cerca de meio segundo por frase. Usa cerca de 1.7 GB de memória de vídeo.",
-      "noteQwen3TtsBase": "Lê em voz alta com a sua voz. Para cloná-la, basta gravar um trecho de fala de cerca de dez segundos. No primeiro uso de cada voz, a leitura leva de alguns segundos a quase meio minuto para começar. Depois, começa na hora. Usa cerca de 3 GB de memória de vídeo e oferece suporte a 10 idiomas."
+      "noteQwen3TtsBase": "Lê em voz alta com a sua voz. Para cloná-la, basta gravar um trecho de fala de cerca de dez segundos. No primeiro uso de cada voz, a leitura leva de alguns segundos a quase meio minuto para começar. Depois, começa na hora. Usa cerca de 3 GB de memória de vídeo e oferece suporte a 10 idiomas.",
+      "noteQwen3TtsBaseSmall": "Lê em voz alta com a sua própria voz, assim como o 1.7B. É mais leve e rápido e, nos testes, reproduziu sua voz tão bem quanto o 1.7B. Usa cerca de 2 GB de memória de vídeo e oferece suporte a 10 idiomas."
     }
   },
   "logsPanel": {
@@ -1637,7 +1638,8 @@
     "mic_in_use": "O microfone “{{device}}” está sendo usado por {{apps}}. Feche {{apps}} e inicie novamente, ou escolha outro microfone.",
     "mic_unreadable": "O Windows não conseguiu abrir o microfone “{{device}}”. Outro aplicativo pode estar usando-o, ou o driver dele parou de responder. Feche os aplicativos que o usam ou reconecte-o e inicie novamente.",
     "mic_blocked": "O Windows não está permitindo que o Sokuji use o microfone. Ative o acesso ao microfone para aplicativos da área de trabalho em Configurações › Privacidade e segurança › Microfone e inicie novamente.",
-    "noise_suppression_fallback": "A supressão de ruído selecionada não está disponível. Um nível inferior está em uso; verifique as configurações do microfone."
+    "noise_suppression_fallback": "A supressão de ruído selecionada não está disponível. Um nível inferior está em uso; verifique as configurações do microfone.",
+    "tts_slow": "A leitura em voz alta não está acompanhando o ritmo. A partir de agora, o áudio de cada frase só vai tocar quando estiver pronto. A placa de vídeo pode estar ocupada."
   },
   "viewer": {
     "title": "Legendas do Sokuji",
@@ -2185,7 +2187,18 @@
       "importVoice": "Importar arquivo de voz",
       "useVoice": "Ler com a voz de {{name}}",
       "addShort": "Adicionar",
-      "importShort": "Importar"
+      "importShort": "Importar",
+      "clipTone": "Tom",
+      "addTone": "Adicionar um tom a “{{name}}”",
+      "removeToneTake": "Excluir a gravação de “{{name}}” em {{language}} com o tom “{{tone}}”",
+      "tones": {
+        "plain": "Normal",
+        "lively": "Alegre",
+        "laugh": "Gargalhando",
+        "gentle": "Suave",
+        "serious": "Sério",
+        "angry": "Com raiva"
+      }
     },
     "echoCancellationGate": "Por volume",
     "echoCancellationGateTooltip": "Por volume — para alto-falantes: o som que eles reproduzem chega ao microfone muito mais baixo que a sua voz, então é bloqueado pelo volume e sua voz permanece intacta.",

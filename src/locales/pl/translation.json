@@ -787,7 +787,8 @@
       "voiceUnnamed": "Nie podano jeszcze modelu do czytania. Wpisz jego nazwę w sekcji „Czytanie”.",
       "noteQwen3Tts": "Brzmi najbardziej naturalnie i zaczyna mówić od razu. W testach po japońsku, chińsku i angielsku: bez błędów wymowy. Zajmuje około 3 GB pamięci karty graficznej, obsługuje 10 języków.",
       "noteIrodori": "Tylko po japońsku. W testach: bez błędów wymowy, około pół sekundy na zdanie. Zajmuje około 1.7 GB pamięci karty graficznej.",
-      "noteQwen3TtsBase": "Czyta na głos Twoim głosem. Do sklonowania głosu wystarczy nagranie trwające około 10 sekund. Przy pierwszym użyciu każdego głosu odczyt zaczyna się po kilku do dwudziestu kilku sekundach. Później rusza od razu. Zużywa około 3 GB pamięci karty graficznej i obsługuje 10 języków."
+      "noteQwen3TtsBase": "Czyta na głos Twoim głosem. Do sklonowania głosu wystarczy nagranie trwające około 10 sekund. Przy pierwszym użyciu każdego głosu odczyt zaczyna się po kilku do dwudziestu kilku sekundach. Później rusza od razu. Zużywa około 3 GB pamięci karty graficznej i obsługuje 10 języków.",
+      "noteQwen3TtsBaseSmall": "Czyta tekst na głos Twoim głosem. Jest lżejszy i szybszy od 1.7B, a w testach równie wiernie oddawał Twój głos. Zajmuje ok. 2 GB pamięci karty graficznej i obsługuje 10 języków."
     }
   },
   "logsPanel": {
@@ -1637,7 +1638,8 @@
     "mic_in_use": "Mikrofon „{{device}}” jest używany przez {{apps}}. Zamknij {{apps}} i rozpocznij ponownie albo wybierz inny mikrofon.",
     "mic_unreadable": "System Windows nie mógł otworzyć mikrofonu „{{device}}”. Może go używać inna aplikacja albo jego sterownik przestał odpowiadać. Zamknij aplikacje, które go używają, lub podłącz go ponownie, a następnie rozpocznij ponownie.",
     "mic_blocked": "System Windows nie pozwala aplikacji Sokuji używać mikrofonu. Włącz dostęp do mikrofonu dla aplikacji klasycznych w obszarze Ustawienia › Prywatność i zabezpieczenia › Mikrofon, a następnie rozpocznij ponownie.",
-    "noise_suppression_fallback": "Wybrane tłumienie szumów jest niedostępne. Używany jest niższy poziom; sprawdź ustawienia mikrofonu."
+    "noise_suppression_fallback": "Wybrane tłumienie szumów jest niedostępne. Używany jest niższy poziom; sprawdź ustawienia mikrofonu.",
+    "tts_slow": "Odczyt na głos nie nadąża. Od teraz każde zdanie zostanie odtworzone dopiero po wygenerowaniu go w całości. Karta graficzna może być zajęta."
   },
   "viewer": {
     "title": "Napisy Sokuji",
@@ -2185,7 +2187,18 @@
       "importVoice": "Importuj plik głosu",
       "useVoice": "Przeczytaj głosem „{{name}}”",
       "addShort": "Dodaj",
-      "importShort": "Importuj"
+      "importShort": "Importuj",
+      "clipTone": "Ton głosu",
+      "addTone": "Dodaj ton głosu do „{{name}}”",
+      "removeToneTake": "Usuń nagranie „{{name}}” w języku {{language}} (ton: {{tone}})",
+      "tones": {
+        "plain": "Zwykły",
+        "lively": "Wesoły",
+        "laugh": "Głośny śmiech",
+        "gentle": "Łagodny",
+        "serious": "Poważny",
+        "angry": "Rozgniewany"
+      }
     },
     "echoCancellationGate": "Według głośności",
     "echoCancellationGateTooltip": "Według głośności — przy korzystaniu z głośników: dźwięk z głośników docierający do mikrofonu jest znacznie cichszy niż twój głos, więc jest odfiltrowywany na podstawie głośności, a twój głos pozostaje bez zmian.",

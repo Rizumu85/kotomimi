@@ -1019,6 +1019,10 @@
     "en": "Add a language to {{name}}",
     "text": "Tambah rekaman bahasa lain untuk {{name}}"
   },
+  "fork.voice.addTone": {
+    "en": "Add a tone to {{name}}",
+    "text": "Tambah nada bicara untuk «{{name}}»"
+  },
   "fork.voice.addVoice": {
     "en": "Add a voice",
     "text": "Tambah suara"
@@ -1050,6 +1054,10 @@
   "fork.voice.clipSilent": {
     "en": "No voice was heard.",
     "text": "Tidak ada suara yang terdengar."
+  },
+  "fork.voice.clipTone": {
+    "en": "Tone",
+    "text": "Nada bicara"
   },
   "fork.voice.clipTooLong": {
     "en": "Too long: no more than {{seconds}} seconds with its words.",
@@ -1163,6 +1171,10 @@
     "en": "Remove the {{language}} recording of {{name}}",
     "text": "Hapus rekaman bahasa {{language}} untuk {{name}}"
   },
+  "fork.voice.removeToneTake": {
+    "en": "Remove the {{tone}} {{language}} recording of {{name}}",
+    "text": "Hapus rekaman {{language}} milik «{{name}}» dengan nada {{tone}}"
+  },
   "fork.voice.removeVoice": {
     "en": "Remove {{name}}",
     "text": "Hapus \"{{name}}\""
@@ -1214,6 +1226,30 @@
   "fork.voice.toMeLocked": {
     "en": "\"To me\" is off: the other side's sound is captured from the whole system, which would hear the voice as theirs. Choose one app (VRChat) as their source.",
     "text": "\"Untuk saya\" belum bisa dipakai. Audio dari seluruh sistem membuat suara bacaan terjemahan ikut dianggap sebagai ucapan lawan bicara. Pilih satu aplikasi (misalnya VRChat) sebagai sumber suara lawan bicara."
+  },
+  "fork.voice.tones.angry": {
+    "en": "Angry",
+    "text": "Marah"
+  },
+  "fork.voice.tones.gentle": {
+    "en": "Gentle",
+    "text": "Lembut"
+  },
+  "fork.voice.tones.laugh": {
+    "en": "Laughing",
+    "text": "Tertawa lepas"
+  },
+  "fork.voice.tones.lively": {
+    "en": "Lively",
+    "text": "Gembira"
+  },
+  "fork.voice.tones.plain": {
+    "en": "Plain",
+    "text": "Biasa"
+  },
+  "fork.voice.tones.serious": {
+    "en": "Serious",
+    "text": "Serius"
   },
   "fork.voice.toThem": {
     "en": "The other side hears it",
@@ -1690,6 +1726,10 @@
   "models.online": {
     "en": "Online",
     "text": "Daring"
+  },
+  "notices.tts_slow": {
+    "en": "Spoken translation cannot keep up, so each sentence now plays once it is complete. The graphics card may be busy.",
+    "text": "Pembacaan terjemahan tertinggal. Mulai sekarang, tiap kalimat diputar setelah suaranya selesai dibuat. Kartu grafis mungkin sedang sibuk."
   },
   "providers.gemini.name": {
     "en": "Google Gemini",
@@ -2278,6 +2318,10 @@
   "providers.localai.noteQwen3TtsBase": {
     "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
     "text": "Membacakan teks dengan suaramu sendiri. Cukup rekam sekitar sepuluh detik untuk mengkloning suaramu. Saat pertama kali memakai tiap suara, tunggu beberapa detik hingga dua puluh sekian detik. Setelah itu, suara langsung terdengar. Perlu sekitar 3 GB memori grafis dan mendukung 10 bahasa."
+  },
+  "providers.localai.noteQwen3TtsBaseSmall": {
+    "en": "Reads in your own voice like the 1.7B, lighter and faster, and measured just as like you. About 2 GB of video memory, ten languages.",
+    "text": "Membacakan teks dengan suara Anda seperti 1.7B. Lebih ringan dan cepat, dengan hasil yang sama miripnya dengan suara Anda dalam pengujian. Memakai sekitar 2 GB memori GPU dan mendukung 10 bahasa."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

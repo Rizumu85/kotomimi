@@ -18,6 +18,7 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const { createNativeEngine, openLive, languageName, languageLocale, modelHears, translatorFits, unspaced, echoOf, endless, hintChecked, tidied, systemTar, ENGINE, MODELS, LLAMA, TRANSLATORS, COACHES, LLAMA_RUNTIME } = require('./native-engine.js');
 const { hfMirrorOf } = require('./fetch-file.js');
+const { audioBuildChoice } = require('./native-engine.js');
 
 const sha = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
 const ARCHIVE = Buffer.from('an archive of the engine');
@@ -37,7 +38,11 @@ const answer = (pieces, status = 200) => new Response(new ReadableStream({
 }), { status });
 
 /** A computer: what the network serves, every process started, and whether the port answers. */
-function computer({ platform = 'win32', arch = 'x64', served = { 'https://example.test/engine.zip': ARCHIVE, 'https://example.test/m1.gguf': MODEL }, fetch: ownFetch, healthy = true, warmEvent = { type: 'done', text: '' }, catalog = CATALOG } = {}) {
+function computer({
+  platform = 'win32', arch = 'x64', fetch: ownFetch, healthy = true, warmEvent = { type: 'done', text: '' },
+  served = { 'https://example.test/engine.zip': ARCHIVE, 'https://example.test/m1.gguf': MODEL },
+  catalog = CATALOG, ...deps
+} = {}) {
   const world = { requests: [], started: [], changes: [], streamEvents: [], lives: [], windows: [], priorities: [], healthy };
   const fetchIt = ownFetch ?? (async (url, init = {}) => {
     world.requests.push({ url, range: init.headers?.Range });
@@ -75,6 +80,7 @@ function computer({ platform = 'win32', arch = 'x64', served = { 'https://exampl
     window,
     extract: async (archive, into) => { world.extracted = fs.readFileSync(archive); fs.writeFileSync(path.join(into, 'server.exe'), 'exe'); },
     freePort: async () => 45123,
+    videoMemoryFree: async () => null,
     get: async (port, pathname) => { world.asked = `${port}${pathname}`; return world.healthy ? { status: 200, body: '{"status":"ok"}' } : null; },
     setPriority: (pid, priority) => world.priorities.push([pid, priority]),
     sleep: async () => {},
@@ -82,12 +88,162 @@ function computer({ platform = 'win32', arch = 'x64', served = { 'https://exampl
     onStream: (event) => world.streamEvents.push(event),
     readyTimeoutMs: 50,
     warmTimeoutMs: 200,
+    ...deps,
   });
   return { world, engine };
 }
 
 const modelFile = () => path.join(dir, 'models', 'm1.gguf');
 const exeFile = () => path.join(dir, 'engine-1.0.0', 'server.exe');
+
+describe('the Windows audio builds', () => {
+  const vulkan = CATALOG.engine.builds['win32-x64'];
+  const archives = ['cuda', 'cudart'].map((name) => ({
+    ...vulkan, archive: `${name}.zip`, url: `https://example.test/${name}.zip`,
+  }));
+  const cuda = { backend: 'cuda', exe: vulkan.exe, archives, bytes: 2 * ARCHIVE.length };
+  const catalog = { ...CATALOG, engine: { version: '1.0.0', builds: { 'win32-x64': { ...vulkan, cuda } } } };
+  const served = Object.fromEntries([vulkan, ...archives].map((part) => [part.url, ARCHIVE]));
+  served[CATALOG.models.m1.url] = MODEL;
+  const card = { memoryMB: 16384, cuda13: true };
+
+  it('counts both pinned archives in one download and starts the CUDA recognizer without voice options', async () => {
+    const audio = audioBuildChoice(card, dir);
+    const asked = [];
+    const { world, engine } = computer({
+      catalog, served, audio, hasCudaDevice: async () => true,
+      videoMemoryFree: async () => { asked.push('free'); return 9000; },
+    });
+    expect(ENGINE.builds['win32-x64'].cuda.bytes).toBe(854645866);
+    expect(engine.status().engineBytes).toBe(cuda.bytes);
+    await engine.download('m1');
+    expect(world.requests.map((r) => r.url)).toEqual([...archives.map((a) => a.url), CATALOG.models.m1.url]);
+    const progress = world.changes.map((s) => s.models.m1)
+      .filter((m) => ['downloading', 'verifying'].includes(m.state));
+    expect(progress.every((m) => m.total === cuda.bytes + MODEL.length)).toBe(true);
+    expect(progress.map((m) => m.received)).toEqual(progress.map((m) => m.received).sort((a, b) => a - b));
+    expect((await engine.start('m1')).run.state).toBe('ready');
+    expect(world.started[0].bin).toBe(path.join(dir, 'engine-1.0.0-cuda', 'server.exe'));
+    const config = JSON.parse(fs.readFileSync(path.join(dir, 'models', 'server.json')));
+    expect(config.backend).toBe('cuda');
+    expect(config.models[0].session_options).toEqual(CATALOG.models.m1.options);
+    // What is free on the card is asked as a CUDA runtime starts: the voice's speed mode is decided by it.
+    expect(asked).toEqual(['free']);
+    await engine.stop();
+  });
+
+  it.each(['no device', 'early exit'])('serves the same request with Vulkan after %s and remembers it', async (why) => {
+    const audio = audioBuildChoice(card, dir, '1.0.0');
+    const { engine, world } = computer({
+      catalog, served, audio, hasCudaDevice: async () => why !== 'no device',
+      get: async () => {
+        if (world.started.at(-1).bin.includes('-cuda')) world.started.at(-1).child.emit('exit', 1);
+        return { status: 200 };
+      },
+    });
+    await engine.download('m1');
+    expect((await engine.start('m1')).run.state).toBe('ready');
+    expect(world.started.at(-1).bin).toBe(exeFile());
+    expect(world.requests.at(-1).url).toBe(vulkan.url);
+    expect(world.requests.filter((r) => r.url === CATALOG.models.m1.url)).toHaveLength(1);
+    expect(fs.existsSync(path.join(dir, 'engine-1.0.0-cuda'))).toBe(false);
+    await engine.stop();
+    const next = computer({ catalog, served, audio: audioBuildChoice(card, dir, '1.0.0') });
+    expect((await next.engine.start('m1')).run.state).toBe('ready');
+    expect(next.world.requests).toEqual([]);
+    expect(next.world.started[0].bin).toBe(exeFile());
+    await next.engine.stop();
+    expect(audioBuildChoice(card, dir, '1.0.1').cuda).toBe(true);
+  });
+
+  it('downloads and unpacks each shared archive once and lets both servers use the fallback', async () => {
+    const audio = audioBuildChoice(card, dir);
+    const voiceDir = path.join(dir, 'voice');
+    const extracted = [];
+    const shared = { catalog, served, audio, runtimeRoot: dir, legacyRuntimeRoot: voiceDir,
+      extract: async (archive, into) => {
+        extracted.push(path.basename(archive));
+        fs.writeFileSync(path.join(into, 'server.exe'), 'exe');
+      } };
+    const asr = computer({ ...shared, hasCudaDevice: async () => false });
+    const voice = computer({
+      ...shared, dir: voiceDir, hasCudaDevice: () => { throw new Error('CUDA was already rejected'); },
+    });
+    await Promise.all([asr.engine.download('m1'), voice.engine.download('m1')]);
+    await asr.engine.start('m1');
+    expect((await voice.engine.start('m1')).run.state).toBe('ready');
+    expect(voice.world.started.map((s) => s.bin)).toEqual([exeFile()]);
+    expect([...asr.world.requests, ...voice.world.requests].map((r) => r.url).filter((url) => url.endsWith('.zip')))
+      .toEqual([...archives.map((a) => a.url), vulkan.url]);
+    expect(extracted).toEqual([...archives.map((a) => a.archive), vulkan.archive]);
+    await asr.engine.remove('m1');
+    expect(voice.engine.status()).toMatchObject({ engine: 'ready', run: { state: 'ready' }, models: { m1: { state: 'downloaded' } } });
+    await Promise.all([asr.engine.stop(), voice.engine.stop()]);
+  });
+
+  it('finishes the shared install for the voice when the recognizer cancels', async () => {
+    const shared = { catalog, served, audio: audioBuildChoice(card, dir), runtimeRoot: dir };
+    const asr = computer(shared);
+    const voice = computer({ ...shared, dir: path.join(dir, 'voice') });
+    const first = asr.engine.download('m1');
+    const second = voice.engine.download('m1');
+    asr.engine.cancel('m1');
+    const [a, b] = await Promise.all([first, second]);
+    expect(a.models.m1.state).toBe('absent');
+    expect(b.models.m1.state).toBe('downloaded');
+    expect(voice.world.requests.map((r) => r.url)).toEqual([CATALOG.models.m1.url]);
+    expect(asr.world.requests.map((r) => r.url)).toEqual(archives.map((a) => a.url));
+  });
+
+  it.each([true, false])('reuses the complete legacy Vulkan install and removes duplicate copies (ASR installed: %s)', async (asrInstalled) => {
+    const voiceDir = path.join(dir, 'native-voice');
+    const old = path.join(voiceDir, 'engine-1.0.0');
+    fs.mkdirSync(old, { recursive: true });
+    fs.writeFileSync(path.join(old, 'server.exe'), 'voice copy');
+    if (asrInstalled) {
+      fs.mkdirSync(path.dirname(exeFile()));
+      fs.writeFileSync(exeFile(), 'ASR copy');
+    }
+    const voice = computer({ dir: voiceDir, runtimeRoot: dir, legacyRuntimeRoot: voiceDir });
+    await voice.engine.updateRuntime();
+    expect(fs.readFileSync(exeFile(), 'utf8')).toBe(asrInstalled ? 'ASR copy' : 'voice copy');
+    expect(fs.existsSync(old)).toBe(false);
+    expect(voice.world.requests).toEqual([]);
+  });
+
+  it('starts Vulkan when the fallback marker cannot be written', async () => {
+    const profile = path.join(dir, 'not-a-directory');
+    fs.writeFileSync(profile, '');
+    const audio = audioBuildChoice(card, profile);
+    const { engine, world } = computer({ catalog, served, audio, hasCudaDevice: async () => false });
+    await engine.download('m1');
+    expect((await engine.start('m1')).run.state).toBe('ready');
+    expect(world.started[0].bin).toBe(exeFile());
+    expect(audio.cuda).toBe(false);
+    expect(audioBuildChoice(card, profile).cuda).toBe(true);
+    await engine.stop();
+  });
+
+  it('keeps CUDA when the user stops a start or the model takes too long to load', async () => {
+    const audio = audioBuildChoice(card, dir);
+    let begin, finish;
+    const polling = new Promise((resolve) => { begin = resolve; });
+    const response = new Promise((resolve) => { finish = resolve; });
+    const { engine } = computer({
+      catalog, served, audio, hasCudaDevice: async () => true,
+      get: () => { begin(); return response; },
+    });
+    await engine.download('m1');
+    const start = engine.start('m1');
+    await polling;
+    await engine.stop();
+    finish(null);
+    expect((await start).run.state).toBe('stopped');
+    expect(audio.cuda).toBe(true);
+    expect((await engine.start('m1')).run.state).toBe('failed');
+    expect(audio.cuda).toBe(true);
+  });
+});
 
 describe('a model made of several pinned files', () => {
   const second = { file: 'decoder.onnx', url: 'https://example.test/decoder', bytes: 3, sha256: sha(Buffer.from('two')) };
