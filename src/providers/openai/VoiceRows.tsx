@@ -38,7 +38,7 @@ const MORE_SAMPLES: Readonly<Record<string, string>> = {
 };
 
 /** Says a sample of a row's language in the voice the card shows now, whether or not it is kept yet. */
-function SampleButton({ id, language, choice, disabled }: { id: string; language: string; choice: VoiceChoice; disabled?: boolean }) {
+function SampleButton({ id, language, choice, disabled, quiet }: { id: string; language: string; choice: VoiceChoice; disabled?: boolean; /** Drawn as one of a voice's own buttons, with no box of its own. */ quiet?: boolean }) {
   const { t } = useTranslation();
   const phase = useLineVoiceStore((s) => (s.line === id ? s.phase : 'idle'));
   const on = phase !== 'idle';
@@ -50,7 +50,7 @@ function SampleButton({ id, language, choice, disabled }: { id: string; language
     void sayLine(id, MORE_SAMPLES[baseOf(language)] ?? previewSampleFor(baseOf(language)).text, language, { ...choice, on: true });
   };
   return (
-    <button type="button" className="kt-voice__sample" onClick={() => { void press(); }} aria-label={label} title={label} aria-pressed={on} disabled={disabled}>
+    <button type="button" className={quiet ? 'kt-myvoices__act' : 'kt-voice__sample'} onClick={() => { void press(); }} aria-label={label} title={label} aria-pressed={on} disabled={disabled}>
       {phase === 'loading' ? <Loader size={13} className="kt-engine__spin" /> : phase === 'playing' ? <Square size={11} fill="currentColor" /> : <Volume2 size={14} />}
     </button>
   );
@@ -135,19 +135,56 @@ export function VoiceRows({ choice, lent = [], languages, ownLanguage = 'en', pl
 
   const seen = new Set<string>();
   const rows = languages.filter((language) => { const base = baseOf(language); if (seen.has(base)) return false; seen.add(base); return true; });
-  /** Removes a voice of the user's own, and every use of it once it is gone: one that could not be removed stays chosen. */
+  const book = voiceBook(choice, lent);
+  /**
+   * Removes a voice of the user's own, and every use of it once it is gone: one that could not be removed stays
+   * chosen. Where it was the one that read, a voice that is left reads in its place.
+   */
   const forget = async (id: string) => {
     await useVoiceLibraryStore.getState().remove(id);
-    if (!useVoiceLibraryStore.getState().voices.some((one) => one.id === id)) onChange(withoutVoice(choice, id));
+    const left = useVoiceLibraryStore.getState().voices;
+    if (left.some((one) => one.id === id)) return;
+    const without = withoutVoice(choice, id);
+    onChange(left[0] && !left.some((one) => one.id === without.voices[book]?.['*']) ? withVoice(without, '*', left[0].id, lent) : without);
   };
-  /** The user's own voices under the rows: each by its name, and the way to add one. */
+  // A cloning model's voices are the user's own, and they are the choice themselves: one voice is simply the one
+  // that reads; of several, the one marked reads every language, and a language may be given another under them.
+  const there = (id: string | undefined): string => (id && mine.some((one) => one.id === id) ? id : '');
+  const spoken = rows.filter((language) => voiceSpeaks(choice, language, lent));
+  /** The voice that reads whatever has none of its own. */
+  const every = there(choice.voices[book]?.['*']) || there(chosenVoice(choice, spoken[0] ?? ownLanguage, lent));
+  /** In this voice alone, every language. */
+  const inVoice = (id: string): VoiceChoice => ({ ...choice, voices: { ...choice.voices, [book]: { '*': id } } });
+  const picked = clones && (mine.length > 1 || (mine.length === 1 && !every));
+  const perLanguage = clones && mine.length > 1 && spoken.length > 1;
+  /** The user's own voices: each by its name, with what is done to it, the languages it has, and the ways to one more. */
   const library = clones && (
     <div className="kt-myvoices">
+      <div className="kt-myvoices__top">
+        <span className="kt-field__label">{t('fork.voice.voice', 'Voice')}</span>
+        <span className="kt-myvoices__adds">
+          <button type="button" className="kt-myvoices__add" onClick={() => { setUnread(false); setAdding({ into: null }); }} disabled={disabled} aria-label={t('fork.voice.addVoice', 'Add a voice')} title={t('fork.voice.addVoice', 'Add a voice')}>
+            <Plus size={12} />
+            <span>{t('fork.voice.addShort', 'Add')}</span>
+          </button>
+          <button type="button" className="kt-myvoices__add" onClick={() => packs.current?.click()} disabled={disabled} aria-label={t('fork.voice.importVoice', 'Import a voice file')} title={t('fork.voice.importVoice', 'Import a voice file')}>
+            <Upload size={12} />
+            <span>{t('fork.voice.importShort', 'Import')}</span>
+          </button>
+          <input ref={packs} type="file" accept=".kotovoice" hidden onChange={(e) => { void takeIn(e.target.files?.[0]); e.target.value = ''; }} />
+        </span>
+      </div>
       {mine.map((voice) => (
         // A voice: who it is and what is done with the whole of it, then the languages it has a recording in and
         // the way to one more.
-        <div key={voice.id} className="kt-myvoices__voice">
+        <div key={voice.id} className={`kt-myvoices__voice${picked && every === voice.id ? ' is-chosen' : ''}`}>
           <div className="kt-myvoices__head">
+            {picked && (
+              <button
+                type="button" role="radio" aria-checked={every === voice.id} className="kt-myvoices__pick" onClick={() => { if (every !== voice.id) onChange(inVoice(voice.id)); }}
+                aria-label={t('fork.voice.useVoice', { name: voice.name, defaultValue: 'Read in {{name}}' })} title={t('fork.voice.useVoice', { name: voice.name, defaultValue: 'Read in {{name}}' })}
+              />
+            )}
             {renaming?.id === voice.id ? (
               <input
                 type="text" className="kt-myvoices__name" autoFocus value={renaming.name} maxLength={40} spellCheck={false}
@@ -160,6 +197,8 @@ export function VoiceRows({ choice, lent = [], languages, ownLanguage = 'en', pl
                 {voice.name}
               </button>
             )}
+            {/* Heard in this voice whichever is chosen, in the first language the run reads. */}
+            <SampleButton quiet id={`sample:voice:${voice.id}`} language={spoken[0] ?? ownLanguage} choice={inVoice(voice.id)} disabled={sampleDisabled} />
             <button type="button" className="kt-myvoices__act" onClick={() => { void useVoiceLibraryStore.getState().export(voice.id); }} aria-label={t('fork.voice.exportVoice', { name: voice.name, defaultValue: 'Save {{name}} as a file' })} title={t('fork.voice.exportVoice', { name: voice.name, defaultValue: 'Save {{name}} as a file' })}>
               <Download size={13} />
             </button>
@@ -169,13 +208,13 @@ export function VoiceRows({ choice, lent = [], languages, ownLanguage = 'en', pl
           </div>
           <div className="kt-myvoices__langs">
             {voice.languages.map((code, i) => {
-              const spoken = languageLabel(code, i18n.language);
+              const said = languageLabel(code, i18n.language);
               // The first is what the voice is; a recording more can be taken away, and its language is then read from the first.
-              if (i === 0) return <span key={code} className="kt-myvoices__lang">{spoken}</span>;
-              const label = t('fork.voice.removeTake', { name: voice.name, language: spoken, defaultValue: 'Remove the {{language}} recording of {{name}}' });
+              if (i === 0) return <span key={code} className="kt-myvoices__lang">{said}</span>;
+              const label = t('fork.voice.removeTake', { name: voice.name, language: said, defaultValue: 'Remove the {{language}} recording of {{name}}' });
               return (
                 <button key={code} type="button" className="kt-myvoices__lang" onClick={() => { void useVoiceLibraryStore.getState().removeTake(voice.id, code); }} disabled={disabled} aria-label={label} title={label}>
-                  {spoken}<X size={10} />
+                  {said}<X size={10} />
                 </button>
               );
             })}
@@ -185,17 +224,6 @@ export function VoiceRows({ choice, lent = [], languages, ownLanguage = 'en', pl
           </div>
         </div>
       ))}
-      <div className="kt-myvoices__adds">
-        <button type="button" className="kt-there__switch" onClick={() => { setUnread(false); setAdding({ into: null }); }} disabled={disabled}>
-          <Plus size={12} />
-          <span>{t('fork.voice.addVoice', 'Add a voice')}</span>
-        </button>
-        <button type="button" className="kt-there__switch" onClick={() => packs.current?.click()} disabled={disabled}>
-          <Upload size={12} />
-          <span>{t('fork.voice.importVoice', 'Import a voice file')}</span>
-        </button>
-        <input ref={packs} type="file" accept=".kotovoice" hidden onChange={(e) => { void takeIn(e.target.files?.[0]); e.target.value = ''; }} />
-      </div>
       {unread && <p className="kt-note kt-note--todo" role="status">{t('fork.voice.clipUnreadable', 'This file could not be read.')}</p>}
       <AddVoiceDialog
         open={adding !== null}
@@ -206,17 +234,21 @@ export function VoiceRows({ choice, lent = [], languages, ownLanguage = 'en', pl
         onClose={() => setAdding(null)}
         // The first voice added reads every language; a later one is chosen where it is wanted. A recording more of
         // a voice changes no choice: the voice is the same one.
-        onAdded={(voice) => { if (!adding?.into && !mine.some((one) => one.id === choice.voices[voiceBook(choice, lent)]?.['*'])) onChange(withVoice(choice, '*', voice.id, lent)); }}
+        onAdded={(voice) => { if (!adding?.into && !mine.some((one) => one.id === choice.voices[book]?.['*'])) onChange(withVoice(choice, '*', voice.id, lent)); }}
       />
     </div>
   );
   return (
     <div className="kt-voice">
-      {clones && mine.length === 0 ? null : rows.map((language) => {
+      {library}
+      {rows.map((language) => {
         const name = languageLabel(baseOf(language), i18n.language);
         if (!voiceSpeaks(choice, language, lent)) {
           return <p key={language} className="kt-note kt-note--todo" role="status">{t('fork.voice.cannotSpeak', { name: placeName, language: name })}</p>;
         }
+        // The user's own voices are chosen where they are listed; a language has a menu of its own only where there
+        // is another voice to give it.
+        if (clones && !perLanguage) return null;
         const kept = chosenVoice(choice, language, lent) ?? '';
         // A voice of the user's own that was removed is no voice chosen.
         const current = clones && !mine.some((voice) => voice.id === kept) ? '' : kept;
@@ -239,7 +271,6 @@ export function VoiceRows({ choice, lent = [], languages, ownLanguage = 'en', pl
           </label>
         );
       })}
-      {library}
     </div>
   );
 }

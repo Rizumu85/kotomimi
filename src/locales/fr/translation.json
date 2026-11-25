@@ -2182,7 +2182,10 @@
       "addTake": "Enregistrer « {{name}} » dans une autre langue",
       "removeTake": "Supprimer l’enregistrement en {{language}} de « {{name}} »",
       "clipWordsNeeded": "Texte prononcé dans l’enregistrement",
-      "importVoice": "Importer un fichier de voix"
+      "importVoice": "Importer un fichier de voix",
+      "useVoice": "Lire avec la voix « {{name}} »",
+      "addShort": "Ajouter",
+      "importShort": "Importer"
     },
     "echoCancellationGate": "Par volume",
     "echoCancellationGateTooltip": "Selon le volume — avec des haut-parleurs : le son qui revient dans le micro est bien moins fort que votre voix, il est donc écarté selon son volume, sans modifier votre voix.",

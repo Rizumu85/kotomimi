@@ -2182,7 +2182,10 @@
       "addTake": "Für „{{name}}“ in einer weiteren Sprache aufnehmen",
       "removeTake": "Aufnahme von „{{name}}“ auf {{language}} löschen",
       "clipWordsNeeded": "Gesprochener Text",
-      "importVoice": "Stimmdatei importieren"
+      "importVoice": "Stimmdatei importieren",
+      "useVoice": "Mit „{{name}}“ vorlesen",
+      "addShort": "Hinzufügen",
+      "importShort": "Importieren"
     },
     "echoCancellationGate": "Nach Lautstärke",
     "echoCancellationGateTooltip": "Nach Lautstärke – für Lautsprecher: Der Ton aus den Lautsprechern gelangt viel leiser als deine Stimme ins Mikrofon und wird deshalb nach Lautstärke ausgefiltert. Deine Stimme bleibt unverändert.",

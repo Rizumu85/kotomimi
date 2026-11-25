@@ -1011,6 +1011,10 @@
     "en": "What you want to say — Enter translates",
     "text": "अपनी बात लिखें, अनुवाद के लिए Enter दबाएँ"
   },
+  "fork.voice.addShort": {
+    "en": "Add",
+    "text": "जोड़ें"
+  },
   "fork.voice.addTake": {
     "en": "Add a language to {{name}}",
     "text": "“{{name}}” के लिए एक और भाषा में रिकॉर्ड करें"
@@ -1090,6 +1094,10 @@
   "fork.voice.hearThem": {
     "en": "To them",
     "text": "सामने वाले को सुनाएँ"
+  },
+  "fork.voice.importShort": {
+    "en": "Import",
+    "text": "इंपोर्ट करें"
   },
   "fork.voice.importVoice": {
     "en": "Import a voice file",
@@ -1218,6 +1226,10 @@
   "fork.voice.unrecorded": {
     "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
     "text": "पढ़कर सुनाने के लिए आपने अपनी आवाज़ नहीं चुनी है। «पढ़कर सुनाएँ» कार्ड में अपनी आवाज़ जोड़ें।"
+  },
+  "fork.voice.useVoice": {
+    "en": "Read in {{name}}",
+    "text": "“{{name}}” की आवाज़ में पढ़ें"
   },
   "fork.voice.voice": {
     "en": "Voice",

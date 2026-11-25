@@ -2182,7 +2182,10 @@
       "addTake": "Äänitä näyte uudella kielellä ({{name}})",
       "removeTake": "Poista äänite ({{name}}, {{language}})",
       "clipWordsNeeded": "Äänitteellä sanotut sanat",
-      "importVoice": "Tuo äänitiedosto"
+      "importVoice": "Tuo äänitiedosto",
+      "useVoice": "Lue äänellä ”{{name}}”",
+      "addShort": "Lisää",
+      "importShort": "Tuo"
     },
     "echoCancellationGate": "Äänenvoimakkuuden mukaan",
     "echoCancellationGateTooltip": "Äänenvoimakkuuden mukaan — kaiuttimia käytettäessä kaiuttimista mikrofoniin vuotava ääni on paljon hiljaisempi kuin puheesi, joten se suodatetaan pois äänenvoimakkuuden perusteella ilman, että äänesi muuttuu.",

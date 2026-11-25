@@ -1011,6 +1011,10 @@
     "en": "What you want to say — Enter translates",
     "text": "พิมพ์สิ่งที่อยากพูด แล้วกด Enter เพื่อแปล"
   },
+  "fork.voice.addShort": {
+    "en": "Add",
+    "text": "เพิ่ม"
+  },
   "fork.voice.addTake": {
     "en": "Add a language to {{name}}",
     "text": "อัดเสียงเพิ่มอีกภาษาสำหรับ “{{name}}”"
@@ -1090,6 +1094,10 @@
   "fork.voice.hearThem": {
     "en": "To them",
     "text": "ให้อีกฝ่ายฟัง"
+  },
+  "fork.voice.importShort": {
+    "en": "Import",
+    "text": "นำเข้า"
   },
   "fork.voice.importVoice": {
     "en": "Import a voice file",
@@ -1218,6 +1226,10 @@
   "fork.voice.unrecorded": {
     "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
     "text": "ยังไม่ได้เลือกเสียงของคุณสำหรับอ่านออกเสียง เพิ่มเสียงได้ในส่วน “อ่านออกเสียง”"
+  },
+  "fork.voice.useVoice": {
+    "en": "Read in {{name}}",
+    "text": "อ่านด้วยเสียง {{name}}"
   },
   "fork.voice.voice": {
     "en": "Voice",

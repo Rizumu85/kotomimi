@@ -642,6 +642,14 @@
     gap: 10px;
   }
 
+  // The card's three parts — what reads, in what voice, who hears — are told apart by a line and room, not by words.
+  .kt-voice,
+  .kt-voice__hearers {
+    margin-top: 2px;
+    padding-top: vars.$space-3;
+    border-top: 1px solid vars.$border-subtle;
+  }
+
   .kt-voice__row {
     display: flex;
     align-items: center;
@@ -700,24 +708,40 @@
     }
   }
 
-  // A volume: its name and percentage on one line, the slider under it. The look of the settings' own `.slider`,
-  // whose rule (under `.setting-item`) does not reach into a stage's card.
-  .kt-voice__volume {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+  // The volumes, one to a line — its name, the slider, its percentage — in columns of their own, so that the
+  // sliders begin and end together whatever the names' lengths.
+  .kt-voice__volumes {
+    display: grid;
+    grid-template-columns: fit-content(50%) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px 10px;
+    font-size: vars.$font-caption;
+    color: vars.$text-secondary;
+  }
 
-    .kt-field__aside {
+  // The look of the settings' own `.slider`, whose rule (under `.setting-item`) does not reach into a stage's card.
+  .kt-voice__volume {
+    display: contents;
+
+    .kt-voice__volume-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .kt-voice__volume-value {
+      min-width: 34px;
+      text-align: right;
       font-variant-numeric: tabular-nums;
-      color: vars.$text-secondary;
     }
 
     input[type='range'] {
       -webkit-appearance: none;
       appearance: none;
       width: 100%;
+      min-width: 0;
       height: 4px;
-      margin: 4px 0;
+      margin: 9px 0;
       border-radius: 2px;
       background: vars.$bg-elevated;
       outline: none;

@@ -2182,7 +2182,10 @@
       "addTake": "“{{name}}” için başka bir dilde kayıt ekle",
       "removeTake": "“{{name}}” için {{language}} ses kaydını sil",
       "clipWordsNeeded": "Kayıtta söylenenler",
-      "importVoice": "Ses dosyasını içe aktar"
+      "importVoice": "Ses dosyasını içe aktar",
+      "useVoice": "“{{name}}” sesiyle oku",
+      "addShort": "Ekle",
+      "importShort": "İçe aktar"
     },
     "echoCancellationGate": "Ses düzeyine göre",
     "echoCancellationGateTooltip": "Ses yüksekliğine göre — hoparlörler için: çaldıkları ses mikrofona sesinizden çok daha kısık döner; bu nedenle ses yüksekliğine göre engellenir ve sesiniz olduğu gibi kalır.",

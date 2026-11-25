@@ -2182,7 +2182,10 @@
       "addTake": "Tambah rekaman bahasa lain untuk {{name}}",
       "removeTake": "Hapus rekaman bahasa {{language}} untuk {{name}}",
       "clipWordsNeeded": "Ucapan dalam rekaman",
-      "importVoice": "Impor file suara"
+      "importVoice": "Impor file suara",
+      "useVoice": "Bacakan dengan suara {{name}}",
+      "addShort": "Tambah",
+      "importShort": "Impor"
     },
     "echoCancellationGate": "Berdasarkan volume",
     "echoCancellationGateTooltip": "Berdasarkan volume — untuk pengeras suara: suara yang diputar masuk kembali ke mikrofon jauh lebih pelan daripada suara Anda, jadi disaring berdasarkan volumenya dan suara Anda tetap seperti semula.",

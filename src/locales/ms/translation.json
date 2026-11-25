@@ -2182,7 +2182,10 @@
       "addTake": "Tambah rakaman dalam bahasa lain untuk “{{name}}”",
       "removeTake": "Padam rakaman “{{name}}” dalam bahasa {{language}}",
       "clipWordsNeeded": "Apa yang disebut dalam rakaman",
-      "importVoice": "Import fail suara"
+      "importVoice": "Import fail suara",
+      "useVoice": "Baca dengan suara {{name}}",
+      "addShort": "Tambah",
+      "importShort": "Import"
     },
     "echoCancellationGate": "Ikut kelantangan",
     "echoCancellationGateTooltip": "Mengikut kelantangan — untuk pembesar suara: bunyi yang dimainkan masuk semula ke mikrofon jauh lebih perlahan daripada suara anda, jadi ia ditapis berdasarkan kelantangan tanpa menjejaskan suara anda.",

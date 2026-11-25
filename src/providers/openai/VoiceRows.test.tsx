@@ -73,13 +73,40 @@ describe('the voices of a model that speaks in the user’s own', () => {
     expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ voices: { [BASE]: { '*': 'aaa111', en: 'bbb222', ja: 'bbb222' } } }));
   });
 
-  it('shows a language with no voice chosen, or one that was removed, as still to be chosen', () => {
+  it('is the choice itself: one voice reads with no menu and no mark, and one that is not chosen yet offers its mark', () => {
     useVoiceLibraryStore.setState({ voices: [voice('aaa111', '我的声音')] });
-    draw({ ...MINE, voices: { [BASE]: { ja: 'gone00' } } });
-    const [japanese, english] = screen.getAllByRole('combobox') as HTMLSelectElement[];
-    expect([japanese.value, english.value]).toEqual(['', '']);
-    expect(japanese.options[0].textContent).toBe('fork.voice.chooseVoice');
-    expect(japanese.disabled).toBe(false);
+    const first = draw({ ...MINE, voices: { [BASE]: { '*': 'aaa111' } } });
+    // The one voice there is, chosen: nothing to choose among.
+    expect(screen.queryAllByRole('combobox')).toEqual([]);
+    expect(screen.queryAllByRole('radio')).toEqual([]);
+    expect(first.onChange).not.toHaveBeenCalled();
+    cleanup();
+    // One that was removed is no voice chosen: the voice there is can be taken with one press.
+    const { onChange } = draw({ ...MINE, voices: { [BASE]: { ja: 'gone00' } } });
+    const mark = screen.getByRole('radio', { name: 'fork.voice.useVoice:我的声音' });
+    expect(mark.getAttribute('aria-checked')).toBe('false');
+    fireEvent.click(mark);
+    expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ voices: { [BASE]: { '*': 'aaa111' } } }));
+  });
+
+  it('marks the one of several that reads, and changes it with a press: every language at once', () => {
+    useVoiceLibraryStore.setState({ voices: [voice('aaa111', '我的声音'), voice('bbb222', '朋友')] });
+    // One language read: the marks are all the choice there is.
+    const { onChange } = draw({ ...MINE, voices: { [BASE]: { '*': 'aaa111', en: 'bbb222' } } }, ['ja']);
+    expect(screen.queryAllByRole('combobox')).toEqual([]);
+    const [mine, friend] = screen.getAllByRole('radio');
+    expect([mine.getAttribute('aria-checked'), friend.getAttribute('aria-checked')]).toEqual(['true', 'false']);
+    expect((mine.closest('.kt-myvoices__voice') as HTMLElement).className).toContain('is-chosen');
+    fireEvent.click(mine);
+    expect(onChange).not.toHaveBeenCalled();
+    fireEvent.click(friend);
+    expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ voices: { [BASE]: { '*': 'bbb222' } } }));
+  });
+
+  it('samples each voice in itself, whichever is chosen', () => {
+    useVoiceLibraryStore.setState({ voices: [voice('aaa111', '我的声音'), voice('bbb222', '朋友')] });
+    draw({ ...MINE, voices: { [BASE]: { '*': 'aaa111' } } }, ['ja']);
+    expect(screen.getAllByRole('button', { name: 'fork.voice.sample' })).toHaveLength(2);
   });
 
   it('saves one as a file, and removes one with every use of it', async () => {
@@ -137,6 +164,14 @@ describe('the voices of a model that speaks in the user’s own', () => {
     await waitFor(() => expect(screen.getByRole('status').textContent).toBe('fork.voice.clipUnreadable'));
   });
 
+  it('has a voice that is left read in place of the one removed', async () => {
+    useVoiceLibraryStore.setState({ voices: [voice('aaa111', '我的声音'), voice('bbb222', '朋友')] });
+    library.remove.mockImplementationOnce(async () => { useVoiceLibraryStore.setState({ voices: [voice('bbb222', '朋友')] }); });
+    const { onChange } = draw({ ...MINE, voices: { [BASE]: { '*': 'aaa111' } } }, ['ja']);
+    fireEvent.click(screen.getByRole('button', { name: 'fork.voice.removeVoice:我的声音' }));
+    await waitFor(() => expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ voices: { [BASE]: { '*': 'bbb222' } } })));
+  });
+
   it('keeps one chosen that could not be removed', async () => {
     useVoiceLibraryStore.setState({ voices: [voice('aaa111', '我的声音')] });
     const { onChange } = draw({ ...MINE, voices: { [BASE]: { '*': 'aaa111' } } });
@@ -148,10 +183,13 @@ describe('the voices of a model that speaks in the user’s own', () => {
 
   it('adds and removes none while a session runs, though a language’s voice can still be chosen', () => {
     useVoiceLibraryStore.setState({ voices: [voice('aaa111', '我的声音'), voice('bbb222', '朋友')] });
-    draw({ ...MINE, voices: { [BASE]: { '*': 'aaa111' } } }, ['ja'], true);
+    const { onChange } = draw({ ...MINE, voices: { [BASE]: { '*': 'aaa111' } } }, ['ja', 'en'], true);
     expect((screen.getByRole('button', { name: 'fork.voice.addVoice' }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole('button', { name: 'fork.voice.removeVoice:朋友' }) as HTMLButtonElement).disabled).toBe(true);
-    expect((screen.getByRole('combobox') as HTMLSelectElement).disabled).toBe(false);
+    // The run goes on in the voice chosen: by its mark, or for one language by that language's menu.
+    for (const menu of screen.getAllByRole('combobox')) expect((menu as HTMLSelectElement).disabled).toBe(false);
+    fireEvent.click(screen.getByRole('radio', { name: 'fork.voice.useVoice:朋友' }));
+    expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ voices: { [BASE]: { '*': 'bbb222' } } }));
   });
 });
 

@@ -2182,7 +2182,10 @@
       "addTake": "Magrekord sa ibang wika para kay {{name}}",
       "removeTake": "Burahin ang rekording ni {{name}} sa {{language}}",
       "clipWordsNeeded": "Sinabi sa rekording",
-      "importVoice": "Mag-import ng file ng boses"
+      "importVoice": "Mag-import ng file ng boses",
+      "useVoice": "Basahin gamit ang boses na “{{name}}”",
+      "addShort": "Idagdag",
+      "importShort": "I-import"
     },
     "echoCancellationGate": "Batay sa lakas ng tunog",
     "echoCancellationGateTooltip": "Ayon sa lakas ng tunog — para sa mga speaker: ang pinapatugtog ng mga ito ay mas mahina pagbalik sa mikropono kaysa sa boses mo, kaya hinaharangan ito batay sa lakas at hindi naaapektuhan ang boses mo.",

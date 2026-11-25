@@ -2182,7 +2182,10 @@
       "addTake": "Opname in een extra taal toevoegen aan ‘{{name}}’",
       "removeTake": "Opname van ‘{{name}}’ in het {{language}} verwijderen",
       "clipWordsNeeded": "Wat er in de opname wordt gezegd",
-      "importVoice": "Stembestand importeren"
+      "importVoice": "Stembestand importeren",
+      "useVoice": "Voorlezen met {{name}}",
+      "addShort": "Toevoegen",
+      "importShort": "Importeren"
     },
     "echoCancellationGate": "Op volume",
     "echoCancellationGateTooltip": "Op volume — voor luidsprekers: wat ze afspelen komt veel zachter terug in de microfoon dan je stem, dus wordt het op volume tegengehouden en blijft je stem zoals die is.",

@@ -2182,7 +2182,10 @@
       "addTake": "「{{name}}」に別の言語の録音を追加",
       "removeTake": "「{{name}}」の{{language}}の録音を削除",
       "clipWordsNeeded": "録音で話した内容",
-      "importVoice": "ボイスファイルをインポート"
+      "importVoice": "ボイスファイルをインポート",
+      "useVoice": "「{{name}}」で読み上げ",
+      "addShort": "追加",
+      "importShort": "インポート"
     },
     "echoCancellationGate": "音量で判定",
     "echoCancellationGateTooltip": "音量で判定 — スピーカー使用時：スピーカーからマイクに回り込む音はあなたの声よりはるかに小さいため、音量で除外し、あなたの声はそのままにします。",

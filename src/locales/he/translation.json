@@ -2182,7 +2182,10 @@
       "addTake": "להקליט את „{{name}}” בשפה נוספת",
       "removeTake": "למחוק את ההקלטה של „{{name}}” בשפה {{language}}",
       "clipWordsNeeded": "מה נאמר בהקלטה",
-      "importVoice": "ייבוא קובץ קול"
+      "importVoice": "ייבוא קובץ קול",
+      "useVoice": "להקריא בקול של {{name}}",
+      "addShort": "הוספה",
+      "importShort": "ייבוא"
     },
     "echoCancellationGate": "לפי עוצמת הקול",
     "echoCancellationGateTooltip": "לפי עוצמת הקול — ברמקולים: הצליל שהם משמיעים חוזר למיקרופון בעוצמה נמוכה בהרבה מהקול שלך, לכן הוא מסונן לפי העוצמה והקול שלך נשאר ללא שינוי.",

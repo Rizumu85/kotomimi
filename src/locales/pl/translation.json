@@ -2182,7 +2182,10 @@
       "addTake": "Nagraj próbkę w kolejnym języku dla „{{name}}”",
       "removeTake": "Usuń nagranie w języku {{language}} dla „{{name}}”",
       "clipWordsNeeded": "Tekst wypowiedziany w nagraniu",
-      "importVoice": "Importuj plik głosu"
+      "importVoice": "Importuj plik głosu",
+      "useVoice": "Przeczytaj głosem „{{name}}”",
+      "addShort": "Dodaj",
+      "importShort": "Importuj"
     },
     "echoCancellationGate": "Według głośności",
     "echoCancellationGateTooltip": "Według głośności — przy korzystaniu z głośników: dźwięk z głośników docierający do mikrofonu jest znacznie cichszy niż twój głos, więc jest odfiltrowywany na podstawie głośności, a twój głos pozostaje bez zmian.",

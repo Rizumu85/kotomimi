@@ -1011,6 +1011,10 @@
     "en": "What you want to say — Enter translates",
     "text": "하고 싶은 말을 입력하고 Enter로 번역"
   },
+  "fork.voice.addShort": {
+    "en": "Add",
+    "text": "추가"
+  },
   "fork.voice.addTake": {
     "en": "Add a language to {{name}}",
     "text": "‘{{name}}’에 다른 언어 녹음 추가"
@@ -1090,6 +1094,10 @@
   "fork.voice.hearThem": {
     "en": "To them",
     "text": "상대방에게"
+  },
+  "fork.voice.importShort": {
+    "en": "Import",
+    "text": "가져오기"
   },
   "fork.voice.importVoice": {
     "en": "Import a voice file",
@@ -1218,6 +1226,10 @@
   "fork.voice.unrecorded": {
     "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
     "text": "읽어 줄 내 목소리가 아직 선택되지 않았어요. ‘읽어 주기’ 카드에서 추가해 주세요."
+  },
+  "fork.voice.useVoice": {
+    "en": "Read in {{name}}",
+    "text": "‘{{name}}’ 음성으로 읽기"
   },
   "fork.voice.voice": {
     "en": "Voice",

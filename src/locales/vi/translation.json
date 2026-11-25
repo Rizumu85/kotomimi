@@ -2182,7 +2182,10 @@
       "addTake": "Ghi âm thêm một ngôn ngữ cho «{{name}}»",
       "removeTake": "Xóa bản ghi âm bằng {{language}} của «{{name}}»",
       "clipWordsNeeded": "Lời nói trong bản ghi âm",
-      "importVoice": "Nhập tệp giọng nói"
+      "importVoice": "Nhập tệp giọng nói",
+      "useVoice": "Đọc bằng giọng {{name}}",
+      "addShort": "Thêm",
+      "importShort": "Nhập"
     },
     "echoCancellationGate": "Theo âm lượng",
     "echoCancellationGateTooltip": "Theo âm lượng — khi dùng loa: âm thanh từ loa lọt vào mic nhỏ hơn nhiều so với giọng bạn, nên được chặn theo âm lượng và giọng bạn không bị ảnh hưởng.",

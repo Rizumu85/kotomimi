@@ -145,11 +145,45 @@
   gap: vars.$space-2;
 }
 
-// The two ways to one more voice: made here, or handed over as a file.
-.kt-myvoices__adds {
+// What the list is, and at its end the two ways to one more voice: made here, or handed over as a file.
+.kt-myvoices__top {
   display: flex;
   flex-wrap: wrap;
-  gap: vars.$space-2;
+  align-items: center;
+  justify-content: space-between;
+  align-self: stretch;
+  gap: 2px vars.$space-2;
+}
+
+.kt-myvoices__adds {
+  display: inline-flex;
+  gap: vars.$space-1;
+  margin-right: -6px;
+}
+
+.kt-myvoices__add {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 6px;
+  font: inherit;
+  font-size: vars.$font-caption;
+  color: vars.$text-secondary;
+  background: transparent;
+  border: none;
+  border-radius: vars.$radius-sm;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    color: vars.$text-primary;
+    background: vars.$bg-hover;
+  }
+
+  &:disabled {
+    opacity: vars.$disabled-opacity;
+    cursor: not-allowed;
+  }
 }
 
 .kt-myvoices__voice {
@@ -162,11 +196,37 @@
   border-radius: vars.$radius-md;
 }
 
+// Of several, the one that reads.
+.kt-myvoices__voice.is-chosen {
+  border-color: tk.$color-primary;
+}
+
 .kt-myvoices__head {
   display: flex;
   align-items: center;
   gap: 2px;
   min-width: 0;
+}
+
+// The mark a voice is chosen by, where there is a choice: a ring, filled in the one that reads.
+.kt-myvoices__pick {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  padding: 0;
+  background: transparent;
+  border: 1.5px solid vars.$text-muted;
+  border-radius: 50%;
+  cursor: pointer;
+
+  &[aria-checked='true'] {
+    border: 4px solid tk.$color-primary;
+  }
+
+  &:hover:not([aria-checked='true']) {
+    border-color: vars.$text-secondary;
+  }
 }
 
 // The name is the way to another name: pressed, it is typed over in place.

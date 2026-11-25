@@ -2182,7 +2182,10 @@
       "addTake": "‘{{name}}’에 다른 언어 녹음 추가",
       "removeTake": "‘{{name}}’의 {{language}} 녹음 삭제",
       "clipWordsNeeded": "녹음에서 한 말",
-      "importVoice": "목소리 파일 가져오기"
+      "importVoice": "목소리 파일 가져오기",
+      "useVoice": "‘{{name}}’ 음성으로 읽기",
+      "addShort": "추가",
+      "importShort": "가져오기"
     },
     "echoCancellationGate": "음량 기준",
     "echoCancellationGateTooltip": "음량 기준 — 스피커 사용 시: 스피커 소리가 마이크에 새어 들어와도 내 목소리보다 훨씬 작으므로 음량으로 걸러 내고 내 목소리는 그대로 둡니다.",

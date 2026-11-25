@@ -1007,6 +1007,10 @@
     "en": "What you want to say — Enter translates",
     "text": "Введите, что хотите сказать. Enter — перевести"
   },
+  "fork.voice.addShort": {
+    "en": "Add",
+    "text": "Добавить"
+  },
   "fork.voice.addTake": {
     "en": "Add a language to {{name}}",
     "text": "Записать «{{name}}» на другом языке"
@@ -1086,6 +1090,10 @@
   "fork.voice.hearThem": {
     "en": "To them",
     "text": "Для собеседника"
+  },
+  "fork.voice.importShort": {
+    "en": "Import",
+    "text": "Импорт"
   },
   "fork.voice.importVoice": {
     "en": "Import a voice file",
@@ -1214,6 +1222,10 @@
   "fork.voice.unrecorded": {
     "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
     "text": "Ваш голос ещё не выбран для озвучивания. Добавьте его в разделе «Озвучивание»."
+  },
+  "fork.voice.useVoice": {
+    "en": "Read in {{name}}",
+    "text": "Прочитать голосом «{{name}}»"
   },
   "fork.voice.voice": {
     "en": "Voice",

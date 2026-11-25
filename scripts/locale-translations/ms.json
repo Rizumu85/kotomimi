@@ -1007,6 +1007,10 @@
     "en": "What you want to say — Enter translates",
     "text": "Apa yang anda mahu katakan, tekan Enter untuk terjemah"
   },
+  "fork.voice.addShort": {
+    "en": "Add",
+    "text": "Tambah"
+  },
   "fork.voice.addTake": {
     "en": "Add a language to {{name}}",
     "text": "Tambah rakaman dalam bahasa lain untuk “{{name}}”"
@@ -1086,6 +1090,10 @@
   "fork.voice.hearThem": {
     "en": "To them",
     "text": "Untuk mereka"
+  },
+  "fork.voice.importShort": {
+    "en": "Import",
+    "text": "Import"
   },
   "fork.voice.importVoice": {
     "en": "Import a voice file",
@@ -1214,6 +1222,10 @@
   "fork.voice.unrecorded": {
     "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
     "text": "Suara sendiri belum dipilih untuk bacaan. Tambah suara di bahagian “Bacaan”."
+  },
+  "fork.voice.useVoice": {
+    "en": "Read in {{name}}",
+    "text": "Baca dengan suara {{name}}"
   },
   "fork.voice.voice": {
     "en": "Voice",

@@ -2182,7 +2182,10 @@
       "addTake": "Gravar noutra língua para «{{name}}»",
       "removeTake": "Eliminar a gravação em {{language}} de «{{name}}»",
       "clipWordsNeeded": "O que se diz na gravação",
-      "importVoice": "Importar ficheiro de voz"
+      "importVoice": "Importar ficheiro de voz",
+      "useVoice": "Ler com a voz «{{name}}»",
+      "addShort": "Adicionar",
+      "importShort": "Importar"
     },
     "echoCancellationGate": "Por volume",
     "echoCancellationGateTooltip": "Por volume — para altifalantes: o som que reproduzem chega ao microfone muito mais baixo do que a sua voz, por isso é filtrado pelo volume, sem afetar a sua voz.",

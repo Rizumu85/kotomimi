@@ -2182,7 +2182,10 @@
       "addTake": "Registra «{{name}}» in un’altra lingua",
       "removeTake": "Elimina la registrazione in {{language}} di «{{name}}»",
       "clipWordsNeeded": "Parole pronunciate nella registrazione",
-      "importVoice": "Importa file vocale"
+      "importVoice": "Importa file vocale",
+      "useVoice": "Leggi con la voce «{{name}}»",
+      "addShort": "Aggiungi",
+      "importShort": "Importa"
     },
     "echoCancellationGate": "In base al volume",
     "echoCancellationGateTooltip": "Per volume — con gli altoparlanti: il suono che rientra nel microfono è molto più basso della tua voce, quindi viene escluso in base al volume, senza modificare la tua voce.",

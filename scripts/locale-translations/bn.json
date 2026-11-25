@@ -1011,6 +1011,10 @@
     "en": "What you want to say — Enter translates",
     "text": "যা বলতে চান লিখুন, অনুবাদ করতে Enter চাপুন"
   },
+  "fork.voice.addShort": {
+    "en": "Add",
+    "text": "যোগ করুন"
+  },
   "fork.voice.addTake": {
     "en": "Add a language to {{name}}",
     "text": "「{{name}}」-এর জন্য আরেকটি ভাষায় রেকর্ড করুন"
@@ -1090,6 +1094,10 @@
   "fork.voice.hearThem": {
     "en": "To them",
     "text": "অপর পক্ষ শুনবে"
+  },
+  "fork.voice.importShort": {
+    "en": "Import",
+    "text": "আমদানি করুন"
   },
   "fork.voice.importVoice": {
     "en": "Import a voice file",
@@ -1218,6 +1226,10 @@
   "fork.voice.unrecorded": {
     "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
     "text": "পড়ে শোনানোর জন্য নিজের কণ্ঠ বেছে নেওয়া হয়নি। ‘পড়ে শোনানো’ কার্ডে কণ্ঠ যোগ করুন।"
+  },
+  "fork.voice.useVoice": {
+    "en": "Read in {{name}}",
+    "text": "‘{{name}}’ কণ্ঠে পড়ে শোনান"
   },
   "fork.voice.voice": {
     "en": "Voice",

@@ -2182,7 +2182,10 @@
       "addTake": "إضافة تسجيل بلغة أخرى لـ«{{name}}»",
       "removeTake": "حذف تسجيل «{{name}}» بلغة {{language}}",
       "clipWordsNeeded": "الكلام في التسجيل",
-      "importVoice": "استيراد ملف صوت"
+      "importVoice": "استيراد ملف صوت",
+      "useVoice": "قراءة بصوت «{{name}}»",
+      "addShort": "إضافة",
+      "importShort": "استيراد"
     },
     "echoCancellationGate": "حسب مستوى الصوت",
     "echoCancellationGateTooltip": "حسب مستوى الصوت — عند استخدام مكبرات الصوت: يكون الصوت المتسرب إلى الميكروفون أخفض بكثير من صوتك، لذا يُحجب بناءً على مستوى صوته ويظل صوتك كما هو.",

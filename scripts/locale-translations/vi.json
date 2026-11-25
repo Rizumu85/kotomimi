@@ -1015,6 +1015,10 @@
     "en": "What you want to say — Enter translates",
     "text": "Nhập điều muốn nói, nhấn Enter để dịch"
   },
+  "fork.voice.addShort": {
+    "en": "Add",
+    "text": "Thêm"
+  },
   "fork.voice.addTake": {
     "en": "Add a language to {{name}}",
     "text": "Ghi âm thêm một ngôn ngữ cho «{{name}}»"
@@ -1094,6 +1098,10 @@
   "fork.voice.hearThem": {
     "en": "To them",
     "text": "Cho người kia nghe"
+  },
+  "fork.voice.importShort": {
+    "en": "Import",
+    "text": "Nhập"
   },
   "fork.voice.importVoice": {
     "en": "Import a voice file",
@@ -1222,6 +1230,10 @@
   "fork.voice.unrecorded": {
     "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
     "text": "Bạn chưa chọn giọng của mình để đọc. Hãy thêm giọng trong mục «Đọc to»."
+  },
+  "fork.voice.useVoice": {
+    "en": "Read in {{name}}",
+    "text": "Đọc bằng giọng {{name}}"
   },
   "fork.voice.voice": {
     "en": "Voice",

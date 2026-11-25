@@ -2182,7 +2182,10 @@
       "addTake": "Spela in på ett till språk för ”{{name}}”",
       "removeTake": "Ta bort inspelningen på {{language}} för ”{{name}}”",
       "clipWordsNeeded": "Vad som sägs i inspelningen",
-      "importVoice": "Importera röstfil"
+      "importVoice": "Importera röstfil",
+      "useVoice": "Läs upp med {{name}}",
+      "addShort": "Lägg till",
+      "importShort": "Importera"
     },
     "echoCancellationGate": "Efter ljudnivå",
     "echoCancellationGateTooltip": "Efter ljudstyrka — för högtalare: ljudet de spelar upp kommer tillbaka till mikrofonen mycket svagare än din röst, så det filtreras bort efter ljudstyrka medan din röst lämnas oförändrad.",

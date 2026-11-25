@@ -28,12 +28,13 @@ export function hearersOf(auto: boolean, me: boolean, them: boolean): Hearers | 
   return me && them ? 'both' : them ? 'them' : me ? 'me' : null;
 }
 
-/** One volume, 0 to 1, as a row: its name, its percentage, the slider. */
+/** One volume, 0 to 1, on one line: its name, the slider, its percentage. */
 function Volume({ label, value, onChange }: { label: string; value: number; onChange(value: number): void }) {
   return (
     <div className="kt-voice__volume">
-      <span className="kt-field__label">{label}<span className="kt-field__aside">{Math.round(value * 100)}%</span></span>
+      <span className="kt-voice__volume-name">{label}</span>
       <input type="range" min="0" max="1" step="0.05" value={value} aria-label={label} onChange={(e) => onChange(parseFloat(e.target.value))} />
+      <span className="kt-voice__volume-value">{Math.round(value * 100)}%</span>
     </div>
   );
 }
@@ -131,8 +132,10 @@ export function VoiceHearers({ auto, onAuto, locked }: {
       )}
       {/* How loud the voice is on each side, moved while it speaks. The user's own is there whoever hears the
           run: a line read on demand and a sample are theirs alone. */}
-      <Volume label={t('fork.voice.volumeMine', 'Volume for me')} value={volumeMine} onChange={setVolumeMine} />
-      {toThem && <Volume label={t('fork.voice.volumeTheirs', 'Volume for them')} value={volumeTheirs} onChange={setVolumeTheirs} />}
+      <div className="kt-voice__volumes">
+        <Volume label={t('fork.voice.volumeMine', 'Volume for me')} value={volumeMine} onChange={setVolumeMine} />
+        {toThem && <Volume label={t('fork.voice.volumeTheirs', 'Volume for them')} value={volumeTheirs} onChange={setVolumeTheirs} />}
+      </div>
       {/* Shown too wherever the voice is going there already (turned on here before, or under another provider):
           what the other side hears of the user is never out of sight. */}
       {(toThem || passthrough) && (

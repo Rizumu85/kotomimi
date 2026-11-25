@@ -1011,6 +1011,10 @@
     "en": "What you want to say — Enter translates",
     "text": "சொல்ல விரும்புவதை உள்ளிட்டு, மொழிபெயர்க்க Enter அழுத்தவும்"
   },
+  "fork.voice.addShort": {
+    "en": "Add",
+    "text": "சேர்"
+  },
   "fork.voice.addTake": {
     "en": "Add a language to {{name}}",
     "text": "«{{name}}»க்கு இன்னொரு மொழியில் பதிவு செய்"
@@ -1090,6 +1094,10 @@
   "fork.voice.hearThem": {
     "en": "To them",
     "text": "மற்றவர்களுக்கு"
+  },
+  "fork.voice.importShort": {
+    "en": "Import",
+    "text": "இறக்குமதி செய்"
   },
   "fork.voice.importVoice": {
     "en": "Import a voice file",
@@ -1218,6 +1226,10 @@
   "fork.voice.unrecorded": {
     "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
     "text": "வாசிப்பதற்கு உங்கள் சொந்தக் குரல் இன்னும் தேர்வு செய்யப்படவில்லை. «வாசிப்பு» பகுதியில் அதைச் சேர்க்கவும்."
+  },
+  "fork.voice.useVoice": {
+    "en": "Read in {{name}}",
+    "text": "“{{name}}” குரலில் வாசி"
   },
   "fork.voice.voice": {
     "en": "Voice",

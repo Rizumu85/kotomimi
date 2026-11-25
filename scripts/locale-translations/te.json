@@ -1011,6 +1011,10 @@
     "en": "What you want to say — Enter translates",
     "text": "మీరు చెప్పాలనేది — Enter అనువదిస్తుంది"
   },
+  "fork.voice.addShort": {
+    "en": "Add",
+    "text": "జోడించండి"
+  },
   "fork.voice.addTake": {
     "en": "Add a language to {{name}}",
     "text": "“{{name}}” కోసం మరో భాషలో రికార్డ్ చేయండి"
@@ -1090,6 +1094,10 @@
   "fork.voice.hearThem": {
     "en": "To them",
     "text": "వారికి వినిపించు"
+  },
+  "fork.voice.importShort": {
+    "en": "Import",
+    "text": "దిగుమతి చేయండి"
   },
   "fork.voice.importVoice": {
     "en": "Import a voice file",
@@ -1218,6 +1226,10 @@
   "fork.voice.unrecorded": {
     "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
     "text": "చదివి వినిపించడానికి మీ సొంత గొంతును ఇంకా ఎంచుకోలేదు. ‘చదివి వినిపించడం’ విభాగంలో మీ గొంతును జోడించండి."
+  },
+  "fork.voice.useVoice": {
+    "en": "Read in {{name}}",
+    "text": "「{{name}}」 స్వరంతో చదవండి"
   },
   "fork.voice.voice": {
     "en": "Voice",

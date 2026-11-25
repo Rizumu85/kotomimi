@@ -1063,6 +1063,10 @@
     "en": "What you want to say — Enter translates",
     "text": "Ang gusto mong sabihin. Enter para isalin"
   },
+  "fork.voice.addShort": {
+    "en": "Add",
+    "text": "Idagdag"
+  },
   "fork.voice.addTake": {
     "en": "Add a language to {{name}}",
     "text": "Magrekord sa ibang wika para kay {{name}}"
@@ -1142,6 +1146,10 @@
   "fork.voice.hearThem": {
     "en": "To them",
     "text": "Sa kausap"
+  },
+  "fork.voice.importShort": {
+    "en": "Import",
+    "text": "I-import"
   },
   "fork.voice.importVoice": {
     "en": "Import a voice file",
@@ -1270,6 +1278,10 @@
   "fork.voice.unrecorded": {
     "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
     "text": "Wala ka pang napiling sariling boses para sa pagbasa. Magdagdag sa seksyong «Pagbasa»."
+  },
+  "fork.voice.useVoice": {
+    "en": "Read in {{name}}",
+    "text": "Basahin gamit ang boses na “{{name}}”"
   },
   "fork.voice.voice": {
     "en": "Voice",

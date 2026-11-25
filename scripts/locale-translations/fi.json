@@ -1007,6 +1007,10 @@
     "en": "What you want to say — Enter translates",
     "text": "Kirjoita, mitä haluat sanoa. Enter kääntää"
   },
+  "fork.voice.addShort": {
+    "en": "Add",
+    "text": "Lisää"
+  },
   "fork.voice.addTake": {
     "en": "Add a language to {{name}}",
     "text": "Äänitä näyte uudella kielellä ({{name}})"
@@ -1086,6 +1090,10 @@
   "fork.voice.hearThem": {
     "en": "To them",
     "text": "Muille"
+  },
+  "fork.voice.importShort": {
+    "en": "Import",
+    "text": "Tuo"
   },
   "fork.voice.importVoice": {
     "en": "Import a voice file",
@@ -1214,6 +1222,10 @@
   "fork.voice.unrecorded": {
     "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
     "text": "Omaa ääntä ei ole valittu. Lisää ääni Ääneenluku-kortissa."
+  },
+  "fork.voice.useVoice": {
+    "en": "Read in {{name}}",
+    "text": "Lue äänellä ”{{name}}”"
   },
   "fork.voice.voice": {
     "en": "Voice",
