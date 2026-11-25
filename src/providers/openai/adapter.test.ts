@@ -584,6 +584,17 @@ describe('the OpenAI Realtime adapter: what comes down', () => {
     expect(h.frames('conversation.item.input_audio_transcription.completed')).toEqual([{ itemId: 'item_in_1', transcript: text, language }]);
   });
 
+  it('marks a transcript a sharing Kotomimi read in none of the speaker\'s languages, and nothing else', async () => {
+    const h = await liveRealtime();
+    const misheard = (itemId: string, text: string, flag: unknown) => JSON.stringify({ ...JSON.parse(inputDoneWithLanguage(itemId, text, 'en')), misheard: flag });
+    h.receive(SERVER.committed('item_in_1'), misheard('item_in_1', 'Prosecute private', true));
+    h.receive(SERVER.committed('item_in_2'), misheard('item_in_2', 'Hello', 'yes'));
+    expect(h.of('segmentText').map((e) => e.payload)).toEqual([
+      { ref: 1, text: 'Prosecute private', language: 'en', misheard: true },
+      { ref: 2, text: 'Hello', language: 'en' },
+    ]);
+  });
+
   it.each([undefined, null, 42, false, {}, ['fr'], '', '  '])('omits an absent or invalid detected language (%j) and keeps ordinary OpenAI final-text behavior', async (language) => {
     const h = await liveRealtime();
     h.receive(SERVER.committed('item_in_1'), SERVER.inputDelta('item_in_1', 'Hello'), inputDoneWithLanguage('item_in_1', 'Hello', language));

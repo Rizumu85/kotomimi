@@ -14,7 +14,7 @@
  * engines, what is downloaded — so its tests run with none of them.
  */
 import type { Clock } from '../contract/clock';
-import { LanTranscriber, type Recognizer } from './transcriber';
+import { LanTranscriber, type RecognitionModel, type Recognizer } from './transcriber';
 import { LanTranslator, type Translator } from './translator';
 import { LanCoach, type CoachDeps } from './coach';
 import { LanVoice, type LanVoiceDeps } from './voice';
@@ -50,7 +50,7 @@ export interface LanModels {
 export interface LanHostDeps {
   bridge: LanBridge;
   models: LanModels;
-  engines: { recognizer(model: { modelId: string; streaming: boolean; also?: string; third?: string; hints?: readonly string[] }): Recognizer; translator(): Translator; /** The feedback engine: its answer to a chat, and the hold that keeps it up. Absent: no feedback model is lent. */ coach?: Pick<CoachDeps, 'answer' | 'hold'>; /** The voice engine. Absent: no voice model is lent. */ voice?: Pick<LanVoiceDeps, 'busy' | 'up' | 'hold'> };
+  engines: { recognizer(model: RecognitionModel): Recognizer; translator(): Translator; /** The feedback engine: its answer to a chat, and the hold that keeps it up. Absent: no feedback model is lent. */ coach?: Pick<CoachDeps, 'answer' | 'hold'>; /** The voice engine. Absent: no voice model is lent. */ voice?: Pick<LanVoiceDeps, 'busy' | 'up' | 'hold'> };
   clock: Clock;
   /** How many sockets are open changed: the settings show it. */
   onClients?(count: number): void;

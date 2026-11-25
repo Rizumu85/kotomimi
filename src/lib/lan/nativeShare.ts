@@ -226,7 +226,7 @@ export function nativeTranslatorFor(source: string, target: string, wanted: stri
 }
 
 /** A recognizer for a native model, as the sharing host drives one; null for any other model. The engine is held while it listens: the app's own check does not stop it under a device that is using it. */
-export function nativeRecognizer(model: { modelId: string; also?: string; third?: string; hints?: readonly string[] }): Recognizer | null {
+export function nativeRecognizer(model: { modelId: string; also?: string; third?: string; hints?: readonly string[]; among?: readonly string[] }): Recognizer | null {
   if (!isNativeRecognizer(model.modelId)) return null;
   const native = nativeModel(model.modelId);
   const asr = createNativeAsr({
@@ -235,6 +235,7 @@ export function nativeRecognizer(model: { modelId: string; also?: string; third?
     model: native.id,
     ...(model.also ? { also: [model.also, ...(model.third ? [model.third] : [])] } : {}),
     ...(native.takesHints !== false && model.hints?.length ? { hints: model.hints } : {}),
+    ...(model.among?.length ? { among: model.among } : {}),
     ...(native.limits ? { limits: native.limits } : {}),
   });
   let release: (() => void) | null = null;

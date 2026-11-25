@@ -103,13 +103,13 @@ export class RealtimeItems {
   }
 
   /** The input's transcript, completed: it settles the text and closes the source. An empty completion keeps streamed text. A detected language still gets its snapshot when the text has not changed. */
-  inputDone(itemId: string, transcript: string, language?: string): void {
+  inputDone(itemId: string, transcript: string, language?: string, misheard = false): void {
     const input = this.input(itemId);
     if (!input) return;
     const text = transcript || input.text;
-    if (text !== input.text || language !== undefined) {
+    if (text !== input.text || language !== undefined || misheard) {
       input.text = text;
-      this.sink.segmentText({ ref: input.ref, text, ...(language !== undefined ? { language } : {}) });
+      this.sink.segmentText({ ref: input.ref, text, ...(language !== undefined ? { language } : {}), ...(misheard ? { misheard: true as const } : {}) });
     }
     this.closeInput(input);
   }

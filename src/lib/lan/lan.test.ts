@@ -3,7 +3,7 @@ import { createVirtualClock } from '../contract/clock';
 import { pcmToBase64 } from '../contract/pcm64';
 import { createLanHost, type LanBridge, type LanModels } from './host';
 import { baseLanguage, capabilityList, firewallAnswer, LAN_OWNER, LAN_PIPELINE, modelList, type SharedModel } from './protocol';
-import { LanTranscriber, vadFrom, type Recognizer } from './transcriber';
+import { LanTranscriber, vadFrom, type RecognitionModel, type Recognizer } from './transcriber';
 import { COACH_IDLE_MS, LanCoach } from './coach';
 import { LanTranslator, type Translator } from './translator';
 
@@ -44,10 +44,11 @@ function socket(dialled = LAN_PIPELINE, resolve: (language: string, wanted: stri
   const sent: Array<Record<string, unknown>> = [];
   const closed: Array<{ code: number; reason: string }> = [];
   const engines: Array<ReturnType<typeof fakeRecognizer>> = [];
+  const models: RecognitionModel[] = [];
   const clock = createVirtualClock(0);
   const asked: Array<[string, string]> = [];
   const t = new LanTranscriber({
-    recognizer: () => { const e = fakeRecognizer(); engines.push(e); return e; },
+    recognizer: (model) => { const e = fakeRecognizer(); engines.push(e); models.push(model); return e; },
     resolve: (language, wanted, also, third) => { asked.push([language, wanted]); return third ? resolve(language, wanted, also, third) : resolve(language, wanted, also); },
     ...(refusal ? { refusal } : {}),
     send: (event) => sent.push(event),
@@ -57,7 +58,7 @@ function socket(dialled = LAN_PIPELINE, resolve: (language: string, wanted: stri
   const say = (event: Record<string, unknown>) => t.receive(JSON.stringify(event));
   const update = (language: string | undefined, extra: Record<string, unknown> = {}) => say({ type: 'session.update', session: { type: 'transcription', audio: { input: { transcription: { ...(language ? { language } : {}), ...extra }, turn_detection: { type: 'semantic_vad', eagerness: 'high' } } } } });
   const types = () => sent.map((e) => e.type);
-  return { t, sent, closed, engines, clock, asked, say, update, types, engine: () => engines[engines.length - 1] };
+  return { t, sent, closed, engines, models, clock, asked, say, update, types, engine: () => engines[engines.length - 1] };
 }
 
 describe('what a sharing Kotomimi says of itself', () => {
@@ -121,6 +122,31 @@ describe('a Realtime socket of a sharing Kotomimi', () => {
     expect(s.sent[s.sent.length - 1]).toMatchObject({ type: 'conversation.item.input_audio_transcription.completed', transcript: 'Bonjour', language: 'fr' });
     s.engine().onResult?.({ text: 'Hello', language: 'en', durationMs: 100, recognitionTimeMs: 1 });
     expect(s.sent[s.sent.length - 1]).toMatchObject({ transcript: 'Hello', language: 'en' });
+  });
+
+  it('reads again in the languages of the speaker where the language is left to detect, and says what no reading fits', async () => {
+    const s = socket(LAN_PIPELINE, () => ({ modelId: 'qwen3-asr-1.7b-q8', streaming: true }));
+    s.update('auto', { among: ['zh-CN', 'ru', 'ru', 'auto', 7] });
+    expect(s.models[0].among).toEqual(['zh', 'ru']);
+    await s.engine().loaded();
+    s.engine().onResult?.({ text: 'Prosecute private', language: 'en', durationMs: 900, recognitionTimeMs: 40, misheard: true });
+    expect(s.sent[s.sent.length - 1]).toMatchObject({ type: 'conversation.item.input_audio_transcription.completed', transcript: 'Prosecute private', language: 'en', misheard: true });
+    s.engine().onResult?.({ text: 'Привет, котик.', language: 'ru', durationMs: 900, recognitionTimeMs: 40 });
+    expect(s.sent[s.sent.length - 1]).not.toHaveProperty('misheard');
+    // A new list is a new reading: the recognizer starts again with it.
+    s.update('auto', { among: ['zh', 'ja'] });
+    expect(s.models.map((m) => m.among)).toEqual([['zh', 'ru'], ['zh', 'ja']]);
+    // One language alone is the same as none: the recognizer is not started again for it.
+    const quiet = socket(LAN_PIPELINE, () => ({ modelId: 'qwen3-asr-1.7b-q8', streaming: true }));
+    quiet.update('auto');
+    quiet.update('auto', { among: ['zh'] });
+    expect(quiet.engines).toHaveLength(1);
+    // Told its language, or one language alone: nothing to read again in.
+    for (const [language, among] of [['ja', ['ja', 'zh']], ['auto', ['zh']]] as const) {
+      const one = socket(LAN_PIPELINE, () => ({ modelId: 'qwen3-asr-1.7b-q8', streaming: true }));
+      one.update(language, { among });
+      expect(one.models[0].among).toBeUndefined();
+    }
   });
 
   it('refuses malformed or unsupported pairs without starting a single-language substitute', () => {

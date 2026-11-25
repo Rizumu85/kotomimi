@@ -1619,6 +1619,8 @@ export function buildLocalAI(asked: SessionContext, all: LocalAISettings, shared
   // Another Kotomimi that hears for this one cuts its sentences with this one's own speech detection, as this
   // computer's engine would: its threshold and pause, where Realtime's semantic default became a 0.8 s pause there.
   const ownDetection = kotomimi && !device && config.turnDetection ? { turnDetection: speechDetection(s).turnDetection } : {};
+  // Another Kotomimi that detects the language hears the speaker's languages too, as this computer's engine would (`among`).
+  const remoteAmong = kotomimi && !device && !remotePair && serverHeard === AUTO && among.length > 1 ? { among } : {};
 
   return {
     ...config,
@@ -1627,7 +1629,7 @@ export function buildLocalAI(asked: SessionContext, all: LocalAISettings, shared
     ...(kotomimi && !device ? { paces: true as const } : {}),
     model,
     modalities: ['text'],
-    transcription: { ...(remotePair ? { ...remotePair, language: remotePair.languages[0] } : transcriptionFor(s, serverHeard, Boolean(stages?.speech) || plain, kotomimi, models)), ...(kotomimi && hints.length ? { keywords: [...hints] } : {}) },
+    transcription: { ...(remotePair ? { ...remotePair, language: remotePair.languages[0] } : transcriptionFor(s, serverHeard, Boolean(stages?.speech) || plain, kotomimi, models)), ...remoteAmong, ...(kotomimi && hints.length ? { keywords: [...hints] } : {}) },
     anchor: false,
     commitAnswers: true,
     ...((stages?.speech || plain) && !device ? { transcribeOnly: true as const } : {}),

@@ -124,6 +124,22 @@ describe('a leg another Kotomimi hears', () => {
     }
   });
 
+  it('tells a detecting recognizer there the speaker\'s languages, as this computer\'s own engine is told them', () => {
+    const models: LocalAIModel[] = [...FOUND, { id: 'qwen3-asr-1.7b-q8', host: 'kotomimi', kind: 'asr', languages: ['auto', 'zh', 'ja'] }];
+    const ask = (patch: Partial<LocalAISettings>, context = SPEAKER) => {
+      const config = buildLocalAI(context, settings({ asrVia: 'server', asrModel: 'qwen3-asr-1.7b-q8', ...patch }), { ...shared, models });
+      if ('refused' in config) throw new Error(config.refused);
+      return config.transcription;
+    };
+    expect(ask({ speakAlso: ['ja'] })).toEqual({ model: 'qwen3-asr-1.7b-q8', language: 'auto', among: ['zh', 'ja'] });
+    // One language of theirs: nothing to read again in.
+    expect(ask({}).among).toBeUndefined();
+    // A recognizer that is told the language reads no stretch again.
+    expect(ask({ asrModel: 'sensevoice-int8', speakAlso: ['ja'] }).among).toBeUndefined();
+    // The other side's leg may be in any language.
+    expect(ask({ speakAlso: ['ja'], asrDetectOther: true }, { ...SPEAKER, direction: { source: 'ja', target: 'zh-CN' } }).among).toBeUndefined();
+  });
+
   it('refuses an explicitly selected Apple pair when the host is old or lacks either language', async () => {
     const pair = { source: 'en', target: 'fr' };
     const offered: SharedModel[] = ['en', 'fr'].map((language) => ({ id: `apple-speech:${language}`, kind: 'asr', languages: [language], bilingual: true }));

@@ -44,6 +44,11 @@ export interface TranscriptionHint {
   language?: string;
   languages?: string[];
   keywords?: string[];
+  /**
+   * Fork, a sharing Kotomimi only: the languages a leg left to be detected may be in (`namedAmong`). Its recognizer
+   * reads a stretch it names outside them again, as this computer's would, and marks one no reading fits `misheard`.
+   */
+  among?: string[];
 }
 
 /** True when `model` accepts the `languages` / `keywords` hints. */

@@ -392,10 +392,11 @@ class RealtimeLeg implements AdapterSession {
     if (this.phase === 'live' && typeof e.item_id === 'string' && typeof e.delta === 'string') this.items.inputDelta(e.item_id, e.delta);
   }
 
-  private inputDone(e: ConversationItemInputAudioTranscriptionCompletedEvent & { language?: unknown }): void {
-    // A sharing Kotomimi can report its detected language; ordinary OpenAI events omit it.
+  private inputDone(e: ConversationItemInputAudioTranscriptionCompletedEvent & { language?: unknown; misheard?: unknown }): void {
+    // A sharing Kotomimi can report its detected language, and a stretch read in none of the speaker's (`among`); ordinary OpenAI events omit both.
     const language = typeof e.language === 'string' ? e.language.trim() || undefined : undefined;
-    this.frame('in', e.type, { itemId: e.item_id ?? null, transcript: e.transcript ?? null, ...(language !== undefined ? { language } : {}) });
+    const misheard = e.misheard === true;
+    this.frame('in', e.type, { itemId: e.item_id ?? null, transcript: e.transcript ?? null, ...(language !== undefined ? { language } : {}), ...(misheard ? { misheard } : {}) });
     if (this.phase !== 'live' || typeof e.item_id !== 'string') return;
     const transcript = typeof e.transcript === 'string' ? e.transcript : '';
     const detected = languageOf(language);
@@ -410,7 +411,7 @@ class RealtimeLeg implements AdapterSession {
       this.items.inputFailed(e.item_id);
       return;
     }
-    this.items.inputDone(e.item_id, transcript, this.languagePair ? detected : language);
+    this.items.inputDone(e.item_id, transcript, this.languagePair ? detected : language, !this.languagePair && misheard);
   }
 
   private inputFailed(e: ConversationItemInputAudioTranscriptionFailedEvent): void {

@@ -25,14 +25,17 @@ export interface Recognizer {
   /** Fork: a shorter stretch, or the usual (`AdapterSession.pace`). Absent: the recognizer cuts as it does. */
   pace?(pace: 'normal' | 'quick'): void;
   onPartialResult: ((text: string) => void) | null;
-  onResult: ((result: { text: string; durationMs: number; recognitionTimeMs: number; language?: string }) => void) | null;
+  onResult: ((result: { text: string; durationMs: number; recognitionTimeMs: number; language?: string; misheard?: true }) => void) | null;
   onSpeechStart: (() => void) | null;
   onError: ((error: string) => void) | null;
   onFatal: ((error: string) => void) | null;
 }
 
-/** `also`: a second language the same speech may be in (a pair); `third`: one more, where the recognizer hears three. */
-export interface RecognitionModel { modelId: string; streaming: boolean; also?: string; third?: string; hints?: readonly string[] }
+/**
+ * `also`: a second language the same speech may be in (a pair); `third`: one more, where the recognizer hears three.
+ * `among`: the speaker's languages, for a recognizer left to detect one (`nativeAsr.ts`'s own).
+ */
+export interface RecognitionModel { modelId: string; streaming: boolean; also?: string; third?: string; hints?: readonly string[]; among?: readonly string[] }
 
 export interface TranscriberDeps {
   /** A recognizer for this model: the app's own engine, a fake in tests. */
@@ -154,7 +157,7 @@ export class LanTranscriber {
   }
 
   private configure(session: unknown): void {
-    const input = ((session ?? {}) as { audio?: { input?: { transcription?: { language?: unknown; languages?: unknown; model?: unknown; keywords?: unknown }; turn_detection?: unknown } } }).audio?.input ?? {};
+    const input = ((session ?? {}) as { audio?: { input?: { transcription?: { language?: unknown; languages?: unknown; model?: unknown; keywords?: unknown; among?: unknown }; turn_detection?: unknown } } }).audio?.input ?? {};
     const language = baseLanguage(input.transcription?.language);
     // "auto" is a language here: answered by a recognizer that tells languages apart, where one is shared (`nativeShare.ts`).
     if (!language) return this.error('language_required', 'Say which language is spoken, or "auto" to have it detected (audio.input.transcription.language).');
@@ -183,8 +186,14 @@ export class LanTranscriber {
     const vad = vadFrom(input.turn_detection);
     const said = input.transcription?.keywords;
     const hints = Array.isArray(said) ? said.filter((word): word is string => typeof word === 'string') : [];
-    const asked = JSON.stringify([model.modelId, language, vad, model.also, model.third, hints]);
-    if (asked !== this.running) this.start({ ...model, ...(hints.length ? { hints } : {}) }, language, vad, asked);
+    // The speaker's languages, where the language is left to detect: a stretch named outside them is read again here.
+    const listed = input.transcription?.among;
+    // One language is nothing to read again in. Bounded past every language the catalog has.
+    const codes = language === 'auto' && !also && Array.isArray(listed)
+      ? [...new Set(listed.map(baseLanguage).filter((l) => /^[a-z]{2,3}$/.test(l) && l !== 'auto'))].slice(0, 32) : [];
+    const among = codes.length > 1 ? codes : [];
+    const asked = JSON.stringify([model.modelId, language, vad, model.also, model.third, hints, among]);
+    if (asked !== this.running) this.start({ ...model, ...(hints.length ? { hints } : {}), ...(among.length ? { among } : {}) }, language, vad, asked);
     this.deps.send({
       type: 'session.updated',
       session: { id: this.sessionId, object: 'realtime.session', type: 'transcription', audio: { input: { transcription: { model: model.modelId, language, ...(also ? { languages: [language, also, ...(model.third ? [model.third] : [])] } : {}) }, turn_detection: input.turn_detection ?? null } } },
@@ -212,7 +221,7 @@ export class LanTranscriber {
         else this.item = null;
         return;
       }
-      this.final(result.text, heard || undefined);
+      this.final(result.text, heard || undefined, result.misheard === true);
     };
     engine.onError = (message) => { if (mine()) this.failed(message); };
     engine.onFatal = (message) => {
@@ -310,7 +319,7 @@ export class LanTranscriber {
     item.sent = settled;
   }
 
-  private final(raw: string, language?: string): void {
+  private final(raw: string, language?: string, misheard = false): void {
     const text = raw.trim();
     const item = this.item;
     this.item = null;
@@ -322,7 +331,7 @@ export class LanTranscriber {
     this.deps.send({ type: 'input_audio_buffer.speech_stopped', item_id: id });
     this.deps.send({ type: 'input_audio_buffer.committed', item_id: id, previous_item_id: null });
     // An empty completion closes what the deltas showed as it stands.
-    this.deps.send({ type: 'conversation.item.input_audio_transcription.completed', item_id: id, content_index: 0, transcript: cleared ? '' : text, ...(!cleared && language ? { language } : {}) });
+    this.deps.send({ type: 'conversation.item.input_audio_transcription.completed', item_id: id, content_index: 0, transcript: cleared ? '' : text, ...(!cleared && language ? { language } : {}), ...(!cleared && misheard ? { misheard: true } : {}) });
   }
 
   /** One utterance could not be recognized: its item fails, and the session goes on. */
