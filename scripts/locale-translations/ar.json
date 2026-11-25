@@ -1011,6 +1011,14 @@
     "en": "What you want to say — Enter translates",
     "text": "اكتب ما تريد قوله، واضغط Enter للترجمة"
   },
+  "fork.voice.addTake": {
+    "en": "Add a language to {{name}}",
+    "text": "إضافة تسجيل بلغة أخرى لـ«{{name}}»"
+  },
+  "fork.voice.addVoice": {
+    "en": "Add a voice",
+    "text": "إضافة صوت"
+  },
   "fork.voice.auto": {
     "en": "Read my translations as they come",
     "text": "قراءة الترجمة تلقائيًا بعد انتهائي من الكلام"
@@ -1018,6 +1026,50 @@
   "fork.voice.cannotSpeak": {
     "en": "{{name}} cannot speak {{language}}.",
     "text": "لا يستطيع {{name}} التحدث بلغة {{language}}."
+  },
+  "fork.voice.chooseFile": {
+    "en": "Choose a file",
+    "text": "اختيار ملف"
+  },
+  "fork.voice.chooseVoice": {
+    "en": "Choose a voice",
+    "text": "اختيار صوت"
+  },
+  "fork.voice.clipFailed": {
+    "en": "The voice could not be added.",
+    "text": "تعذّرت إضافة الصوت."
+  },
+  "fork.voice.clipLanguage": {
+    "en": "Language of the recording",
+    "text": "لغة التسجيل"
+  },
+  "fork.voice.clipSilent": {
+    "en": "No voice was heard.",
+    "text": "لم يُسمع أي صوت."
+  },
+  "fork.voice.clipTooLong": {
+    "en": "Too long: no more than {{seconds}} seconds with its words.",
+    "text": "التسجيل طويل جدًا. عند إرفاق النص، الحد الأقصى {{seconds}} ثانية."
+  },
+  "fork.voice.clipTooShort": {
+    "en": "Too short: at least {{seconds}} seconds.",
+    "text": "التسجيل قصير جدًا. الحد الأدنى {{seconds}} ثانية."
+  },
+  "fork.voice.clipUnreadable": {
+    "en": "This file could not be read.",
+    "text": "تعذّرت قراءة هذا الملف."
+  },
+  "fork.voice.clipWords": {
+    "en": "What is said in it (optional)",
+    "text": "نص الكلام في التسجيل (اختياري)"
+  },
+  "fork.voice.clipWordsNeeded": {
+    "en": "What is said in it",
+    "text": "الكلام في التسجيل"
+  },
+  "fork.voice.exportVoice": {
+    "en": "Save {{name}} as a file",
+    "text": "حفظ «{{name}}» كملف"
   },
   "fork.voice.hearBoth": {
     "en": "To both",
@@ -1039,6 +1091,10 @@
     "en": "To them",
     "text": "للطرف الآخر"
   },
+  "fork.voice.importVoice": {
+    "en": "Import a voice file",
+    "text": "استيراد ملف صوت"
+  },
   "fork.voice.lineFailed": {
     "en": "This line could not be read aloud",
     "text": "تعذرت قراءة هذا السطر بصوت مسموع"
@@ -1059,9 +1115,17 @@
     "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
     "text": "تُشغَّل الترجمة المنطوقة على هذا الجهاز، ويستقبلها الطرف الآخر كما لو كانت صادرة من ميكروفون. إذا كانت بطاقة الصوت تدعم المزج داخليًا، فاختر إحدى قنوات التشغيل فيها وامزج صوتها مع صوت ميكروفونك على البطاقة نفسها. هكذا لا يمر صوتك الأصلي عبر أي برنامج."
   },
+  "fork.voice.micDenied": {
+    "en": "The microphone could not be opened.",
+    "text": "تعذّر تشغيل الميكروفون."
+  },
   "fork.voice.modelPlaceholder": {
     "en": "The model's name, e.g. tts-1",
     "text": "اسم النموذج، مثل tts-1"
+  },
+  "fork.voice.myVoice": {
+    "en": "My voice",
+    "text": "صوتي"
   },
   "fork.voice.myVoiceToo": {
     "en": "My own voice goes too",
@@ -1079,13 +1143,41 @@
     "en": "Read aloud",
     "text": "تفعيل القراءة الصوتية"
   },
+  "fork.voice.record": {
+    "en": "Read it aloud",
+    "text": "اقرأ هذه الجملة بصوت مسموع"
+  },
+  "fork.voice.recordAgain": {
+    "en": "Record again",
+    "text": "إعادة التسجيل"
+  },
+  "fork.voice.removeTake": {
+    "en": "Remove the {{language}} recording of {{name}}",
+    "text": "حذف تسجيل «{{name}}» بلغة {{language}}"
+  },
+  "fork.voice.removeVoice": {
+    "en": "Remove {{name}}",
+    "text": "حذف «{{name}}»"
+  },
+  "fork.voice.renameVoice": {
+    "en": "Rename {{name}}",
+    "text": "تغيير اسم «{{name}}»"
+  },
   "fork.voice.sample": {
     "en": "Play a sample",
     "text": "معاينة الصوت"
   },
+  "fork.voice.saveVoice": {
+    "en": "Save",
+    "text": "حفظ"
+  },
   "fork.voice.sayLine": {
     "en": "Read this line aloud",
     "text": "قراءة هذا السطر بصوت مسموع"
+  },
+  "fork.voice.serverNone": {
+    "en": "The other device lends no voice model. Use an API or this computer instead.",
+    "text": "لا يتوفر نموذج للقراءة الصوتية على الجهاز الآخر. يمكنك استخدام API أو هذا الكمبيوتر بدلاً من ذلك."
   },
   "fork.voice.stage": {
     "en": "Voice",
@@ -1096,6 +1188,10 @@
     "text": "يقرأ ترجماتك بصوت مسموع. يمكنك أيضًا سماع أي سطر في المحادثة بالضغط على زر مكبر الصوت بجانبه."
   },
   "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "إيقاف"
+  },
+  "fork.voice.stopRecording": {
     "en": "Stop",
     "text": "إيقاف"
   },
@@ -1119,9 +1215,17 @@
     "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
     "text": "عند القراءة للطرف الآخر، يُرسل الصوت إلى الميكروفون الافتراضي. اختره كميكروفون في VRChat أو تطبيق الاجتماعات (اسمه في Windows هو CABLE Output)."
   },
+  "fork.voice.unrecorded": {
+    "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
+    "text": "لم تختر صوتًا خاصًا بك للقراءة. أضف صوتًا من بطاقة «القراءة بصوت مسموع»."
+  },
   "fork.voice.voice": {
     "en": "Voice",
     "text": "الصوت"
+  },
+  "fork.voice.voiceName": {
+    "en": "Name",
+    "text": "الاسم"
   },
   "fork.voice.voiceOf": {
     "en": "{{language}} voice",
@@ -1134,6 +1238,14 @@
   "fork.voice.volumeTheirs": {
     "en": "Volume for them",
     "text": "مستوى الصوت عند الطرف الآخر"
+  },
+  "fork.voice.wayImport": {
+    "en": "Import a recording",
+    "text": "استيراد تسجيل"
+  },
+  "fork.voice.wayRecord": {
+    "en": "Record now",
+    "text": "التسجيل الآن"
   },
   "fork.voice.woman": {
     "en": "Female voice",
@@ -2130,6 +2242,10 @@
   "providers.localai.noteQwen3Tts": {
     "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
     "text": "الأكثر طبيعية، ويبدأ الكلام فورًا. في الاختبارات، نطق اليابانية والصينية والإنجليزية بلا أخطاء. يستهلك نحو 3 GB من ذاكرة بطاقة الرسومات، ويدعم 10 لغات."
+  },
+  "providers.localai.noteQwen3TtsBase": {
+    "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
+    "text": "يقرأ النص بصوتك. يكفي تسجيل مقطع كلام مدته نحو عشر ثوانٍ لاستنساخ صوتك. عند استخدام أي صوت لأول مرة، يستغرق بدء القراءة من بضع ثوانٍ إلى ما يقارب نصف دقيقة. بعد ذلك تبدأ القراءة فورًا. يستخدم نحو 3 GB من ذاكرة بطاقة الرسوميات ويدعم 10 لغات."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

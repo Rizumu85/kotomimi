@@ -1011,6 +1011,14 @@
     "en": "What you want to say — Enter translates",
     "text": "하고 싶은 말을 입력하고 Enter로 번역"
   },
+  "fork.voice.addTake": {
+    "en": "Add a language to {{name}}",
+    "text": "‘{{name}}’에 다른 언어 녹음 추가"
+  },
+  "fork.voice.addVoice": {
+    "en": "Add a voice",
+    "text": "음성 추가"
+  },
   "fork.voice.auto": {
     "en": "Read my translations as they come",
     "text": "내 말이 끝나면 번역문 자동으로 읽기"
@@ -1018,6 +1026,50 @@
   "fork.voice.cannotSpeak": {
     "en": "{{name}} cannot speak {{language}}.",
     "text": "{{name}} 모델은 {{language}} 음성을 지원하지 않아요."
+  },
+  "fork.voice.chooseFile": {
+    "en": "Choose a file",
+    "text": "파일 선택"
+  },
+  "fork.voice.chooseVoice": {
+    "en": "Choose a voice",
+    "text": "음성 선택"
+  },
+  "fork.voice.clipFailed": {
+    "en": "The voice could not be added.",
+    "text": "음성을 추가하지 못했어요."
+  },
+  "fork.voice.clipLanguage": {
+    "en": "Language of the recording",
+    "text": "녹음 언어"
+  },
+  "fork.voice.clipSilent": {
+    "en": "No voice was heard.",
+    "text": "목소리가 들리지 않아요."
+  },
+  "fork.voice.clipTooLong": {
+    "en": "Too long: no more than {{seconds}} seconds with its words.",
+    "text": "녹음이 너무 길어요. 녹음 내용을 입력한 경우 최대 {{seconds}}초까지 사용할 수 있어요."
+  },
+  "fork.voice.clipTooShort": {
+    "en": "Too short: at least {{seconds}} seconds.",
+    "text": "녹음이 너무 짧아요. 최소 {{seconds}}초가 필요해요."
+  },
+  "fork.voice.clipUnreadable": {
+    "en": "This file could not be read.",
+    "text": "이 파일을 읽을 수 없어요."
+  },
+  "fork.voice.clipWords": {
+    "en": "What is said in it (optional)",
+    "text": "녹음에서 말한 내용 (선택 사항)"
+  },
+  "fork.voice.clipWordsNeeded": {
+    "en": "What is said in it",
+    "text": "녹음에서 한 말"
+  },
+  "fork.voice.exportVoice": {
+    "en": "Save {{name}} as a file",
+    "text": "‘{{name}}’ 파일로 저장"
   },
   "fork.voice.hearBoth": {
     "en": "To both",
@@ -1039,6 +1091,10 @@
     "en": "To them",
     "text": "상대방에게"
   },
+  "fork.voice.importVoice": {
+    "en": "Import a voice file",
+    "text": "목소리 파일 가져오기"
+  },
   "fork.voice.lineFailed": {
     "en": "This line could not be read aloud",
     "text": "이 줄을 읽지 못했어요"
@@ -1059,9 +1115,17 @@
     "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
     "text": "번역 음성은 이 장치에서 재생되며, 상대방에게는 마이크 소리로 전달됩니다. 사운드 카드에 믹싱 기능이 내장되어 있다면 재생 채널 하나를 선택하고 사운드 카드에서 마이크 소리와 섞으세요. 이렇게 하면 내 목소리는 소프트웨어를 거치지 않습니다."
   },
+  "fork.voice.micDenied": {
+    "en": "The microphone could not be opened.",
+    "text": "마이크를 사용할 수 없어요."
+  },
   "fork.voice.modelPlaceholder": {
     "en": "The model's name, e.g. tts-1",
     "text": "모델 이름, 예: tts-1"
+  },
+  "fork.voice.myVoice": {
+    "en": "My voice",
+    "text": "내 목소리"
   },
   "fork.voice.myVoiceToo": {
     "en": "My own voice goes too",
@@ -1079,13 +1143,41 @@
     "en": "Read aloud",
     "text": "음성 읽기 켜기"
   },
+  "fork.voice.record": {
+    "en": "Read it aloud",
+    "text": "이 문장 읽기"
+  },
+  "fork.voice.recordAgain": {
+    "en": "Record again",
+    "text": "다시 녹음"
+  },
+  "fork.voice.removeTake": {
+    "en": "Remove the {{language}} recording of {{name}}",
+    "text": "‘{{name}}’의 {{language}} 녹음 삭제"
+  },
+  "fork.voice.removeVoice": {
+    "en": "Remove {{name}}",
+    "text": "‘{{name}}’ 삭제"
+  },
+  "fork.voice.renameVoice": {
+    "en": "Rename {{name}}",
+    "text": "‘{{name}}’ 이름 바꾸기"
+  },
   "fork.voice.sample": {
     "en": "Play a sample",
     "text": "미리 듣기"
   },
+  "fork.voice.saveVoice": {
+    "en": "Save",
+    "text": "저장"
+  },
   "fork.voice.sayLine": {
     "en": "Read this line aloud",
     "text": "이 줄 읽기"
+  },
+  "fork.voice.serverNone": {
+    "en": "The other device lends no voice model. Use an API or this computer instead.",
+    "text": "다른 기기에 사용할 수 있는 음성 읽기 모델이 없어요. 대신 API를 쓰거나 이 컴퓨터에서 실행할 수 있어요."
   },
   "fork.voice.stage": {
     "en": "Voice",
@@ -1096,6 +1188,10 @@
     "text": "내 번역문을 소리 내어 읽어요. 대화의 어느 줄이든 스피커 버튼을 누르면 들을 수 있어요."
   },
   "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "중지"
+  },
+  "fork.voice.stopRecording": {
     "en": "Stop",
     "text": "중지"
   },
@@ -1119,9 +1215,17 @@
     "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
     "text": "상대에게 읽어 줄 때는 소리가 가상 마이크로 전달돼요. VRChat이나 회의 앱에서 해당 마이크를 선택하세요(Windows에서는 CABLE Output)."
   },
+  "fork.voice.unrecorded": {
+    "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
+    "text": "읽어 줄 내 목소리가 아직 선택되지 않았어요. ‘읽어 주기’ 카드에서 추가해 주세요."
+  },
   "fork.voice.voice": {
     "en": "Voice",
     "text": "목소리"
+  },
+  "fork.voice.voiceName": {
+    "en": "Name",
+    "text": "이름"
   },
   "fork.voice.voiceOf": {
     "en": "{{language}} voice",
@@ -1134,6 +1238,14 @@
   "fork.voice.volumeTheirs": {
     "en": "Volume for them",
     "text": "상대가 듣는 음량"
+  },
+  "fork.voice.wayImport": {
+    "en": "Import a recording",
+    "text": "녹음 가져오기"
+  },
+  "fork.voice.wayRecord": {
+    "en": "Record now",
+    "text": "지금 녹음"
   },
   "fork.voice.woman": {
     "en": "Female voice",
@@ -2126,6 +2238,10 @@
   "providers.localai.noteQwen3Tts": {
     "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
     "text": "가장 자연스럽고 바로 말하기 시작해요. 일본어, 중국어, 영어로 직접 테스트했을 때 잘못 읽는 부분이 없었어요. 비디오 메모리 약 3 GB를 사용하며, 10개 언어를 지원해요."
+  },
+  "providers.localai.noteQwen3TtsBase": {
+    "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
+    "text": "10초 정도 말한 내용을 녹음하면 내 목소리를 복제해 글을 읽어 줍니다. 목소리마다 처음 사용할 때는 몇 초에서 20여 초 걸리고, 그다음부터는 말하자마자 소리가 나옵니다. 그래픽 메모리를 약 3 GB 사용하며 10개 언어를 지원합니다."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

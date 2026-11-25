@@ -92,6 +92,22 @@ describe('ClipQueue', () => {
     expect(plays[1].at).toBeCloseTo(1 + LEAD_S, 9);
   });
 
+  it('says what is scheduled and how long until each clip starts (fork)', () => {
+    const { timeline, advance } = fakeTimeline();
+    const queue = new ClipQueue<string>(timeline, 0.05);
+    expect(queue.scheduled()).toEqual([]);
+    queue.enqueue('a', new Int16Array(24000));
+    queue.enqueue('b', new Int16Array(12000));
+    const round = () => queue.scheduled().map(({ key, inMs }) => ({ key, inMs: Math.round(inMs) }));
+    // The first a lead ahead of the clock, the second where the first ends.
+    expect(round()).toEqual([{ key: 'a', inMs: 50 }, { key: 'b', inMs: 1050 }]);
+    advance(0.5);
+    // Started: no time left to it. What has ended is no longer there.
+    expect(round()).toEqual([{ key: 'a', inMs: -450 }, { key: 'b', inMs: 550 }]);
+    advance(0.6);
+    expect(round()).toEqual([{ key: 'b', inMs: -50 }]);
+  });
+
   it('tells subscribers when a clip is enqueued and when one ends', () => {
     const { timeline, advance } = fakeTimeline();
     const queue = new ClipQueue(timeline);

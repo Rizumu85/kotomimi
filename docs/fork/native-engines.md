@@ -140,7 +140,7 @@ Qwen3-ASR and SenseVoice, told no language, report the one they heard (audio.cpp
 
 `pullWhole` in `electron/fetch-file.js` decides who is asked and how patiently; `electron/native-engine.js` only verifies.
 
-- Models come from Hugging Face, and `hf-mirror.com` serves the same paths. Seven also have a `mirror` on ModelScope; R2T2 and SenseVoice-Small have no copy there.
+- Models come from Hugging Face, and `hf-mirror.com` serves the same paths. Most also have a `mirror` on ModelScope; R2T2 and SenseVoice-Small have no copy there.
 - Runtimes come from GitHub releases, plus the relays in `GITHUB_RELAYS`. No mirror of our own exists in China.
 - A mainland China time zone (`inMainlandChina`) asks mirrors and relays first. That guess only orders addresses: a large file tries all at once and starts at the quickest (`quickestFirst`), since a slow relay that still delivers is never left.
 - An address that fails or breaks off with nothing new is left, and the next goes on from the `.part`. A download fails only after every address came up empty twice; the error names each host's reply.

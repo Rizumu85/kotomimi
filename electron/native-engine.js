@@ -375,6 +375,26 @@ const VOICES = {
     },
     voice: 'woman',
   },
+  // Fork: the same family's cloning model: it has no voice of its own, and speaks in the one of a recording it is
+  // handed with each sentence (`voice-library.js`). Measured 2026-11-24 on the RTX 5070 Ti beside a running game, a
+  // 4 s Chinese sentence as the recording: first sound about 80 ms, a sentence 2.5 times faster than it is said,
+  // about 3 GB of video memory. A recording is read once before the first sentence in it — about 2.7 s for each
+  // second of it with its words, 4-6 s in all without — and kept, each way apart (`voice_prompt_cache_slots`), so a
+  // run's few voices are read once each. Spoken on from in another language than its own it misreads: a Chinese
+  // recording's Japanese 6-37 % wrong, a Japanese one's Chinese garbled; from its sound alone, 0 % (`speechRequest`).
+  'qwen3-tts-1.7b-base-q8': {
+    file: 'qwen3-tts-12hz-1.7b-base-q8_0_v2.gguf',
+    url: 'https://huggingface.co/audio-cpp/audio.cpp-gguf/resolve/047ec541cc3f7e50c583acd56e0177ae286c4078/Qwen3-TTS-12Hz-1.7B-Base-GGUF/qwen3-tts-12hz-1.7b-base-q8_0_v2.gguf',
+    mirror: 'https://modelscope.cn/models/audio-cpp/audio.cpp-gguf/resolve/master/Qwen3-TTS-12Hz-1.7B-Base-GGUF/qwen3-tts-12hz-1.7b-base-q8_0_v2.gguf',
+    bytes: 2695186240,
+    sha256: '92641a8022d521efd79a5db45e952589b3f2b781680f9abfcf26f075d37b86c6',
+    family: 'qwen3_tts',
+    mode: 'streaming',
+    sampleRate: 24000,
+    languages: ['zh', 'en', 'ja', 'ko', 'de', 'fr', 'ru', 'pt', 'es', 'it'],
+    options: { 'qwen3_tts.voice_prompt_cache_slots': 4 },
+    speech: { clone: true, languageAs: 'language' },
+  },
 };
 
 /** The model the runtime is told the language by: its name in English, as R2T2 was trained to read it. Any other is left to detection. */
@@ -602,12 +622,12 @@ function wavSound(bytes) {
  * handed on in one piece. `done` resolves with the rate when it is over, and rejects with what the runtime said when
  * it refuses; `abort` drops the request.
  */
-function speakLive({ host = LOOPBACK, port, model, input, voice, options = {}, sampleRate, whole = false, timeoutMs = 60_000 }, onPcm) {
+function speakLive({ host = LOOPBACK, port, model, input, voice, options = {}, fields = {}, sampleRate, whole = false, timeoutMs = 60_000 }, onPcm) {
   let request = null;
   let aborted = false;
   const done = new Promise((resolve, reject) => {
     const payload = Buffer.from(JSON.stringify({
-      model, input, ...(voice ? { voice } : {}),
+      model, input, ...(voice ? { voice } : {}), ...fields,
       ...(whole ? { response_format: 'wav' } : { stream: true, stream_format: 'audio', response_format: 'pcm' }),
       ...(Object.keys(options).length > 0 ? { options } : {}),
     }));
@@ -659,10 +679,26 @@ function speakLive({ host = LOOPBACK, port, model, input, voice, options = {}, s
  * 'voice_id'`, also the request's own `voice`), or one of the model's described ones (`voices`: a name of ours → the
  * words that describe it, under the option `voiceAs` names) — the language's code under `languageAs`, and whatever
  * its family is always told (`options`). A voice that is none of the model's is its first.
+ *
+ * Fork: a cloning model (`clone`) has no voice of its own: `reference` is the recording it speaks from. In the
+ * recording's own language it is handed the recording's words too and speaks on from it, which is the nearest
+ * likeness. In any other language only the sound of the voice is taken (`x_vector_only_mode`): speaking on from a
+ * Chinese recording carries its accent into Japanese and English (heard by the user, 2026-11-24). So too where the
+ * words or their language are not known. The first sentence in a recording waits while it is read: `timeoutMs` says
+ * how long that may take.
  */
-function speechRequest(model, voice, language) {
-  const { voiceAs, languageAs, voices, options } = model?.speech ?? {};
+function speechRequest(model, voice, language, reference) {
+  const { voiceAs, languageAs, voices, options, clone } = model?.speech ?? {};
   const code = languageCode(language);
+  if (clone) {
+    const spokenOn = Boolean(reference.text) && code !== null && languageCode(reference.language) === code;
+    return {
+      fields: { voice_ref: reference.path, ...(spokenOn ? { reference_text: reference.text } : {}) },
+      options: { ...(options ?? {}), ...(languageAs && code ? { [languageAs]: code } : {}), ...(spokenOn ? {} : { x_vector_only_mode: true }) },
+      whole: false,
+      timeoutMs: CLONE_TIMEOUT_MS,
+    };
+  }
   const named = voices ? (Object.hasOwn(voices, voice ?? '') ? voice : model.voice) : voice || model?.voice;
   const told = voices ? voices[named] : named;
   return {
@@ -671,6 +707,9 @@ function speechRequest(model, voice, language) {
     whole: model?.mode === 'offline',
   };
 }
+
+/** How long a sentence of a cloning model may take: its recording is read before the first one in it. */
+const CLONE_TIMEOUT_MS = 180_000;
 
 /** One short sentence in a language the model speaks, for its warm-up: English where it has it, else its first. */
 const WARM_WORDS = { en: 'Hello.', ja: 'こんにちは。', zh: '你好。' };
@@ -696,6 +735,9 @@ const VOICE_RUNTIME = {
     return ['--config', 'server.json', '--no-ui'];
   },
   async warm({ port, id, model, say = speakLive, timeoutMs }) {
+    // A cloning model has no voice to warm up in until it is handed a recording: the run's own are read as it
+    // begins (`native-voice:warm` in main.js).
+    if (model.speech?.clone) return true;
     let heard = 0;
     const { language, text } = warmWords(model);
     try {
@@ -1779,23 +1821,41 @@ function createNativeEngine(deps = {}) {
    * Fork: a sentence spoken by a voice runtime, for the page: its sound to `onPcm` as it is made. Resolves `{ ok }`
    * when it is over, `{ error }` with why not: the runtime is not up with this model, it refused, or it was stopped
    * (`stopSpeaking`, by the id the page gave). Never rejects.
+   *
+   * One sentence at a time, in the order they were asked: this computer's own run and the devices it lends its voice
+   * to (`lan:reply-voice` in main.js) ask the one model, which makes two sentences no faster for making them at once.
    */
   const speaking = new Map();
-  async function speak({ id, model: asked, text, voice, language } = {}, onPcm = () => {}) {
-    if (run.state !== 'ready' || !run.model || (typeof asked === 'string' && asked && asked !== run.model)) return { error: 'The voice engine is not up with this model.' };
+  let speakTurn = Promise.resolve();
+  async function speak({ id, model: asked, text, voice, language, reference } = {}, onPcm = () => {}) {
+    const up = () => run.state === 'ready' && run.model && !(typeof asked === 'string' && asked && asked !== run.model);
+    if (!up()) return { error: 'The voice engine is not up with this model.' };
     const input = typeof text === 'string' ? text.trim().slice(0, 2000) : '';
     if (!input) return { error: 'There is nothing to say.' };
-    const model = MODELS_[run.model];
-    const named = typeof voice === 'string' && /^[\w.()+-]{1,80}$/.test(voice) ? voice : model.voice;
-    const one = say({ port: run.port, model: run.model, input, ...speechRequest(model, named, language), sampleRate: model.sampleRate }, onPcm);
-    speaking.set(id, one);
+    // Stopped while it waits its turn, it is never asked.
+    const mine = { stopped: false, abort() { this.stopped = true; } };
+    speaking.set(id, mine);
+    const before = speakTurn;
+    let done = () => {};
+    speakTurn = new Promise((resolve) => { done = resolve; });
     try {
+      await before;
+      if (mine.stopped) return { error: 'The voice was stopped.' };
+      // The engine may have been stopped, or started with another model, while this one waited.
+      if (!up()) return { error: 'The voice engine is not up with this model.' };
+      const model = MODELS_[run.model];
+      // A cloning model speaks from a recording, or not at all.
+      if (model.speech?.clone && !reference?.path) return { error: 'This voice model has no recording to speak from.' };
+      const named = typeof voice === 'string' && /^[\w.()+-]{1,80}$/.test(voice) ? voice : model.voice;
+      const one = say({ port: run.port, model: run.model, input, ...speechRequest(model, named, language, reference), sampleRate: model.sampleRate }, onPcm);
+      mine.abort = () => one.abort();
       await one.done;
       return { ok: true };
     } catch (error) {
       return { error: String(error?.message ?? error).slice(0, 300) };
     } finally {
-      if (speaking.get(id) === one) speaking.delete(id);
+      if (speaking.get(id) === mine) speaking.delete(id);
+      done();
     }
   }
   function stopSpeaking(id) { speaking.get(id)?.abort(); return true; }

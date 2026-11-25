@@ -86,8 +86,9 @@ export function watchCoachingFromStores(): () => void {
 
 /**
  * Fork: calls `changed` whenever the selected provider's languages change — its pair (a pick, or a pair derived
- * again), or the languages each side may speak beside it (`languages.more`) — so that a running session goes on
- * in them (`Runner.retarget`). Not at once, and not for another provider's. Returns the unsubscribe.
+ * again), or the languages each side may speak beside it (`languages.more`) — or what else of its settings a live
+ * run follows (`liveReads`: the voices Kotomimi reads in), so that a running session goes on in them
+ * (`Runner.retarget`). Not at once, and not for another provider's. Returns the unsubscribe.
  */
 export function watchPairFromStores(changed: () => void): () => void {
   const pairOf = () => {
@@ -101,7 +102,7 @@ export function watchPairFromStores(changed: () => void): () => void {
     } catch {
       // A provider that cannot say goes by its pair alone.
     }
-    return `${entry.pair.source}|${entry.pair.target}${detected}`;
+    return `${entry.pair.source}|${entry.pair.target}${detected}|${provider.liveReads?.(entry.settings) ?? ''}`;
   };
   let last = pairOf();
   return useProviderStore.subscribe(() => {

@@ -1,9 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Entry } from '../lib/projection/types';
 import { useVRChatStore, vrchatHolds } from '../stores/vrchatStore';
-import { chatboxPages, chatboxReadingMs, chatboxWaiting, finishedLine, linkOf, startVRChat, type VRChatDeps } from './vrchat';
+import { useProviderStore } from '../stores/providerStore';
+import { useRoutingStore } from '../stores/routingStore';
+import { VOICE_DEFAULTS } from '../providers/openai/localaiVoice';
+import { appReading, chatboxPages, chatboxReadingMs, chatboxWaiting, finishedLine, linkOf, READING_WAIT_MS, startVRChat, type Reading, type VRChatDeps } from './vrchat';
 
 vi.mock('../services/persistSetting', () => ({ persistSetting: async () => {} }));
+const speakerQueue = vi.hoisted(() => ({ clips: [] as Array<{ key: string; inMs: number }>, asked: 0 }));
+vi.mock('../lib/audio/appAudio', () => ({
+  getAppAudio: async () => { speakerQueue.asked += 1; return { playback: { queues: { speaker: { scheduled: () => speakerQueue.clips, subscribe: () => () => {} } } } }; },
+}));
 
 const last = <T>(list: readonly T[]): T | undefined => list[list.length - 1];
 
@@ -28,7 +35,7 @@ function setup(over: Partial<VRChatDeps> = {}, initial: Entry[] = []) {
     state: { getState: () => ({ phase }), subscribe: (l: () => void) => { runListeners.add(l); return () => runListeners.delete(l); } },
   };
   let entries: Entry[] = initial;
-  let legs: Array<{ segments: Array<{ id: string; origin?: string }> }> = [];
+  let legs: Array<{ segments: Array<{ id: string; origin?: string; ref?: number }> }> = [];
   const viewListeners = new Set<() => void>();
   const view = { get: () => ({ entries, legs }), subscribe: (l: () => void) => { viewListeners.add(l); return () => viewListeners.delete(l); } };
   const timers: Array<() => void> = [];
@@ -471,6 +478,186 @@ describe('the chatbox', () => {
     t.timers.shift()?.();
     expect(t.chatboxLines()).toEqual(['I am here']);
     expect(useVRChatStore.getState().recent).toEqual({ said: 'Je suis ici', translation: 'I am here' });
+  });
+});
+
+describe('the chatbox, where the translations are read aloud to the other side (fork)', () => {
+  /** The playback's queue of the user's leg, as a test moves it. */
+  function voice() {
+    let clips: Array<{ ref: number | undefined; inMs: number }> = [];
+    const listeners = new Set<() => void>();
+    const reading: Reading = { scheduled: () => clips, subscribe: (listener) => { listeners.add(listener); return () => { listeners.delete(listener); }; } };
+    return { reading, listeners, set(next: typeof clips) { clips = next; for (const listener of [...listeners]) listener(); }, move(next: typeof clips) { clips = next; } };
+  }
+  /** The segments of the user's leg: each translation by the number its reading goes by. */
+  const legsOf = (refs: Record<string, number>) => [{ segments: Object.entries(refs).map(([id, ref]) => ({ id, ref })) }];
+  function reads() {
+    useVRChatStore.setState({ chatbox: 'translation' });
+    const v = voice();
+    const waits: Array<{ fn: () => void; ms: number }> = [];
+    const t = setup({ reading: () => v.reading, setTimeout: (fn, ms) => { waits.push({ fn, ms }); } });
+    const fire = (ms: number) => { const at = waits.findIndex((wait) => wait.ms === ms); if (at < 0) throw new Error(`no timer of ${ms} ms`); waits.splice(at, 1)[0].fn(); };
+    return { t, v, waits, fire };
+  }
+
+  it('sends a sentence up when its reading begins, not when its translation is written', () => {
+    const { t, v } = reads();
+    t.show([exchange('a', '你好', 'こんにちは')], legsOf({ こんにちは: 4 }));
+    expect(t.chatboxLines()).toEqual([]);
+    // Made and queued behind what is still being read: not yet.
+    v.set([{ ref: 2, inMs: -900 }, { ref: 4, inMs: 1200 }]);
+    expect(t.chatboxLines()).toEqual([]);
+    // The one before it has ended, and it sounds.
+    v.set([{ ref: 4, inMs: -5 }]);
+    expect(t.chatboxLines()).toEqual(['こんにちは']);
+    // Its later pieces send nothing again.
+    v.set([{ ref: 4, inMs: -400 }, { ref: 4, inMs: 300 }]);
+    expect(t.chatboxLines()).toEqual(['こんにちは']);
+    t.controller.stop();
+  });
+
+  it('sends a sentence at once whose reading began, or was over, before its line was finished on screen', () => {
+    const { t, v } = reads();
+    t.run('running');
+    // A short answer: read and over before the view has shown its translation as final.
+    v.set([{ ref: 4, inMs: -5 }]);
+    v.set([]);
+    t.show([exchange('a', '好', 'はい')], legsOf({ はい: 4 }));
+    expect(t.chatboxLines()).toEqual(['はい']);
+    t.controller.stop();
+  });
+
+  it('looks again at the moment a queued reading starts, which the queue does not tell', () => {
+    const { t, v, fire } = reads();
+    t.show([exchange('a', '你好', 'こんにちは')], legsOf({ こんにちは: 4 }));
+    // Queued while nothing plays: it starts a moment later, with no word from the queue.
+    v.set([{ ref: 4, inMs: 50 }]);
+    expect(t.chatboxLines()).toEqual([]);
+    v.move([{ ref: 4, inMs: -5 }]);
+    fire(55);
+    expect(t.chatboxLines()).toEqual(['こんにちは']);
+    t.controller.stop();
+  });
+
+  it('keeps the sentences in step with the voice, each held only as long as VRChat asks', () => {
+    const { t, v, waits, fire } = reads();
+    const three = [exchange('a', '一', 'First'), exchange('b', '二', 'Second'), exchange('c', '三', 'Third')];
+    t.show(three, legsOf({ First: 1, Second: 2, Third: 3 }));
+    // All three are translated and made; the voice is on the first.
+    const before = waits.length;
+    v.set([{ ref: 1, inMs: -10 }, { ref: 2, inMs: 2000 }, { ref: 3, inMs: 4500 }]);
+    expect(t.chatboxLines()).toEqual(['First']);
+    // Held for the gap between two lines, not for the time the line takes to read: the voice sets the pace. And
+    // looked at again when the next one starts.
+    expect(waits.slice(before).map((wait) => wait.ms).sort((a, b) => a - b)).toEqual([1500, 2005]);
+    expect(chatboxReadingMs('First')).toBeGreaterThan(1500);
+    fire(1500);
+    expect(t.chatboxLines()).toEqual(['First']);
+    v.set([{ ref: 2, inMs: -10 }, { ref: 3, inMs: 2500 }]);
+    expect(t.chatboxLines()).toEqual(['First', 'Second']);
+    fire(1500);
+    v.set([{ ref: 3, inMs: -10 }]);
+    expect(t.chatboxLines()).toEqual(['First', 'Second', 'Third']);
+    t.controller.stop();
+  });
+
+  it('sends a sentence the voice passed over with the next one that is read', () => {
+    const { t, v } = reads();
+    t.show([exchange('a', '一', 'First'), exchange('b', '二', 'Second')], legsOf({ First: 1, Second: 2 }));
+    // The first was dropped by a voice that had fallen behind: the second is what it reads.
+    v.set([{ ref: 2, inMs: -10 }]);
+    expect(t.chatboxLines()).toEqual(['First\nSecond']);
+    t.controller.stop();
+  });
+
+  it('sends a sentence whose reading never comes once nothing is being read, and waits on while something is', () => {
+    const { t, v, fire } = reads();
+    t.show([exchange('a', '你好', 'こんにちは')], legsOf({ こんにちは: 4 }));
+    // Another sentence is still being read: its turn may yet come.
+    v.move([{ ref: 2, inMs: -900 }]);
+    fire(READING_WAIT_MS);
+    expect(t.chatboxLines()).toEqual([]);
+    // Nothing is read, and nothing waits to be: the voice could not make it.
+    v.move([]);
+    fire(READING_WAIT_MS);
+    expect(t.chatboxLines()).toEqual(['こんにちは']);
+    t.controller.stop();
+  });
+
+  it('keeps nothing back that is not read: a sentence sent as said, one with no segment known, and all of it once nobody is read to', () => {
+    useVRChatStore.setState({ chatbox: 'translation' });
+    const v = voice();
+    let on = true;
+    const t = setup({ reading: () => (on ? v.reading : null), theirs: () => ({ languages: ['ja'], back: false }) });
+    // Said in their language: it goes up as said, and nothing reads it.
+    const said = exchange('a', 'こんにちは', '');
+    t.show([said.kind === 'exchange' ? { ...said, source: said.source.map((r) => ({ ...r, language: 'ja' })) } : said]);
+    expect(t.chatboxLines()).toEqual(['こんにちは']);
+    t.timers.shift()!();
+    // Its segment is not known to the view: nothing could tell when its reading begins.
+    t.show([exchange('b', '谢谢', 'ありがとう')]);
+    expect(t.chatboxLines()).toEqual(['こんにちは', 'ありがとう']);
+    t.timers.shift()!();
+    // Kept back for its reading, and the other side is set not to hear it any more: it goes up at the next look.
+    t.show([exchange('b', '谢谢', 'ありがとう'), exchange('c', '再见', 'さようなら')], legsOf({ さようなら: 9 }));
+    expect(t.chatboxLines()).toEqual(['こんにちは', 'ありがとう']);
+    on = false;
+    t.show([exchange('b', '谢谢', 'ありがとう'), exchange('c', '再见', 'さようなら')], legsOf({ さようなら: 9 }));
+    expect(t.chatboxLines()).toEqual(['こんにちは', 'ありがとう', 'さようなら']);
+    t.controller.stop();
+  });
+
+  it('forgets what it kept back when the run ends, and shows the typing bubble while it keeps one', () => {
+    const { t, v } = reads();
+    t.run('running');
+    t.show([exchange('a', '你好', 'こんにちは')], legsOf({ こんにちは: 4 }));
+    expect(last(t.invoked.filter(([channel]) => channel === 'vrchat:typing'))).toEqual(['vrchat:typing', { on: true }]);
+    t.run('idle');
+    v.set([{ ref: 4, inMs: -5 }]);
+    expect(t.chatboxLines()).toEqual([]);
+    t.controller.stop();
+  });
+});
+
+describe('the reading the app hands the chatbox (fork)', () => {
+  const theirs = () => ({ languages: ['ja'], back: false });
+  const select = (speak: object, selected = 'localai') => {
+    const before = useProviderStore.getState();
+    useProviderStore.setState({ selected, entries: { ...before.entries, localai: { ...before.entries.localai, settings: { speak } } as never } });
+  };
+
+  it('is there only while Kotomimi\u2019s own run reads to the other side, in a voice that speaks their language', async () => {
+    const before = { provider: useProviderStore.getState(), meeting: useRoutingStore.getState().meeting };
+    try {
+      useRoutingStore.setState({ meeting: true });
+      const edge = { ...VOICE_DEFAULTS, on: true, at: 'api' as const };
+      // Off, said on demand only, another provider's run, a voice that does not speak their language, the other side
+      // not hearing it: nothing is kept back for a reading.
+      select({ ...edge, on: false });
+      expect(appReading(theirs)()).toBeNull();
+      select({ ...edge, auto: false });
+      expect(appReading(theirs)()).toBeNull();
+      select(edge, 'openai');
+      expect(appReading(theirs)()).toBeNull();
+      select({ ...VOICE_DEFAULTS, on: true, at: 'device', nativeModel: 'irodori-tts-v4.1-small-mf-q8' });
+      expect(appReading(() => ({ languages: ['en-US'], back: false }))()).toBeNull();
+      select(edge);
+      useRoutingStore.setState({ meeting: false });
+      expect(appReading(theirs)()).toBeNull();
+      expect(speakerQueue.asked).toBe(0);
+      // It reads to them: the playback's queue of the user's leg, asked for once, each clip by its segment.
+      useRoutingStore.setState({ meeting: true });
+      const reading = appReading(theirs);
+      expect(reading()).toBeNull();
+      await vi.waitFor(() => expect(reading()).not.toBeNull());
+      expect(speakerQueue.asked).toBe(1);
+      speakerQueue.clips = [{ key: 'speaker:7:0', inMs: -20 }, { key: 'speaker:7:1', inMs: 480 }, { key: 'speaker:none:0', inMs: 900 }];
+      expect(reading()!.scheduled()).toEqual([{ ref: 7, inMs: -20 }, { ref: 7, inMs: 480 }, { ref: undefined, inMs: 900 }]);
+    } finally {
+      speakerQueue.clips = [];
+      useProviderStore.setState({ selected: before.provider.selected, entries: before.provider.entries });
+      useRoutingStore.setState({ meeting: before.meeting });
+    }
   });
 });
 

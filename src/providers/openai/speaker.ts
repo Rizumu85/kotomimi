@@ -11,7 +11,7 @@ import { describeCause } from '../../lib/diagnostics/describeCause';
 import { eventsFrom } from '../../lib/contract/events';
 import { framePayload } from '../../lib/contract/framePayload';
 import { sameSpeech } from '../../lib/language/script';
-import { speakText, speaksLanguage, type VoiceDeps, type VoiceStage } from './voice';
+import { speakText, speaksLanguage, warmVoice, type VoiceDeps, type VoiceStage } from './voice';
 
 /** No more sentences than this wait, in one language, behind the one being made. */
 export const SAYINGS_MOST = 2;
@@ -21,6 +21,7 @@ interface Saying { ref?: Ref; text: string; language: string }
 export class Speaker {
   private readonly waiting: Saying[] = [];
   private making: AbortController | null = null;
+  private warming: AbortController | null = null;
   private stopped = false;
 
   constructor(
@@ -61,9 +62,20 @@ export class Speaker {
     this.next();
   }
 
+  /**
+   * Another Kotomimi's voice engine loads its model at the first sentence asked of it: asked for now, as the leg
+   * begins, and not waited for (`warmVoice`). Any other place has nothing to bring up from here.
+   */
+  warm(): void {
+    if (this.stopped || this.warming) return;
+    this.warming = new AbortController();
+    void warmVoice(this.stage, this.key, this.deps, this.warming.signal);
+  }
+
   /** Nothing more is said: the sentence being made is given up, and nothing is said of it. */
   stop(): void {
     this.stopped = true;
+    this.warming?.abort();
     this.waiting.length = 0;
     this.making?.abort(new Error('the session ended'));
     this.making = null;

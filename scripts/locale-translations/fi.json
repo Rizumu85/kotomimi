@@ -1007,6 +1007,14 @@
     "en": "What you want to say — Enter translates",
     "text": "Kirjoita, mitä haluat sanoa. Enter kääntää"
   },
+  "fork.voice.addTake": {
+    "en": "Add a language to {{name}}",
+    "text": "Äänitä näyte uudella kielellä ({{name}})"
+  },
+  "fork.voice.addVoice": {
+    "en": "Add a voice",
+    "text": "Lisää ääni"
+  },
   "fork.voice.auto": {
     "en": "Read my translations as they come",
     "text": "Lue käännös automaattisesti puheeni jälkeen"
@@ -1014,6 +1022,50 @@
   "fork.voice.cannotSpeak": {
     "en": "{{name}} cannot speak {{language}}.",
     "text": "{{name}} ei tue kieltä {{language}}."
+  },
+  "fork.voice.chooseFile": {
+    "en": "Choose a file",
+    "text": "Valitse tiedosto"
+  },
+  "fork.voice.chooseVoice": {
+    "en": "Choose a voice",
+    "text": "Valitse ääni"
+  },
+  "fork.voice.clipFailed": {
+    "en": "The voice could not be added.",
+    "text": "Ääntä ei voitu lisätä."
+  },
+  "fork.voice.clipLanguage": {
+    "en": "Language of the recording",
+    "text": "Äänitteen kieli"
+  },
+  "fork.voice.clipSilent": {
+    "en": "No voice was heard.",
+    "text": "Äänitteestä ei kuulunut ääntä."
+  },
+  "fork.voice.clipTooLong": {
+    "en": "Too long: no more than {{seconds}} seconds with its words.",
+    "text": "Äänite on liian pitkä. Jos annat myös tekstin, äänite saa kestää enintään {{seconds}} sekuntia."
+  },
+  "fork.voice.clipTooShort": {
+    "en": "Too short: at least {{seconds}} seconds.",
+    "text": "Äänite on liian lyhyt. Vähimmäispituus on {{seconds}} sekuntia."
+  },
+  "fork.voice.clipUnreadable": {
+    "en": "This file could not be read.",
+    "text": "Tiedostoa ei voitu lukea."
+  },
+  "fork.voice.clipWords": {
+    "en": "What is said in it (optional)",
+    "text": "Äänitteen sanat (valinnainen)"
+  },
+  "fork.voice.clipWordsNeeded": {
+    "en": "What is said in it",
+    "text": "Äänitteellä sanotut sanat"
+  },
+  "fork.voice.exportVoice": {
+    "en": "Save {{name}} as a file",
+    "text": "Tallenna «{{name}}» tiedostoon"
   },
   "fork.voice.hearBoth": {
     "en": "To both",
@@ -1035,6 +1087,10 @@
     "en": "To them",
     "text": "Muille"
   },
+  "fork.voice.importVoice": {
+    "en": "Import a voice file",
+    "text": "Tuo äänitiedosto"
+  },
   "fork.voice.lineFailed": {
     "en": "This line could not be read aloud",
     "text": "Tämän rivin ääneenluku epäonnistui"
@@ -1055,9 +1111,17 @@
     "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
     "text": "Kotomimi toistaa käännökset ääneen tällä laitteella, ja puhelusovellus käyttää sitä mikrofonina. Jos äänikorttisi osaa miksata ääntä itse, valitse yksi sen toistokanavista ja yhdistä sen ääni mikrofonisi ääneen äänikortilla. Näin oma äänesi ei kulje ohjelmiston kautta."
   },
+  "fork.voice.micDenied": {
+    "en": "The microphone could not be opened.",
+    "text": "Mikrofonia ei voitu ottaa käyttöön."
+  },
   "fork.voice.modelPlaceholder": {
     "en": "The model's name, e.g. tts-1",
     "text": "Mallin nimi, esim. tts-1"
+  },
+  "fork.voice.myVoice": {
+    "en": "My voice",
+    "text": "Oma ääni"
   },
   "fork.voice.myVoiceToo": {
     "en": "My own voice goes too",
@@ -1075,13 +1139,41 @@
     "en": "Read aloud",
     "text": "Lue ääneen"
   },
+  "fork.voice.record": {
+    "en": "Read it aloud",
+    "text": "Lue tämä lause ääneen"
+  },
+  "fork.voice.recordAgain": {
+    "en": "Record again",
+    "text": "Äänitä uudelleen"
+  },
+  "fork.voice.removeTake": {
+    "en": "Remove the {{language}} recording of {{name}}",
+    "text": "Poista äänite ({{name}}, {{language}})"
+  },
+  "fork.voice.removeVoice": {
+    "en": "Remove {{name}}",
+    "text": "Poista «{{name}}»"
+  },
+  "fork.voice.renameVoice": {
+    "en": "Rename {{name}}",
+    "text": "Nimeä ”{{name}}” uudelleen"
+  },
   "fork.voice.sample": {
     "en": "Play a sample",
     "text": "Kuuntele näyte"
   },
+  "fork.voice.saveVoice": {
+    "en": "Save",
+    "text": "Tallenna"
+  },
   "fork.voice.sayLine": {
     "en": "Read this line aloud",
     "text": "Lue tämä rivi ääneen"
+  },
+  "fork.voice.serverNone": {
+    "en": "The other device lends no voice model. Use an API or this computer instead.",
+    "text": "Toisella laitteella ei ole käytettävissä olevaa puhesynteesimallia. Voit käyttää API:a tai tätä tietokonetta."
   },
   "fork.voice.stage": {
     "en": "Voice",
@@ -1094,6 +1186,10 @@
   "fork.voice.stopLine": {
     "en": "Stop",
     "text": "Pysäytä"
+  },
+  "fork.voice.stopRecording": {
+    "en": "Stop",
+    "text": "Lopeta"
   },
   "fork.voice.toMe": {
     "en": "I hear it",
@@ -1115,9 +1211,17 @@
     "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
     "text": "Kun käännös luetaan toiselle osapuolelle, ääni ohjataan virtuaalimikrofoniin. Valitse se mikrofoniksi VRChatissa tai kokoussovelluksessa (Windowsissa nimellä CABLE Output)."
   },
+  "fork.voice.unrecorded": {
+    "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
+    "text": "Omaa ääntä ei ole valittu. Lisää ääni Ääneenluku-kortissa."
+  },
   "fork.voice.voice": {
     "en": "Voice",
     "text": "Ääni"
+  },
+  "fork.voice.voiceName": {
+    "en": "Name",
+    "text": "Nimi"
   },
   "fork.voice.voiceOf": {
     "en": "{{language}} voice",
@@ -1130,6 +1234,14 @@
   "fork.voice.volumeTheirs": {
     "en": "Volume for them",
     "text": "Äänenvoimakkuus toiselle osapuolelle"
+  },
+  "fork.voice.wayImport": {
+    "en": "Import a recording",
+    "text": "Tuo äänite"
+  },
+  "fork.voice.wayRecord": {
+    "en": "Record now",
+    "text": "Äänitä nyt"
   },
   "fork.voice.woman": {
     "en": "Female voice",
@@ -2134,6 +2246,10 @@
   "providers.localai.noteQwen3Tts": {
     "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
     "text": "Luonnollisin ääni, ja puhe alkaa heti. Testattu japaniksi, kiinaksi ja englanniksi ilman lukuvirheitä. Käyttää noin 3 GB näyttömuistia ja tukee 10 kieltä."
+  },
+  "providers.localai.noteQwen3TtsBase": {
+    "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
+    "text": "Lukee tekstin omalla äänelläsi. Äänen kloonaamiseen riittää noin kymmenen sekunnin äänite. Uuden äänen ensimmäisellä käyttökerralla puhe alkaa muutaman sekunnin tai runsaan 20 sekunnin kuluttua. Sen jälkeen puhe alkaa heti. Vaatii noin 3 GB näyttömuistia ja tukee 10 kieltä."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

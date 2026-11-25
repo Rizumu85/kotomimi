@@ -1011,6 +1011,14 @@
     "en": "What you want to say — Enter translates",
     "text": "Söylemek istediğiniz şey — Enter çevirir"
   },
+  "fork.voice.addTake": {
+    "en": "Add a language to {{name}}",
+    "text": "“{{name}}” için başka bir dilde kayıt ekle"
+  },
+  "fork.voice.addVoice": {
+    "en": "Add a voice",
+    "text": "Ses ekle"
+  },
   "fork.voice.auto": {
     "en": "Read my translations as they come",
     "text": "Konuşmam bitince çeviriyi otomatik oku"
@@ -1018,6 +1026,50 @@
   "fork.voice.cannotSpeak": {
     "en": "{{name}} cannot speak {{language}}.",
     "text": "{{name}}, {{language}} konuşamıyor."
+  },
+  "fork.voice.chooseFile": {
+    "en": "Choose a file",
+    "text": "Dosya seç"
+  },
+  "fork.voice.chooseVoice": {
+    "en": "Choose a voice",
+    "text": "Ses seç"
+  },
+  "fork.voice.clipFailed": {
+    "en": "The voice could not be added.",
+    "text": "Ses eklenemedi."
+  },
+  "fork.voice.clipLanguage": {
+    "en": "Language of the recording",
+    "text": "Kaydın dili"
+  },
+  "fork.voice.clipSilent": {
+    "en": "No voice was heard.",
+    "text": "Kayıtta konuşma sesi duyulmadı."
+  },
+  "fork.voice.clipTooLong": {
+    "en": "Too long: no more than {{seconds}} seconds with its words.",
+    "text": "Kayıt çok uzun. Metni girilen kayıtlar en fazla {{seconds}} saniye olabilir."
+  },
+  "fork.voice.clipTooShort": {
+    "en": "Too short: at least {{seconds}} seconds.",
+    "text": "Kayıt çok kısa. En az {{seconds}} saniye olmalı."
+  },
+  "fork.voice.clipUnreadable": {
+    "en": "This file could not be read.",
+    "text": "Bu dosya okunamadı."
+  },
+  "fork.voice.clipWords": {
+    "en": "What is said in it (optional)",
+    "text": "Kayıtta söylenenler (isteğe bağlı)"
+  },
+  "fork.voice.clipWordsNeeded": {
+    "en": "What is said in it",
+    "text": "Kayıtta söylenenler"
+  },
+  "fork.voice.exportVoice": {
+    "en": "Save {{name}} as a file",
+    "text": "“{{name}}” sesini dosya olarak kaydet"
   },
   "fork.voice.hearBoth": {
     "en": "To both",
@@ -1039,6 +1091,10 @@
     "en": "To them",
     "text": "Karşı taraf duysun"
   },
+  "fork.voice.importVoice": {
+    "en": "Import a voice file",
+    "text": "Ses dosyasını içe aktar"
+  },
   "fork.voice.lineFailed": {
     "en": "This line could not be read aloud",
     "text": "Bu satır sesli okunamadı"
@@ -1059,9 +1115,17 @@
     "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
     "text": "Seslendirilen çeviri bu cihazda çalınır ve karşı tarafa mikrofon sesi olarak gider. Ses kartınız donanımsal mikslemeyi destekliyorsa kartın ses çıkış kanallarından birini seçin ve bu kanalın sesini mikrofonunuzla ses kartında birleştirin. Böylece kendi sesiniz yazılımdan geçmez."
   },
+  "fork.voice.micDenied": {
+    "en": "The microphone could not be opened.",
+    "text": "Mikrofon açılamadı."
+  },
   "fork.voice.modelPlaceholder": {
     "en": "The model's name, e.g. tts-1",
     "text": "Model adı, ör. tts-1"
+  },
+  "fork.voice.myVoice": {
+    "en": "My voice",
+    "text": "Kendi sesim"
   },
   "fork.voice.myVoiceToo": {
     "en": "My own voice goes too",
@@ -1079,13 +1143,41 @@
     "en": "Read aloud",
     "text": "Seslendirmeyi aç"
   },
+  "fork.voice.record": {
+    "en": "Read it aloud",
+    "text": "Bu cümleyi sesli oku"
+  },
+  "fork.voice.recordAgain": {
+    "en": "Record again",
+    "text": "Yeniden kaydet"
+  },
+  "fork.voice.removeTake": {
+    "en": "Remove the {{language}} recording of {{name}}",
+    "text": "“{{name}}” için {{language}} ses kaydını sil"
+  },
+  "fork.voice.removeVoice": {
+    "en": "Remove {{name}}",
+    "text": "“{{name}}” sesini sil"
+  },
+  "fork.voice.renameVoice": {
+    "en": "Rename {{name}}",
+    "text": "“{{name}}” adını değiştir"
+  },
   "fork.voice.sample": {
     "en": "Play a sample",
     "text": "Örneği dinle"
   },
+  "fork.voice.saveVoice": {
+    "en": "Save",
+    "text": "Kaydet"
+  },
   "fork.voice.sayLine": {
     "en": "Read this line aloud",
     "text": "Bu satırı sesli oku"
+  },
+  "fork.voice.serverNone": {
+    "en": "The other device lends no voice model. Use an API or this computer instead.",
+    "text": "Diğer cihazda kullanabileceğiniz bir seslendirme modeli yok. API veya bu bilgisayarı kullanabilirsiniz."
   },
   "fork.voice.stage": {
     "en": "Voice",
@@ -1096,6 +1188,10 @@
     "text": "Çevirilerinizi sesli okur. Konuşmadaki herhangi bir satırı dinlemek için yanındaki hoparlör düğmesine basın."
   },
   "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "Durdur"
+  },
+  "fork.voice.stopRecording": {
     "en": "Stop",
     "text": "Durdur"
   },
@@ -1119,9 +1215,17 @@
     "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
     "text": "Karşı tarafa okunurken ses sanal mikrofona gönderilir. VRChat veya toplantı uygulamanda mikrofon olarak bunu seç (Windows'ta CABLE Output)."
   },
+  "fork.voice.unrecorded": {
+    "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
+    "text": "Sesli okuma için henüz kendi sesinizi seçmediniz. “Sesli okuma” kartından sesinizi ekleyin."
+  },
   "fork.voice.voice": {
     "en": "Voice",
     "text": "Ses"
+  },
+  "fork.voice.voiceName": {
+    "en": "Name",
+    "text": "Ad"
   },
   "fork.voice.voiceOf": {
     "en": "{{language}} voice",
@@ -1134,6 +1238,14 @@
   "fork.voice.volumeTheirs": {
     "en": "Volume for them",
     "text": "Karşı tarafın duyduğu ses düzeyi"
+  },
+  "fork.voice.wayImport": {
+    "en": "Import a recording",
+    "text": "Ses kaydı içe aktar"
+  },
+  "fork.voice.wayRecord": {
+    "en": "Record now",
+    "text": "Şimdi kaydet"
   },
   "fork.voice.woman": {
     "en": "Female voice",
@@ -2130,6 +2242,10 @@
   "providers.localai.noteQwen3Tts": {
     "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
     "text": "En doğal ses, anında konuşmaya başlar. Japonca, Çince ve İngilizce testlerinde hiç okuma hatası yapmadı. Yaklaşık 3 GB ekran kartı belleği kullanır, 10 dili destekler."
+  },
+  "providers.localai.noteQwen3TtsBase": {
+    "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
+    "text": "Yaklaşık on saniyelik bir kayıtla sesini klonlar ve metni senin sesinle okur. Her ses ilk kullanımda birkaç saniye ile otuz saniyeye yakın bir süre arasında bekletebilir. Sonraki kullanımlarda hemen okumaya başlar. Yaklaşık 3 GB ekran kartı belleği kullanır ve 10 dili destekler."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

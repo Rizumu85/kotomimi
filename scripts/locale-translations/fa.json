@@ -1011,6 +1011,14 @@
     "en": "What you want to say — Enter translates",
     "text": "حرفتان را بنویسید؛ با Enter ترجمه می‌شود"
   },
+  "fork.voice.addTake": {
+    "en": "Add a language to {{name}}",
+    "text": "ضبط صدا به زبانی دیگر برای «{{name}}»"
+  },
+  "fork.voice.addVoice": {
+    "en": "Add a voice",
+    "text": "افزودن صدا"
+  },
   "fork.voice.auto": {
     "en": "Read my translations as they come",
     "text": "بعد از حرف‌زدنم، ترجمه خودکار خوانده شود"
@@ -1018,6 +1026,50 @@
   "fork.voice.cannotSpeak": {
     "en": "{{name}} cannot speak {{language}}.",
     "text": "{{name}} نمی‌تواند به زبان {{language}} صحبت کند."
+  },
+  "fork.voice.chooseFile": {
+    "en": "Choose a file",
+    "text": "انتخاب فایل"
+  },
+  "fork.voice.chooseVoice": {
+    "en": "Choose a voice",
+    "text": "انتخاب صدا"
+  },
+  "fork.voice.clipFailed": {
+    "en": "The voice could not be added.",
+    "text": "افزودن صدا ممکن نشد."
+  },
+  "fork.voice.clipLanguage": {
+    "en": "Language of the recording",
+    "text": "زبان صدای ضبط‌شده"
+  },
+  "fork.voice.clipSilent": {
+    "en": "No voice was heard.",
+    "text": "صدایی شنیده نشد."
+  },
+  "fork.voice.clipTooLong": {
+    "en": "Too long: no more than {{seconds}} seconds with its words.",
+    "text": "ضبط خیلی طولانی است. اگر متن گفتار را وارد می‌کنید، ضبط باید حداکثر {{seconds}} ثانیه باشد."
+  },
+  "fork.voice.clipTooShort": {
+    "en": "Too short: at least {{seconds}} seconds.",
+    "text": "ضبط خیلی کوتاه است. باید دست‌کم {{seconds}} ثانیه باشد."
+  },
+  "fork.voice.clipUnreadable": {
+    "en": "This file could not be read.",
+    "text": "این فایل قابل خواندن نیست."
+  },
+  "fork.voice.clipWords": {
+    "en": "What is said in it (optional)",
+    "text": "متن گفتار ضبط‌شده (اختیاری)"
+  },
+  "fork.voice.clipWordsNeeded": {
+    "en": "What is said in it",
+    "text": "متن حرف‌های ضبط‌شده"
+  },
+  "fork.voice.exportVoice": {
+    "en": "Save {{name}} as a file",
+    "text": "ذخیرهٔ «{{name}}» به‌صورت فایل"
   },
   "fork.voice.hearBoth": {
     "en": "To both",
@@ -1039,6 +1091,10 @@
     "en": "To them",
     "text": "برای طرف مقابل"
   },
+  "fork.voice.importVoice": {
+    "en": "Import a voice file",
+    "text": "وارد کردن فایل صدا"
+  },
   "fork.voice.lineFailed": {
     "en": "This line could not be read aloud",
     "text": "این خط خوانده نشد"
@@ -1059,9 +1115,17 @@
     "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
     "text": "ترجمهٔ صوتی روی این دستگاه پخش می‌شود و طرف مقابل آن را مثل صدای میکروفون می‌شنود. اگر کارت صدا قابلیت میکس سخت‌افزاری دارد، یکی از کانال‌های پخش آن را انتخاب کنید و صدای آن را در خود کارت صدا با صدای میکروفونتان میکس کنید. به این ترتیب صدای اصلی شما از نرم‌افزار عبور نمی‌کند."
   },
+  "fork.voice.micDenied": {
+    "en": "The microphone could not be opened.",
+    "text": "میکروفون در دسترس نیست."
+  },
   "fork.voice.modelPlaceholder": {
     "en": "The model's name, e.g. tts-1",
     "text": "نام مدل، مثلاً tts-1"
+  },
+  "fork.voice.myVoice": {
+    "en": "My voice",
+    "text": "صدای من"
   },
   "fork.voice.myVoiceToo": {
     "en": "My own voice goes too",
@@ -1079,13 +1143,41 @@
     "en": "Read aloud",
     "text": "فعال‌کردن روخوانی"
   },
+  "fork.voice.record": {
+    "en": "Read it aloud",
+    "text": "این جمله را بلند بخوانید"
+  },
+  "fork.voice.recordAgain": {
+    "en": "Record again",
+    "text": "ضبط دوباره"
+  },
+  "fork.voice.removeTake": {
+    "en": "Remove the {{language}} recording of {{name}}",
+    "text": "حذف صدای ضبط‌شدهٔ «{{name}}» به زبان {{language}}"
+  },
+  "fork.voice.removeVoice": {
+    "en": "Remove {{name}}",
+    "text": "حذف «{{name}}»"
+  },
+  "fork.voice.renameVoice": {
+    "en": "Rename {{name}}",
+    "text": "تغییر نام «{{name}}»"
+  },
   "fork.voice.sample": {
     "en": "Play a sample",
     "text": "پخش نمونه"
   },
+  "fork.voice.saveVoice": {
+    "en": "Save",
+    "text": "ذخیره"
+  },
   "fork.voice.sayLine": {
     "en": "Read this line aloud",
     "text": "خواندن این خط"
+  },
+  "fork.voice.serverNone": {
+    "en": "The other device lends no voice model. Use an API or this computer instead.",
+    "text": "دستگاه دیگر مدل تبدیل متن به گفتار برای استفاده ندارد. می‌توانید از API یا همین رایانه استفاده کنید."
   },
   "fork.voice.stage": {
     "en": "Voice",
@@ -1096,6 +1188,10 @@
     "text": "ترجمه‌هایتان را با صدا می‌خواند. برای شنیدن هر خط از گفتگو هم روی دکمهٔ بلندگوی آن بزنید."
   },
   "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "توقف"
+  },
+  "fork.voice.stopRecording": {
     "en": "Stop",
     "text": "توقف"
   },
@@ -1119,9 +1215,17 @@
     "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
     "text": "هنگام خواندن برای طرف مقابل، صدا به میکروفون مجازی فرستاده می‌شود. در VRChat یا برنامهٔ جلسه، آن را به‌عنوان میکروفون انتخاب کنید (در Windows نامش CABLE Output است)."
   },
+  "fork.voice.unrecorded": {
+    "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
+    "text": "هنوز صدای خودتان را برای خواندن متن انتخاب نکرده‌اید. آن را در بخش «خواندن متن» اضافه کنید."
+  },
   "fork.voice.voice": {
     "en": "Voice",
     "text": "صدا"
+  },
+  "fork.voice.voiceName": {
+    "en": "Name",
+    "text": "نام"
   },
   "fork.voice.voiceOf": {
     "en": "{{language}} voice",
@@ -1134,6 +1238,14 @@
   "fork.voice.volumeTheirs": {
     "en": "Volume for them",
     "text": "بلندی صدا برای طرف مقابل"
+  },
+  "fork.voice.wayImport": {
+    "en": "Import a recording",
+    "text": "وارد کردن صدای ضبط‌شده"
+  },
+  "fork.voice.wayRecord": {
+    "en": "Record now",
+    "text": "ضبط همین حالا"
   },
   "fork.voice.woman": {
     "en": "Female voice",
@@ -2130,6 +2242,10 @@
   "providers.localai.noteQwen3Tts": {
     "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
     "text": "طبیعی‌ترین صدا، با پخش فوری. در آزمون‌های ژاپنی، چینی و انگلیسی هیچ اشتباهی در خواندن نداشت. حدود 3 GB حافظهٔ گرافیکی مصرف می‌کند و از 10 زبان پشتیبانی می‌کند."
+  },
+  "providers.localai.noteQwen3TtsBase": {
+    "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
+    "text": "متن را با صدای خودتان می‌خواند. برای شبیه‌سازی صدایتان کافی است حدود ده ثانیه از آن را ضبط کنید. بار اول که از هر صدا استفاده می‌کنید، خواندن بعد از چند ثانیه تا کمی بیشتر از بیست ثانیه شروع می‌شود. دفعات بعد خواندن بلافاصله شروع می‌شود. حدود 3 GB از حافظهٔ کارت گرافیک را مصرف می‌کند و از 10 زبان پشتیبانی می‌کند."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

@@ -23,7 +23,8 @@ describe('what a LocalAI model is for', () => {
     expect(kindOf(null)).toBe('pipeline');
     expect(kindOf([])).toBe('pipeline');
     expect(kindOf(['vad'])).toBe('other');
-    expect(kindOf(['tts'])).toBe('other');
+    // Fork: a model that speaks is the voice stage's.
+    expect(kindOf(['tts'])).toBe('voice');
     expect(kindOf('chat')).toBe('pipeline');
   });
 });

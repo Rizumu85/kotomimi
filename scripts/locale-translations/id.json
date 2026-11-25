@@ -1011,6 +1011,14 @@
     "en": "What you want to say — Enter translates",
     "text": "Ketik yang ingin Anda katakan, tekan Enter untuk menerjemahkan"
   },
+  "fork.voice.addTake": {
+    "en": "Add a language to {{name}}",
+    "text": "Tambah rekaman bahasa lain untuk {{name}}"
+  },
+  "fork.voice.addVoice": {
+    "en": "Add a voice",
+    "text": "Tambah suara"
+  },
   "fork.voice.auto": {
     "en": "Read my translations as they come",
     "text": "Bacakan terjemahan otomatis setelah saya bicara"
@@ -1018,6 +1026,50 @@
   "fork.voice.cannotSpeak": {
     "en": "{{name}} cannot speak {{language}}.",
     "text": "{{name}} tidak bisa berbicara dalam bahasa {{language}}."
+  },
+  "fork.voice.chooseFile": {
+    "en": "Choose a file",
+    "text": "Pilih file"
+  },
+  "fork.voice.chooseVoice": {
+    "en": "Choose a voice",
+    "text": "Pilih suara"
+  },
+  "fork.voice.clipFailed": {
+    "en": "The voice could not be added.",
+    "text": "Suara tidak bisa ditambahkan."
+  },
+  "fork.voice.clipLanguage": {
+    "en": "Language of the recording",
+    "text": "Bahasa rekaman"
+  },
+  "fork.voice.clipSilent": {
+    "en": "No voice was heard.",
+    "text": "Tidak ada suara yang terdengar."
+  },
+  "fork.voice.clipTooLong": {
+    "en": "Too long: no more than {{seconds}} seconds with its words.",
+    "text": "Rekaman terlalu panjang. Jika teks diisi, durasinya maksimal {{seconds}} detik."
+  },
+  "fork.voice.clipTooShort": {
+    "en": "Too short: at least {{seconds}} seconds.",
+    "text": "Rekaman terlalu pendek. Durasinya minimal {{seconds}} detik."
+  },
+  "fork.voice.clipUnreadable": {
+    "en": "This file could not be read.",
+    "text": "File ini tidak bisa dibaca."
+  },
+  "fork.voice.clipWords": {
+    "en": "What is said in it (optional)",
+    "text": "Isi ucapan dalam rekaman (opsional)"
+  },
+  "fork.voice.clipWordsNeeded": {
+    "en": "What is said in it",
+    "text": "Ucapan dalam rekaman"
+  },
+  "fork.voice.exportVoice": {
+    "en": "Save {{name}} as a file",
+    "text": "Simpan \"{{name}}\" sebagai file"
   },
   "fork.voice.hearBoth": {
     "en": "To both",
@@ -1039,6 +1091,10 @@
     "en": "To them",
     "text": "Untuk lawan bicara"
   },
+  "fork.voice.importVoice": {
+    "en": "Import a voice file",
+    "text": "Impor file suara"
+  },
   "fork.voice.lineFailed": {
     "en": "This line could not be read aloud",
     "text": "Baris ini gagal dibacakan"
@@ -1059,9 +1115,17 @@
     "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
     "text": "Terjemahan yang dibacakan diputar melalui perangkat ini. Lawan bicara mendengarnya seolah-olah dari mikrofon Anda. Jika kartu suara Anda bisa mencampur audio secara langsung, pilih salah satu saluran pemutarannya lalu gabungkan audio dari saluran itu dengan suara mikrofon di kartu suara. Dengan begitu, suara asli Anda tidak melewati perangkat lunak."
   },
+  "fork.voice.micDenied": {
+    "en": "The microphone could not be opened.",
+    "text": "Mikrofon tidak bisa diaktifkan."
+  },
   "fork.voice.modelPlaceholder": {
     "en": "The model's name, e.g. tts-1",
     "text": "Nama model, misalnya tts-1"
+  },
+  "fork.voice.myVoice": {
+    "en": "My voice",
+    "text": "Suara saya"
   },
   "fork.voice.myVoiceToo": {
     "en": "My own voice goes too",
@@ -1079,13 +1143,41 @@
     "en": "Read aloud",
     "text": "Aktifkan baca nyaring"
   },
+  "fork.voice.record": {
+    "en": "Read it aloud",
+    "text": "Bacakan kalimat ini"
+  },
+  "fork.voice.recordAgain": {
+    "en": "Record again",
+    "text": "Rekam ulang"
+  },
+  "fork.voice.removeTake": {
+    "en": "Remove the {{language}} recording of {{name}}",
+    "text": "Hapus rekaman bahasa {{language}} untuk {{name}}"
+  },
+  "fork.voice.removeVoice": {
+    "en": "Remove {{name}}",
+    "text": "Hapus \"{{name}}\""
+  },
+  "fork.voice.renameVoice": {
+    "en": "Rename {{name}}",
+    "text": "Ubah nama “{{name}}”"
+  },
   "fork.voice.sample": {
     "en": "Play a sample",
     "text": "Dengarkan contoh"
   },
+  "fork.voice.saveVoice": {
+    "en": "Save",
+    "text": "Simpan"
+  },
   "fork.voice.sayLine": {
     "en": "Read this line aloud",
     "text": "Bacakan baris ini"
+  },
+  "fork.voice.serverNone": {
+    "en": "The other device lends no voice model. Use an API or this computer instead.",
+    "text": "Tidak ada model pembaca teks yang bisa dipakai dari perangkat lain itu. Gunakan API atau komputer ini."
   },
   "fork.voice.stage": {
     "en": "Voice",
@@ -1098,6 +1190,10 @@
   "fork.voice.stopLine": {
     "en": "Stop",
     "text": "Hentikan"
+  },
+  "fork.voice.stopRecording": {
+    "en": "Stop",
+    "text": "Berhenti"
   },
   "fork.voice.toMe": {
     "en": "I hear it",
@@ -1119,9 +1215,17 @@
     "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
     "text": "Saat dibacakan untuk lawan bicara, suara dikirim ke mikrofon virtual. Di VRChat atau aplikasi rapat, pilih mikrofon tersebut (di Windows namanya CABLE Output)."
   },
+  "fork.voice.unrecorded": {
+    "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
+    "text": "Suara Anda sendiri belum dipilih untuk membacakan teks. Tambahkan suara di panel \"Bacakan teks\"."
+  },
   "fork.voice.voice": {
     "en": "Voice",
     "text": "Suara"
+  },
+  "fork.voice.voiceName": {
+    "en": "Name",
+    "text": "Nama"
   },
   "fork.voice.voiceOf": {
     "en": "{{language}} voice",
@@ -1134,6 +1238,14 @@
   "fork.voice.volumeTheirs": {
     "en": "Volume for them",
     "text": "Volume untuk lawan bicara"
+  },
+  "fork.voice.wayImport": {
+    "en": "Import a recording",
+    "text": "Impor rekaman"
+  },
+  "fork.voice.wayRecord": {
+    "en": "Record now",
+    "text": "Rekam sekarang"
   },
   "fork.voice.woman": {
     "en": "Female voice",
@@ -2150,6 +2262,10 @@
   "providers.localai.noteQwen3Tts": {
     "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
     "text": "Paling alami, langsung bersuara. Diuji dalam bahasa Jepang, Mandarin, dan Inggris: tidak ada salah baca. Memakai sekitar 3 GB memori grafis, mendukung 10 bahasa."
+  },
+  "providers.localai.noteQwen3TtsBase": {
+    "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
+    "text": "Membacakan teks dengan suaramu sendiri. Cukup rekam sekitar sepuluh detik untuk mengkloning suaramu. Saat pertama kali memakai tiap suara, tunggu beberapa detik hingga dua puluh sekian detik. Setelah itu, suara langsung terdengar. Perlu sekitar 3 GB memori grafis dan mendukung 10 bahasa."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

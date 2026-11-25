@@ -22,6 +22,11 @@ export interface NativeVoiceModel extends NativeCardModel {
   any: readonly VoiceOption[];
   /** Runs on the processor alone. */
   usesGpu?: false;
+  /**
+   * It has no voice of its own: it speaks in the user's, cloned from a recording of theirs (`voiceLibraryStore`,
+   * `electron/voice-library.js`). Its voices are the library's, the same for every language.
+   */
+  clones?: true;
 }
 
 /** The voices of a model that is told one by a description (`VOICES[…].speech.voices` in the main process). */
@@ -65,6 +70,15 @@ export const NATIVE_VOICES: readonly NativeVoiceModel[] = [
     languages: ['ja'],
     voices: { ja: DESCRIBED },
     any: [],
+  },
+  {
+    id: 'qwen3-tts-1.7b-base-q8',
+    name: 'Qwen3-TTS 1.7B Base',
+    bytes: 2695186240,
+    languages: ['zh', 'en', 'ja', 'ko', 'de', 'fr', 'ru', 'pt', 'es', 'it'],
+    voices: {},
+    any: [],
+    clones: true,
   },
 ];
 

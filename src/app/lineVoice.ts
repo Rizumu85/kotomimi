@@ -11,9 +11,12 @@ import { describeCause, reportWarning } from '../lib/diagnostics/report';
 import { getAppAudio } from '../lib/audio/appAudio';
 import { liveVoiceDeps } from '../lib/voice/liveVoice';
 import { holdNative, nativeDownloaded, voiceUp } from '../providers/openai/localaiNative';
-import { speaksByEdge, voiceLanguages, voiceSpeaks, voiceStageOf, VOICE_DEFAULTS, type VoiceChoice } from '../providers/openai/localaiVoice';
+import { chosenVoice, serverLendsVoice, speaksByEdge, voiceLanguages, voiceSource, voiceSpeaks, voiceStageOf, VOICE_DEFAULTS, type VoiceChoice } from '../providers/openai/localaiVoice';
+import { localaiEndpoint } from '../providers/openai/localai';
+import type { LocalAIModel } from '../providers/openai/localaiModels';
+import { httpBaseOf } from '../providers/openai/textModel';
 import { nativeVoice } from '../providers/openai/nativeVoices';
-import { speakText, spokenText } from '../providers/openai/voice';
+import { atServer, speakText, spokenText } from '../providers/openai/voice';
 import { useLineVoiceStore } from '../stores/lineVoiceStore';
 import { useNativeVoiceStore } from '../stores/nativeEngineStore';
 import { useProviderStore } from '../stores/providerStore';
@@ -30,15 +33,33 @@ export function voiceChoiceNow(): VoiceChoice {
   return settings?.speak ?? VOICE_DEFAULTS;
 }
 
+/** What the other device listed at its last check: the voice models it lends are among it. */
+export const lentNow = (): readonly LocalAIModel[] => useProviderStore.getState().models[LOCALAI] ?? [];
+
+/** The other device as a voice is asked there: its address, and its access key where it asks for one. Null: no address is set. */
+function serverNow(): { baseUrl: string; key: string | undefined } | null {
+  const entry = useProviderStore.getState().entries[LOCALAI];
+  const endpoint = localaiEndpoint(entry?.credentials.endpoint ?? '');
+  if (!endpoint) return null;
+  const needsKey = (entry?.settings as { serverNeedsKey?: boolean } | undefined)?.serverNeedsKey === true;
+  return { baseUrl: httpBaseOf(endpoint), key: needsKey ? entry?.credentials.serverKey : undefined };
+}
+
 /** Whether the stage can be asked for a sentence now: on, and what speaks is here. */
 export function voiceReady(choice: VoiceChoice = voiceChoiceNow()): boolean {
   if (!choice.on) return false;
   if (choice.at === 'device') return nativeDownloaded(useNativeVoiceStore.getState().status, nativeVoice(choice.nativeModel).id);
+  if (choice.at === 'server') return serverNow() !== null && serverLendsVoice(choice, lentNow());
   return speaksByEdge(choice) || (choice.apiBaseUrl.trim() !== '' && choice.apiModel.trim() !== '');
 }
 
 /** Whether a line in this language can be said now. */
-export const canSay = (language: string, choice: VoiceChoice = voiceChoiceNow()): boolean => voiceReady(choice) && voiceSpeaks(choice, language);
+export function canSay(language: string, choice: VoiceChoice = voiceChoiceNow()): boolean {
+  if (!voiceReady(choice) || !voiceSpeaks(choice, language, lentNow())) return false;
+  // A cloning model says nothing in a language no voice of the user's is chosen for.
+  const source = voiceSource(choice, lentNow());
+  return !(source.by === 'catalog' && source.model.clones) || chosenVoice(choice, language, lentNow()) !== undefined;
+}
 
 /**
  * Whether nothing may be played on the real device now: a run is capturing the whole system as the other side, and
@@ -67,11 +88,14 @@ export function stopLine(): void {
 export async function sayLine(id: string, text: string, language: string, using?: VoiceChoice): Promise<void> {
   const choice = using ?? voiceChoiceNow();
   const said = spokenText(text);
-  const stage = said ? voiceStageOf(choice, [language]) : null;
+  const lent = lentNow();
+  const server = choice.at === 'server' ? serverNow() : null;
+  const made = said && (choice.at !== 'server' || server) ? voiceStageOf(choice, [language], lent) : null;
+  const stage = made && server ? atServer(made, server.baseUrl) : made;
   current?.abort(new Error('another line'));
   const control = new AbortController();
   current = control;
-  if (!stage || !voiceSpeaks(choice, language) || lineBlocked()) {
+  if (!stage || !voiceSpeaks(choice, language, lent) || lineBlocked()) {
     useLineVoiceStore.setState({ line: null, phase: 'idle', failed: id });
     return;
   }
@@ -88,7 +112,7 @@ export async function sayLine(id: string, text: string, language: string, using?
     const mine = queue.clears;
     if (stage.engine) await voiceUp(stage.model);
     if (control.signal.aborted) return;
-    const key = stage.key ? useProviderStore.getState().entries[LOCALAI]?.credentials[stage.key] : undefined;
+    const key = stage.server ? server?.key : stage.key ? useProviderStore.getState().entries[LOCALAI]?.credentials[stage.key] : undefined;
     await speakText(stage, { text: said, language }, key, { ...liveVoiceDeps, fetch: (input, init) => fetch(input, init), clock: realClock }, control.signal, (pcm) => {
       if (control.signal.aborted) return;
       if (queue.clears !== mine) { control.abort(new Error('another clip took its place')); return; }
@@ -122,13 +146,16 @@ export function watchLineVoice(): () => void {
   const apply = () => {
     const choice = voiceChoiceNow();
     const ready = voiceReady(choice);
-    const languages = voiceLanguages(choice);
+    const languages = voiceLanguages(choice, lentNow());
     const now = useLineVoiceStore.getState();
     if (now.ready !== ready || (now.languages ?? []).join() !== (languages ?? []).join() || (now.languages === null) !== (languages === null)) useLineVoiceStore.setState({ ready, languages });
   };
   apply();
   const stops = [
-    useProviderStore.subscribe((state, before) => { if (speakOf(state) !== speakOf(before)) apply(); }),
+    // The other device's address and what it lends decide it too, where it speaks.
+    useProviderStore.subscribe((state, before) => {
+      if (speakOf(state) !== speakOf(before) || state.models[LOCALAI] !== before.models[LOCALAI] || state.entries[LOCALAI]?.credentials !== before.entries[LOCALAI]?.credentials) apply();
+    }),
     useNativeVoiceStore.subscribe((state) => `${state.status.engine}|${Object.entries(state.status.models).map(([id, m]) => `${id}:${m.state}`).join(',')}`, apply),
   ];
   return () => { for (const stop of stops) stop(); };

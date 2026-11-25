@@ -8,10 +8,10 @@ import type { ModelOption } from '../../lib/provider/types';
 /**
  * What a model on the Realtime server is for: a pipeline the socket runs, a
  * recognizer, a text model, a translation model that is no chat model
- * (another Kotomimi's own, `src/lib/lan`), or something no stage uses (a
- * VAD, a TTS voice).
+ * (another Kotomimi's own, `src/lib/lan`), a voice, or something no stage
+ * uses (a VAD).
  */
-export type LocalAIModelKind = 'pipeline' | 'asr' | 'text' | 'translate' | 'feedback' | 'other';
+export type LocalAIModelKind = 'pipeline' | 'asr' | 'text' | 'translate' | 'feedback' | 'voice' | 'other';
 
 /** The name another Kotomimi gives as the owner of every model it shares. */
 export const KOTOMIMI_HOST = 'kotomimi';
@@ -36,9 +36,9 @@ export interface LocalAIModel extends ModelOption {
 /**
  * A model's kind from LocalAI's `/v1/models/capabilities`: `transcript` is a
  * recognizer, `chat` or `completion` a text model, `translate` a translation
- * model, and a model with no capability of its own is a pipeline — it only
- * strings other models together. Anything else (`vad`, `tts`, `embeddings`)
- * no stage here uses.
+ * model, `tts` a voice, and a model with no capability of its own is a
+ * pipeline — it only strings other models together. Anything else (`vad`,
+ * `embeddings`) no stage here uses.
  */
 export function kindOf(capabilities: unknown): LocalAIModelKind {
   const list = Array.isArray(capabilities) ? capabilities.filter((c): c is string => typeof c === 'string') : [];
@@ -47,11 +47,12 @@ export function kindOf(capabilities: unknown): LocalAIModelKind {
   if (list.includes('translate')) return 'translate';
   // Another Kotomimi's feedback model (`src/lib/lan/protocol.ts`): lent for grammar feedback, and for that alone.
   if (list.includes('feedback')) return 'feedback';
+  if (list.includes('tts')) return 'voice';
   return list.length === 0 ? 'pipeline' : 'other';
 }
 
 /** The slots a model is chosen for. */
-export type LocalAIModelSlot = 'pipeline' | 'asr' | 'translate' | 'coach';
+export type LocalAIModelSlot = 'pipeline' | 'asr' | 'translate' | 'coach' | 'voice';
 
 /** The kinds that can do a slot's work: a translation model translates, and gives no feedback. */
 const KINDS: Readonly<Record<LocalAIModelSlot, readonly LocalAIModelKind[]>> = {
@@ -59,6 +60,7 @@ const KINDS: Readonly<Record<LocalAIModelSlot, readonly LocalAIModelKind[]>> = {
   asr: ['asr'],
   translate: ['text', 'translate'],
   coach: ['text', 'feedback'],
+  voice: ['voice'],
 };
 
 /**

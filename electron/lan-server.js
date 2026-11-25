@@ -9,6 +9,7 @@
 // What is served, and only this:
 //   GET  /v1/models, /v1/models/capabilities
 //   POST /v1/chat/completions
+//   POST /v1/audio/speech
 //   WS   /v1/realtime
 //
 // A session left running is not left holding a model. A device that forgot
@@ -50,8 +51,15 @@ const HANDSHAKE_TIMEOUT_MS = 30_000;
 const KEY_TRIES = 10;
 const KEY_WINDOW_MS = 60_000;
 
+/**
+ * What the page knows a request or a socket by: never the same twice while the app runs. Sharing stopped and started
+ * again is another server, and an answer still being made for a request of the old one must find nobody, not a
+ * request of the new one that happens to be numbered alike.
+ */
+let nextId = 0;
+
 const REALTIME_PATH = '/v1/realtime';
-const ROUTES = new Set(['GET /v1/models', 'GET /v1/models/capabilities', 'POST /v1/chat/completions']);
+const ROUTES = new Set(['GET /v1/models', 'GET /v1/models/capabilities', 'POST /v1/chat/completions', 'POST /v1/audio/speech']);
 
 /**
  * The origins a request may name. The app's own page is a file, and its
@@ -163,7 +171,8 @@ function sameKey(given, wanted) {
 
 /**
  * Starts the server. `handlers` is the page's side:
- *   request({ id, method, path, body })   answered later through `reply(id, …)`
+ *   request({ id, method, path, body })   answered later through `reply(id, …)`, or piece by piece through `stream(id, …)`
+ *   requestClosed({ id })                 the caller went away before its answer was whole (optional)
  *   socketOpen({ id, model, address })
  *   socketMessage({ id, data })
  *   socketClose({ id })
@@ -208,7 +217,6 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
     if (!isLocalHost(request.headers.host)) return 'This Kotomimi is not reached by that name.';
     return null;
   };
-  let nextId = 0;
   /** Requests the page has not answered yet. */
   const waiting = new Map();
   /** Open sockets, by the id the page knows them by. */
@@ -297,16 +305,22 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
       // To the page, as everything is.
       const id = `r${++nextId}`;
       const timer = setTimeout(() => {
-        if (!waiting.delete(id)) return;
-        refuse(response, 504, 'timeout', 'Kotomimi did not answer in time.');
+        const pending = waiting.get(id);
+        if (!pending) return;
+        waiting.delete(id);
+        // An answer that had begun is cut where it is; one that had not is refused.
+        if (pending.streaming) response.destroy();
+        else refuse(response, 504, 'timeout', 'Kotomimi did not answer in time.');
+        handlers.requestClosed?.({ id });
       }, REPLY_TIMEOUT_MS);
       waiting.set(id, { response, timer });
-      // The caller went away: the page's answer has no one to go to.
+      // The caller went away: the page's answer has no one to go to, and what was being made for it can stop.
       response.on('close', () => {
         const pending = waiting.get(id);
         if (pending && !response.writableEnded) {
           clearTimeout(pending.timer);
           waiting.delete(id);
+          handlers.requestClosed?.({ id });
         }
       });
       handlers.request({ id, method: request.method, path, body, ...(request.method === 'GET' && url.search ? { query: Object.fromEntries(url.searchParams) } : {}) });
@@ -381,7 +395,7 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
         /** The page's answer to a request: a status and a body — JSON, or text with its own content type. */
         reply(id, { status = 200, body = null, contentType } = {}) {
           const pending = waiting.get(id);
-          if (!pending) return false;
+          if (!pending || pending.streaming) return false;
           waiting.delete(id);
           clearTimeout(pending.timer);
           if (contentType) {
@@ -391,6 +405,30 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
             json(pending.response, status, body);
           }
           return true;
+        },
+        /** Whether a request still waits for its answer: its caller has not gone away, and nothing has answered it. */
+        waits(id) { return waiting.has(id) && !waiting.get(id).streaming; },
+        /**
+         * An answer that comes in pieces (a sentence's sound as it is made): the head goes now, and what is returned
+         * writes the pieces and ends it — `end` when all of it came, `abort` when it did not, so that the caller
+         * reads a cut answer as one. Null: the request is not waiting any more. The request's own time limit stands.
+         */
+        stream(id, { status = 200, contentType = 'application/octet-stream' } = {}) {
+          const pending = waiting.get(id);
+          if (!pending || pending.streaming) return null;
+          pending.streaming = true;
+          pending.response.writeHead(status, { 'Content-Type': contentType, 'Cache-Control': 'no-store', ...named(pending.response.req) });
+          const finish = (how) => {
+            if (waiting.get(id) !== pending) return;
+            waiting.delete(id);
+            clearTimeout(pending.timer);
+            how();
+          };
+          return {
+            write(bytes) { if (waiting.get(id) === pending) pending.response.write(bytes); },
+            end() { finish(() => pending.response.end()); },
+            abort() { finish(() => pending.response.destroy()); },
+          };
         },
         /** One JSON text frame to a socket. */
         send(id, data) {
@@ -407,8 +445,10 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
           clearInterval(idle);
           for (const [id, pending] of waiting) {
             clearTimeout(pending.timer);
-            refuse(pending.response, 503, 'stopped', 'Kotomimi stopped sharing.');
             waiting.delete(id);
+            if (pending.streaming) pending.response.destroy();
+            else refuse(pending.response, 503, 'stopped', 'Kotomimi stopped sharing.');
+            handlers.requestClosed?.({ id });
           }
           for (const ws of sockets.values()) ws.terminate();
           sockets.clear();

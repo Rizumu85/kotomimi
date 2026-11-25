@@ -1007,6 +1007,14 @@
     "en": "What you want to say — Enter translates",
     "text": "Що хочете сказати? Enter — перекласти"
   },
+  "fork.voice.addTake": {
+    "en": "Add a language to {{name}}",
+    "text": "Записати «{{name}}» ще однією мовою"
+  },
+  "fork.voice.addVoice": {
+    "en": "Add a voice",
+    "text": "Додати голос"
+  },
   "fork.voice.auto": {
     "en": "Read my translations as they come",
     "text": "Автоматично озвучувати переклад після моїх слів"
@@ -1014,6 +1022,50 @@
   "fork.voice.cannotSpeak": {
     "en": "{{name}} cannot speak {{language}}.",
     "text": "{{name}} не підтримує озвучення мовою {{language}}."
+  },
+  "fork.voice.chooseFile": {
+    "en": "Choose a file",
+    "text": "Вибрати файл"
+  },
+  "fork.voice.chooseVoice": {
+    "en": "Choose a voice",
+    "text": "Вибрати голос"
+  },
+  "fork.voice.clipFailed": {
+    "en": "The voice could not be added.",
+    "text": "Не вдалося додати голос."
+  },
+  "fork.voice.clipLanguage": {
+    "en": "Language of the recording",
+    "text": "Мова запису"
+  },
+  "fork.voice.clipSilent": {
+    "en": "No voice was heard.",
+    "text": "На записі не чути голосу."
+  },
+  "fork.voice.clipTooLong": {
+    "en": "Too long: no more than {{seconds}} seconds with its words.",
+    "text": "Запис із текстом задовгий. Максимум {{seconds}} с."
+  },
+  "fork.voice.clipTooShort": {
+    "en": "Too short: at least {{seconds}} seconds.",
+    "text": "Запис закороткий. Мінімум {{seconds}} с."
+  },
+  "fork.voice.clipUnreadable": {
+    "en": "This file could not be read.",
+    "text": "Не вдалося прочитати цей файл."
+  },
+  "fork.voice.clipWords": {
+    "en": "What is said in it (optional)",
+    "text": "Текст запису (необов’язково)"
+  },
+  "fork.voice.clipWordsNeeded": {
+    "en": "What is said in it",
+    "text": "Що сказано в записі"
+  },
+  "fork.voice.exportVoice": {
+    "en": "Save {{name}} as a file",
+    "text": "Зберегти «{{name}}» у файл"
   },
   "fork.voice.hearBoth": {
     "en": "To both",
@@ -1035,6 +1087,10 @@
     "en": "To them",
     "text": "Для співрозмовника"
   },
+  "fork.voice.importVoice": {
+    "en": "Import a voice file",
+    "text": "Імпортувати файл голосу"
+  },
   "fork.voice.lineFailed": {
     "en": "This line could not be read aloud",
     "text": "Не вдалося озвучити цей рядок"
@@ -1055,9 +1111,17 @@
     "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
     "text": "Озвучений переклад відтворюється на цьому пристрої, а співрозмовник чує його як звук із мікрофона. Якщо ваша звукова карта підтримує апаратне мікшування, виберіть один із її каналів відтворення та змішайте його зі звуком мікрофона на самій карті. Тоді ваш голос не проходитиме через програму."
   },
+  "fork.voice.micDenied": {
+    "en": "The microphone could not be opened.",
+    "text": "Не вдалося ввімкнути мікрофон."
+  },
   "fork.voice.modelPlaceholder": {
     "en": "The model's name, e.g. tts-1",
     "text": "Назва моделі, наприклад tts-1"
+  },
+  "fork.voice.myVoice": {
+    "en": "My voice",
+    "text": "Мій голос"
   },
   "fork.voice.myVoiceToo": {
     "en": "My own voice goes too",
@@ -1075,13 +1139,41 @@
     "en": "Read aloud",
     "text": "Увімкнути озвучення"
   },
+  "fork.voice.record": {
+    "en": "Read it aloud",
+    "text": "Прочитайте це речення вголос"
+  },
+  "fork.voice.recordAgain": {
+    "en": "Record again",
+    "text": "Перезаписати"
+  },
+  "fork.voice.removeTake": {
+    "en": "Remove the {{language}} recording of {{name}}",
+    "text": "Видалити запис «{{name}}» ({{language}})"
+  },
+  "fork.voice.removeVoice": {
+    "en": "Remove {{name}}",
+    "text": "Видалити «{{name}}»"
+  },
+  "fork.voice.renameVoice": {
+    "en": "Rename {{name}}",
+    "text": "Перейменувати «{{name}}»"
+  },
   "fork.voice.sample": {
     "en": "Play a sample",
     "text": "Прослухати"
   },
+  "fork.voice.saveVoice": {
+    "en": "Save",
+    "text": "Зберегти"
+  },
   "fork.voice.sayLine": {
     "en": "Read this line aloud",
     "text": "Озвучити цей рядок"
+  },
+  "fork.voice.serverNone": {
+    "en": "The other device lends no voice model. Use an API or this computer instead.",
+    "text": "На іншому пристрої немає доступної моделі озвучення. Можна скористатися API або озвучувати на цьому комп’ютері."
   },
   "fork.voice.stage": {
     "en": "Voice",
@@ -1092,6 +1184,10 @@
     "text": "Озвучує ваші переклади. Також можна прослухати будь-який рядок розмови: натисніть значок динаміка поруч."
   },
   "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "Зупинити"
+  },
+  "fork.voice.stopRecording": {
     "en": "Stop",
     "text": "Зупинити"
   },
@@ -1115,9 +1211,17 @@
     "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
     "text": "Під час озвучування для співрозмовника звук надходить у віртуальний мікрофон. Виберіть його як мікрофон у VRChat або програмі для зустрічей (у Windows він називається CABLE Output)."
   },
+  "fork.voice.unrecorded": {
+    "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
+    "text": "Власний голос для читання ще не вибрано. Додайте його в розділі «Читання вголос»."
+  },
   "fork.voice.voice": {
     "en": "Voice",
     "text": "Голос"
+  },
+  "fork.voice.voiceName": {
+    "en": "Name",
+    "text": "Назва"
   },
   "fork.voice.voiceOf": {
     "en": "{{language}} voice",
@@ -1130,6 +1234,14 @@
   "fork.voice.volumeTheirs": {
     "en": "Volume for them",
     "text": "Гучність для співрозмовника"
+  },
+  "fork.voice.wayImport": {
+    "en": "Import a recording",
+    "text": "Імпортувати запис"
+  },
+  "fork.voice.wayRecord": {
+    "en": "Record now",
+    "text": "Записати зараз"
   },
   "fork.voice.woman": {
     "en": "Female voice",
@@ -2126,6 +2238,10 @@
   "providers.localai.noteQwen3Tts": {
     "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
     "text": "Найприродніше звучання, озвучення починається одразу. Перевірено японською, китайською та англійською: жодної помилки у вимові. Потребує близько 3 GB відеопам’яті, підтримує 10 мов."
+  },
+  "providers.localai.noteQwen3TtsBase": {
+    "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
+    "text": "Читає вашим голосом. Щоб його клонувати, достатньо записати приблизно десять секунд мовлення. Під час першого використання кожного голосу доведеться зачекати від кількох до двадцяти з лишком секунд. Далі озвучення починається одразу. Потребує близько 3 GB відеопам’яті й підтримує 10 мов."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

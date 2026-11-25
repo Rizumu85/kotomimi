@@ -30,7 +30,7 @@ import { NativeEngineCard, nativeStoreOf, type NativeCardModel, type NativeKind 
 import { NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator } from './nativeTranslators';
 import { NATIVE_COACHES, nativeCoach } from './nativeCoaches';
 import { NATIVE_VOICES, nativeVoice } from './nativeVoices';
-import { speaksByEdge, VOICE_PLACES, type VoiceChoice } from './localaiVoice';
+import { lentVoices, serverLendsVoice, serverVoiceModel, speaksAtServer, speaksByEdge, type VoiceChoice } from './localaiVoice';
 import { VoiceRows } from './VoiceRows';
 import { VoiceHearers } from './VoiceHearers';
 import { lentChoice } from './phoneText';
@@ -59,7 +59,7 @@ function shownName(id: string): string {
   const entry = getManifestEntry(id);
   if (entry) return shortenModelName(entry.name, entry.shortName);
   // A native engine's model the other Kotomimi shares: by the name it has here. The Mac's recognition is a model to a language.
-  const native = NATIVE_MODELS.find((m) => m.id === id) ?? NATIVE_TRANSLATORS.find((m) => m.id === id) ?? NATIVE_COACHES.find((m) => m.id === id);
+  const native = NATIVE_MODELS.find((m) => m.id === id) ?? NATIVE_TRANSLATORS.find((m) => m.id === id) ?? NATIVE_COACHES.find((m) => m.id === id) ?? NATIVE_VOICES.find((m) => m.id === id);
   if (native) return id.includes(':') ? `${native.name} (${id.slice(id.indexOf(':') + 1)})` : native.name;
   return modelLabel(id);
 }
@@ -75,12 +75,12 @@ function Field({ label, aside, children }: { label: string; aside?: string; chil
 }
 
 /** The three places a stage can run, as one row of buttons: the same three, in the same order, for every stage. */
-function PlaceSwitch({ label, value, onChange, disabled, places = PLACES }: { label: string; value: Place; onChange(place: Place): void; disabled?: boolean; /** Fork: the places this stage can run, where they are not all three (the voice's). */ places?: readonly Place[] }) {
+function PlaceSwitch({ label, value, onChange, disabled }: { label: string; value: Place; onChange(place: Place): void; disabled?: boolean }) {
   const { t } = useTranslation();
   const names: Record<Place, string> = { server: t('providers.localai.placeServer'), api: t('providers.localai.viaModel'), device: t('providers.localai.placeDevice') };
   return (
     <div className="kt-seg" role="group" aria-label={label}>
-      {PLACES.filter((place) => places.includes(place)).map((place) => (
+      {PLACES.map((place) => (
         <button key={place} type="button" className={`kt-seg__option${place === value ? ' is-active' : ''}`} aria-pressed={place === value} onClick={() => { if (place !== value) onChange(place); }} disabled={disabled}>
           {names[place]}
         </button>
@@ -790,14 +790,18 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
   const voiceLanguagesShown = [...theirsInto(settings, pair), ...alsoSpoken(settings, pair)];
   const voiceService = voice.at === 'api' ? serviceOf(voice.apiBaseUrl, 'voice') : undefined;
   const voiceStatus = nativeStoreOf('voice')((one) => one.status);
-  // Something to ask now: this computer's model downloaded, or an API named.
-  const voiceHere = voice.at === 'device' ? nativeDownloaded(voiceStatus, nativeVoice(voice.nativeModel).id) : speaksByEdge(voice) || (voice.apiBaseUrl.trim() !== '' && voice.apiModel.trim() !== '');
-
   const found: readonly LocalAIModel[] = models;
+  // Something to ask now: this computer's model downloaded, the other device lending one, or an API named.
+  const voiceHere = voice.at === 'device' ? nativeDownloaded(voiceStatus, nativeVoice(voice.nativeModel).id)
+    : voice.at === 'server' ? (values.endpoint ?? '').trim() !== '' && serverLendsVoice(voice, found)
+      : speaksByEdge(voice) || (voice.apiBaseUrl.trim() !== '' && voice.apiModel.trim() !== '');
+  const voiceOptions = lentVoices(found);
+  const voiceDefault = serverVoiceModel({ serverModel: '' }, found);
+
   // On the device the stages share: a device of the hearing stage's own (a phone) is none of what follows.
   const onServer = hearingPlace(settings) === 'server';
   // Either side's: the user's own may alone be heard there (`asrMine`).
-  const serverInUse = needsServer(settings) || needsServer(hearingOf(settings, 'speaker'));
+  const serverInUse = needsServer(settings) || needsServer(hearingOf(settings, 'speaker')) || speaksAtServer(voice);
   const address = values.endpoint ?? '';
   // The address names this computer itself: a model server running here (a LocalAI), reached the way another device is.
   const onThisComputer = /^(?:[a-z]+:\/\/)?(?:127\.0\.0\.1|localhost|\[::1\])(?::|\/|$)/i.test(address.trim());
@@ -1458,7 +1462,16 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
       >
         {voice.on && (
           <>
-            <PlaceSwitch label={t('fork.voice.stage')} value={voice.at} onChange={(at) => putVoice({ at })} disabled={disabled} places={VOICE_PLACES} />
+            <PlaceSwitch label={t('fork.voice.stage')} value={voice.at} onChange={(at) => putVoice({ at })} disabled={disabled} />
+            {voice.at === 'server' && (
+              <>
+                {connectFirst}
+                {/* A device that says what its models are for, and lends none that speaks: a phone, an older Kotomimi. */}
+                {ownModels.some((m) => m.kind !== undefined) && voiceOptions.length === 0
+                  ? <p className="kt-note kt-note--todo">{t('fork.voice.serverNone')}</p>
+                  : <ServerModel label={t('providers.localai.model')} value={voice.serverModel} blank={voiceDefault ? t('providers.localai.auto', { name: shownName(voiceDefault) }) : t('providers.localai.hereModelPick')} options={voiceOptions} onChange={(serverModel) => putVoice({ serverModel })} disabled={disabled} />}
+              </>
+            )}
             {voice.at === 'api' && (
               <ApiFields
                 id="localai-voice-api"
@@ -1492,8 +1505,12 @@ export function LocalAIAssist({ settings, values, set, fill, update, disabled, p
             )}
             <VoiceRows
               choice={voice}
+              lent={found}
               languages={voiceLanguagesShown}
-              placeName={voice.at === 'device' ? nativeVoice(voice.nativeModel).name : speaksByEdge(voice) ? t('providers.localai.apiServiceEdge') : voice.apiModel.trim() || t('providers.localai.viaModel')}
+              ownLanguage={pair.source}
+              placeName={voice.at === 'device' ? nativeVoice(voice.nativeModel).name
+                : voice.at === 'server' ? (serverVoiceModel(voice, found) ? shownName(serverVoiceModel(voice, found)) : t('providers.localai.placeServer'))
+                  : speaksByEdge(voice) ? t('providers.localai.apiServiceEdge') : voice.apiModel.trim() || t('providers.localai.viaModel')}
               onChange={(next) => put({ speak: next } as Partial<S>)}
               disabled={disabled}
               // Not while a session runs: its settings are locked, and a sample could be captured as the other side's.

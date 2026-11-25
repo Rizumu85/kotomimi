@@ -169,7 +169,11 @@ export const NOTICE_ALIASES: Readonly<Record<string, string>> = {
   native_voice_missing: 'providers.localai.nativeVoiceMissing',
   native_voice_updating: 'providers.localai.nativeVoiceUpdating',
   native_voice_failed: 'providers.localai.nativeVoiceFailed',
+  // Fork: a cloning voice model with no recording of the user's chosen for a language it reads.
+  native_voice_unrecorded: 'fork.voice.unrecorded',
   voice_unnamed: 'providers.localai.voiceUnnamed',
+  // Fork: the voice is on the other device, which lends no voice model.
+  server_no_voice: 'fork.voice.serverNone',
   api_key_needed: 'providers.localai.apiKeyNeeded',
   api_key_refused: 'providers.localai.apiKeyRefused',
   // Fork: another Kotomimi hears a leg's language with none of its recognizers.

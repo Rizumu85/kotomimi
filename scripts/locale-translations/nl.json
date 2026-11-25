@@ -1015,6 +1015,14 @@
     "en": "What you want to say — Enter translates",
     "text": "Wat je wilt zeggen, Enter om te vertalen"
   },
+  "fork.voice.addTake": {
+    "en": "Add a language to {{name}}",
+    "text": "Opname in een extra taal toevoegen aan ‘{{name}}’"
+  },
+  "fork.voice.addVoice": {
+    "en": "Add a voice",
+    "text": "Stem toevoegen"
+  },
   "fork.voice.auto": {
     "en": "Read my translations as they come",
     "text": "Mijn vertaling automatisch voorlezen als ik uitgesproken ben"
@@ -1022,6 +1030,50 @@
   "fork.voice.cannotSpeak": {
     "en": "{{name}} cannot speak {{language}}.",
     "text": "{{name}} spreekt geen {{language}}."
+  },
+  "fork.voice.chooseFile": {
+    "en": "Choose a file",
+    "text": "Bestand kiezen"
+  },
+  "fork.voice.chooseVoice": {
+    "en": "Choose a voice",
+    "text": "Stem kiezen"
+  },
+  "fork.voice.clipFailed": {
+    "en": "The voice could not be added.",
+    "text": "De stem kon niet worden toegevoegd."
+  },
+  "fork.voice.clipLanguage": {
+    "en": "Language of the recording",
+    "text": "Taal van de opname"
+  },
+  "fork.voice.clipSilent": {
+    "en": "No voice was heard.",
+    "text": "Er is geen stem te horen."
+  },
+  "fork.voice.clipTooLong": {
+    "en": "Too long: no more than {{seconds}} seconds with its words.",
+    "text": "De opname is te lang. Met tekst mag die maximaal {{seconds}} seconden duren."
+  },
+  "fork.voice.clipTooShort": {
+    "en": "Too short: at least {{seconds}} seconds.",
+    "text": "De opname is te kort. Neem minstens {{seconds}} seconden op."
+  },
+  "fork.voice.clipUnreadable": {
+    "en": "This file could not be read.",
+    "text": "Dit bestand kan niet worden gelezen."
+  },
+  "fork.voice.clipWords": {
+    "en": "What is said in it (optional)",
+    "text": "Gesproken tekst (optioneel)"
+  },
+  "fork.voice.clipWordsNeeded": {
+    "en": "What is said in it",
+    "text": "Wat er in de opname wordt gezegd"
+  },
+  "fork.voice.exportVoice": {
+    "en": "Save {{name}} as a file",
+    "text": "‘{{name}}’ opslaan als bestand"
   },
   "fork.voice.hearBoth": {
     "en": "To both",
@@ -1043,6 +1095,10 @@
     "en": "To them",
     "text": "Voor de ander"
   },
+  "fork.voice.importVoice": {
+    "en": "Import a voice file",
+    "text": "Stembestand importeren"
+  },
   "fork.voice.lineFailed": {
     "en": "This line could not be read aloud",
     "text": "Deze regel kon niet worden voorgelezen"
@@ -1063,9 +1119,17 @@
     "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
     "text": "De vertaling wordt via dit apparaat voorgelezen. Het dient als microfoon voor je gesprekspartner. Kan je geluidskaart zelf audio mixen? Kies dan een afspeelkanaal van die kaart en meng het op de kaart met je microfoongeluid. Zo gaat je eigen stem niet door de software."
   },
+  "fork.voice.micDenied": {
+    "en": "The microphone could not be opened.",
+    "text": "De microfoon kon niet worden ingeschakeld."
+  },
   "fork.voice.modelPlaceholder": {
     "en": "The model's name, e.g. tts-1",
     "text": "Modelnaam, bijvoorbeeld tts-1"
+  },
+  "fork.voice.myVoice": {
+    "en": "My voice",
+    "text": "Mijn stem"
   },
   "fork.voice.myVoiceToo": {
     "en": "My own voice goes too",
@@ -1083,13 +1147,41 @@
     "en": "Read aloud",
     "text": "Voorlezen inschakelen"
   },
+  "fork.voice.record": {
+    "en": "Read it aloud",
+    "text": "Lees deze zin hardop"
+  },
+  "fork.voice.recordAgain": {
+    "en": "Record again",
+    "text": "Opnieuw opnemen"
+  },
+  "fork.voice.removeTake": {
+    "en": "Remove the {{language}} recording of {{name}}",
+    "text": "Opname van ‘{{name}}’ in het {{language}} verwijderen"
+  },
+  "fork.voice.removeVoice": {
+    "en": "Remove {{name}}",
+    "text": "‘{{name}}’ verwijderen"
+  },
+  "fork.voice.renameVoice": {
+    "en": "Rename {{name}}",
+    "text": "Naam van ‘{{name}}’ wijzigen"
+  },
   "fork.voice.sample": {
     "en": "Play a sample",
     "text": "Voorbeeld beluisteren"
   },
+  "fork.voice.saveVoice": {
+    "en": "Save",
+    "text": "Opslaan"
+  },
   "fork.voice.sayLine": {
     "en": "Read this line aloud",
     "text": "Deze regel voorlezen"
+  },
+  "fork.voice.serverNone": {
+    "en": "The other device lends no voice model. Use an API or this computer instead.",
+    "text": "Op het andere apparaat is geen voorleesmodel beschikbaar. Je kunt een API of deze computer gebruiken."
   },
   "fork.voice.stage": {
     "en": "Voice",
@@ -1100,6 +1192,10 @@
     "text": "Leest je vertalingen voor. Je kunt ook elke regel van het gesprek beluisteren: klik op het luidsprekerknopje ernaast."
   },
   "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "Stoppen"
+  },
+  "fork.voice.stopRecording": {
     "en": "Stop",
     "text": "Stoppen"
   },
@@ -1123,9 +1219,17 @@
     "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
     "text": "Bij voorlezen aan de ander gaat het geluid naar de virtuele microfoon. Kies die als microfoon in VRChat of je vergaderapp (in Windows heet die CABLE Output)."
   },
+  "fork.voice.unrecorded": {
+    "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
+    "text": "Je hebt nog geen eigen stem gekozen om mee voor te lezen. Voeg er een toe bij ‘Voorlezen’."
+  },
   "fork.voice.voice": {
     "en": "Voice",
     "text": "Stem"
+  },
+  "fork.voice.voiceName": {
+    "en": "Name",
+    "text": "Naam"
   },
   "fork.voice.voiceOf": {
     "en": "{{language}} voice",
@@ -1138,6 +1242,14 @@
   "fork.voice.volumeTheirs": {
     "en": "Volume for them",
     "text": "Volume voor de ander"
+  },
+  "fork.voice.wayImport": {
+    "en": "Import a recording",
+    "text": "Opname importeren"
+  },
+  "fork.voice.wayRecord": {
+    "en": "Record now",
+    "text": "Nu opnemen"
   },
   "fork.voice.woman": {
     "en": "Female voice",
@@ -2170,6 +2282,10 @@
   "providers.localai.noteQwen3Tts": {
     "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
     "text": "Klinkt het natuurlijkst en begint meteen te spreken. Getest in het Japans, Chinees en Engels: alles correct uitgesproken. Gebruikt ongeveer 3 GB videogeheugen en ondersteunt 10 talen."
+  },
+  "providers.localai.noteQwen3TtsBase": {
+    "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
+    "text": "Leest voor met je eigen stem. Een opname van ongeveer tien seconden is genoeg om je stem te klonen. De eerste keer dat je een stem gebruikt, duurt het een paar seconden tot bijna een halve minuut voordat je iets hoort. Daarna begint het voorlezen meteen. Gebruikt ongeveer 3 GB videogeheugen en ondersteunt 10 talen."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

@@ -1011,6 +1011,14 @@
     "en": "What you want to say — Enter translates",
     "text": "சொல்ல விரும்புவதை உள்ளிட்டு, மொழிபெயர்க்க Enter அழுத்தவும்"
   },
+  "fork.voice.addTake": {
+    "en": "Add a language to {{name}}",
+    "text": "«{{name}}»க்கு இன்னொரு மொழியில் பதிவு செய்"
+  },
+  "fork.voice.addVoice": {
+    "en": "Add a voice",
+    "text": "குரலைச் சேர்"
+  },
   "fork.voice.auto": {
     "en": "Read my translations as they come",
     "text": "நான் பேசி முடித்ததும் மொழிபெயர்ப்பை வாசி"
@@ -1018,6 +1026,50 @@
   "fork.voice.cannotSpeak": {
     "en": "{{name}} cannot speak {{language}}.",
     "text": "{{name}} குரலால் {{language}} பேச முடியாது."
+  },
+  "fork.voice.chooseFile": {
+    "en": "Choose a file",
+    "text": "கோப்பைத் தேர்வு செய்"
+  },
+  "fork.voice.chooseVoice": {
+    "en": "Choose a voice",
+    "text": "குரலைத் தேர்வு செய்"
+  },
+  "fork.voice.clipFailed": {
+    "en": "The voice could not be added.",
+    "text": "குரலைச் சேர்க்க முடியவில்லை."
+  },
+  "fork.voice.clipLanguage": {
+    "en": "Language of the recording",
+    "text": "ஒலிப்பதிவின் மொழி"
+  },
+  "fork.voice.clipSilent": {
+    "en": "No voice was heard.",
+    "text": "குரல் எதுவும் கேட்கவில்லை."
+  },
+  "fork.voice.clipTooLong": {
+    "en": "Too long: no more than {{seconds}} seconds with its words.",
+    "text": "பதிவு மிக நீளமாக உள்ளது. பேசிய சொற்களையும் உள்ளிட்டால், பதிவு {{seconds}} வினாடிகளுக்கு மிகாமல் இருக்க வேண்டும்."
+  },
+  "fork.voice.clipTooShort": {
+    "en": "Too short: at least {{seconds}} seconds.",
+    "text": "பதிவு மிகக் குறுகியது. குறைந்தது {{seconds}} வினாடிகள் இருக்க வேண்டும்."
+  },
+  "fork.voice.clipUnreadable": {
+    "en": "This file could not be read.",
+    "text": "இந்தக் கோப்பைப் படிக்க முடியவில்லை."
+  },
+  "fork.voice.clipWords": {
+    "en": "What is said in it (optional)",
+    "text": "பதிவில் பேசிய சொற்கள் (விரும்பினால்)"
+  },
+  "fork.voice.clipWordsNeeded": {
+    "en": "What is said in it",
+    "text": "பதிவில் பேசிய வார்த்தைகள்"
+  },
+  "fork.voice.exportVoice": {
+    "en": "Save {{name}} as a file",
+    "text": "«{{name}}» குரலைக் கோப்பாகச் சேமி"
   },
   "fork.voice.hearBoth": {
     "en": "To both",
@@ -1039,6 +1091,10 @@
     "en": "To them",
     "text": "மற்றவர்களுக்கு"
   },
+  "fork.voice.importVoice": {
+    "en": "Import a voice file",
+    "text": "குரல் கோப்பை இறக்குமதி செய்"
+  },
   "fork.voice.lineFailed": {
     "en": "This line could not be read aloud",
     "text": "இந்த வரியை வாசிக்க முடியவில்லை"
@@ -1059,9 +1115,17 @@
     "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
     "text": "மொழிபெயர்ப்பு இந்தச் சாதனத்தில் குரலாக ஒலிக்கும். மறுமுனையில் அது மைக்ரோஃபோன் ஒலியாகக் கேட்கும். உங்கள் ஒலி அட்டையிலேயே ஒலிகளைக் கலக்கும் வசதி இருந்தால், அதன் ஒலி வெளியீட்டுச் சேனல் ஒன்றைத் தேர்ந்தெடுத்து, அட்டையிலேயே அதை உங்கள் மைக்ரோஃபோன் ஒலியுடன் கலக்கவும். அப்போது உங்கள் குரல் மென்பொருள் வழியாகச் செல்லாது."
   },
+  "fork.voice.micDenied": {
+    "en": "The microphone could not be opened.",
+    "text": "மைக்ரோஃபோனை இயக்க முடியவில்லை."
+  },
   "fork.voice.modelPlaceholder": {
     "en": "The model's name, e.g. tts-1",
     "text": "மாதிரியின் பெயர், எ.கா. tts-1"
+  },
+  "fork.voice.myVoice": {
+    "en": "My voice",
+    "text": "என் குரல்"
   },
   "fork.voice.myVoiceToo": {
     "en": "My own voice goes too",
@@ -1079,13 +1143,41 @@
     "en": "Read aloud",
     "text": "வாசிப்பை இயக்கு"
   },
+  "fork.voice.record": {
+    "en": "Read it aloud",
+    "text": "இந்த வாக்கியத்தைச் சத்தமாக வாசிக்கவும்"
+  },
+  "fork.voice.recordAgain": {
+    "en": "Record again",
+    "text": "மீண்டும் பதிவு செய்"
+  },
+  "fork.voice.removeTake": {
+    "en": "Remove the {{language}} recording of {{name}}",
+    "text": "«{{name}}» இன் {{language}} மொழிப் பதிவை நீக்கு"
+  },
+  "fork.voice.removeVoice": {
+    "en": "Remove {{name}}",
+    "text": "«{{name}}» குரலை நீக்கு"
+  },
+  "fork.voice.renameVoice": {
+    "en": "Rename {{name}}",
+    "text": "«{{name}}» பெயரை மாற்று"
+  },
   "fork.voice.sample": {
     "en": "Play a sample",
     "text": "மாதிரியைக் கேள்"
   },
+  "fork.voice.saveVoice": {
+    "en": "Save",
+    "text": "சேமி"
+  },
   "fork.voice.sayLine": {
     "en": "Read this line aloud",
     "text": "இந்த வரியை வாசி"
+  },
+  "fork.voice.serverNone": {
+    "en": "The other device lends no voice model. Use an API or this computer instead.",
+    "text": "மற்ற சாதனத்தில் உரையை வாசிக்கப் பயன்படுத்தக்கூடிய குரல் மாதிரி இல்லை. API அல்லது இந்தக் கணினியைப் பயன்படுத்தலாம்."
   },
   "fork.voice.stage": {
     "en": "Voice",
@@ -1096,6 +1188,10 @@
     "text": "உங்கள் மொழிபெயர்ப்புகளை வாசிக்கும். உரையாடலில் எந்த வரியையும் கேட்கலாம்: அதன் ஒலிபெருக்கி பொத்தானை அழுத்தவும்."
   },
   "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "நிறுத்து"
+  },
+  "fork.voice.stopRecording": {
     "en": "Stop",
     "text": "நிறுத்து"
   },
@@ -1119,9 +1215,17 @@
     "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
     "text": "மற்றவருக்கு வாசிக்கும்போது, ஒலி மெய்நிகர் மைக்ரோஃபோனுக்கு அனுப்பப்படும். VRChat அல்லது உங்கள் சந்திப்புச் செயலியில் அதையே மைக்ரோஃபோனாகத் தேர்ந்தெடுக்கவும் (Windows இல்: CABLE Output)."
   },
+  "fork.voice.unrecorded": {
+    "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
+    "text": "வாசிப்பதற்கு உங்கள் சொந்தக் குரல் இன்னும் தேர்வு செய்யப்படவில்லை. «வாசிப்பு» பகுதியில் அதைச் சேர்க்கவும்."
+  },
   "fork.voice.voice": {
     "en": "Voice",
     "text": "குரல்"
+  },
+  "fork.voice.voiceName": {
+    "en": "Name",
+    "text": "பெயர்"
   },
   "fork.voice.voiceOf": {
     "en": "{{language}} voice",
@@ -1134,6 +1238,14 @@
   "fork.voice.volumeTheirs": {
     "en": "Volume for them",
     "text": "மறுமுனையில் கேட்கும் ஒலியளவு"
+  },
+  "fork.voice.wayImport": {
+    "en": "Import a recording",
+    "text": "ஒலிப்பதிவை இறக்குமதி செய்"
+  },
+  "fork.voice.wayRecord": {
+    "en": "Record now",
+    "text": "இப்போது பதிவு செய்"
   },
   "fork.voice.woman": {
     "en": "Female voice",
@@ -2130,6 +2242,10 @@
   "providers.localai.noteQwen3Tts": {
     "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
     "text": "மிகவும் இயல்பான குரல். உடனே பேசத் தொடங்கும். ஜப்பானியம், சீனம், ஆங்கிலத்தில் சோதித்தபோது வாசிப்புப் பிழைகள் இல்லை. சுமார் 3 GB கிராபிக்ஸ் நினைவகம் தேவை. 10 மொழிகளை ஆதரிக்கிறது."
+  },
+  "providers.localai.noteQwen3TtsBase": {
+    "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
+    "text": "உங்கள் குரலிலேயே வாசிக்கும். அதற்கு சுமார் பத்து விநாடிகள் பேசிப் பதிவு செய்தால் போதும். ஒவ்வொரு குரலையும் முதல் முறை பயன்படுத்தும்போது சில விநாடிகள் முதல் இருபதுக்கும் மேற்பட்ட விநாடிகள் வரை காத்திருக்க வேண்டியிருக்கும். அதன் பிறகு உடனே பேசத் தொடங்கும். சுமார் 3 GB கிராபிக்ஸ் நினைவகம் தேவை. 10 மொழிகளை ஆதரிக்கிறது."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

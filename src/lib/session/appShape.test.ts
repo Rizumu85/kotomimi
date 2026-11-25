@@ -29,7 +29,7 @@ import { useProviderStore } from '../../stores/providerStore';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { useTurnModeStore } from '../../stores/turnModeStore';
 import { useRoutingStore } from '../../stores/routingStore';
-import { ensureReadyFromStores, legsFor, liveGate, participantSpeechFromStores, participantSpeechSwitchFromStores, persistIfUnchanged, readShapeFromStores, speechInputsFromStores, watchLegsFromStores, watchSpeechFromStores } from './appShape';
+import { ensureReadyFromStores, legsFor, liveGate, participantSpeechFromStores, participantSpeechSwitchFromStores, persistIfUnchanged, readShapeFromStores, speechInputsFromStores, watchLegsFromStores, watchPairFromStores, watchSpeechFromStores } from './appShape';
 import type { RunShape } from './types';
 
 const auth = { signedIn: false, getToken: async () => null };
@@ -200,6 +200,33 @@ describe('ensureReadyFromStores', () => {
     const signal = new AbortController().signal;
     await expect(ensureReadyFromStores(shape, signal)).resolves.toEqual({ state: 'ready', models: [] });
     expect(check).toHaveBeenCalledWith(expect.anything(), settings, { pair: { source: 'ja', target: 'en' }, legs: ['speaker', 'participant'], signal });
+  });
+});
+
+describe('watchPairFromStores (fork)', () => {
+  it('says when the pair changes, or what else of its settings a live run follows, and nothing for any other setting', () => {
+    const provider = fakeProvider.id;
+    const entry = (settings: object, pair = { source: 'en', target: 'ja' }) => ({ [provider]: { settings, credentials: {}, pair } as never });
+    const before = fakeProvider.liveReads;
+    // What a live run of it follows: the one field named here.
+    (fakeProvider as AnyProvider).liveReads = (s) => String((s as { followed?: string }).followed ?? '');
+    try {
+      useProviderStore.setState({ selected: provider, entries: entry({ ...FAKE_DEFAULTS, followed: 'a' }) });
+      const changed = vi.fn();
+      const unwatch = watchPairFromStores(changed);
+      // Another setting: the run goes on as it is.
+      useProviderStore.setState({ entries: entry({ ...FAKE_DEFAULTS, followed: 'a', other: 1 }) });
+      expect(changed).not.toHaveBeenCalled();
+      useProviderStore.setState({ entries: entry({ ...FAKE_DEFAULTS, followed: 'b' }) });
+      expect(changed).toHaveBeenCalledTimes(1);
+      useProviderStore.setState({ entries: entry({ ...FAKE_DEFAULTS, followed: 'b' }, { source: 'en', target: 'ko' }) });
+      expect(changed).toHaveBeenCalledTimes(2);
+      unwatch();
+      useProviderStore.setState({ entries: entry({ ...FAKE_DEFAULTS, followed: 'c' }) });
+      expect(changed).toHaveBeenCalledTimes(2);
+    } finally {
+      (fakeProvider as AnyProvider).liveReads = before;
+    }
   });
 });
 

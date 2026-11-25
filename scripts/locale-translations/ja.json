@@ -1011,6 +1011,14 @@
     "en": "What you want to say — Enter translates",
     "text": "伝えたいことを入力、Enter で翻訳"
   },
+  "fork.voice.addTake": {
+    "en": "Add a language to {{name}}",
+    "text": "「{{name}}」に別の言語の録音を追加"
+  },
+  "fork.voice.addVoice": {
+    "en": "Add a voice",
+    "text": "声を追加"
+  },
   "fork.voice.auto": {
     "en": "Read my translations as they come",
     "text": "話し終えたら訳文を自動で読み上げる"
@@ -1018,6 +1026,50 @@
   "fork.voice.cannotSpeak": {
     "en": "{{name}} cannot speak {{language}}.",
     "text": "{{name}}は{{language}}を話せません。"
+  },
+  "fork.voice.chooseFile": {
+    "en": "Choose a file",
+    "text": "ファイルを選択"
+  },
+  "fork.voice.chooseVoice": {
+    "en": "Choose a voice",
+    "text": "声を選択"
+  },
+  "fork.voice.clipFailed": {
+    "en": "The voice could not be added.",
+    "text": "声を追加できませんでした。"
+  },
+  "fork.voice.clipLanguage": {
+    "en": "Language of the recording",
+    "text": "録音の言語"
+  },
+  "fork.voice.clipSilent": {
+    "en": "No voice was heard.",
+    "text": "話し声が検出されませんでした。"
+  },
+  "fork.voice.clipTooLong": {
+    "en": "Too long: no more than {{seconds}} seconds with its words.",
+    "text": "録音が長すぎます。話した内容を入力する場合は、{{seconds}}秒以内の録音を使ってください。"
+  },
+  "fork.voice.clipTooShort": {
+    "en": "Too short: at least {{seconds}} seconds.",
+    "text": "録音が短すぎます。{{seconds}}秒以上の録音を使ってください。"
+  },
+  "fork.voice.clipUnreadable": {
+    "en": "This file could not be read.",
+    "text": "このファイルを読み込めませんでした。"
+  },
+  "fork.voice.clipWords": {
+    "en": "What is said in it (optional)",
+    "text": "録音で話した内容（任意）"
+  },
+  "fork.voice.clipWordsNeeded": {
+    "en": "What is said in it",
+    "text": "録音で話した内容"
+  },
+  "fork.voice.exportVoice": {
+    "en": "Save {{name}} as a file",
+    "text": "「{{name}}」をファイルに保存"
   },
   "fork.voice.hearBoth": {
     "en": "To both",
@@ -1039,6 +1091,10 @@
     "en": "To them",
     "text": "相手に"
   },
+  "fork.voice.importVoice": {
+    "en": "Import a voice file",
+    "text": "ボイスファイルをインポート"
+  },
   "fork.voice.lineFailed": {
     "en": "This line could not be read aloud",
     "text": "この行を読み上げられませんでした"
@@ -1059,9 +1115,17 @@
     "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
     "text": "訳文の読み上げは、このデバイスからマイク音声として相手に届きます。サウンドカード本体で音を混ぜられる場合は、そのカードの再生チャンネルを選び、カード側でマイクの音と混ぜてください。自分の声はソフトウェアを通らずに相手に届きます。"
   },
+  "fork.voice.micDenied": {
+    "en": "The microphone could not be opened.",
+    "text": "マイクを使用できませんでした。"
+  },
   "fork.voice.modelPlaceholder": {
     "en": "The model's name, e.g. tts-1",
     "text": "モデル名（例：tts-1）"
+  },
+  "fork.voice.myVoice": {
+    "en": "My voice",
+    "text": "自分の声"
   },
   "fork.voice.myVoiceToo": {
     "en": "My own voice goes too",
@@ -1079,13 +1143,41 @@
     "en": "Read aloud",
     "text": "読み上げをオン"
   },
+  "fork.voice.record": {
+    "en": "Read it aloud",
+    "text": "この文を読み上げる"
+  },
+  "fork.voice.recordAgain": {
+    "en": "Record again",
+    "text": "録り直す"
+  },
+  "fork.voice.removeTake": {
+    "en": "Remove the {{language}} recording of {{name}}",
+    "text": "「{{name}}」の{{language}}の録音を削除"
+  },
+  "fork.voice.removeVoice": {
+    "en": "Remove {{name}}",
+    "text": "「{{name}}」を削除"
+  },
+  "fork.voice.renameVoice": {
+    "en": "Rename {{name}}",
+    "text": "「{{name}}」の名前を変更"
+  },
   "fork.voice.sample": {
     "en": "Play a sample",
     "text": "試聴"
   },
+  "fork.voice.saveVoice": {
+    "en": "Save",
+    "text": "保存"
+  },
   "fork.voice.sayLine": {
     "en": "Read this line aloud",
     "text": "この行を読み上げる"
+  },
+  "fork.voice.serverNone": {
+    "en": "The other device lends no voice model. Use an API or this computer instead.",
+    "text": "別の端末に利用できる読み上げモデルがありません。API またはこのパソコンに切り替えられます。"
   },
   "fork.voice.stage": {
     "en": "Voice",
@@ -1096,6 +1188,10 @@
     "text": "自分の発言の訳文を読み上げます。会話の各行も、スピーカーボタンを押すと聞けます。"
   },
   "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "停止"
+  },
+  "fork.voice.stopRecording": {
     "en": "Stop",
     "text": "停止"
   },
@@ -1119,9 +1215,17 @@
     "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
     "text": "相手に読み上げるときは、音声が仮想マイクに送られます。VRChat や会議アプリで、その仮想マイクをマイクとして選んでください（Windows では CABLE Output）。"
   },
+  "fork.voice.unrecorded": {
+    "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
+    "text": "読み上げに使う自分の声が選ばれていません。「読み上げ」カードで声を追加してください。"
+  },
   "fork.voice.voice": {
     "en": "Voice",
     "text": "声の種類"
+  },
+  "fork.voice.voiceName": {
+    "en": "Name",
+    "text": "名前"
   },
   "fork.voice.voiceOf": {
     "en": "{{language}} voice",
@@ -1134,6 +1238,14 @@
   "fork.voice.volumeTheirs": {
     "en": "Volume for them",
     "text": "音量（相手に聞こえる）"
+  },
+  "fork.voice.wayImport": {
+    "en": "Import a recording",
+    "text": "録音を取り込む"
+  },
+  "fork.voice.wayRecord": {
+    "en": "Record now",
+    "text": "今すぐ録音"
   },
   "fork.voice.woman": {
     "en": "Female voice",
@@ -2130,6 +2242,10 @@
   "providers.localai.noteQwen3Tts": {
     "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
     "text": "最も自然で、すぐに話し始めます。日本語・中国語・英語で検証し、読み間違いはありませんでした。ビデオメモリ使用量は約 3 GB、10 言語に対応。"
+  },
+  "providers.localai.noteQwen3TtsBase": {
+    "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
+    "text": "10秒ほど話した声を録音するだけで、自分の声を再現して読み上げられます。ボイスごとに初回は読み上げまで数秒から20数秒かかりますが、次からはすぐに読み上げが始まります。GPUメモリを約3 GB使用し、10言語に対応しています。"
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

@@ -3,9 +3,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NO_NATIVE_ENGINE, type NativeEngineStatus } from '../native/nativeEngine';
 import { holdNative, holdNativeForRun, nativeIdle, preferNative, translatorIdle } from '../../providers/openai/localaiNative';
 import { useModelStore } from '../../stores/modelStore';
-import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
+import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore, useNativeVoiceStore } from '../../stores/nativeEngineStore';
 import { appLanModels } from './appModels';
-import { NATIVE_KNOWN_WITHIN_MS, nativeCoachAnswer, nativeCoachFor, nativeKnown, nativeOfferFor, nativeTranslator, nativeRecognizer, nativeRecognizerFor, nativeRecognizerRefusal, nativeShared, nativeTranslatorFor } from './nativeShare';
+import { NATIVE_KNOWN_WITHIN_MS, nativeCoachAnswer, nativeCoachFor, nativeKnown, nativeOfferFor, nativeTranslator, nativeRecognizer, nativeRecognizerFor, nativeRecognizerRefusal, nativeShared, nativeTranslatorFor, nativeVoiceFor } from './nativeShare';
 import { BEFORE_SLOT, NATIVE_TRANSLATORS, TEXT_SLOT, translatorRequest } from '../../providers/openai/nativeTranslators';
 
 const downloaded = { state: 'downloaded' as const, received: 1, total: 1 };
@@ -23,6 +23,8 @@ beforeEach(() => {
   useModelStore.setState({ initialized: true, webgpuAvailable: true, deviceFeatures: [], modelStatuses: {} });
   useNativeEngineStore.setState({ status: NO_NATIVE_ENGINE, asked: true });
   useNativeTranslatorStore.setState({ status: NO_NATIVE_ENGINE, asked: true });
+  useNativeCoachStore.setState({ asked: true });
+  useNativeVoiceStore.setState({ status: NO_NATIVE_ENGINE, asked: true });
 });
 
 describe('what of the native engines is shared', () => {
@@ -355,6 +357,26 @@ describe('this computer\u2019s feedback model, lent', () => {
   });
 });
 
+describe('this computer\u2019s voice model, lent (fork)', () => {
+  it('is listed with the languages it speaks once it is downloaded, and found by its name alone', () => {
+    expect(nativeShared().some((m) => m.kind === 'voice')).toBe(false);
+    expect(nativeVoiceFor('irodori-tts-v4.1-small-mf-q8')).toBeNull();
+    useNativeVoiceStore.setState({ status: status({ 'irodori-tts-v4.1-small-mf-q8': downloaded, 'qwen3-tts-1.7b-customvoice-q8': absent }) });
+    expect(nativeShared().filter((m) => m.kind === 'voice')).toEqual([{ id: 'irodori-tts-v4.1-small-mf-q8', kind: 'voice', languages: ['ja'] }]);
+    expect(nativeVoiceFor('irodori-tts-v4.1-small-mf-q8')).toBe('irodori-tts-v4.1-small-mf-q8');
+    // One not downloaded, the pipeline's name and any other model's are no voice of this computer's.
+    expect(nativeVoiceFor('qwen3-tts-1.7b-customvoice-q8')).toBeNull();
+    expect(nativeVoiceFor('kotomimi')).toBeNull();
+    expect(nativeVoiceFor('')).toBeNull();
+  });
+
+  it('is not lent where it speaks in its owner\u2019s own voice: another device has not their recordings', () => {
+    useNativeVoiceStore.setState({ status: status({ 'qwen3-tts-1.7b-base-q8': downloaded }) });
+    expect(nativeShared().some((m) => m.kind === 'voice')).toBe(false);
+    expect(nativeVoiceFor('qwen3-tts-1.7b-base-q8')).toBeNull();
+  });
+});
+
 describe('two sessions of one device at once (fork)', () => {
   const BOTH = status({ 'sensevoice-small-q8': downloaded, 'qwen3-asr-1.7b-q8': downloaded }, { state: 'ready', model: 'sensevoice-small-q8', port: 5000 });
   const vad = { threshold: 0.3, minSilenceDuration: 1.4, minSpeechDuration: 0.4, maxSpeechDuration: 15 };
@@ -493,6 +515,17 @@ describe('sharing waits for the engines to say what they have (fork)', () => {
     await Promise.resolve();
     expect(open).toBe(false);
     useNativeCoachStore.setState({ asked: true });
+    await known;
+    expect(open).toBe(true);
+  });
+
+  it('waits for the voice engine as for the others', async () => {
+    useNativeVoiceStore.setState({ asked: false });
+    let open = false;
+    const known = nativeKnown().then(() => { open = true; });
+    await Promise.resolve();
+    expect(open).toBe(false);
+    useNativeVoiceStore.setState({ asked: true });
     await known;
     expect(open).toBe(true);
   });

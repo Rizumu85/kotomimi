@@ -1011,6 +1011,14 @@
     "en": "What you want to say — Enter translates",
     "text": "พิมพ์สิ่งที่อยากพูด แล้วกด Enter เพื่อแปล"
   },
+  "fork.voice.addTake": {
+    "en": "Add a language to {{name}}",
+    "text": "อัดเสียงเพิ่มอีกภาษาสำหรับ “{{name}}”"
+  },
+  "fork.voice.addVoice": {
+    "en": "Add a voice",
+    "text": "เพิ่มเสียง"
+  },
   "fork.voice.auto": {
     "en": "Read my translations as they come",
     "text": "อ่านคำแปลอัตโนมัติเมื่อฉันพูดจบ"
@@ -1018,6 +1026,50 @@
   "fork.voice.cannotSpeak": {
     "en": "{{name}} cannot speak {{language}}.",
     "text": "{{name}} พูดภาษา{{language}}ไม่ได้"
+  },
+  "fork.voice.chooseFile": {
+    "en": "Choose a file",
+    "text": "เลือกไฟล์"
+  },
+  "fork.voice.chooseVoice": {
+    "en": "Choose a voice",
+    "text": "เลือกเสียง"
+  },
+  "fork.voice.clipFailed": {
+    "en": "The voice could not be added.",
+    "text": "เพิ่มเสียงไม่ได้"
+  },
+  "fork.voice.clipLanguage": {
+    "en": "Language of the recording",
+    "text": "ภาษาในคลิปเสียง"
+  },
+  "fork.voice.clipSilent": {
+    "en": "No voice was heard.",
+    "text": "ไม่พบเสียงพูด"
+  },
+  "fork.voice.clipTooLong": {
+    "en": "Too long: no more than {{seconds}} seconds with its words.",
+    "text": "เสียงยาวเกินไป ถ้ากรอกคำพูดด้วย เสียงต้องยาวไม่เกิน {{seconds}} วินาที"
+  },
+  "fork.voice.clipTooShort": {
+    "en": "Too short: at least {{seconds}} seconds.",
+    "text": "เสียงสั้นเกินไป ต้องยาวอย่างน้อย {{seconds}} วินาที"
+  },
+  "fork.voice.clipUnreadable": {
+    "en": "This file could not be read.",
+    "text": "อ่านไฟล์นี้ไม่ได้"
+  },
+  "fork.voice.clipWords": {
+    "en": "What is said in it (optional)",
+    "text": "คำพูดในไฟล์เสียง (เว้นว่างได้)"
+  },
+  "fork.voice.clipWordsNeeded": {
+    "en": "What is said in it",
+    "text": "คำพูดในคลิปเสียง"
+  },
+  "fork.voice.exportVoice": {
+    "en": "Save {{name}} as a file",
+    "text": "บันทึก “{{name}}” เป็นไฟล์"
   },
   "fork.voice.hearBoth": {
     "en": "To both",
@@ -1039,6 +1091,10 @@
     "en": "To them",
     "text": "ให้อีกฝ่ายฟัง"
   },
+  "fork.voice.importVoice": {
+    "en": "Import a voice file",
+    "text": "นำเข้าไฟล์เสียงพูด"
+  },
   "fork.voice.lineFailed": {
     "en": "This line could not be read aloud",
     "text": "อ่านบรรทัดนี้ออกเสียงไม่ได้"
@@ -1059,9 +1115,17 @@
     "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
     "text": "แอปจะเล่นเสียงอ่านคำแปลผ่านอุปกรณ์นี้ โดยใช้เป็นไมโครโฟนสำหรับส่งเสียงให้คู่สนทนา ถ้าการ์ดเสียงผสมเสียงได้ในตัว ให้เลือกช่องเล่นเสียงของการ์ด แล้วผสมเสียงจากช่องนั้นกับเสียงไมโครโฟนบนการ์ดโดยตรง วิธีนี้เสียงพูดของคุณจะไม่ผ่านซอฟต์แวร์"
   },
+  "fork.voice.micDenied": {
+    "en": "The microphone could not be opened.",
+    "text": "เปิดไมโครโฟนไม่ได้"
+  },
   "fork.voice.modelPlaceholder": {
     "en": "The model's name, e.g. tts-1",
     "text": "ชื่อโมเดล เช่น tts-1"
+  },
+  "fork.voice.myVoice": {
+    "en": "My voice",
+    "text": "เสียงของฉัน"
   },
   "fork.voice.myVoiceToo": {
     "en": "My own voice goes too",
@@ -1079,13 +1143,41 @@
     "en": "Read aloud",
     "text": "เปิดอ่านออกเสียง"
   },
+  "fork.voice.record": {
+    "en": "Read it aloud",
+    "text": "อ่านประโยคนี้ออกเสียง"
+  },
+  "fork.voice.recordAgain": {
+    "en": "Record again",
+    "text": "อัดใหม่"
+  },
+  "fork.voice.removeTake": {
+    "en": "Remove the {{language}} recording of {{name}}",
+    "text": "ลบเสียงอัดภาษา{{language}}ของ “{{name}}”"
+  },
+  "fork.voice.removeVoice": {
+    "en": "Remove {{name}}",
+    "text": "ลบ “{{name}}”"
+  },
+  "fork.voice.renameVoice": {
+    "en": "Rename {{name}}",
+    "text": "เปลี่ยนชื่อ “{{name}}”"
+  },
   "fork.voice.sample": {
     "en": "Play a sample",
     "text": "ฟังตัวอย่าง"
   },
+  "fork.voice.saveVoice": {
+    "en": "Save",
+    "text": "บันทึก"
+  },
   "fork.voice.sayLine": {
     "en": "Read this line aloud",
     "text": "อ่านบรรทัดนี้"
+  },
+  "fork.voice.serverNone": {
+    "en": "The other device lends no voice model. Use an API or this computer instead.",
+    "text": "อุปกรณ์อีกเครื่องไม่มีโมเดลอ่านออกเสียงให้ใช้ เปลี่ยนไปใช้ API หรือคอมพิวเตอร์เครื่องนี้แทนได้"
   },
   "fork.voice.stage": {
     "en": "Voice",
@@ -1096,6 +1188,10 @@
     "text": "อ่านคำแปลของคุณให้ฟัง ฟังข้อความบรรทัดไหนในบทสนทนาก็ได้ เพียงกดปุ่มลำโพงของบรรทัดนั้น"
   },
   "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "หยุด"
+  },
+  "fork.voice.stopRecording": {
     "en": "Stop",
     "text": "หยุด"
   },
@@ -1119,9 +1215,17 @@
     "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
     "text": "เมื่ออ่านให้อีกฝ่ายฟัง เสียงจะถูกส่งเข้าไมโครโฟนเสมือน ให้เลือกไมโครโฟนนี้ใน VRChat หรือแอปประชุม (ใน Windows ชื่อ CABLE Output)"
   },
+  "fork.voice.unrecorded": {
+    "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
+    "text": "ยังไม่ได้เลือกเสียงของคุณสำหรับอ่านออกเสียง เพิ่มเสียงได้ในส่วน “อ่านออกเสียง”"
+  },
   "fork.voice.voice": {
     "en": "Voice",
     "text": "เสียง"
+  },
+  "fork.voice.voiceName": {
+    "en": "Name",
+    "text": "ชื่อ"
   },
   "fork.voice.voiceOf": {
     "en": "{{language}} voice",
@@ -1134,6 +1238,14 @@
   "fork.voice.volumeTheirs": {
     "en": "Volume for them",
     "text": "ระดับเสียงที่อีกฝ่ายได้ยิน"
+  },
+  "fork.voice.wayImport": {
+    "en": "Import a recording",
+    "text": "นำเข้าไฟล์เสียง"
+  },
+  "fork.voice.wayRecord": {
+    "en": "Record now",
+    "text": "อัดเสียงตอนนี้"
   },
   "fork.voice.woman": {
     "en": "Female voice",
@@ -2130,6 +2242,10 @@
   "providers.localai.noteQwen3Tts": {
     "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
     "text": "เป็นธรรมชาติที่สุด เริ่มพูดได้ทันที ทดสอบแล้วว่าอ่านภาษาญี่ปุ่น จีน และอังกฤษได้ถูกต้องทั้งหมด ใช้หน่วยความจำการ์ดจอประมาณ 3 GB รองรับ 10 ภาษา"
+  },
+  "providers.localai.noteQwen3TtsBase": {
+    "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
+    "text": "อ่านออกเสียงด้วยเสียงของคุณเอง แค่อัดเสียงพูดประมาณ 10 วินาทีก็โคลนเสียงได้ ครั้งแรกที่ใช้เสียงแต่ละแบบต้องรอตั้งแต่ไม่กี่วินาทีถึงยี่สิบกว่าวินาที หลังจากนั้นจะเริ่มอ่านทันที ใช้หน่วยความจำการ์ดจอประมาณ 3 GB รองรับ 10 ภาษา"
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

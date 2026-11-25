@@ -32,7 +32,7 @@ const sse = (...pieces: string[]) => new Response(
 const stops: Array<() => Promise<void>> = [];
 afterEach(async () => { for (const stop of stops.splice(0)) await stop(); });
 
-async function live(context: SessionContext, patch: Partial<LocalAISettings>, answers: Response[], voice: Partial<Pick<VoiceDeps, 'decode' | 'native' | 'edge'>> = {}, adjust?: (config: LocalAIConfig) => void) {
+async function live(context: SessionContext, patch: Partial<LocalAISettings>, answers: Response[], voice: Partial<Pick<VoiceDeps, 'decode' | 'native' | 'edge'>> = {}, adjust?: (config: LocalAIConfig) => void, credentials: LocalAICredentials = K) {
   const config = buildLocalAI(context, { ...LOCALAI_DEFAULTS, ...patch }, shared);
   if ('refused' in config) throw new Error(config.refused);
   adjust?.(config);
@@ -40,7 +40,7 @@ async function live(context: SessionContext, patch: Partial<LocalAISettings>, an
   const { clock } = trackedClock();
   const { events, log } = recordEvents();
   const said: Array<{ text: string; voice: string }> = [];
-  const fetch = vi.fn(() => {
+  const fetch = vi.fn((_input: RequestInfo | URL, _init?: RequestInit) => {
     const next = answers.shift();
     return next ? Promise.resolve(next) : Promise.reject(new Error('no answer scripted'));
   });
@@ -50,7 +50,7 @@ async function live(context: SessionContext, patch: Partial<LocalAISettings>, an
     edge: async (request) => { said.push(request); return new ArrayBuffer(8); },
     ...voice,
   };
-  const starting = createPipelineAdapter({ openSocket: sockets.create, fetch: fetch as unknown as typeof globalThis.fetch, voice: deps }).start({ context, config, credentials: K, clock, signal: new AbortController().signal }, events);
+  const starting = createPipelineAdapter({ openSocket: sockets.create, fetch: fetch as unknown as typeof globalThis.fetch, voice: deps }).start({ context, config, credentials, clock, signal: new AbortController().signal }, events);
   const socket = sockets.last();
   socket.open('');
   socket.receive(frame({ type: 'session.created', session: { id: 'sess_1', type: 'realtime', model: 'gpt-realtime' } }));
@@ -59,7 +59,7 @@ async function live(context: SessionContext, patch: Partial<LocalAISettings>, an
   stops.push(() => session.stop());
   const of = <T extends AdapterEvent['kind']>(kind: T) => log.filter((e): e is Extract<AdapterEvent, { kind: T }> => e.kind === kind);
   const frames = (type: string) => of('frame').filter((e) => e.payload.type === type);
-  return { config, session, log, of, frames, said, clock, receive: (...m: string[]) => { for (const x of m) socket.receive(x); } };
+  return { config, session, log, of, frames, said, clock, fetch, receive: (...m: string[]) => { for (const x of m) socket.receive(x); } };
 }
 
 describe('a leg that speaks (fork)', () => {
@@ -75,6 +75,36 @@ describe('a leg that speaks (fork)', () => {
   it('is refused while its voice API names no model', () => {
     const unnamed = buildLocalAI(SPEAKS, { ...LOCALAI_DEFAULTS, ...EDGE_ON, speak: { ...LOCALAI_DEFAULTS.speak, on: true, at: 'api', apiBaseUrl: 'https://api.example.com/v1', apiModel: '' } }, shared);
     expect(unnamed).toMatchObject({ code: 'voice_unnamed' });
+  });
+
+  describe('with the voice on the other device', () => {
+    const QWEN = 'qwen3-tts-1.7b-customvoice-q8';
+    const THERE: Partial<LocalAISettings> = { translateServerModel: 'hy-mt2-1.8b', speak: { ...LOCALAI_DEFAULTS.speak, on: true, at: 'server', serverModel: QWEN } };
+    const lends = { ...shared, models: [{ id: 'kotomimi', kind: 'pipeline', host: 'kotomimi' }, { id: 'hy-mt2-1.8b', kind: 'translate', host: 'kotomimi' }, { id: QWEN, kind: 'voice', host: 'kotomimi' }] };
+
+    it('is built as a stage of the shared device, and refused where the device lends no voice model', () => {
+      const on = buildLocalAI(SPEAKS, { ...LOCALAI_DEFAULTS, ...THERE }, lends);
+      expect('refused' in on ? null : on.stages?.voice).toMatchObject({ via: 'speech', server: true, model: QWEN, key: 'serverKey', streams: true, voices: { ja: 'ono_anna' } });
+      const none = buildLocalAI(SPEAKS, { ...LOCALAI_DEFAULTS, ...THERE, speak: { ...LOCALAI_DEFAULTS.speak, on: true, at: 'server' } }, { ...lends, models: lends.models.filter((m) => m.kind !== 'voice') });
+      expect(none).toMatchObject({ code: 'server_no_voice' });
+    });
+
+    it('asks the device the run is connected to, with the run\'s own access key', async () => {
+      const pcm = new Response(new Uint8Array(new Int16Array(2400).fill(500).buffer), { headers: { 'Content-Type': 'audio/pcm;rate=24000' } });
+      // Asked first, as the run begins: the warm-up, whose sound nobody hears.
+      const warm = new Response(new Uint8Array(4), { headers: { 'Content-Type': 'audio/pcm;rate=24000' } });
+      const h = await live(SPEAKS, THERE, [warm, sse('こんにちは。'), pcm], { decode: async () => new Int16Array(0) }, undefined, { ...K, apiKey: 'door-key' });
+      h.receive(...heard('a', '你好。'));
+      await vi.waitFor(() => expect(h.of('audio')).toHaveLength(1));
+      expect(h.of('audio')[0].payload.pcm).toHaveLength(2400);
+      const speeches = h.fetch.mock.calls.filter((call) => String(call[0]).endsWith('/audio/speech'));
+      expect(speeches).toHaveLength(2);
+      expect(JSON.parse(speeches[0][1]!.body as string)).toMatchObject({ model: QWEN, input: 'こんにちは。', response_format: 'pcm' });
+      const asked = speeches[1];
+      expect(String(asked[0])).toBe('http://192.168.1.10:8080/v1/audio/speech');
+      expect((asked[1]!.headers as Record<string, string>).Authorization).toBe('Bearer door-key');
+      expect(JSON.parse(asked[1]!.body as string)).toMatchObject({ model: QWEN, input: 'こんにちは。', voice: 'ono_anna', response_format: 'pcm', language: 'ja' });
+    });
   });
 
   it('speaks each translation when it is whole, on the translation\'s own segment, in the language\'s voice', async () => {

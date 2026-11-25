@@ -7,7 +7,9 @@
  *   while the settings card is open: the user's leg hears silence while they
  *   are muted in VRChat (`vrchatHolds`, read by the microphone source).
  * - **The chatbox.** Each of the user's sentences, once it and its
- *   translation are final, goes above their avatar — spoken or typed. While
+ *   translation are final, goes above their avatar — spoken or typed; where
+ *   the translation is read aloud to the other side, when its reading
+ *   begins, so that what is read and what is heard are one sentence. While
  *   coached the user speaks the other side's language and gets feedback, not
  *   a translation: their spoken sentence goes up as they said it, the
  *   feedback is for them alone; typed text is translated as ever.
@@ -33,6 +35,10 @@ import { useCoachingStore } from '../stores/coachingStore';
 import useAudioStore from '../stores/audioStore';
 import { getProvider } from '../providers/registry';
 import { useProviderStore } from '../stores/providerStore';
+import { useRoutingStore } from '../stores/routingStore';
+import { parseClipKey } from '../lib/audio/playback';
+import { speaksAlong, voiceSpeaks, type VoiceChoice } from '../providers/openai/localaiVoice';
+import type { LocalAIModel } from '../providers/openai/localaiModels';
 import useSettingsStore from '../stores/settingsStore';
 import { useSubtitleLookStore } from '../stores/subtitleLookStore';
 import { useVRChatStore, type ChatboxShows, type OnVideo, type VideoApart, type VRChatLink } from '../stores/vrchatStore';
@@ -47,7 +53,7 @@ export interface VRChatDeps {
   ipc: VRChatIpc;
   runner: Pick<Runner, 'setLegPace'> & Partial<Pick<Runner, 'openSide' | 'sideOffered'>> & { state: { getState(): { phase: string }; subscribe(listener: () => void): () => void } };
   /** The conversation as drawn, and its segments: a typed sentence is told by its origin (`pipeline.ts`). */
-  view: Readable<{ entries: readonly Entry[]; legs?: readonly { segments: readonly { id: string; origin?: string }[] }[] }>;
+  view: Readable<{ entries: readonly Entry[]; legs?: readonly { segments: readonly { id: string; origin?: string; ref?: number }[] }[] }>;
   /** The legs a run opens now (the audio mode's). */
   legs(): readonly LegName[];
   /** Whether the user can be asked now: false while the subtitle strip lets the mouse pass through. */
@@ -61,6 +67,11 @@ export interface VRChatDeps {
   theirs?(): Theirs | undefined;
   /** The conversation emptied (a clear, a new run): what waits to be sent was said there, and is not sent. */
   onReset?(listener: () => void): () => void;
+  /**
+   * Fork: the user's translations as they are read aloud to the other side (`Reading`), while a run reads them so.
+   * Null, or absent: nothing is read to them, and a line goes up as soon as it is finished.
+   */
+  reading?(): Reading | null;
   store: typeof useVRChatStore;
   /** The other side's sound by channel (`participantSplit`): absent, a video is only ever heard faster. */
   split?: Pick<ParticipantSplit, 'onHearing' | 'onShared' | 'setMode' | 'spatialSeen'>;
@@ -72,6 +83,22 @@ export interface VRChatDeps {
   askWaitMs?: number;
   setTimeout?(fn: () => void, ms: number): unknown;
 }
+
+/**
+ * Fork: what is being read aloud of the user's leg: the playback's own queue for it (`ClipQueue.scheduled`), each
+ * clip by the segment it reads (`Segment.ref`; none for what is said with no segment of its own).
+ */
+export interface Reading {
+  scheduled(): Array<{ ref: number | undefined; inMs: number }>;
+  /** Told when a clip is queued, one ends, or the queue is emptied. */
+  subscribe(listener: () => void): () => void;
+}
+
+/**
+ * How long a line waits for a reading that has not come while nothing else is being read: a sentence the voice
+ * passed over, or could not make, goes up all the same.
+ */
+export const READING_WAIT_MS = 3000;
 
 /** The main process's word for VRChat's side, held to its shape. */
 export function linkOf(value: unknown): VRChatLink {
@@ -358,6 +385,18 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
   /** The pages still to go of the line going up now. */
   let rest: string[] = [];
   let sending = false;
+  /**
+   * Fork: the lines kept back for their reading, oldest first (`Reading`): each with the segments its translations
+   * are in. One goes up when the reading of it begins — and with it every line before it, which the voice has then
+   * passed over (it reads in order) — or when nothing is read for `READING_WAIT_MS` and its turn has not come.
+   */
+  const held: Array<{ pages: string[]; refs: number[] }> = [];
+  /** The segments the reading has had in its queue, and those of them it has begun. */
+  const queued = new Set<number>();
+  const begun = new Set<number>();
+  let listened: Reading | null = null;
+  let unlisten: (() => void) | null = null;
+  let startTimer = 0;
   /** Whether a line may go up now: asked again at the moment it is sent, as the setting may have changed while it waited. */
   const allowed = () => !stopped && store.getState().chatbox !== 'off';
   /**
@@ -385,7 +424,7 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
         && !entry.source.some((row) => typed.has(row.segmentId)) && textOf(entry.source).trim() !== '')
       .map((entry) => `${entry.id}:${textOf(entry.source)}`)
       .join('|');
-    const waiting = queue.length > 0 || rest.length > 0 ? `waiting:${queue.length}:${rest.length}` : '';
+    const waiting = queue.length > 0 || rest.length > 0 || held.length > 0 ? `waiting:${queue.length}:${rest.length}:${held.length}` : '';
     const now = `${coming}${waiting}`;
     if (now === '') { typingFor = ''; setTyping(false); return; }
     // Only news of the sentence holds it longer: the other side talking on does not.
@@ -414,8 +453,63 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
     sending = true;
     void ipc.invoke('vrchat:chatbox', { text: line }).catch(() => {});
     showTyping();
-    later(() => { sending = false; pump(); }, Math.max(gap, chatboxReadingMs(line)));
+    // Read aloud to them, the voice sets the pace: the next sentence goes up when it is read, held only as long as
+    // VRChat asks. A line of several pages still gives each its reading time.
+    const paced = rest.length === 0 && readingNow() !== null;
+    later(() => { sending = false; pump(); }, paced ? gap : Math.max(gap, chatboxReadingMs(line)));
   };
+  /** The reading now, listened to while there is one. */
+  function readingNow(): Reading | null {
+    const reading = allowed() ? deps.reading?.() ?? null : null;
+    if (reading !== listened) {
+      unlisten?.();
+      listened = reading;
+      unlisten = reading ? reading.subscribe(() => release()) : null;
+    }
+    return reading;
+  }
+  const letGo = (count: number) => {
+    if (count <= 0) return;
+    for (const line of held.splice(0, count)) queue.push(line.pages);
+    pump();
+    showTyping();
+  };
+  /** Sends up every kept line whose reading has begun, and the ones before it. */
+  function release(): void {
+    if (stopped) return;
+    const reading = readingNow();
+    // Nothing is read to them any more: nothing is waited for.
+    if (!reading) { letGo(held.length); return; }
+    // What it reads is noted whether or not a line waits for it yet: a reading may begin before its line is finished
+    // on screen, and be over by then.
+    const now = reading.scheduled();
+    const present = new Set<number>();
+    for (const clip of now) {
+      if (clip.ref === undefined) continue;
+      present.add(clip.ref);
+      queued.add(clip.ref);
+      if (clip.inMs <= 0) begun.add(clip.ref);
+    }
+    // One that was in the queue and is no longer has been played to its end.
+    for (const ref of queued) if (!present.has(ref)) { begun.add(ref); queued.delete(ref); }
+    let upTo = 0;
+    held.forEach((line, i) => { if (line.refs.some((ref) => begun.has(ref))) upTo = i + 1; });
+    letGo(upTo);
+    // The next of them to begin: looked at again at that moment, which the queue does not tell.
+    const next = now.filter((clip) => clip.ref !== undefined && clip.inMs > 0 && held.some((line) => line.refs.includes(clip.ref!))).map((clip) => clip.inMs);
+    if (next.length === 0) return;
+    const mine = ++startTimer;
+    later(() => { if (mine === startTimer) release(); }, Math.ceil(Math.min(...next)) + 5);
+  }
+  /** A kept line whose reading has not come: it goes up once nothing is being read, with the ones before it. */
+  const giveUp = (line: { pages: string[] }) => {
+    const at = held.findIndex((one) => one.pages === line.pages);
+    if (stopped || at < 0) return;
+    const reading = readingNow();
+    if (reading && reading.scheduled().length > 0) { later(() => giveUp(line), READING_WAIT_MS); return; }
+    letGo(at + 1);
+  };
+  const forget = () => { queue.length = 0; rest = []; held.length = 0; queued.clear(); begun.clear(); };
   const look = () => {
     const shows = store.getState().chatbox;
     const state = deps.view.get();
@@ -423,6 +517,8 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
     const theirs = deps.theirs?.();
     // The segments typed text opened: everything else of the user's leg was spoken.
     const typed = new Set((state.legs ?? []).flatMap((leg) => leg.segments.filter((s) => TYPED.test(s.origin ?? '')).map((s) => s.id)));
+    /** The segment a row is of, as its reading names it. */
+    const refOf = new Map((state.legs ?? []).flatMap((leg) => leg.segments.flatMap((s): Array<[string, number]> => (s.ref === undefined ? [] : [[s.id, s.ref]]))));
     // Feedback is private; a coached speaker's own-language sentence is a translation instead.
     // An undecided partial must not reach the chatbox before the final language arrives.
     const feedback = (entry: Extract<Entry, { kind: 'exchange' }>) => coached
@@ -463,27 +559,39 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
       const line = finishedLine(entry, shows, said, store.getState().chatboxTranslationFirst, theirs, i < newest);
       if (line === null) return;
       sent.add(entry.id);
-      queue.push(chatboxPages(line));
+      const pages = chatboxPages(line);
+      // Fork: read aloud to them, it goes up with its reading. Not what is sent as said (it is not read), nor a line
+      // with no translation into a language of theirs (one back into the user's own is not read either).
+      const refs = said || asSaid(entry) || readingNow() === null ? [] : entry.translation
+        .filter((row) => row.purpose !== 'feedback' && (!theirs || theirs.languages.some((code) => base(code) === base(row.language || entry.languages.target))))
+        .flatMap((row) => { const ref = refOf.get(row.segmentId); return ref === undefined ? [] : [ref]; });
+      if (refs.length === 0) { queue.push(pages); return; }
+      const kept = { pages, refs };
+      held.push(kept);
+      later(() => giveUp(kept), READING_WAIT_MS);
     });
+    release();
     pump();
     showTyping();
   };
   // What is finished on screen when this begins was said before: it is not sent now. A sentence still under way is.
   for (const entry of deps.view.get().entries) if (finishedLine(entry, 'translation', false, false, deps.theirs?.()) !== null) sent.add(entry.id);
   offs.push(deps.view.subscribe(look));
-  if (deps.onReset) offs.push(deps.onReset(() => { queue.length = 0; rest = []; }));
+  if (deps.onReset) offs.push(deps.onReset(forget));
 
   // ── Following the run, the settings and the views ─────────────────────────
   let wasRunning = running();
   offs.push(runner.state.subscribe(() => {
     const now = running();
     // The run is over: a video it heard is forgotten, the pace is the usual for the next.
-    if (wasRunning && !now) { endVideo(); queue.length = 0; rest = []; showTyping(); }
+    if (wasRunning && !now) { endVideo(); forget(); showTyping(); }
+    // A run begins: the reading is asked for now, so that it is there when the first sentence is finished.
+    if (!wasRunning && now) readingNow();
     wasRunning = now;
     watch();
   }));
   offs.push(store.subscribe(() => {
-    if (store.getState().chatbox === 'off') { queue.length = 0; rest = []; }
+    if (store.getState().chatbox === 'off') forget();
     showTyping();
     watch();
   }));
@@ -504,7 +612,8 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
       setTyping(false);
       stopped = true;
       for (const off of offs.splice(0)) off();
-      queue.length = 0;
+      forget();
+      unlisten?.();
       if (watching) void ipc.invoke('vrchat:watch', { on: false }).catch(() => {});
       watching = false;
     },
@@ -521,9 +630,53 @@ export function getVRChatController(): Promise<VRChatController | null> {
   return building;
 }
 
+/**
+ * Fork: the reading of the user's translations, where the selected provider's run reads them aloud to the other
+ * side: Kotomimi's own voice stage on and set to speak along, in a voice that speaks one of their languages, and the
+ * other side set to hear it. The playback's queue of the user's leg is what it reads from; it is there once the run
+ * has made its first sound, and until then nothing is kept back for it.
+ */
+export function appReading(theirs: () => Theirs | undefined): () => Reading | null {
+  let reading: Reading | null = null;
+  let asked = false;
+  return () => {
+    const { selected, entries, models } = useProviderStore.getState();
+    const speak = selected === 'localai' ? (entries[selected]?.settings as { speak?: VoiceChoice } | undefined)?.speak : undefined;
+    if (!speak || !speaksAlong(speak) || !useRoutingStore.getState().meeting) return null;
+    const lent = (models.localai ?? []) as readonly LocalAIModel[];
+    if (!(theirs()?.languages ?? []).some((language) => voiceSpeaks(speak, language, lent))) return null;
+    if (!asked) {
+      asked = true;
+      void import('../lib/audio/appAudio').then(({ getAppAudio }) => getAppAudio()).then((audio) => {
+        const queue = audio.playback.queues.speaker;
+        reading = {
+          scheduled: () => queue.scheduled().map(({ key, inMs }) => ({ ref: parseClipKey(key).ref, inMs })),
+          subscribe: (listener) => queue.subscribe(listener),
+        };
+      }, () => { asked = false; });
+    }
+    return reading;
+  };
+}
+
 async function build(): Promise<VRChatController> {
   const { getAppSession } = await import('./session');
   const session = getAppSession();
+  const theirs = (): Theirs | undefined => {
+    const { selected, entries, models } = useProviderStore.getState();
+    const entry = selected ? entries[selected] : undefined;
+    const provider = selected ? getProvider(selected) : undefined;
+    if (!entry || !provider) return undefined;
+    // Fork: the other side's languages — their main one, and the one lit beside it — and whether the user speaks
+    // them ("我也会说").
+    const listed = models[selected!] ?? [];
+    const more = provider.languages.more?.(entry.settings, listed, entry.pair);
+    const lit = more?.theirs?.lit;
+    const languages = [entry.pair.target, ...(lit && lit !== 'auto' ? [lit] : [])];
+    const base = (code: string) => code.toLowerCase().split(/[-_]/)[0];
+    const speaks = more?.mine ? more.mine.chosen.some((code: string) => languages.some((one) => base(one) === base(code))) : true;
+    return { languages, back: speaks && provider.languages.detection?.(entry.settings, listed, entry.pair).both.on === true };
+  };
   const controller = startVRChat({
     ipc: (window as unknown as { electron: VRChatIpc }).electron,
     runner: session.runner,
@@ -531,21 +684,8 @@ async function build(): Promise<VRChatController> {
     legs: () => { const mode = useAudioStore.getState().mode; return mode === 'both' ? ['speaker', 'participant'] : [mode]; },
     canAsk: () => !(useSettingsStore.getState().subtitleModeActive && useSubtitleLookStore.getState().through),
     coached: () => useCoachingStore.getState().coached,
-    theirs: () => {
-      const { selected, entries, models } = useProviderStore.getState();
-      const entry = selected ? entries[selected] : undefined;
-      const provider = selected ? getProvider(selected) : undefined;
-      if (!entry || !provider) return undefined;
-      // Fork: the other side's languages — their main one, and the one lit beside it — and whether the user speaks
-      // them ("我也会说").
-      const listed = models[selected!] ?? [];
-      const more = provider.languages.more?.(entry.settings, listed, entry.pair);
-      const lit = more?.theirs?.lit;
-      const languages = [entry.pair.target, ...(lit && lit !== 'auto' ? [lit] : [])];
-      const base = (code: string) => code.toLowerCase().split(/[-_]/)[0];
-      const speaks = more?.mine ? more.mine.chosen.some((code: string) => languages.some((one) => base(one) === base(code))) : true;
-      return { languages, back: speaks && provider.languages.detection?.(entry.settings, listed, entry.pair).both.on === true };
-    },
+    theirs,
+    reading: appReading(theirs),
     onReset: (listener) => session.runner.conversation.onReset(() => listener()),
     store: useVRChatStore,
     split: participantSplit,

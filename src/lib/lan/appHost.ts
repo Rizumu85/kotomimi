@@ -4,7 +4,7 @@ import { createLanHost, type LanBridge, type LanHost } from './host';
 import { FIREWALL_UNKNOWN, firewallAnswer, type LanFirewall } from './protocol';
 import { appLanModels } from './appModels';
 import { nativeCoachAnswer, nativeKnown, nativeTranslator, nativeRecognizer } from './nativeShare';
-import { holdNative } from '../../providers/openai/localaiNative';
+import { holdNative, voiceTaken, voiceUp } from '../../providers/openai/localaiNative';
 import { NATIVE_COACH_EXTRA } from '../../providers/openai/nativeCoaches';
 
 interface ElectronApi {
@@ -57,6 +57,8 @@ export function createAppLanHost(onClients: (count: number) => void, onAsked?: (
       // The feedback model is the native engine's alone: the app's own chat models are not lent.
       // Asked as this computer asks it for itself, unless the device says otherwise.
       coach: { answer: (model, messages, extra) => nativeCoachAnswer(model, messages, { ...NATIVE_COACH_EXTRA, ...extra }), hold: () => holdNative('coach') },
+      // The voice engine, one model at a time: a device is not given another than the one someone is using.
+      voice: { busy: (model) => { const taken = voiceTaken(); return taken !== null && taken !== model; }, up: (model) => voiceUp(model), hold: () => holdNative('voice') },
     },
     clock: realClock,
     onClients,

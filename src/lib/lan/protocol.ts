@@ -8,9 +8,9 @@
  * every model is `owned_by: 'kotomimi'`, which is how a client knows what it
  * is talking to; a recognizer's capability is LocalAI's `transcript`; and a
  * translation model's is `translate` — it is no chat model, and is told the
- * pair it translates; and a model that gives grammar feedback is `feedback`
+ * pair it translates; a model that gives grammar feedback is `feedback`
  * — a chat model, lent for that work alone, so that it is offered for no
- * other.
+ * other; and a model that speaks is LocalAI's `tts`.
  */
 
 /**
@@ -47,7 +47,7 @@ export const LAN_PIPELINE = 'kotomimi';
 
 export interface SharedModel {
   id: string;
-  kind: 'asr' | 'translate' | 'feedback';
+  kind: 'asr' | 'translate' | 'feedback' | 'voice';
   /** The languages it takes, as the catalog codes them; empty: any. */
   languages: readonly string[];
   /** Can arbitrate between two installed languages of this recognizer's family. */
@@ -75,7 +75,7 @@ export function capabilityList(models: readonly SharedModel[]): { object: 'list'
       ...models.map((m) => ({
         id: m.id,
         capabilities: [
-          m.kind === 'asr' ? 'transcript' : m.kind,
+          m.kind === 'asr' ? 'transcript' : m.kind === 'voice' ? 'tts' : m.kind,
           ...(m.kind === 'asr' && m.bilingual ? ['bilingual'] : []),
           ...(m.kind === 'asr' && m.bilingual && m.trilingual ? ['trilingual'] : []),
         ],

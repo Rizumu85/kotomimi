@@ -457,6 +457,12 @@ export interface Provider<S, K extends { missing?: never } & object, C extends {
    * text-only switch decides.
    */
   speaks?(s: S): boolean;
+  /**
+   * Fork: what of the settings a live run goes on with when it changes, beside its languages (`Runner.retarget`,
+   * `watchPairFromStores`): a text that is the same while they are. Absent: its languages alone, and anything else
+   * waits for the next run.
+   */
+  liveReads?(s: S): string;
   /** Whether the speaker leg takes typed text under these settings: Gemini's Live Translate ignores it where its dialogue models answer it. */
   textInput(s: S): boolean;
   boundaries(s: S): 'provider' | 'silence';

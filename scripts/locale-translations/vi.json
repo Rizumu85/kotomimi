@@ -1015,6 +1015,14 @@
     "en": "What you want to say — Enter translates",
     "text": "Nhập điều muốn nói, nhấn Enter để dịch"
   },
+  "fork.voice.addTake": {
+    "en": "Add a language to {{name}}",
+    "text": "Ghi âm thêm một ngôn ngữ cho «{{name}}»"
+  },
+  "fork.voice.addVoice": {
+    "en": "Add a voice",
+    "text": "Thêm giọng"
+  },
   "fork.voice.auto": {
     "en": "Read my translations as they come",
     "text": "Tự đọc bản dịch sau khi tôi nói xong"
@@ -1022,6 +1030,50 @@
   "fork.voice.cannotSpeak": {
     "en": "{{name}} cannot speak {{language}}.",
     "text": "{{name}} không nói được {{language}}."
+  },
+  "fork.voice.chooseFile": {
+    "en": "Choose a file",
+    "text": "Chọn tệp"
+  },
+  "fork.voice.chooseVoice": {
+    "en": "Choose a voice",
+    "text": "Chọn giọng"
+  },
+  "fork.voice.clipFailed": {
+    "en": "The voice could not be added.",
+    "text": "Không thêm được giọng."
+  },
+  "fork.voice.clipLanguage": {
+    "en": "Language of the recording",
+    "text": "Ngôn ngữ của bản ghi âm"
+  },
+  "fork.voice.clipSilent": {
+    "en": "No voice was heard.",
+    "text": "Không nghe thấy tiếng nói."
+  },
+  "fork.voice.clipTooLong": {
+    "en": "Too long: no more than {{seconds}} seconds with its words.",
+    "text": "Bản ghi quá dài. Nếu có nhập lời, bản ghi chỉ được dài tối đa {{seconds}} giây."
+  },
+  "fork.voice.clipTooShort": {
+    "en": "Too short: at least {{seconds}} seconds.",
+    "text": "Bản ghi quá ngắn, cần ít nhất {{seconds}} giây."
+  },
+  "fork.voice.clipUnreadable": {
+    "en": "This file could not be read.",
+    "text": "Không đọc được tệp này."
+  },
+  "fork.voice.clipWords": {
+    "en": "What is said in it (optional)",
+    "text": "Lời nói trong bản ghi (không bắt buộc)"
+  },
+  "fork.voice.clipWordsNeeded": {
+    "en": "What is said in it",
+    "text": "Lời nói trong bản ghi âm"
+  },
+  "fork.voice.exportVoice": {
+    "en": "Save {{name}} as a file",
+    "text": "Lưu «{{name}}» thành tệp"
   },
   "fork.voice.hearBoth": {
     "en": "To both",
@@ -1043,6 +1095,10 @@
     "en": "To them",
     "text": "Cho người kia nghe"
   },
+  "fork.voice.importVoice": {
+    "en": "Import a voice file",
+    "text": "Nhập tệp giọng nói"
+  },
   "fork.voice.lineFailed": {
     "en": "This line could not be read aloud",
     "text": "Không thể đọc dòng này"
@@ -1063,9 +1119,17 @@
     "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
     "text": "Bản dịch được đọc qua thiết bị này để bên kia nghe như qua micrô. Nếu card âm thanh có sẵn chức năng trộn âm, hãy chọn một kênh phát của card rồi trộn âm từ kênh đó với tiếng micrô ngay trên card. Như vậy, giọng gốc của bạn không đi qua phần mềm."
   },
+  "fork.voice.micDenied": {
+    "en": "The microphone could not be opened.",
+    "text": "Không mở được micrô."
+  },
   "fork.voice.modelPlaceholder": {
     "en": "The model's name, e.g. tts-1",
     "text": "Tên mô hình, ví dụ tts-1"
+  },
+  "fork.voice.myVoice": {
+    "en": "My voice",
+    "text": "Giọng của tôi"
   },
   "fork.voice.myVoiceToo": {
     "en": "My own voice goes too",
@@ -1083,13 +1147,41 @@
     "en": "Read aloud",
     "text": "Bật đọc thành tiếng"
   },
+  "fork.voice.record": {
+    "en": "Read it aloud",
+    "text": "Đọc to câu này"
+  },
+  "fork.voice.recordAgain": {
+    "en": "Record again",
+    "text": "Thu lại"
+  },
+  "fork.voice.removeTake": {
+    "en": "Remove the {{language}} recording of {{name}}",
+    "text": "Xóa bản ghi âm bằng {{language}} của «{{name}}»"
+  },
+  "fork.voice.removeVoice": {
+    "en": "Remove {{name}}",
+    "text": "Xóa «{{name}}»"
+  },
+  "fork.voice.renameVoice": {
+    "en": "Rename {{name}}",
+    "text": "Đổi tên “{{name}}”"
+  },
   "fork.voice.sample": {
     "en": "Play a sample",
     "text": "Nghe thử"
   },
+  "fork.voice.saveVoice": {
+    "en": "Save",
+    "text": "Lưu"
+  },
   "fork.voice.sayLine": {
     "en": "Read this line aloud",
     "text": "Đọc dòng này"
+  },
+  "fork.voice.serverNone": {
+    "en": "The other device lends no voice model. Use an API or this computer instead.",
+    "text": "Thiết bị kia không có mô hình đọc văn bản để dùng chung. Bạn có thể chuyển sang dùng API hoặc máy tính này."
   },
   "fork.voice.stage": {
     "en": "Voice",
@@ -1100,6 +1192,10 @@
     "text": "Đọc bản dịch của bạn thành tiếng. Bạn cũng có thể nghe bất kỳ dòng nào trong cuộc trò chuyện bằng cách nhấn nút loa bên cạnh."
   },
   "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "Dừng"
+  },
+  "fork.voice.stopRecording": {
     "en": "Stop",
     "text": "Dừng"
   },
@@ -1123,9 +1219,17 @@
     "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
     "text": "Khi đọc cho bên kia nghe, âm thanh sẽ được gửi vào micrô ảo. Trong VRChat hoặc ứng dụng họp, hãy chọn micrô đó (trên Windows có tên là CABLE Output)."
   },
+  "fork.voice.unrecorded": {
+    "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
+    "text": "Bạn chưa chọn giọng của mình để đọc. Hãy thêm giọng trong mục «Đọc to»."
+  },
   "fork.voice.voice": {
     "en": "Voice",
     "text": "Giọng đọc"
+  },
+  "fork.voice.voiceName": {
+    "en": "Name",
+    "text": "Tên"
   },
   "fork.voice.voiceOf": {
     "en": "{{language}} voice",
@@ -1138,6 +1242,14 @@
   "fork.voice.volumeTheirs": {
     "en": "Volume for them",
     "text": "Âm lượng cho đối phương"
+  },
+  "fork.voice.wayImport": {
+    "en": "Import a recording",
+    "text": "Nhập bản ghi âm"
+  },
+  "fork.voice.wayRecord": {
+    "en": "Record now",
+    "text": "Thu âm ngay"
   },
   "fork.voice.woman": {
     "en": "Female voice",
@@ -2134,6 +2246,10 @@
   "providers.localai.noteQwen3Tts": {
     "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
     "text": "Tự nhiên nhất, phát giọng ngay khi bắt đầu. Thử nghiệm với tiếng Nhật, tiếng Trung và tiếng Anh đều không đọc sai. Dùng khoảng 3 GB bộ nhớ đồ họa, hỗ trợ 10 ngôn ngữ."
+  },
+  "providers.localai.noteQwen3TtsBase": {
+    "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
+    "text": "Chỉ cần ghi âm khoảng mười giây để tạo bản sao giọng của bạn và dùng giọng đó để đọc văn bản. Lần đầu dùng mỗi giọng, bạn cần chờ từ vài giây đến hơn hai mươi giây. Những lần sau, giọng sẽ phát ngay. Dùng khoảng 3 GB bộ nhớ đồ họa và hỗ trợ 10 ngôn ngữ."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

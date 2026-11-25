@@ -16,10 +16,11 @@ import { ipcNativeBridge } from '../native/nativeEngine';
 import { AUTO } from '../provider/languages';
 import { createNativeAsr } from '../../providers/openai/nativeAsr';
 import { NATIVE_COACHES } from '../../providers/openai/nativeCoaches';
+import { NATIVE_VOICES } from '../../providers/openai/nativeVoices';
 import { coachBaseUrl, coachKey } from '../../providers/openai/localaiNative';
 import { NATIVE_MODELS, type NativeModel, holdNative, isApple, nativeDownloaded, nativeEngineOf, nativeModel, nativeModelFor, nativePicked, nativePreference, nativeTaken, translatorBaseUrl, translatorKey } from '../../providers/openai/localaiNative';
 import { BEFORE_SLOT, NATIVE_TRANSLATORS, TEXT_SLOT, nativeTranslates, translatorRequest } from '../../providers/openai/nativeTranslators';
-import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore } from '../../stores/nativeEngineStore';
+import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore, useNativeVoiceStore } from '../../stores/nativeEngineStore';
 import type { SharedModel } from './protocol';
 import type { Recognizer } from './transcriber';
 import type { Translator } from './translator';
@@ -38,7 +39,7 @@ export const NATIVE_KNOWN_WITHIN_MS = 5000;
  * ms whatever they said: until then they look as if they had nothing, and sharing would tell a device so.
  */
 export function nativeKnown(within = NATIVE_KNOWN_WITHIN_MS): Promise<void> {
-  const stores = [useNativeEngineStore, useNativeTranslatorStore, useNativeCoachStore];
+  const stores = [useNativeEngineStore, useNativeTranslatorStore, useNativeCoachStore, useNativeVoiceStore];
   const known = () => stores.every((store) => store.getState().asked);
   if (known()) return Promise.resolve();
   return new Promise((resolve) => {
@@ -62,7 +63,16 @@ export function nativeShared(): SharedModel[] {
     ...NATIVE_TRANSLATORS.filter((m) => nativeDownloaded(translating, m.id)).map((m): SharedModel => ({ id: m.id, kind: 'translate', languages: m.languages === 'any' ? [] : [...m.languages] })),
     // The feedback engine's models: chat models, lent for grammar feedback in whatever languages they are asked.
     ...NATIVE_COACHES.filter((m) => nativeDownloaded(useNativeCoachStore.getState().status, m.id)).map((m): SharedModel => ({ id: m.id, kind: 'feedback', languages: [] })),
+    // The voice engine's models, each with the languages it speaks.
+    // Not a cloning model: its voices are recordings of this computer's owner, which another device has not.
+    ...NATIVE_VOICES.filter((m) => !m.clones && nativeDownloaded(useNativeVoiceStore.getState().status, m.id)).map((m): SharedModel => ({ id: m.id, kind: 'voice', languages: [...m.languages] })),
   ];
+}
+
+/** The native voice model a device named, where it is downloaded; null for any other name. */
+export function nativeVoiceFor(wanted: string): string | null {
+  const model = NATIVE_VOICES.find((m) => m.id === wanted && !m.clones);
+  return model && nativeDownloaded(useNativeVoiceStore.getState().status, model.id) ? model.id : null;
 }
 
 /** The native feedback model a device named, where it is downloaded; null for any other name. */

@@ -1,6 +1,6 @@
 /** Settings for lending this computer's native models over the local network. */
 import { useEffect, useMemo, useState } from 'react';
-import { Check, CircleHelp, Copy, GraduationCap, Languages, Loader, Mic, Share2, ShieldAlert, TriangleAlert } from 'lucide-react';
+import { Check, CircleHelp, Copy, GraduationCap, Languages, Loader, Mic, Share2, ShieldAlert, TriangleAlert, Volume2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ToggleSwitch from '../Settings/shared/ToggleSwitch';
 import Tooltip from '../Tooltip/Tooltip';
@@ -12,9 +12,10 @@ import { NativeEngineCard, nativeStoreOf, type NativeCardModel, type NativeKind 
 import { NATIVE_MODELS, isAutoLanguage } from '../../providers/openai/localaiNative';
 import { NATIVE_TRANSLATORS } from '../../providers/openai/nativeTranslators';
 import { NATIVE_COACHES } from '../../providers/openai/nativeCoaches';
+import { NATIVE_VOICES } from '../../providers/openai/nativeVoices';
 import './LanSharingSection.scss';
 
-const LIBRARY: Record<NativeKind, readonly NativeCardModel[]> = { asr: NATIVE_MODELS, translation: NATIVE_TRANSLATORS, coach: NATIVE_COACHES };
+const LIBRARY: Record<NativeKind, readonly NativeCardModel[]> = { asr: NATIVE_MODELS, translation: NATIVE_TRANSLATORS, coach: NATIVE_COACHES, voice: NATIVE_VOICES };
 
 /** Sharing lends every downloaded model; it does not change the local session's selection. */
 function SharedLibrary({ kind, disabled }: { kind: NativeKind; disabled: boolean }) {
@@ -22,8 +23,8 @@ function SharedLibrary({ kind, disabled }: { kind: NativeKind; disabled: boolean
   const status = nativeStoreOf(kind)((s) => s.status);
   const models = LIBRARY[kind].filter((m) => status.supported && status.models[m.id] && (!m.retired || status.models[m.id].state !== 'absent'));
   if (!models.length) return null;
-  const label = kind === 'asr' ? 'hearStage' : kind === 'translation' ? 'translateStage' : 'coachStage';
-  return <section><h3>{t(`providers.localai.${label}`)}</h3>{models.map((model) => <NativeEngineCard key={model.id} kind={kind} model={model} selected={false} disabled={disabled} />)}</section>;
+  const label = kind === 'voice' ? 'fork.voice.stage' : `providers.localai.${kind === 'asr' ? 'hearStage' : kind === 'translation' ? 'translateStage' : 'coachStage'}`;
+  return <section><h3>{t(label)}</h3>{models.map((model) => <NativeEngineCard key={model.id} kind={kind} model={model} selected={false} disabled={disabled} />)}</section>;
 }
 
 
@@ -72,13 +73,15 @@ export function LanSharingSection({ disabled = false }: { disabled?: boolean }) 
   const asr = nativeStoreOf('asr')((s) => s.status);
   const translation = nativeStoreOf('translation')((s) => s.status);
   const coach = nativeStoreOf('coach')((s) => s.status);
+  const voice = nativeStoreOf('voice')((s) => s.status);
   const asked = nativeStoreOf('asr')((s) => s.asked);
-  const shared = useMemo(() => (enabled ? appLanModels.shared() : []), [enabled, asr, translation, coach]); // eslint-disable-line react-hooks/exhaustive-deps
+  const shared = useMemo(() => (enabled ? appLanModels.shared() : []), [enabled, asr, translation, coach, voice]); // eslint-disable-line react-hooks/exhaustive-deps
   const nameOf = (id: string) => Object.values(LIBRARY).flat().find((m) => m.id === id)?.name ?? id;
   const recognizers = shared.filter((m) => m.kind === 'asr');
   const translators = shared.filter((m) => m.kind === 'translate');
   const coaches = shared.filter((m) => m.kind === 'feedback');
-  const lentCount = recognizers.length + translators.length + coaches.length;
+  const voices = shared.filter((m) => m.kind === 'voice');
+  const lentCount = recognizers.length + translators.length + coaches.length + voices.length;
   // A device found nothing here for its language: the model that would hear it, to download in place.
   const offer = useMemo(() => (askedFor && Date.now() - askedFor.at < ASKED_FOR_MS ? nativeOfferFor(askedFor.language, askedFor.model) : null), [askedFor, asr]);
   // Looked, and nothing here hears: another device would find nothing to listen with.
@@ -161,13 +164,14 @@ export function LanSharingSection({ disabled = false }: { disabled?: boolean }) 
               {recognizers.map((m) => <span key={m.id} className="kt-lan__model"><Mic size={12} />{nameOf(m.id)}</span>)}
               {translators.map((m) => <span key={m.id} className="kt-lan__model"><Languages size={12} />{nameOf(m.id)}</span>)}
               {coaches.map((m) => <span key={m.id} className="kt-lan__model"><GraduationCap size={12} />{nameOf(m.id)}</span>)}
+              {voices.map((m) => <span key={m.id} className="kt-lan__model"><Volume2 size={12} />{nameOf(m.id)}</span>)}
             </div>
             <button type="button" className="kt-lan__link" aria-expanded={managing} onClick={() => setManaging(!managing)}>
               {managing ? t('fork.lan.hideLibrary') : t('fork.lan.showLibrary')}
             </button>
             {managing && (
               <div className="kt-lan__library">
-                {(['asr', 'translation', 'coach'] as const).map((kind) => <SharedLibrary key={kind} kind={kind} disabled={disabled} />)}
+                {(['asr', 'translation', 'coach', 'voice'] as const).map((kind) => <SharedLibrary key={kind} kind={kind} disabled={disabled} />)}
               </div>
             )}
           </details>

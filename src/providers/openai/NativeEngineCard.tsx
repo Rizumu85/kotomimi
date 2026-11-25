@@ -57,6 +57,7 @@ const NOTES: Readonly<Record<string, string>> = {
   'gemma-4-e2b': 'noteGemma4',
   'qwen3-tts-1.7b-customvoice-q8': 'noteQwen3Tts',
   'irodori-tts-v4.1-small-mf-q8': 'noteIrodori',
+  'qwen3-tts-1.7b-base-q8': 'noteQwen3TtsBase',
 };
 
 /** The note of a model's card. A model of one family to a language (the Mac's recognition) shares its family's. */

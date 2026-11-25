@@ -21,9 +21,10 @@ afterEach(async () => {
 
 /** A server on a free loopback port, and everything the page was handed. */
 async function start(key = '') {
-  const seen = { requests: [], opened: [], messages: [], closed: [] };
+  const seen = { requests: [], opened: [], messages: [], closed: [], gone: [] };
   const server = await startLanServer({ port: 0, key, host: '127.0.0.1', name: '里兹 PC' }, {
     request: (r) => seen.requests.push(r),
+    requestClosed: (r) => seen.gone.push(r),
     socketOpen: (s) => seen.opened.push(s),
     socketMessage: (m) => seen.messages.push(m),
     socketClose: (c) => seen.closed.push(c),
@@ -112,7 +113,7 @@ describe('the shared models\' door: HTTP', () => {
     const preflight = await fetch(`${base}/v1/chat/completions`, { method: 'OPTIONS' });
     expect(preflight.status).toBe(204);
     expect(preflight.headers.get('access-control-allow-origin')).toBeNull();
-    expect((await fetch(`${base}/v1/audio/speech`, { method: 'POST', body: '{}' })).status).toBe(404);
+    expect((await fetch(`${base}/v1/audio/transcriptions`, { method: 'POST', body: '{}' })).status).toBe(404);
     expect((await fetch(`${base}/`)).status).toBe(404);
     expect((await fetch(`${base}/v1/chat/completions`, { method: 'POST', body: 'not json' })).status).toBe(400);
     expect((await fetch(`${base}/v1/chat/completions`, { method: 'POST', body: 'x'.repeat(1024 * 1024 + 10) })).status).toBe(413);
@@ -152,6 +153,111 @@ describe('the shared models\' door: HTTP', () => {
     running = [];
     await server.close();
     expect((await answer).status).toBe(503);
+  });
+});
+
+describe('the shared models\' door: an answer in pieces (fork)', () => {
+  const speech = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'a-voice', input: 'Hello.' }) };
+
+  it('sends a sentence\'s sound on as it is handed over, under the type the page names', async () => {
+    const { server, seen, base } = await start();
+    const asked = fetch(`${base}/v1/audio/speech`, speech);
+    await until(() => seen.requests.length === 1);
+    expect(seen.requests[0]).toMatchObject({ method: 'POST', path: '/v1/audio/speech', body: { model: 'a-voice', input: 'Hello.' } });
+    const { id } = seen.requests[0];
+    expect(server.waits(id)).toBe(true);
+    const out = server.stream(id, { contentType: 'audio/pcm;rate=24000' });
+    expect(server.waits(id)).toBe(false);
+    out.write(Buffer.from([1, 2]));
+    // The head and the first piece are there before the rest is made.
+    const response = await asked;
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toBe('audio/pcm;rate=24000');
+    expect(response.headers.get('x-kotomimi-name')).toBe(encodeURIComponent('里兹 PC'));
+    out.write(Buffer.from([3, 4]));
+    out.end();
+    expect([...new Uint8Array(await response.arrayBuffer())]).toEqual([1, 2, 3, 4]);
+    // Answered: nothing else takes the request, and nobody hung up.
+    expect(server.stream(id)).toBeNull();
+    expect(server.reply(id, { body: {} })).toBe(false);
+    expect(seen.gone).toEqual([]);
+  });
+
+  it('is not answered a second way once it has begun', async () => {
+    const { server, seen, base } = await start();
+    const asked = fetch(`${base}/v1/audio/speech`, speech);
+    await until(() => seen.requests.length === 1);
+    const { id } = seen.requests[0];
+    const out = server.stream(id, { contentType: 'audio/pcm;rate=48000' });
+    expect(server.reply(id, { status: 500, body: { error: {} } })).toBe(false);
+    expect(server.stream(id)).toBeNull();
+    out.end();
+    expect((await asked).status).toBe(200);
+  });
+
+  it('tells the page when the caller hangs up before its answer is whole, waiting or begun', async () => {
+    const { server, seen, base } = await start();
+    const hangUpOn = async (begin) => {
+      const before = seen.requests.length;
+      const request = http.request(`${base}/v1/audio/speech`, { method: 'POST', headers: speech.headers });
+      request.on('error', () => {});
+      request.end(speech.body);
+      await until(() => seen.requests.length === before + 1);
+      const { id } = seen.requests[before];
+      const out = begin ? server.stream(id, { contentType: 'audio/pcm;rate=24000' }) : null;
+      out?.write(Buffer.from([1, 2]));
+      request.destroy();
+      await until(() => seen.gone.some((gone) => gone.id === id));
+      // What is written after that goes nowhere, and throws nothing.
+      out?.write(Buffer.from([3, 4]));
+      out?.end();
+      expect(server.stream(id)).toBeNull();
+      expect(server.waits(id)).toBe(false);
+    };
+    await hangUpOn(false);
+    await hangUpOn(true);
+    expect(seen.gone).toHaveLength(2);
+  });
+
+  it('cuts an answer short when it is aborted, so that its caller does not take a part for the whole', async () => {
+    const { server, seen, base } = await start();
+    const asked = fetch(`${base}/v1/audio/speech`, speech);
+    await until(() => seen.requests.length === 1);
+    const { id } = seen.requests[0];
+    const out = server.stream(id, { contentType: 'audio/pcm;rate=24000' });
+    out.write(Buffer.from([1, 2]));
+    const response = await asked;
+    out.abort();
+    await expect(response.arrayBuffer()).rejects.toThrow();
+    // It was the page that ended it: nobody is told that the caller went away.
+    expect(seen.gone).toEqual([]);
+    expect(server.stream(id)).toBeNull();
+  });
+
+  it('never numbers a request as one of an earlier sharing was: an answer made late finds nobody', async () => {
+    const first = await start();
+    void fetch(`${first.base}/v1/audio/speech`, speech).catch(() => {});
+    await until(() => first.seen.requests.length === 1);
+    const old = first.seen.requests[0].id;
+    await first.server.close();
+    // Whoever was making its answer is told it is over.
+    expect(first.seen.gone).toEqual([{ id: old }]);
+    const second = await start();
+    void fetch(`${second.base}/v1/audio/speech`, speech).catch(() => {});
+    await until(() => second.seen.requests.length === 1);
+    expect(second.seen.requests[0].id).not.toBe(old);
+    expect(second.server.waits(old)).toBe(false);
+    expect(second.server.stream(old)).toBeNull();
+  });
+
+  it('cuts a sentence that is being sent when sharing stops', async () => {
+    const { server, seen, base } = await start();
+    const asked = fetch(`${base}/v1/audio/speech`, speech);
+    await until(() => seen.requests.length === 1);
+    server.stream(seen.requests[0].id, { contentType: 'audio/pcm;rate=24000' }).write(Buffer.from([1, 2]));
+    const response = await asked;
+    await server.close();
+    await expect(response.arrayBuffer()).rejects.toThrow();
   });
 });
 

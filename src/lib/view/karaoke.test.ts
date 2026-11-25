@@ -26,6 +26,7 @@ function fakeQueue() {
     position: () => playing,
     get pending() { return pending; },
     get clears() { return clears; },
+    scheduled: () => [],
     subscribe: (listener) => { listeners.add(listener); return () => { listeners.delete(listener); }; },
   };
   return {

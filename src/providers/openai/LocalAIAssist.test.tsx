@@ -1107,4 +1107,61 @@ describe('the voice card: a voice for every language it reads aloud (fork)', () 
     const two = draw({ settings: { ...EDGE, theyAlso: ['en'], theyLit: 'en', asrDetectOther: true } });
     expect(voices(two.card('fork.voice.stage'))).toHaveLength(2);
   });
+
+  it('lets a language\'s voice be chosen while a session runs, and a typed one not', () => {
+    const props = { values: { endpoint: '' }, set: vi.fn(), fill: vi.fn(), pair: { source: 'zh-CN', target: 'ja' }, legs: ['speaker' as const], models: [], readiness: { state: 'unknown' as const }, check: vi.fn() };
+    const update = vi.fn();
+    const here = { ...LOCALAI_DEFAULTS, speak: { ...LOCALAI_DEFAULTS.speak, on: true, at: 'device' as const } };
+    const view = render(<LocalAIAssist settings={here} {...props} update={update} disabled />);
+    const voice = within(screen.getByRole('region', { name: 'fork.voice.stage' })).getByRole('combobox', { name: 'fork.voice.voiceOf' }) as HTMLSelectElement;
+    expect(voice.disabled).toBe(false);
+    fireEvent.change(voice, { target: { value: 'ryan' } });
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ speak: expect.objectContaining({ voices: { 'qwen3-tts-1.7b-customvoice-q8': { ja: 'ryan' } } }) }));
+    view.unmount();
+    // An API's one voice is typed: every letter would be another voice, so it waits for the session's end.
+    const api = { ...LOCALAI_DEFAULTS, speak: { ...LOCALAI_DEFAULTS.speak, on: true, at: 'api' as const, apiBaseUrl: 'https://api.example.com/v1', apiModel: 'tts-1' } };
+    render(<LocalAIAssist settings={api} {...props} update={update} disabled />);
+    expect((within(screen.getByRole('region', { name: 'fork.voice.stage' })).getByRole('textbox', { name: 'fork.voice.voice' }) as HTMLInputElement).disabled).toBe(true);
+  });
+
+  describe('on the other device', () => {
+    const QWEN = 'qwen3-tts-1.7b-customvoice-q8';
+    const THERE: Partial<LocalAISettings> = { asrVia: 'device', translateAt: 'device', speak: { ...LOCALAI_DEFAULTS.speak, on: true, at: 'server' } };
+    const KOTOMIMI: LocalAIModel[] = [{ id: 'kotomimi', kind: 'pipeline', host: 'kotomimi' }, { id: 'r2t2-q8', kind: 'asr', host: 'kotomimi' }];
+    const LENDS: LocalAIModel[] = [...KOTOMIMI, { id: QWEN, kind: 'voice', host: 'kotomimi', languages: ['zh', 'en', 'ja'] }];
+
+    it('is one of the three places, as for every stage', () => {
+      const x = draw({ settings: THERE });
+      expect(x.places('fork.voice.stage').map((b) => b.textContent)).toEqual(THREE);
+      expect(pressed(x.places('fork.voice.stage'))).toBe('providers.localai.placeServer');
+      // With no device chosen yet, it says to choose one.
+      expect(x.card('fork.voice.stage').getByText('providers.localai.connectFirst')).toBeTruthy();
+    });
+
+    it('offers the voice models the device lends, the first where none is chosen, each language in that model\'s voices', () => {
+      const x = draw({ settings: THERE, values: { endpoint: '192.168.1.20:8790' }, models: LENDS });
+      const card = x.card('fork.voice.stage');
+      const model = card.getByRole('combobox', { name: 'providers.localai.model' });
+      expect(options(model)).toEqual(['', QWEN]);
+      fireEvent.change(model, { target: { value: QWEN } });
+      expect(x.update).toHaveBeenLastCalledWith(expect.objectContaining({ speak: expect.objectContaining({ at: 'server', serverModel: QWEN }) }));
+      // Japanese, in the voices this build knows for the model: the same ones as on this computer.
+      expect(options(voices(card)[0])).toContain('ono_anna');
+      expect((voices(card)[0] as HTMLSelectElement).value).toBe('ono_anna');
+    });
+
+    it('asks for a model to be chosen where the device does not say which of its models speak', () => {
+      const x = draw({ settings: THERE, values: { endpoint: '192.168.1.20:8080' }, models: [{ id: 'gpt-realtime' }, { id: 'tts-1' }] });
+      const model = x.card('fork.voice.stage').getByRole('combobox', { name: 'providers.localai.model' }) as HTMLSelectElement;
+      expect(options(model)).toEqual(['', 'gpt-realtime', 'tts-1']);
+      expect(model.options[0].textContent).toBe('providers.localai.hereModelPick');
+    });
+
+    it('says so where the device lends none, in place of a model to choose', () => {
+      const x = draw({ settings: THERE, values: { endpoint: '192.168.1.20:8790' }, models: KOTOMIMI });
+      const card = x.card('fork.voice.stage');
+      expect(card.getByText('fork.voice.serverNone')).toBeTruthy();
+      expect(card.queryByRole('combobox', { name: 'providers.localai.model' })).toBeNull();
+    });
+  });
 });

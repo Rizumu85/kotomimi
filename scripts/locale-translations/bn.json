@@ -1011,6 +1011,14 @@
     "en": "What you want to say — Enter translates",
     "text": "যা বলতে চান লিখুন, অনুবাদ করতে Enter চাপুন"
   },
+  "fork.voice.addTake": {
+    "en": "Add a language to {{name}}",
+    "text": "「{{name}}」-এর জন্য আরেকটি ভাষায় রেকর্ড করুন"
+  },
+  "fork.voice.addVoice": {
+    "en": "Add a voice",
+    "text": "কণ্ঠ যোগ করুন"
+  },
   "fork.voice.auto": {
     "en": "Read my translations as they come",
     "text": "আমার কথা শেষ হলে অনুবাদ পড়ে শোনান"
@@ -1018,6 +1026,50 @@
   "fork.voice.cannotSpeak": {
     "en": "{{name}} cannot speak {{language}}.",
     "text": "{{name}} {{language}} বলতে পারে না।"
+  },
+  "fork.voice.chooseFile": {
+    "en": "Choose a file",
+    "text": "ফাইল বেছে নিন"
+  },
+  "fork.voice.chooseVoice": {
+    "en": "Choose a voice",
+    "text": "কণ্ঠ বেছে নিন"
+  },
+  "fork.voice.clipFailed": {
+    "en": "The voice could not be added.",
+    "text": "কণ্ঠ যোগ করা যায়নি।"
+  },
+  "fork.voice.clipLanguage": {
+    "en": "Language of the recording",
+    "text": "রেকর্ডিংয়ের ভাষা"
+  },
+  "fork.voice.clipSilent": {
+    "en": "No voice was heard.",
+    "text": "কোনো কণ্ঠ শোনা যায়নি।"
+  },
+  "fork.voice.clipTooLong": {
+    "en": "Too long: no more than {{seconds}} seconds with its words.",
+    "text": "রেকর্ডিংটি খুব লম্বা। কথাগুলো লিখে দিলে রেকর্ডিং সর্বোচ্চ {{seconds}} সেকেন্ডের হতে পারে।"
+  },
+  "fork.voice.clipTooShort": {
+    "en": "Too short: at least {{seconds}} seconds.",
+    "text": "রেকর্ডিংটি খুব ছোট। অন্তত {{seconds}} সেকেন্ড হতে হবে।"
+  },
+  "fork.voice.clipUnreadable": {
+    "en": "This file could not be read.",
+    "text": "এই ফাইলটি পড়া যায়নি।"
+  },
+  "fork.voice.clipWords": {
+    "en": "What is said in it (optional)",
+    "text": "রেকর্ডিংয়ে যা বলা হয়েছে (ঐচ্ছিক)"
+  },
+  "fork.voice.clipWordsNeeded": {
+    "en": "What is said in it",
+    "text": "রেকর্ডিংয়ে যা বলা হয়েছে"
+  },
+  "fork.voice.exportVoice": {
+    "en": "Save {{name}} as a file",
+    "text": "‘{{name}}’ ফাইল হিসেবে সংরক্ষণ করুন"
   },
   "fork.voice.hearBoth": {
     "en": "To both",
@@ -1039,6 +1091,10 @@
     "en": "To them",
     "text": "অপর পক্ষ শুনবে"
   },
+  "fork.voice.importVoice": {
+    "en": "Import a voice file",
+    "text": "কণ্ঠের ফাইল আমদানি করুন"
+  },
   "fork.voice.lineFailed": {
     "en": "This line could not be read aloud",
     "text": "এই লাইন পড়ে শোনানো যায়নি"
@@ -1059,9 +1115,17 @@
     "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
     "text": "অনুবাদটি এই ডিভাইসে পড়ে শোনানো হয়। ওপাশে এই ডিভাইসের শব্দ মাইক্রোফোনের ইনপুট হিসেবে পৌঁছায়। আপনার সাউন্ড কার্ডে সরাসরি শব্দ মেশানোর সুবিধা থাকলে, তার একটি প্লেব্যাক চ্যানেল বেছে নিন। তারপর সাউন্ড কার্ডেই ওই চ্যানেলের শব্দের সঙ্গে আপনার মাইক্রোফোনের শব্দ মেশান। এতে আপনার নিজের কণ্ঠস্বর সফটওয়্যারের মধ্য দিয়ে যাবে না।"
   },
+  "fork.voice.micDenied": {
+    "en": "The microphone could not be opened.",
+    "text": "মাইক্রোফোন চালু করা যায়নি।"
+  },
   "fork.voice.modelPlaceholder": {
     "en": "The model's name, e.g. tts-1",
     "text": "মডেলের নাম, যেমন tts-1"
+  },
+  "fork.voice.myVoice": {
+    "en": "My voice",
+    "text": "আমার কণ্ঠ"
   },
   "fork.voice.myVoiceToo": {
     "en": "My own voice goes too",
@@ -1079,13 +1143,41 @@
     "en": "Read aloud",
     "text": "পড়ে শোনানো চালু করুন"
   },
+  "fork.voice.record": {
+    "en": "Read it aloud",
+    "text": "এই বাক্যটি জোরে পড়ুন"
+  },
+  "fork.voice.recordAgain": {
+    "en": "Record again",
+    "text": "আবার রেকর্ড করুন"
+  },
+  "fork.voice.removeTake": {
+    "en": "Remove the {{language}} recording of {{name}}",
+    "text": "「{{name}}」-এর {{language}} রেকর্ডিং মুছুন"
+  },
+  "fork.voice.removeVoice": {
+    "en": "Remove {{name}}",
+    "text": "‘{{name}}’ মুছে ফেলুন"
+  },
+  "fork.voice.renameVoice": {
+    "en": "Rename {{name}}",
+    "text": "‘{{name}}’-এর নাম বদলান"
+  },
   "fork.voice.sample": {
     "en": "Play a sample",
     "text": "নমুনা শুনুন"
   },
+  "fork.voice.saveVoice": {
+    "en": "Save",
+    "text": "সংরক্ষণ করুন"
+  },
   "fork.voice.sayLine": {
     "en": "Read this line aloud",
     "text": "এই লাইন পড়ে শোনান"
+  },
+  "fork.voice.serverNone": {
+    "en": "The other device lends no voice model. Use an API or this computer instead.",
+    "text": "অন্য ডিভাইসে ধার নেওয়ার মতো কোনো পড়ে শোনানোর মডেল নেই। এর বদলে API বা এই কম্পিউটার ব্যবহার করতে পারেন।"
   },
   "fork.voice.stage": {
     "en": "Voice",
@@ -1096,6 +1188,10 @@
     "text": "আপনার অনুবাদ পড়ে শোনায়। কথোপকথনের যেকোনো লাইনও শুনতে পারবেন: সেটির স্পিকার বোতাম চাপুন।"
   },
   "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "থামান"
+  },
+  "fork.voice.stopRecording": {
     "en": "Stop",
     "text": "থামান"
   },
@@ -1119,9 +1215,17 @@
     "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
     "text": "অপর পক্ষকে পড়ে শোনানোর সময় শব্দ ভার্চুয়াল মাইক্রোফোনে পাঠানো হয়। VRChat বা মিটিং অ্যাপে সেটিকে মাইক্রোফোন হিসেবে বেছে নিন (Windows-এ এর নাম CABLE Output)।"
   },
+  "fork.voice.unrecorded": {
+    "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
+    "text": "পড়ে শোনানোর জন্য নিজের কণ্ঠ বেছে নেওয়া হয়নি। ‘পড়ে শোনানো’ কার্ডে কণ্ঠ যোগ করুন।"
+  },
   "fork.voice.voice": {
     "en": "Voice",
     "text": "কণ্ঠ"
+  },
+  "fork.voice.voiceName": {
+    "en": "Name",
+    "text": "নাম"
   },
   "fork.voice.voiceOf": {
     "en": "{{language}} voice",
@@ -1134,6 +1238,14 @@
   "fork.voice.volumeTheirs": {
     "en": "Volume for them",
     "text": "ওপাশে যে ভলিউমে শোনা যায়"
+  },
+  "fork.voice.wayImport": {
+    "en": "Import a recording",
+    "text": "রেকর্ডিং আমদানি করুন"
+  },
+  "fork.voice.wayRecord": {
+    "en": "Record now",
+    "text": "এখন রেকর্ড করুন"
   },
   "fork.voice.woman": {
     "en": "Female voice",
@@ -2130,6 +2242,10 @@
   "providers.localai.noteQwen3Tts": {
     "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
     "text": "সবচেয়ে স্বাভাবিক শোনায়, সঙ্গে সঙ্গেই কথা বলা শুরু করে। পরীক্ষায় জাপানি, চীনা ও ইংরেজিতে কোনো উচ্চারণ ভুল হয়নি। প্রায় 3 GB ভিডিও মেমরি লাগে, 10টি ভাষা সমর্থন করে।"
+  },
+  "providers.localai.noteQwen3TtsBase": {
+    "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
+    "text": "আপনার নিজের কণ্ঠে পড়ে শোনায়। কণ্ঠ ক্লোন করতে প্রায় 10 সেকেন্ডের রেকর্ডিংই যথেষ্ট। প্রতিটি কণ্ঠ প্রথমবার ব্যবহার করলে কয়েক সেকেন্ড থেকে 20 সেকেন্ডের কিছু বেশি সময় লাগতে পারে। এরপর সঙ্গে সঙ্গেই পড়া শুরু হয়। প্রায় 3 GB ভিডিও মেমরি লাগে। 10টি ভাষা সমর্থিত।"
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

@@ -3,8 +3,8 @@
  * process holds the listening socket (`electron/lan-server.js`) and hands
  * every request and every socket message here, to the page, where the
  * models run; this module answers them — the model lists itself, a
- * translation through `LanTranslator`, a Realtime socket through one
- * `LanTranscriber` each.
+ * translation through `LanTranslator`, a sentence to speak through
+ * `LanVoice`, a Realtime socket through one `LanTranscriber` each.
  *
  * To the other device this is a server that speaks the wire the Kotomimi
  * provider already speaks to a LocalAI (`docs/fork/lan-and-phone.md`), so nothing new is needed
@@ -17,6 +17,7 @@ import type { Clock } from '../contract/clock';
 import { LanTranscriber, type Recognizer } from './transcriber';
 import { LanTranslator, type Translator } from './translator';
 import { LanCoach, type CoachDeps } from './coach';
+import { LanVoice, type LanVoiceDeps } from './voice';
 import { capabilityList, modelList, wireError, type SharedModel } from './protocol';
 
 /** The page's side of the main process's door: calls up, and events down. */
@@ -42,12 +43,14 @@ export interface LanModels {
   refusal?(source: string, target: string, wanted: string): 'unfit' | 'busy' | null;
   /** The feedback model a device named, where this computer lends one by that name; null for any other name. */
   coach?(wanted: string): string | null;
+  /** The same of a voice model. */
+  voice?(wanted: string): string | null;
 }
 
 export interface LanHostDeps {
   bridge: LanBridge;
   models: LanModels;
-  engines: { recognizer(model: { modelId: string; streaming: boolean; also?: string; third?: string; hints?: readonly string[] }): Recognizer; translator(): Translator; /** The feedback engine: its answer to a chat, and the hold that keeps it up. Absent: no feedback model is lent. */ coach?: Pick<CoachDeps, 'answer' | 'hold'> };
+  engines: { recognizer(model: { modelId: string; streaming: boolean; also?: string; third?: string; hints?: readonly string[] }): Recognizer; translator(): Translator; /** The feedback engine: its answer to a chat, and the hold that keeps it up. Absent: no feedback model is lent. */ coach?: Pick<CoachDeps, 'answer' | 'hold'>; /** The voice engine. Absent: no voice model is lent. */ voice?: Pick<LanVoiceDeps, 'busy' | 'up' | 'hold'> };
   clock: Clock;
   /** How many sockets are open changed: the settings show it. */
   onClients?(count: number): void;
@@ -75,13 +78,14 @@ export function createLanHost(deps: LanHostDeps): LanHost {
   const sockets = new Map<string, LanTranscriber>();
   let translator: LanTranslator | null = null;
   let coach: LanCoach | null = null;
+  let voice: LanVoice | null = null;
   let unsubscribe: Array<() => void> = [];
   let sessions = 0;
 
   const clients = () => deps.onClients?.(sockets.size);
 
   const answer = async (request: WireRequest): Promise<void> => {
-    let reply: { status: number; body: unknown; contentType?: string };
+    let reply: { status: number; body: unknown; contentType?: string } | null;
     try {
       if (request.path === '/v1/models') reply = { status: 200, body: modelList(models.shared()) };
       else if (request.path === '/v1/models/capabilities') {
@@ -96,11 +100,13 @@ export function createLanHost(deps: LanHostDeps): LanHost {
         const feedback = coach && typeof named === 'string' ? models.coach?.(named) ?? null : null;
         reply = feedback && coach ? await coach.complete(feedback, request.body) : await translator.complete(request.body);
       }
+      // Null: the sentence's sound went out as it was made, and the request is answered.
+      else if (request.path === '/v1/audio/speech' && voice) reply = await voice.speak(request.id, request.body);
       else reply = { status: 404, body: { error: wireError('not_found', `Kotomimi shares no ${request.path}.`) } };
     } catch (cause) {
       reply = { status: 500, body: { error: wireError('server_error', cause instanceof Error ? cause.message : String(cause)) } };
     }
-    await bridge.invoke('lan:reply', { id: request.id, ...reply });
+    if (reply) await bridge.invoke('lan:reply', { id: request.id, ...reply });
   };
 
   const drop = () => {
@@ -112,6 +118,8 @@ export function createLanHost(deps: LanHostDeps): LanHost {
     translator = null;
     coach?.dispose();
     coach = null;
+    voice?.dispose();
+    voice = null;
     clients();
   };
 
@@ -123,6 +131,13 @@ export function createLanHost(deps: LanHostDeps): LanHost {
       if (!started.ok) return started;
       translator = new LanTranslator({ translator: deps.engines.translator, resolve: models.translator, refusal: models.refusal, clock });
       coach = deps.engines.coach ? new LanCoach({ ...deps.engines.coach, clock }) : null;
+      voice = deps.engines.voice ? new LanVoice({
+        ...deps.engines.voice,
+        resolve: (wanted) => models.voice?.(wanted) ?? null,
+        // The main process sends the sound, from the engine straight to the device.
+        speak: async (id, said) => (await bridge.invoke('lan:reply-voice', { id, ...said })) as { ok: true } | { error: string; sent: boolean },
+        clock,
+      }) : null;
       unsubscribe = [
         bridge.on('lan:request', (request: WireRequest) => { void answer(request); }),
         bridge.on('lan:socket-open', ({ id, model }: { id: string; model: string }) => {

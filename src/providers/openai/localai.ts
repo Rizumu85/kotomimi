@@ -68,8 +68,8 @@ import { alsoFirst, alsoInto, theirsInto, alsoListed, alsoLit, alsoSpoken, backI
 import { NATIVE_MODELS, isApple, preferNative, type NativeModel, type NativePick } from './localaiNative';
 import { NATIVE_DEFAULT_MODEL, appleExtraGap, downloadedAppleLanguages, coachBaseUrl, coachGap, coachIdle, coachUp, hearingPick, hearsByDownloaded, holdNativeForRun, nativeEither, nativeGap, nativeUp, restNative, translatorUp, nativeIdle, nativePicked, translatorBaseUrl, translatorGap, translatorIdle, watchNativeEngine } from './localaiNative';
 import { NATIVE_COACH_EXTRA, NATIVE_COACHES, NATIVE_DEFAULT_COACH, nativeCoach } from './nativeCoaches';
-import { VOICE_DEFAULTS, speaksAlong, speaksByKeyedApi, speaksNatively, voiceChoice, voiceSpeaks, voiceStageOf, type VoiceChoice } from './localaiVoice';
-import { voiceGap, voiceIdle, voiceUp } from './localaiNative';
+import { VOICE_DEFAULTS, clonedVoices, serverLendsVoice, speaksAlong, speaksAtServer, speaksByKeyedApi, speaksNatively, voiceChoice, voiceSpeaks, voiceStageOf, type VoiceChoice } from './localaiVoice';
+import { voiceGap, voiceIdle, voiceUnrecorded, voiceUp, warmCloned } from './localaiNative';
 import { defaultPairedModel, namedAmong, pairedLanguages, recognitionLimits, speechDetection, tellingOf, toldLanguage, type Telling } from './hearingPlan';
 import { NATIVE_DEFAULT_TRANSLATOR, NATIVE_TRANSLATORS, nativeTranslates, nativeTranslator, translatorRequest } from './nativeTranslators';
 import { LocalAITurnDetectionControls, LocalAITurnDetectionHelp, LocalAITurnDetectionSummary } from './LocalAIEngine';
@@ -481,8 +481,8 @@ export function settled(stored: LocalAISettings): LocalAISettings {
 }
 
 const SIDES: readonly LegName[] = ['speaker', 'participant'];
-/** A stage of either side's run is on the shared device (`needsServer`, of each side's own hearing). */
-const needsServerEither = (s: LocalAISettings): boolean => SIDES.some((leg) => needsServer(hearingOf(s, leg)));
+/** A stage of either side's run is on the shared device (`needsServer`, of each side's own hearing), or the voice is. */
+const needsServerEither = (s: LocalAISettings): boolean => SIDES.some((leg) => needsServer(hearingOf(s, leg))) || speaksAtServer(s.speak);
 
 /** Every field is drawn by the provider's own view, beside the stage it belongs to (`LocalAIAssist`): the address with the search that finds it, a key with the API it opens. */
 const own = (key: string, labelKey: string, secret: boolean, placeholderKey = labelKey): CredentialField => ({ key, labelKey, secret, placeholderKey, drawnByAssist: true });
@@ -809,7 +809,8 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
     const servers = needsServerEither(s) || otherServers(k, s).length > 0 || phones.length > 0
       ? await boundedFetch({ clock, ms: CHECK_TIMEOUT_MS, signal: ctx.signal, late }, async (signal): Promise<CheckResult> => {
         const models: LocalAIModel[] = [];
-        if (needsServerEither(s)) {
+        // The shared device's own list, into `models`. A refusal, or null.
+        const listServer = async (): Promise<CheckResult | null> => {
           let response: Response;
           try {
             response = await doFetch(localaiModelsUrl(k.endpoint), listing(k.apiKey, signal));
@@ -861,6 +862,18 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
               ...(m.kotomimi && trilingual.has(m.id) ? { trilingual: true } : {}),
               ...(pair ? { pair } : {}),
             });
+          }
+          return null;
+        };
+        if (needsServerEither(s)) {
+          // Fork: only the voice is there, and this run does not speak by itself (said on demand alone, or the other
+          // side's leg alone): the device is asked for what it lends, and a run does not wait on its answer.
+          const unused = !SIDES.some((leg) => needsServer(hearingOf(s, leg))) && !(ctx.legs.includes('speaker') && speaksAlong(s.speak));
+          try {
+            const refused = await listServer();
+            if (refused && !unused) return refused;
+          } catch (error) {
+            if (signal.aborted || !unused) throw error;
           }
         }
 
@@ -921,7 +934,7 @@ export function createLocalAICheck(deps: LocalAICheckDeps = {}) {
           }
           for (const m of theirs) {
             const kind = kinds?.get(m.id);
-            if (kind === 'asr' || kind === 'other') continue;
+            if (kind === 'asr' || kind === 'voice' || kind === 'other') continue;
             models.push({ id: m.id, kind: m.kotomimi ? 'translate' : 'text', from: other.slot, ...(m.kotomimi ? { host: KOTOMIMI_HOST } : {}) });
           }
         }
@@ -1003,6 +1016,8 @@ interface NativeNeeds {
   translates?: string;
   coaches?: string;
   speaks?: string;
+  /** Fork: the user's own voices the run speaks in, each with a language it reads, where its voice model clones them: read by the engine as the run begins. */
+  speaksIn?: readonly { voice: string; language: string }[];
 }
 
 /** Fork: what this computer's recognizer hears a run's languages with (`hearingPick`), for the run's pair. */
@@ -1099,10 +1114,10 @@ function nativeHearing(s: LocalAISettings, legs: readonly LegName[]): { s: Local
  * Fork: whether a run speaks by itself: the stage set to, and its voice speaking one of the languages the user's
  * sentences go into (`theirsInto`). The check and the engines' needs ask it of the settings alone: a run that puts
  * nothing into their second language after all (a coached speaker's, one the other device's own session answers)
- * still has a voice that speaks only that one checked and loaded.
+ * still has a voice that speaks only that one checked and loaded. `lent`: what the other device lists, where it speaks.
  */
-function voicesAny(choice: VoiceChoice, into: readonly string[]): boolean {
-  return speaksAlong(choice) && into.some((language) => voiceSpeaks(choice, language));
+function voicesAny(choice: VoiceChoice, into: readonly string[], lent: readonly LocalAIModel[] = []): boolean {
+  return speaksAlong(choice) && into.some((language) => voiceSpeaks(choice, language, lent));
 }
 
 function nativeNeeds(s: LocalAISettings, pair: { source: string; target: string }, legs: readonly ('speaker' | 'participant')[]): NativeNeeds {
@@ -1113,12 +1128,12 @@ function nativeNeeds(s: LocalAISettings, pair: { source: string; target: string 
     ...(translatesNatively(s) && legs.some((leg) => !shownAsSaid(s, pair, leg)) ? { translates: s.translateNativeModel } : {}),
     ...(coachesNatively(s) && legs.includes('speaker') ? { coaches: s.coachNativeModel } : {}),
     // Only the speaker's leg speaks.
-    ...(legs.includes('speaker') && voicesAny(s.speak, theirsInto(s, pair)) && speaksNatively(s.speak) ? { speaks: s.speak.nativeModel } : {}),
+    ...(legs.includes('speaker') && voicesAny(s.speak, theirsInto(s, pair)) && speaksNatively(s.speak) ? { speaks: s.speak.nativeModel, ...(clonedVoices(s.speak, theirsInto(s, pair)) ? { speaksIn: clonedVoices(s.speak, theirsInto(s, pair))!.reads } : {}) } : {}),
   };
 }
 
-export interface NativeUps { hears: typeof nativeUp; translates: typeof translatorUp; coaches: typeof coachUp; speaks?: typeof voiceUp; rest: typeof restNative }
-const UPS: NativeUps = { hears: nativeUp, translates: translatorUp, coaches: coachUp, speaks: voiceUp, rest: restNative };
+export interface NativeUps { hears: typeof nativeUp; translates: typeof translatorUp; coaches: typeof coachUp; speaks?: typeof voiceUp; /** Fork: the recordings a cloning voice model will speak from, read ahead (`warmCloned`). */ reads?: typeof warmCloned; rest: typeof restNative }
+const UPS: NativeUps = { hears: nativeUp, translates: translatorUp, coaches: coachUp, speaks: voiceUp, reads: warmCloned, rest: restNative };
 
 /** The engines a run needs, brought up side by side and waited for. Rejects with the first that did not come up. */
 async function bringUp(needs: NativeNeeds, ups: NativeUps): Promise<boolean> {
@@ -1126,7 +1141,8 @@ async function bringUp(needs: NativeNeeds, ups: NativeUps): Promise<boolean> {
     ...(needs.hears ? [ups.hears(needs.hears.pick, needs.hears.heard)] : []),
     ...(needs.translates ? [ups.translates(needs.translates)] : []),
     ...(needs.coaches ? [ups.coaches(needs.coaches)] : []),
-    ...(needs.speaks && ups.speaks ? [ups.speaks(needs.speaks)] : []),
+    // The engine up, its recordings are read behind the run's back: the first sentence in one would wait for that.
+    ...(needs.speaks && ups.speaks ? [ups.speaks(needs.speaks).then(() => { if (needs.speaksIn?.length) ups.reads?.(needs.speaks!, needs.speaksIn); })] : []),
   ];
   if (starts.length === 0) return false;
   // Held while they load: a rest that an earlier run left pending does not stop what this one is waiting for.
@@ -1223,7 +1239,7 @@ export function primeNativeOnce(ups: NativeUps = UPS, now: () => number = () => 
  * (`prepareLocalAI`), so that no model holds video memory while nothing
  * listens. What the servers listed goes with its refusal, as with any other.
  */
-export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISettings, ctx: CheckContext, check: typeof checkLocalAI = checkLocalAI, native: { gap: typeof nativeGap; idle: typeof nativeIdle; translatorGap?: typeof translatorGap; translatorIdle?: typeof translatorIdle; coachGap?: typeof coachGap; coachIdle?: typeof coachIdle; voiceGap?: typeof voiceGap; voiceIdle?: typeof voiceIdle } = { gap: nativeGap, idle: nativeIdle }): Promise<CheckResult> {
+export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISettings, ctx: CheckContext, check: typeof checkLocalAI = checkLocalAI, native: { gap: typeof nativeGap; idle: typeof nativeIdle; translatorGap?: typeof translatorGap; translatorIdle?: typeof translatorIdle; coachGap?: typeof coachGap; coachIdle?: typeof coachIdle; voiceGap?: typeof voiceGap; voiceIdle?: typeof voiceIdle; voiceUnrecorded?: typeof voiceUnrecorded } = { gap: nativeGap, idle: nativeIdle }): Promise<CheckResult> {
   // Asked first, beside the servers.
   let hears: ReturnType<typeof nativeGap> | null = null;
   const here = nativeHearing(s, ctx.legs);
@@ -1265,7 +1281,7 @@ export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISe
   }
   let speaks: ReturnType<typeof voiceGap> | null = null;
   // Only where a run speaks by itself: a stage kept for lines said on demand loads its model when one is asked for.
-  const usesVoice = ctx.legs.includes('speaker') && voicesAny(s.speak, theirsInto(s, ctx.pair));
+  const usesVoice = ctx.legs.includes('speaker') && voicesAny(s.speak, theirsInto(s, ctx.pair), models);
   if (usesVoice && speaksNatively(s.speak)) {
     speaks = (native.voiceGap ?? voiceGap)(s.speak.nativeModel);
     speaks.catch(() => undefined);
@@ -1284,14 +1300,21 @@ export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISe
     if (wanted) primeNow(lastNeeds, primeUps);
   }
   if (!servers.ok) return servers;
+  // Fork: the other device lends no voice model, or not the one chosen: said by the card it is chosen in.
+  if (usesVoice && speaksAtServer(s.speak) && !serverLendsVoice(s.speak, models)) {
+    return { ok: false, reason: 'The other device lends no voice model.', code: 'server_no_voice', ...(servers.models?.length ? { models: servers.models } : {}) };
+  }
   // Fork: a voice API with no model named: said here, by the card it is named in, before a start would refuse it.
-  if (usesVoice && !voiceStageOf(s.speak, [ctx.pair.target])) {
+  if (usesVoice && !voiceStageOf(s.speak, [ctx.pair.target], models)) {
     return { ok: false, reason: 'No voice API is named.', code: 'voice_unnamed', ...(servers.models?.length ? { models: servers.models } : {}) };
   }
   if (usesVoice && speaksByKeyedApi(s.speak) && !k.speakKey) {
     return { ok: false, reason: 'Enter the API key of the voice.', ...(servers.models?.length ? { models: servers.models } : {}) };
   }
-  const refused = (hears ? await hears : null) ?? (translates ? await translates : null) ?? (coaches ? await coaches : null) ?? (speaks ? await speaks : null);
+  // Fork: a cloning voice model reads in the user's own voices: one chosen for each language it reads, and still there.
+  const cloned = usesVoice && speaksNatively(s.speak) ? clonedVoices(s.speak, theirsInto(s, ctx.pair)) : null;
+  const unrecorded = cloned ? (native.voiceUnrecorded ?? voiceUnrecorded)(cloned) : null;
+  const refused = (hears ? await hears : null) ?? (translates ? await translates : null) ?? (coaches ? await coaches : null) ?? (speaks ? await speaks : null) ?? unrecorded;
   return refused ? { ...refused, ...(servers.models?.length ? { models: servers.models } : {}) } : servers;
 }
 
@@ -1583,9 +1606,9 @@ export function buildLocalAI(asked: SessionContext, all: LocalAISettings, shared
   // Fork: the speaker's leg speaks its translations into the other side's languages (their main one, and the second
   // lit beside it), and what they type in a language of the other side's, where the voice stage is on (`context.speech`, by `speaks`). A leg the other device's own
   // session answers has no stage of its own: it is given the voice alone, and its session's translations are spoken.
-  if (asked.speech && (asked.leg ? asked.leg === 'speaker' : !participant) && voicesAny(s.speak, lit ? [target, lit] : [target])) {
-    const voice = voiceStageOf(s.speak, [target, ...(lit ? [lit] : []), ...also]);
-    if (!voice) return { refused: 'No voice API is named.', code: 'voice_unnamed' };
+  if (asked.speech && (asked.leg ? asked.leg === 'speaker' : !participant) && voicesAny(s.speak, lit ? [target, lit] : [target], models)) {
+    const voice = voiceStageOf(s.speak, [target, ...(lit ? [lit] : []), ...also], models);
+    if (!voice) return speaksAtServer(s.speak) ? { refused: 'The other device lends no voice model.', code: 'server_no_voice' } : { refused: 'No voice API is named.', code: 'voice_unnamed' };
     stages = { ...(stages ?? { speech: null, typed: null }), voice };
   }
 
@@ -1739,6 +1762,8 @@ export const localaiProvider: Provider<LocalAISettings, LocalAICredentials, Loca
   // Fork: it speaks where the voice stage is on (`speaks`), not by the shared text-only switch; the speaker's leg only.
   speech: 'optional',
   speaks: (stored) => speaksAlong(stored.speak),
+  // Fork: the voice each language is read in can be changed while a run reads: it goes on in the new one.
+  liveReads: (stored) => JSON.stringify(stored.speak.voices),
   participantSpeech: false,
   // A coached speaker's session only transcribes: typed text is answered by the translation stage, which an API with no model named cannot be.
   textInput: (stored) => { const s = settled(stored); return !s.coach || s.translateAt !== 'api' || (s.translateBaseUrl.trim() !== '' && s.translateModel.trim() !== ''); },

@@ -67,6 +67,7 @@ export const INVOKE_CHANNELS = [
   'lan:start',
   'lan:stop',
   'lan:reply',
+  'lan:reply-voice',
   'lan:send',
   'lan:close-socket',
   // Fork: whether the system's firewall lets other devices reach it (electron/lan-firewall.js)
@@ -113,6 +114,14 @@ export const INVOKE_CHANNELS = [
   'native-voice:stop',
   'native-voice:speak',
   'native-voice:speak-stop',
+  'native-voice:warm',
+  // Fork: the user's own voices, recordings a cloning voice model speaks from (electron/voice-library.js)
+  'voice-library:list',
+  'voice-library:add',
+  'voice-library:remove',
+  'voice-library:rename',
+  'voice-library:remove-take',
+  'voice-library:export',
   // Fork: this computer's memory for native model recommendations
   'model-memory:get',
   // Fork: where the downloaded models are kept, and moving them (electron/model-storage.js)

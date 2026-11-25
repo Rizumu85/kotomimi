@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { SAMPLE_RATE } from '../../lib/contract/adapter';
 import { trackedClock } from '../../lib/contract/testing/trackedClock';
-import { speakText, speaksLanguage, speechUrl, spokenText, voiceFor, VOICE_MOST_CHARS, VOICE_TIMEOUT_MS, type VoiceDeps, type VoiceStage } from './voice';
+import { atServer, warmVoice, VOICE_WARM_MS, speakText, speaksLanguage, speechUrl, spokenText, voiceFor, VOICE_MOST_CHARS, VOICE_PATIENT_MS, VOICE_TIMEOUT_MS, type VoiceDeps, type VoiceStage } from './voice';
 
 const tone = (samples: number, value = 1000) => new Int16Array(samples).fill(value);
 
@@ -82,6 +82,74 @@ describe('a sentence spoken', () => {
     expect(speechUrl('http://host:1/v1')).toBe('http://host:1/v1/audio/speech');
   });
 
+  describe('by another Kotomimi', () => {
+    const LENT: VoiceStage = { via: 'speech', baseUrl: '', server: true, model: 'qwen3-tts-1.7b-customvoice-q8', key: 'serverKey', voices: { ja: 'ono_anna' }, streams: true, tellsLanguage: true };
+    /** Raw 16-bit sound in pieces of any size, as a door sends it. */
+    const raw = (pieces: number[][], type = 'audio/pcm;rate=24000') => new Response(new ReadableStream<Uint8Array>({ start(controller) { for (const piece of pieces) controller.enqueue(Uint8Array.from(piece)); controller.close(); } }), { headers: { 'Content-Type': type } });
+    const bytesOf = (samples: number[]) => [...new Uint8Array(Int16Array.from(samples).buffer)];
+
+    it('is asked at the device\'s address for the sound raw, told the language, and keyed with the device\'s key', async () => {
+      const fetch = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => raw([bytesOf([1, 2, 3])]));
+      const d = deps({ fetch: fetch as unknown as typeof globalThis.fetch });
+      await speakText(atServer(LENT, 'http://192.168.1.20:8790/v1'), { text: 'こんにちは', language: 'ja-JP' }, 'door-key', d, never, () => undefined);
+      expect(String(fetch.mock.calls[0][0])).toBe('http://192.168.1.20:8790/v1/audio/speech');
+      const init = fetch.mock.calls[0][1] as RequestInit;
+      expect((init.headers as Record<string, string>).Authorization).toBe('Bearer door-key');
+      expect(JSON.parse(init.body as string)).toEqual({ model: LENT.model, input: 'こんにちは', voice: 'ono_anna', response_format: 'pcm', language: 'ja-JP' });
+      // A stage of an API's own is left where it is.
+      expect(atServer(API, 'http://192.168.1.20:8790/v1')).toBe(API);
+    });
+
+    it('hands the sound on in whole samples, whatever the pieces\' sizes', async () => {
+      const samples = Array.from({ length: 9000 }, (_one, at) => (at % 200) - 100);
+      const bytes = bytesOf(samples);
+      // Pieces that end in the middle of a sample, and one of a single byte.
+      const d = deps({ fetch: (async () => raw([bytes.slice(0, 3), bytes.slice(3, 4), bytes.slice(4, 9001), bytes.slice(9001)])) as unknown as typeof fetch, decode: vi.fn() });
+      const heard: number[] = [];
+      const spoken = await speakText(atServer(LENT, 'http://h/v1'), { text: 'こんにちは', language: 'ja' }, undefined, d, never, (pcm) => heard.push(...pcm));
+      expect(heard).toEqual(samples);
+      expect(spoken.samples).toBe(samples.length);
+      expect(d.decode).not.toHaveBeenCalled();
+    });
+
+    it('brings a rate that is not the contract\'s to it', async () => {
+      const d = deps({ fetch: (async () => raw([bytesOf(new Array(48000).fill(1000))], 'audio/pcm;rate=48000')) as unknown as typeof fetch });
+      const spoken = await speakText(atServer(LENT, 'http://h/v1'), { text: 'こんにちは', language: 'ja' }, undefined, d, never, () => undefined);
+      expect(Math.abs(spoken.samples - SAMPLE_RATE)).toBeLessThan(200);
+    });
+
+    it('is brought up as a run begins: one short word asked for in a voice of the run\'s, and dropped unheard', async () => {
+      let cancelled = false;
+      const answer = new Response(new ReadableStream<Uint8Array>({ pull() { /* never ends by itself */ }, cancel() { cancelled = true; } }), { headers: { 'Content-Type': 'audio/pcm;rate=24000' } });
+      const fetch = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => answer);
+      const d = deps({ fetch: fetch as unknown as typeof globalThis.fetch });
+      await warmVoice(atServer(LENT, 'http://192.168.1.20:8790/v1'), 'door-key', d, never);
+      expect(String(fetch.mock.calls[0][0])).toBe('http://192.168.1.20:8790/v1/audio/speech');
+      expect(JSON.parse(fetch.mock.calls[0][1]!.body as string)).toEqual({ model: LENT.model, input: 'こんにちは。', voice: 'ono_anna', response_format: 'pcm', language: 'ja' });
+      expect(cancelled).toBe(true);
+      // Only another Kotomimi is warmed: an API, this computer's engine and Edge are not asked.
+      for (const other of [API, NATIVE, EDGE]) await warmVoice(other, 'k', d, never);
+      expect(fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('never fails a start, and gives up on a device that does not answer', async () => {
+      const refused = deps({ fetch: (async () => { throw new Error('unreachable'); }) as unknown as typeof fetch });
+      await expect(warmVoice(atServer(LENT, 'http://h/v1'), undefined, refused, never)).resolves.toBeUndefined();
+      const hang = deps({ fetch: ((_input: RequestInfo | URL, init?: RequestInit) => new Promise((_resolve, reject) => init!.signal!.addEventListener('abort', () => reject(new Error('aborted'))))) as unknown as typeof fetch });
+      const warming = warmVoice(atServer(LENT, 'http://h/v1'), undefined, hang, never);
+      hang.clock.advance(VOICE_WARM_MS);
+      await expect(warming).resolves.toBeUndefined();
+    });
+
+    it('decodes a file where the answer is one after all, and says what the device refused', async () => {
+      const filed = deps({ fetch: (async () => new Response(new ArrayBuffer(44), { headers: { 'Content-Type': 'audio/wav' } })) as unknown as typeof fetch });
+      await speakText(atServer(LENT, 'http://h/v1'), { text: 'こんにちは', language: 'ja' }, undefined, filed, never, () => undefined);
+      expect(filed.decode).toHaveBeenCalledOnce();
+      const busy = deps({ fetch: (async () => new Response('{"error":{"code":"voice_busy","message":"in use"}}', { status: 503 })) as unknown as typeof fetch });
+      await expect(speakText(atServer(LENT, 'http://h/v1'), { text: 'こんにちは', language: 'ja' }, undefined, busy, never, () => undefined)).rejects.toThrow(/HTTP 503.*voice_busy/);
+    });
+  });
+
   it('by Edge: in the voice chosen for the language, and not at all where none is', async () => {
     const d = deps();
     await speakText(EDGE, { text: 'こんにちは', language: 'ja' }, undefined, d, never, () => undefined);
@@ -113,5 +181,16 @@ describe('a sentence spoken', () => {
     const late = speakText(NATIVE, { text: 'こんにちは', language: 'ja' }, undefined, d, never, () => undefined);
     d.clock.advance(VOICE_TIMEOUT_MS);
     await expect(late).rejects.toThrow(/in time/);
+
+    // One that speaks in the user's own voice reads a recording first: given the time for it, and no more.
+    const p = deps({ native: hang });
+    let ended: unknown = null;
+    const patient = speakText({ ...NATIVE, patient: true }, { text: 'こんにちは', language: 'ja' }, undefined, p, never, () => undefined).catch((error) => { ended = error; });
+    p.clock.advance(VOICE_TIMEOUT_MS * 2);
+    await Promise.resolve();
+    expect(ended).toBeNull();
+    p.clock.advance(VOICE_PATIENT_MS);
+    await patient;
+    expect(String(ended)).toMatch(/in time/);
   });
 });

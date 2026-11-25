@@ -35,6 +35,8 @@ export interface QueueView<K extends string = string> {
   position(): Playing<K> | null;
   /** How many clips are scheduled or playing. */
   readonly pending: number;
+  /** Fork: every clip scheduled or playing, in order, with how long until it starts on the audio clock: 0 or less, it has. */
+  scheduled(): Array<{ key: K; inMs: number }>;
   /** How many times `clear()` has run: a live queue's held karaoke ends when this moves — `clear()` is the explicit "stop speaking". */
   readonly clears: number;
   /** Called when a clip is enqueued, a clip ends, or the queue is cleared: time to read `position()` again. */
@@ -115,6 +117,11 @@ export class ClipQueue<K extends string = string> implements QueueView<K> {
 
   get pending(): number {
     return this.clips.length;
+  }
+
+  scheduled(): Array<{ key: K; inMs: number }> {
+    const now = Math.max(this.timeline.now(), this.endedAt);
+    return this.clips.map((clip) => ({ key: clip.key, inMs: (clip.at - now) * 1000 }));
   }
 
   get clears(): number {

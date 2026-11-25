@@ -1015,6 +1015,14 @@
     "en": "What you want to say — Enter translates",
     "text": "Det du vill säga – Enter översätter"
   },
+  "fork.voice.addTake": {
+    "en": "Add a language to {{name}}",
+    "text": "Spela in på ett till språk för ”{{name}}”"
+  },
+  "fork.voice.addVoice": {
+    "en": "Add a voice",
+    "text": "Lägg till en röst"
+  },
   "fork.voice.auto": {
     "en": "Read my translations as they come",
     "text": "Läs upp översättningen automatiskt när jag pratat klart"
@@ -1022,6 +1030,50 @@
   "fork.voice.cannotSpeak": {
     "en": "{{name}} cannot speak {{language}}.",
     "text": "{{name}} kan inte tala {{language}}."
+  },
+  "fork.voice.chooseFile": {
+    "en": "Choose a file",
+    "text": "Välj fil"
+  },
+  "fork.voice.chooseVoice": {
+    "en": "Choose a voice",
+    "text": "Välj en röst"
+  },
+  "fork.voice.clipFailed": {
+    "en": "The voice could not be added.",
+    "text": "Det gick inte att lägga till rösten."
+  },
+  "fork.voice.clipLanguage": {
+    "en": "Language of the recording",
+    "text": "Språk i inspelningen"
+  },
+  "fork.voice.clipSilent": {
+    "en": "No voice was heard.",
+    "text": "Ingen röst hördes."
+  },
+  "fork.voice.clipTooLong": {
+    "en": "Too long: no more than {{seconds}} seconds with its words.",
+    "text": "En inspelning med text får vara högst {{seconds}} sekunder."
+  },
+  "fork.voice.clipTooShort": {
+    "en": "Too short: at least {{seconds}} seconds.",
+    "text": "Inspelningen måste vara minst {{seconds}} sekunder."
+  },
+  "fork.voice.clipUnreadable": {
+    "en": "This file could not be read.",
+    "text": "Det gick inte att läsa filen."
+  },
+  "fork.voice.clipWords": {
+    "en": "What is said in it (optional)",
+    "text": "Det som sägs i inspelningen (valfritt)"
+  },
+  "fork.voice.clipWordsNeeded": {
+    "en": "What is said in it",
+    "text": "Vad som sägs i inspelningen"
+  },
+  "fork.voice.exportVoice": {
+    "en": "Save {{name}} as a file",
+    "text": "Spara ”{{name}}” som fil"
   },
   "fork.voice.hearBoth": {
     "en": "To both",
@@ -1043,6 +1095,10 @@
     "en": "To them",
     "text": "För andra"
   },
+  "fork.voice.importVoice": {
+    "en": "Import a voice file",
+    "text": "Importera röstfil"
+  },
   "fork.voice.lineFailed": {
     "en": "This line could not be read aloud",
     "text": "Den här raden kunde inte läsas upp"
@@ -1063,9 +1119,17 @@
     "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
     "text": "Upplästa översättningar spelas upp på den här enheten, som fungerar som mikrofon så att den andra parten hör dem. Om ljudkortet har inbyggd mixning kan du välja en av dess uppspelningskanaler och blanda ljudet från den med mikrofonsignalen direkt i ljudkortet. Då går din egen röst inte via någon programvara."
   },
+  "fork.voice.micDenied": {
+    "en": "The microphone could not be opened.",
+    "text": "Det gick inte att starta mikrofonen."
+  },
   "fork.voice.modelPlaceholder": {
     "en": "The model's name, e.g. tts-1",
     "text": "Modellnamn, t.ex. tts-1"
+  },
+  "fork.voice.myVoice": {
+    "en": "My voice",
+    "text": "Min röst"
   },
   "fork.voice.myVoiceToo": {
     "en": "My own voice goes too",
@@ -1083,13 +1147,41 @@
     "en": "Read aloud",
     "text": "Aktivera uppläsning"
   },
+  "fork.voice.record": {
+    "en": "Read it aloud",
+    "text": "Läs meningen högt"
+  },
+  "fork.voice.recordAgain": {
+    "en": "Record again",
+    "text": "Spela in igen"
+  },
+  "fork.voice.removeTake": {
+    "en": "Remove the {{language}} recording of {{name}}",
+    "text": "Ta bort inspelningen på {{language}} för ”{{name}}”"
+  },
+  "fork.voice.removeVoice": {
+    "en": "Remove {{name}}",
+    "text": "Ta bort ”{{name}}”"
+  },
+  "fork.voice.renameVoice": {
+    "en": "Rename {{name}}",
+    "text": "Byt namn på ”{{name}}”"
+  },
   "fork.voice.sample": {
     "en": "Play a sample",
     "text": "Provlyssna"
   },
+  "fork.voice.saveVoice": {
+    "en": "Save",
+    "text": "Spara"
+  },
   "fork.voice.sayLine": {
     "en": "Read this line aloud",
     "text": "Läs upp den här raden"
+  },
+  "fork.voice.serverNone": {
+    "en": "The other device lends no voice model. Use an API or this computer instead.",
+    "text": "Det finns ingen modell för uppläsning att låna från den andra enheten. Använd ett API eller den här datorn i stället."
   },
   "fork.voice.stage": {
     "en": "Voice",
@@ -1100,6 +1192,10 @@
     "text": "Läser upp dina översättningar. Du kan också lyssna på valfri rad i samtalet: tryck på högtalarknappen."
   },
   "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "Stoppa"
+  },
+  "fork.voice.stopRecording": {
     "en": "Stop",
     "text": "Stoppa"
   },
@@ -1123,9 +1219,17 @@
     "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
     "text": "När du läser upp för den andra skickas ljudet till den virtuella mikrofonen. Välj den som mikrofon i VRChat eller din mötesapp (i Windows heter den CABLE Output)."
   },
+  "fork.voice.unrecorded": {
+    "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
+    "text": "Du har inte valt någon egen röst för uppläsning. Lägg till en under Uppläsning."
+  },
   "fork.voice.voice": {
     "en": "Voice",
     "text": "Röst"
+  },
+  "fork.voice.voiceName": {
+    "en": "Name",
+    "text": "Namn"
   },
   "fork.voice.voiceOf": {
     "en": "{{language}} voice",
@@ -1138,6 +1242,14 @@
   "fork.voice.volumeTheirs": {
     "en": "Volume for them",
     "text": "Volym för den andra"
+  },
+  "fork.voice.wayImport": {
+    "en": "Import a recording",
+    "text": "Importera inspelning"
+  },
+  "fork.voice.wayRecord": {
+    "en": "Record now",
+    "text": "Spela in nu"
   },
   "fork.voice.woman": {
     "en": "Female voice",
@@ -2166,6 +2278,10 @@
   "providers.localai.noteQwen3Tts": {
     "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
     "text": "Naturligast och börjar tala direkt. Inga felläsningar i tester på japanska, kinesiska och engelska. Använder cirka 3 GB grafikminne och stöder 10 språk."
+  },
+  "providers.localai.noteQwen3TtsBase": {
+    "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
+    "text": "Läser upp text med din egen röst. Spela in ungefär tio sekunder tal för att klona rösten. Första gången du använder en röst kan det ta allt från några sekunder till närmare en halv minut. Därefter börjar uppläsningen direkt. Använder cirka 3 GB grafikminne och stöder 10 språk."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

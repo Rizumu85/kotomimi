@@ -1063,6 +1063,14 @@
     "en": "What you want to say — Enter translates",
     "text": "Ang gusto mong sabihin. Enter para isalin"
   },
+  "fork.voice.addTake": {
+    "en": "Add a language to {{name}}",
+    "text": "Magrekord sa ibang wika para kay {{name}}"
+  },
+  "fork.voice.addVoice": {
+    "en": "Add a voice",
+    "text": "Magdagdag ng boses"
+  },
   "fork.voice.auto": {
     "en": "Read my translations as they come",
     "text": "Awtomatikong basahin ang salin pagkasalita ko"
@@ -1070,6 +1078,50 @@
   "fork.voice.cannotSpeak": {
     "en": "{{name}} cannot speak {{language}}.",
     "text": "Hindi nakapagsasalita ng {{language}} ang {{name}}."
+  },
+  "fork.voice.chooseFile": {
+    "en": "Choose a file",
+    "text": "Pumili ng file"
+  },
+  "fork.voice.chooseVoice": {
+    "en": "Choose a voice",
+    "text": "Pumili ng boses"
+  },
+  "fork.voice.clipFailed": {
+    "en": "The voice could not be added.",
+    "text": "Hindi maidagdag ang boses."
+  },
+  "fork.voice.clipLanguage": {
+    "en": "Language of the recording",
+    "text": "Wika ng rekording"
+  },
+  "fork.voice.clipSilent": {
+    "en": "No voice was heard.",
+    "text": "Walang narinig na boses."
+  },
+  "fork.voice.clipTooLong": {
+    "en": "Too long: no more than {{seconds}} seconds with its words.",
+    "text": "Masyadong mahaba. Hanggang {{seconds}} segundo lang ang rekording na may teksto."
+  },
+  "fork.voice.clipTooShort": {
+    "en": "Too short: at least {{seconds}} seconds.",
+    "text": "Masyadong maikli. Kailangan ng hindi bababa sa {{seconds}} segundo."
+  },
+  "fork.voice.clipUnreadable": {
+    "en": "This file could not be read.",
+    "text": "Hindi mabasa ang file na ito."
+  },
+  "fork.voice.clipWords": {
+    "en": "What is said in it (optional)",
+    "text": "Sinabi sa rekording (opsyonal)"
+  },
+  "fork.voice.clipWordsNeeded": {
+    "en": "What is said in it",
+    "text": "Sinabi sa rekording"
+  },
+  "fork.voice.exportVoice": {
+    "en": "Save {{name}} as a file",
+    "text": "I-save ang «{{name}}» bilang file"
   },
   "fork.voice.hearBoth": {
     "en": "To both",
@@ -1091,6 +1143,10 @@
     "en": "To them",
     "text": "Sa kausap"
   },
+  "fork.voice.importVoice": {
+    "en": "Import a voice file",
+    "text": "Mag-import ng file ng boses"
+  },
   "fork.voice.lineFailed": {
     "en": "This line could not be read aloud",
     "text": "Hindi mabasa nang malakas ang linyang ito"
@@ -1111,9 +1167,17 @@
     "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
     "text": "Dito pinapatugtog ang binibigkas na salin. Naririnig ito ng kausap mo na parang galing sa mikropono. Kung kayang pagsamahin ng sound card mo mismo ang mga tunog, pumili ng isa sa mga playback channel nito at doon ihalo ang tunog mula sa mikropono mo. Sa ganitong paraan, hindi na dadaan sa software ang boses mo."
   },
+  "fork.voice.micDenied": {
+    "en": "The microphone could not be opened.",
+    "text": "Hindi mabuksan ang mikropono."
+  },
   "fork.voice.modelPlaceholder": {
     "en": "The model's name, e.g. tts-1",
     "text": "Pangalan ng modelo, hal. tts-1"
+  },
+  "fork.voice.myVoice": {
+    "en": "My voice",
+    "text": "Boses ko"
   },
   "fork.voice.myVoiceToo": {
     "en": "My own voice goes too",
@@ -1131,13 +1195,41 @@
     "en": "Read aloud",
     "text": "Basahin nang malakas"
   },
+  "fork.voice.record": {
+    "en": "Read it aloud",
+    "text": "Basahin nang malakas ang pangungusap na ito"
+  },
+  "fork.voice.recordAgain": {
+    "en": "Record again",
+    "text": "Magrekord ulit"
+  },
+  "fork.voice.removeTake": {
+    "en": "Remove the {{language}} recording of {{name}}",
+    "text": "Burahin ang rekording ni {{name}} sa {{language}}"
+  },
+  "fork.voice.removeVoice": {
+    "en": "Remove {{name}}",
+    "text": "Alisin ang «{{name}}»"
+  },
+  "fork.voice.renameVoice": {
+    "en": "Rename {{name}}",
+    "text": "Palitan ang pangalan ng “{{name}}”"
+  },
   "fork.voice.sample": {
     "en": "Play a sample",
     "text": "Pakinggan ang sample"
   },
+  "fork.voice.saveVoice": {
+    "en": "Save",
+    "text": "I-save"
+  },
   "fork.voice.sayLine": {
     "en": "Read this line aloud",
     "text": "Basahin nang malakas ang linyang ito"
+  },
+  "fork.voice.serverNone": {
+    "en": "The other device lends no voice model. Use an API or this computer instead.",
+    "text": "Walang magagamit na modelo ng boses para sa pagbasa sa kabilang device. Puwede mong gamitin ang API o ang computer na ito."
   },
   "fork.voice.stage": {
     "en": "Voice",
@@ -1150,6 +1242,10 @@
   "fork.voice.stopLine": {
     "en": "Stop",
     "text": "Ihinto"
+  },
+  "fork.voice.stopRecording": {
+    "en": "Stop",
+    "text": "Itigil"
   },
   "fork.voice.toMe": {
     "en": "I hear it",
@@ -1171,9 +1267,17 @@
     "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
     "text": "Kapag binabasa para sa kausap, ipinapadala ang tunog sa virtual na mikropono. Piliin ito bilang mikropono sa VRChat o sa app para sa pulong (CABLE Output ang tawag dito sa Windows)."
   },
+  "fork.voice.unrecorded": {
+    "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
+    "text": "Wala ka pang napiling sariling boses para sa pagbasa. Magdagdag sa seksyong «Pagbasa»."
+  },
   "fork.voice.voice": {
     "en": "Voice",
     "text": "Boses"
+  },
+  "fork.voice.voiceName": {
+    "en": "Name",
+    "text": "Pangalan"
   },
   "fork.voice.voiceOf": {
     "en": "{{language}} voice",
@@ -1186,6 +1290,14 @@
   "fork.voice.volumeTheirs": {
     "en": "Volume for them",
     "text": "Lakas ng tunog para sa kausap"
+  },
+  "fork.voice.wayImport": {
+    "en": "Import a recording",
+    "text": "Mag-import ng rekording"
+  },
+  "fork.voice.wayRecord": {
+    "en": "Record now",
+    "text": "Magrekord ngayon"
   },
   "fork.voice.woman": {
     "en": "Female voice",
@@ -2258,6 +2370,10 @@
   "providers.localai.noteQwen3Tts": {
     "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
     "text": "Pinakanatural, at agad nagsasalita. Sa pagsubok sa Japanese, Chinese at English, walang maling bigkas. Gumagamit ng humigit-kumulang 3 GB ng video memory at may suporta sa 10 wika."
+  },
+  "providers.localai.noteQwen3TtsBase": {
+    "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
+    "text": "Nagbabasa gamit ang sarili mong boses. Mag-record lang ng mga sampung segundo ng pagsasalita para makopya ang boses mo. Sa unang gamit ng bawat boses, maghintay ng ilang segundo hanggang mahigit dalawampung segundo. Sa mga susunod, magsasalita ito agad. Gumagamit ng humigit-kumulang 3 GB ng memory ng video card at sumusuporta sa 10 wika."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

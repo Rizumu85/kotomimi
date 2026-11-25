@@ -1015,6 +1015,14 @@
     "en": "What you want to say — Enter translates",
     "text": "Co chcesz powiedzieć? Enter tłumaczy"
   },
+  "fork.voice.addTake": {
+    "en": "Add a language to {{name}}",
+    "text": "Nagraj próbkę w kolejnym języku dla „{{name}}”"
+  },
+  "fork.voice.addVoice": {
+    "en": "Add a voice",
+    "text": "Dodaj głos"
+  },
   "fork.voice.auto": {
     "en": "Read my translations as they come",
     "text": "Czytaj tłumaczenie, gdy skończę mówić"
@@ -1022,6 +1030,50 @@
   "fork.voice.cannotSpeak": {
     "en": "{{name}} cannot speak {{language}}.",
     "text": "{{name}} nie obsługuje języka {{language}}."
+  },
+  "fork.voice.chooseFile": {
+    "en": "Choose a file",
+    "text": "Wybierz plik"
+  },
+  "fork.voice.chooseVoice": {
+    "en": "Choose a voice",
+    "text": "Wybierz głos"
+  },
+  "fork.voice.clipFailed": {
+    "en": "The voice could not be added.",
+    "text": "Nie udało się dodać głosu."
+  },
+  "fork.voice.clipLanguage": {
+    "en": "Language of the recording",
+    "text": "Język nagrania"
+  },
+  "fork.voice.clipSilent": {
+    "en": "No voice was heard.",
+    "text": "Nie wykryto głosu."
+  },
+  "fork.voice.clipTooLong": {
+    "en": "Too long: no more than {{seconds}} seconds with its words.",
+    "text": "Nagranie z tekstem jest za długie. Maksimum: {{seconds}} s."
+  },
+  "fork.voice.clipTooShort": {
+    "en": "Too short: at least {{seconds}} seconds.",
+    "text": "Nagranie jest za krótkie. Minimum: {{seconds}} s."
+  },
+  "fork.voice.clipUnreadable": {
+    "en": "This file could not be read.",
+    "text": "Nie udało się odczytać tego pliku."
+  },
+  "fork.voice.clipWords": {
+    "en": "What is said in it (optional)",
+    "text": "Tekst nagrania (opcjonalnie)"
+  },
+  "fork.voice.clipWordsNeeded": {
+    "en": "What is said in it",
+    "text": "Tekst wypowiedziany w nagraniu"
+  },
+  "fork.voice.exportVoice": {
+    "en": "Save {{name}} as a file",
+    "text": "Zapisz „{{name}}” jako plik"
   },
   "fork.voice.hearBoth": {
     "en": "To both",
@@ -1043,6 +1095,10 @@
     "en": "To them",
     "text": "Dla rozmówcy"
   },
+  "fork.voice.importVoice": {
+    "en": "Import a voice file",
+    "text": "Importuj plik głosu"
+  },
   "fork.voice.lineFailed": {
     "en": "This line could not be read aloud",
     "text": "Nie udało się przeczytać tego wiersza"
@@ -1063,9 +1119,17 @@
     "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
     "text": "Kotomimi odtwarza tłumaczenie na tym urządzeniu. Aplikacja do rozmów używa go jako mikrofonu. Jeśli karta dźwiękowa obsługuje miksowanie sprzętowe, wybierz jeden z jej kanałów odtwarzania i połącz na karcie dźwięk z tego kanału z dźwiękiem z mikrofonu. Dzięki temu Twój głos nie przechodzi przez oprogramowanie."
   },
+  "fork.voice.micDenied": {
+    "en": "The microphone could not be opened.",
+    "text": "Nie udało się włączyć mikrofonu."
+  },
   "fork.voice.modelPlaceholder": {
     "en": "The model's name, e.g. tts-1",
     "text": "Nazwa modelu, np. tts-1"
+  },
+  "fork.voice.myVoice": {
+    "en": "My voice",
+    "text": "Mój głos"
   },
   "fork.voice.myVoiceToo": {
     "en": "My own voice goes too",
@@ -1083,13 +1147,41 @@
     "en": "Read aloud",
     "text": "Czytaj na głos"
   },
+  "fork.voice.record": {
+    "en": "Read it aloud",
+    "text": "Przeczytaj to zdanie na głos"
+  },
+  "fork.voice.recordAgain": {
+    "en": "Record again",
+    "text": "Nagraj ponownie"
+  },
+  "fork.voice.removeTake": {
+    "en": "Remove the {{language}} recording of {{name}}",
+    "text": "Usuń nagranie w języku {{language}} dla „{{name}}”"
+  },
+  "fork.voice.removeVoice": {
+    "en": "Remove {{name}}",
+    "text": "Usuń „{{name}}”"
+  },
+  "fork.voice.renameVoice": {
+    "en": "Rename {{name}}",
+    "text": "Zmień nazwę „{{name}}”"
+  },
   "fork.voice.sample": {
     "en": "Play a sample",
     "text": "Odsłuchaj próbkę"
   },
+  "fork.voice.saveVoice": {
+    "en": "Save",
+    "text": "Zapisz"
+  },
   "fork.voice.sayLine": {
     "en": "Read this line aloud",
     "text": "Przeczytaj ten wiersz"
+  },
+  "fork.voice.serverNone": {
+    "en": "The other device lends no voice model. Use an API or this computer instead.",
+    "text": "Na drugim urządzeniu nie ma dostępnego modelu do odczytu na głos. Możesz użyć API lub tego komputera."
   },
   "fork.voice.stage": {
     "en": "Voice",
@@ -1100,6 +1192,10 @@
     "text": "Czyta na głos tłumaczenia Twoich wypowiedzi. Możesz też odsłuchać dowolny wiersz rozmowy: kliknij przy nim ikonę głośnika."
   },
   "fork.voice.stopLine": {
+    "en": "Stop",
+    "text": "Zatrzymaj"
+  },
+  "fork.voice.stopRecording": {
     "en": "Stop",
     "text": "Zatrzymaj"
   },
@@ -1123,9 +1219,17 @@
     "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
     "text": "Przy czytaniu rozmówcy dźwięk trafia do wirtualnego mikrofonu. W VRChat lub aplikacji do spotkań wybierz go jako mikrofon (w Windows: CABLE Output)."
   },
+  "fork.voice.unrecorded": {
+    "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
+    "text": "Nie wybrano własnego głosu do odczytywania. Dodaj go w sekcji „Odczytywanie”."
+  },
   "fork.voice.voice": {
     "en": "Voice",
     "text": "Głos"
+  },
+  "fork.voice.voiceName": {
+    "en": "Name",
+    "text": "Nazwa"
   },
   "fork.voice.voiceOf": {
     "en": "{{language}} voice",
@@ -1138,6 +1242,14 @@
   "fork.voice.volumeTheirs": {
     "en": "Volume for them",
     "text": "Głośność dla rozmówcy"
+  },
+  "fork.voice.wayImport": {
+    "en": "Import a recording",
+    "text": "Importuj nagranie"
+  },
+  "fork.voice.wayRecord": {
+    "en": "Record now",
+    "text": "Nagraj teraz"
   },
   "fork.voice.woman": {
     "en": "Female voice",
@@ -2146,6 +2258,10 @@
   "providers.localai.noteQwen3Tts": {
     "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
     "text": "Brzmi najbardziej naturalnie i zaczyna mówić od razu. W testach po japońsku, chińsku i angielsku: bez błędów wymowy. Zajmuje około 3 GB pamięci karty graficznej, obsługuje 10 języków."
+  },
+  "providers.localai.noteQwen3TtsBase": {
+    "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
+    "text": "Czyta na głos Twoim głosem. Do sklonowania głosu wystarczy nagranie trwające około 10 sekund. Przy pierwszym użyciu każdego głosu odczyt zaczyna się po kilku do dwudziestu kilku sekundach. Później rusza od razu. Zużywa około 3 GB pamięci karty graficznej i obsługuje 10 języków."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

@@ -50,7 +50,7 @@ import { phoneKey } from '../../lib/lan/phoneKeys';
 import { knownDeviceLabel } from '../../lib/lan/knownDevices';
 import { unwrapTranslationText } from './wire';
 import { recognitionLimits } from './hearingPlan';
-import type { VoiceDeps, VoiceStage } from './voice';
+import { atServer, type VoiceDeps, type VoiceStage } from './voice';
 import { Speaker, speakingEvents } from './speaker';
 import { liveVoiceDeps } from '../../lib/voice/liveVoice';
 
@@ -1251,7 +1251,11 @@ const baseOf = (code: string): string => code.split('-')[0];
 /** Fork: what speaks a leg's sentences: its voice stage, where there is one and the leg's context says it speaks. */
 function speakerOf(request: StartRequest<PipelineConfig, PipelineCredentials>, stage: VoiceStage | undefined, events: AdapterEvents, doFetch: typeof fetch, voice: Pick<VoiceDeps, 'decode' | 'native' | 'edge'>, saying?: (text: string, untilAtLeast: number) => (until: number | null) => void): Speaker | null {
   if (!stage || !request.context.speech) return null;
-  return new Speaker(stage, stage.key ? request.credentials[stage.key] : undefined, { ...voice, fetch: doFetch, clock: request.clock }, events, saying);
+  // The shared device's access key is the Realtime credential's own.
+  const key = (stage.key === 'serverKey' ? request.credentials.apiKey : stage.key ? request.credentials[stage.key] : undefined) || undefined;
+  const speaker = new Speaker(atServer(stage, httpBaseOf(request.credentials.endpoint)), key, { ...voice, fetch: doFetch, clock: request.clock }, events, saying);
+  speaker.warm();
+  return speaker;
 }
 
 /** `fetch` as it is when called, so a test's stubbed global is seen. */

@@ -14,6 +14,7 @@ import type { CheckResult } from '../../lib/provider/types';
 import type { NativeEngineStatus } from '../../lib/native/nativeEngine';
 import type { NativeLimits } from './nativeAsr';
 import { useNativeCoachStore, useNativeEngineStore, useNativeTranslatorStore, useNativeVoiceStore } from '../../stores/nativeEngineStore';
+import { useVoiceLibraryStore } from '../../stores/voiceLibraryStore';
 import { nativeVoice } from './nativeVoices';
 import { nativeCoach } from './nativeCoaches';
 import { nativeTranslates, nativeTranslator } from './nativeTranslators';
@@ -468,6 +469,24 @@ export async function voiceUp(id: string, deps: NativeUpDeps = {}): Promise<void
   if (!nativeReady(status, model.id)) throw notUp('native_voice_failed', status, model.id);
 }
 
+/**
+ * Fork: the user's own voices a run reads in, of a cloning voice model: a refusal where a language it reads has none
+ * chosen, or one chosen is no longer in the library. Null: every one is there.
+ */
+export function voiceUnrecorded(cloned: { voices: readonly string[]; missing: boolean }, library: readonly { id: string }[] = useVoiceLibraryStore.getState().voices): Extract<CheckResult, { ok: false }> | null {
+  const gone = cloned.voices.some((voice) => !library.some((one) => one.id === voice));
+  return cloned.missing || gone ? { ok: false, reason: 'No voice of the user\'s own is chosen to read in.', code: 'native_voice_unrecorded' } : null;
+}
+
+/**
+ * Fork: the recordings a run will speak from, read by the engine as the run begins (`native-voice:warm`): the first
+ * sentence in a voice would else wait while its recording is read. Not waited for, and never a run's failure.
+ */
+export function warmCloned(model: string, reads: readonly { voice: string; language: string }[]): void {
+  const api = (typeof window === 'undefined' ? undefined : (window as unknown as { electron?: { invoke(channel: string, data?: unknown): Promise<unknown> } }).electron);
+  void api?.invoke('native-voice:warm', { model, reads: reads.map(({ voice, language }) => ({ voice, language })) }).catch(() => undefined);
+}
+
 /** How long the engines stay up after the last run or device that used them: a stop and a start a moment later load nothing twice. */
 export const NATIVE_REST_MS = 60_000;
 
@@ -559,6 +578,15 @@ export function nativeTaken(kind: 'asr' | 'translation', model?: string): string
     return [...status.up, ...(coming ? [coming] : [])].find((id) => !isApple(id) && (!model || nativeEngineOf(id) === nativeEngineOf(model)) && asrHeld(id)) ?? null;
   }
   return downloadedUp(useNativeTranslatorStore.getState().status);
+}
+
+/**
+ * Fork: the voice engine is someone's now — a run of this computer, a line being said, a device it lends its voice to
+ * (`src/lib/lan/voice.ts`) — and with which model. Null: nobody's, and a device's request may start another.
+ */
+export function voiceTaken(): string | null {
+  if (using.voice === 0 && using.runs === 0) return null;
+  return downloadedUp(useNativeVoiceStore.getState().status);
 }
 
 /**

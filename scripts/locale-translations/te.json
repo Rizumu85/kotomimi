@@ -1011,6 +1011,14 @@
     "en": "What you want to say — Enter translates",
     "text": "మీరు చెప్పాలనేది — Enter అనువదిస్తుంది"
   },
+  "fork.voice.addTake": {
+    "en": "Add a language to {{name}}",
+    "text": "“{{name}}” కోసం మరో భాషలో రికార్డ్ చేయండి"
+  },
+  "fork.voice.addVoice": {
+    "en": "Add a voice",
+    "text": "గొంతు జోడించండి"
+  },
   "fork.voice.auto": {
     "en": "Read my translations as they come",
     "text": "నేను మాట్లాడాక అనువాదాన్ని ఆటోమేటిక్‌గా చదువు"
@@ -1018,6 +1026,50 @@
   "fork.voice.cannotSpeak": {
     "en": "{{name}} cannot speak {{language}}.",
     "text": "{{name}} {{language}}లో మాట్లాడలేదు."
+  },
+  "fork.voice.chooseFile": {
+    "en": "Choose a file",
+    "text": "ఫైల్‌ను ఎంచుకోండి"
+  },
+  "fork.voice.chooseVoice": {
+    "en": "Choose a voice",
+    "text": "గొంతును ఎంచుకోండి"
+  },
+  "fork.voice.clipFailed": {
+    "en": "The voice could not be added.",
+    "text": "గొంతును జోడించలేకపోయాం."
+  },
+  "fork.voice.clipLanguage": {
+    "en": "Language of the recording",
+    "text": "రికార్డింగ్ భాష"
+  },
+  "fork.voice.clipSilent": {
+    "en": "No voice was heard.",
+    "text": "గొంతు వినిపించలేదు."
+  },
+  "fork.voice.clipTooLong": {
+    "en": "Too long: no more than {{seconds}} seconds with its words.",
+    "text": "రికార్డింగ్ మరీ పొడవుగా ఉంది. చెప్పిన మాటలను కూడా ఇస్తే, రికార్డింగ్ {{seconds}} సెకన్లు మించకూడదు."
+  },
+  "fork.voice.clipTooShort": {
+    "en": "Too short: at least {{seconds}} seconds.",
+    "text": "రికార్డింగ్ మరీ చిన్నది. కనీసం {{seconds}} సెకన్లు ఉండాలి."
+  },
+  "fork.voice.clipUnreadable": {
+    "en": "This file could not be read.",
+    "text": "ఈ ఫైల్‌ను చదవలేకపోయాం."
+  },
+  "fork.voice.clipWords": {
+    "en": "What is said in it (optional)",
+    "text": "రికార్డింగ్‌లో చెప్పిన మాటలు (ఐచ్ఛికం)"
+  },
+  "fork.voice.clipWordsNeeded": {
+    "en": "What is said in it",
+    "text": "రికార్డింగ్‌లో చెప్పిన మాటలు"
+  },
+  "fork.voice.exportVoice": {
+    "en": "Save {{name}} as a file",
+    "text": "‘{{name}}’ను ఫైల్‌గా సేవ్ చేయండి"
   },
   "fork.voice.hearBoth": {
     "en": "To both",
@@ -1039,6 +1091,10 @@
     "en": "To them",
     "text": "వారికి వినిపించు"
   },
+  "fork.voice.importVoice": {
+    "en": "Import a voice file",
+    "text": "వాయిస్ ఫైల్‌ను దిగుమతి చేయండి"
+  },
   "fork.voice.lineFailed": {
     "en": "This line could not be read aloud",
     "text": "ఈ పంక్తిని చదివి వినిపించలేకపోయింది"
@@ -1059,9 +1115,17 @@
     "en": "Spoken translations are played on this device, which the other side takes as a microphone. If your sound card mixes in hardware, choose one of its playback channels and mix it with your microphone there: your own voice then never passes through software.",
     "text": "అనువాదాన్ని ఈ పరికరంలో చదివి వినిపిస్తారు. అవతలి వారికి అది మైక్రోఫోన్ నుంచి వచ్చినట్లుగా వినిపిస్తుంది. మీ సౌండ్ కార్డ్‌లోనే ఆడియోను కలిపే సదుపాయం ఉంటే, దానిలోని ఒక ప్లేబ్యాక్ ఛానల్‌ను ఎంచుకుని, ఆ ఛానల్ ఆడియోను మీ మైక్రోఫోన్ ఆడియోతో కార్డ్‌లోనే కలపండి. అప్పుడు మీ అసలు గొంతు సాఫ్ట్‌వేర్ గుండా వెళ్లదు."
   },
+  "fork.voice.micDenied": {
+    "en": "The microphone could not be opened.",
+    "text": "మైక్రోఫోన్‌ను ఆన్ చేయలేకపోయాం."
+  },
   "fork.voice.modelPlaceholder": {
     "en": "The model's name, e.g. tts-1",
     "text": "మోడల్ పేరు, ఉదా. tts-1"
+  },
+  "fork.voice.myVoice": {
+    "en": "My voice",
+    "text": "నా గొంతు"
   },
   "fork.voice.myVoiceToo": {
     "en": "My own voice goes too",
@@ -1079,13 +1143,41 @@
     "en": "Read aloud",
     "text": "చదివి వినిపించు"
   },
+  "fork.voice.record": {
+    "en": "Read it aloud",
+    "text": "ఈ వాక్యాన్ని బిగ్గరగా చదవండి"
+  },
+  "fork.voice.recordAgain": {
+    "en": "Record again",
+    "text": "మళ్లీ రికార్డ్ చేయండి"
+  },
+  "fork.voice.removeTake": {
+    "en": "Remove the {{language}} recording of {{name}}",
+    "text": "“{{name}}” యొక్క {{language}} రికార్డింగ్‌ను తొలగించండి"
+  },
+  "fork.voice.removeVoice": {
+    "en": "Remove {{name}}",
+    "text": "‘{{name}}’ను తొలగించండి"
+  },
+  "fork.voice.renameVoice": {
+    "en": "Rename {{name}}",
+    "text": "“{{name}}” పేరు మార్చండి"
+  },
   "fork.voice.sample": {
     "en": "Play a sample",
     "text": "నమూనా వినండి"
   },
+  "fork.voice.saveVoice": {
+    "en": "Save",
+    "text": "సేవ్ చేయండి"
+  },
   "fork.voice.sayLine": {
     "en": "Read this line aloud",
     "text": "ఈ పంక్తిని చదివి వినిపించు"
+  },
+  "fork.voice.serverNone": {
+    "en": "The other device lends no voice model. Use an API or this computer instead.",
+    "text": "ఆ పరికరంలో అరువుగా వాడుకోగల వాయిస్ మోడల్ లేదు. బదులుగా API లేదా ఈ కంప్యూటర్‌ను వాడవచ్చు."
   },
   "fork.voice.stage": {
     "en": "Voice",
@@ -1098,6 +1190,10 @@
   "fork.voice.stopLine": {
     "en": "Stop",
     "text": "ఆపు"
+  },
+  "fork.voice.stopRecording": {
+    "en": "Stop",
+    "text": "ఆపండి"
   },
   "fork.voice.toMe": {
     "en": "I hear it",
@@ -1119,9 +1215,17 @@
     "en": "Read to them, it goes into the virtual microphone. In VRChat or your meeting app, choose that as the microphone (on Windows: CABLE Output).",
     "text": "అవతలివారికి చదివి వినిపించేటప్పుడు, ఆ స్వరం వర్చువల్ మైక్రోఫోన్‌కు వెళ్తుంది. VRChat లేదా మీ మీటింగ్ యాప్‌లో దానిని మైక్రోఫోన్‌గా ఎంచుకోండి (Windowsలో దాని పేరు CABLE Output)."
   },
+  "fork.voice.unrecorded": {
+    "en": "No voice of your own is chosen to read in. Add one in the Voice card.",
+    "text": "చదివి వినిపించడానికి మీ సొంత గొంతును ఇంకా ఎంచుకోలేదు. ‘చదివి వినిపించడం’ విభాగంలో మీ గొంతును జోడించండి."
+  },
   "fork.voice.voice": {
     "en": "Voice",
     "text": "స్వరం"
+  },
+  "fork.voice.voiceName": {
+    "en": "Name",
+    "text": "పేరు"
   },
   "fork.voice.voiceOf": {
     "en": "{{language}} voice",
@@ -1134,6 +1238,14 @@
   "fork.voice.volumeTheirs": {
     "en": "Volume for them",
     "text": "అవతలి వారికి వినిపించే వాల్యూమ్"
+  },
+  "fork.voice.wayImport": {
+    "en": "Import a recording",
+    "text": "రికార్డింగ్‌ను దిగుమతి చేయండి"
+  },
+  "fork.voice.wayRecord": {
+    "en": "Record now",
+    "text": "ఇప్పుడే రికార్డ్ చేయండి"
   },
   "fork.voice.woman": {
     "en": "Female voice",
@@ -2130,6 +2242,10 @@
   "providers.localai.noteQwen3Tts": {
     "en": "The most natural, and it starts speaking at once. Measured in Japanese, Chinese and English: nothing misread. About 3 GB of video memory, ten languages.",
     "text": "అత్యంత సహజమైన స్వరం, వెంటనే మాట్లాడటం మొదలవుతుంది. పరీక్షల్లో జపనీస్, చైనీస్, ఇంగ్లీష్‌లో ఏదీ తప్పుగా చదవలేదు. సుమారు 3 GB వీడియో మెమరీ అవసరం, 10 భాషలకు మద్దతు ఉంది."
+  },
+  "providers.localai.noteQwen3TtsBase": {
+    "en": "Reads in your own voice, cloned from about ten seconds of it. The first sentence in a voice waits from a few seconds to half a minute; after that it starts speaking at once. About 3 GB of video memory, ten languages.",
+    "text": "మీ సొంత గొంతుతో చదివి వినిపిస్తుంది. మీ గొంతును క్లోన్ చేయడానికి దాదాపు పది సెకన్ల మాట రికార్డు చేస్తే చాలు. ఒక్కో గొంతును మొదటిసారి వాడినప్పుడు కొన్ని సెకన్ల నుంచి ఇరవై పైచిలుకు సెకన్ల వరకు పట్టొచ్చు. ఆ తర్వాత మాట్లాడగానే శబ్దం వస్తుంది. దాదాపు 3 GB వీడియో మెమరీ వాడుతుంది. 10 భాషల్లో పనిచేస్తుంది."
   },
   "providers.localai.noteSenseVoice": {
     "en": "Measured on Japanese VRChat talk: it writes no kana, so Japanese comes out unreadable.",

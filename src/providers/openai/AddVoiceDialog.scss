@@ -1,0 +1,284 @@
+@use '../../components/Settings/shared/variables' as vars;
+@use '../../styles/tokens' as tk;
+
+// Fork: the dialog a voice of the user's own is added in (AddVoiceDialog.tsx), and the list of them under the voice
+// rows (VoiceRows.tsx). Drawn inside the stage's card, so the card's own controls (`kt-seg`, `kt-input`, `kt-note`)
+// are what it is made of.
+
+.kt-addvoice {
+  display: flex;
+  flex-direction: column;
+  gap: vars.$space-3;
+  min-width: min(440px, 80vw);
+}
+
+// The two ways, and the language of the recording beside them.
+.kt-addvoice__top {
+  display: flex;
+  align-items: stretch;
+  gap: vars.$space-2;
+
+  .kt-seg { flex: 1; }
+  .select-dropdown { width: auto; min-width: 104px; }
+}
+
+.kt-addvoice__read {
+  margin: 0;
+  padding: vars.$space-3;
+  font-size: 17px;
+  line-height: 1.6;
+  color: vars.$text-primary;
+  background: vars.$bg-control;
+  border: 1px solid vars.$border-subtle;
+  border-radius: vars.$radius-md;
+}
+
+.kt-addvoice__capture {
+  display: flex;
+  align-items: center;
+  gap: vars.$space-3;
+}
+
+.kt-addvoice__record,
+.kt-addvoice__save {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  min-height: vars.$control-height-compact;
+  padding: 4px 12px;
+  font: inherit;
+  font-size: vars.$font-body;
+  color: vars.$text-primary;
+  background: vars.$bg-control;
+  border: 1px solid vars.$border-default;
+  border-radius: vars.$radius-sm;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: vars.$text-muted;
+  }
+
+  &:disabled {
+    opacity: vars.$disabled-opacity;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: vars.$focus-ring-width solid vars.$focus-ring-color;
+    outline-offset: 1px;
+  }
+}
+
+.kt-addvoice__record.is-recording {
+  color: tk.$color-error;
+  border-color: tk.$color-error;
+}
+
+.kt-addvoice__save {
+  color: tk.$color-on-primary;
+  background: tk.$color-primary-fill;
+  border-color: tk.$color-primary-fill;
+
+  &:hover:not(:disabled) {
+    background: tk.$color-primary-fill-hover;
+    border-color: tk.$color-primary-fill-hover;
+  }
+}
+
+// How loud the microphone is while it records: there is a voice, or there is none.
+.kt-addvoice__meter {
+  flex: 1 1 auto;
+  height: 6px;
+  overflow: hidden;
+  background: vars.$bg-control;
+  border-radius: 3px;
+
+  > span {
+    display: block;
+    height: 100%;
+    background: tk.$color-primary;
+    transition: width 0.08s linear;
+  }
+}
+
+.kt-addvoice__words {
+  width: 100%;
+  resize: vertical;
+}
+
+.kt-addvoice__keep {
+  display: flex;
+  align-items: center;
+  gap: vars.$space-2;
+
+  > .kt-input {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
+.kt-addvoice__length {
+  flex-shrink: 0;
+  font-size: vars.$font-caption;
+  font-variant-numeric: tabular-nums;
+  color: vars.$text-muted;
+}
+
+// The user's own voices under the voice rows: each by its name, with what can be done with it.
+// Whose recording it is, where it is one more of a voice there is: where a new voice's name is typed.
+.kt-addvoice__whose {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: vars.$text-secondary;
+}
+
+// The user's own voices, one under another: each a name with what is done to the whole of it, and under the name the
+// languages it has a recording in, ending in the way to one more.
+.kt-myvoices {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: vars.$space-2;
+}
+
+// The two ways to one more voice: made here, or handed over as a file.
+.kt-myvoices__adds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: vars.$space-2;
+}
+
+.kt-myvoices__voice {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-self: stretch;
+  padding: 6px 6px 8px 12px;
+  border: 1px solid vars.$border-subtle;
+  border-radius: vars.$radius-md;
+}
+
+.kt-myvoices__head {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+// The name is the way to another name: pressed, it is typed over in place.
+.kt-myvoices__name {
+  flex: 1;
+  min-width: 0;
+  height: 26px;
+  padding: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: inherit;
+  font-size: vars.$font-body;
+  text-align: left;
+  color: vars.$text-primary;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  border-radius: 0;
+  outline: none;
+  cursor: text;
+}
+
+input.kt-myvoices__name {
+  border-bottom-color: tk.$color-primary;
+}
+
+.kt-myvoices__act {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  color: vars.$text-muted;
+  background: transparent;
+  border: none;
+  border-radius: vars.$radius-sm;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    color: vars.$text-primary;
+    background: vars.$bg-hover;
+  }
+
+  &:disabled {
+    opacity: vars.$disabled-opacity;
+    cursor: not-allowed;
+  }
+}
+
+.kt-myvoices__langs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+// A language it has a recording in. The first is the voice itself; any other can be taken away.
+.kt-myvoices__lang,
+.kt-myvoices__more {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 22px;
+  padding: 0 8px;
+  font: inherit;
+  font-size: vars.$font-caption;
+  line-height: 1;
+  white-space: nowrap;
+  color: vars.$text-secondary;
+  background: vars.$bg-control;
+  border: 1px solid transparent;
+  border-radius: 999px;
+}
+
+button.kt-myvoices__lang {
+  padding-right: 6px;
+  cursor: pointer;
+
+  svg { color: vars.$text-muted; }
+
+  &:hover:not(:disabled) {
+    color: vars.$text-primary;
+
+    svg { color: vars.$text-primary; }
+  }
+
+  &:disabled {
+    opacity: vars.$disabled-opacity;
+    cursor: not-allowed;
+  }
+}
+
+// One more language: the outline of a language that is not there yet.
+.kt-myvoices__more {
+  justify-content: center;
+  width: 30px;
+  padding: 0;
+  color: vars.$text-muted;
+  background: transparent;
+  border: 1px dashed vars.$border-subtle;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    color: tk.$color-primary;
+    border-color: tk.$color-primary;
+  }
+
+  &:disabled {
+    opacity: vars.$disabled-opacity;
+    cursor: not-allowed;
+  }
+}

@@ -178,6 +178,7 @@ export default defineConfig(({ command, mode }) => {
             'ws-header-rules': 'electron/ws-header-rules.js',
             // Fork: sharing this computer's models on the local network
             'lan-server': 'electron/lan-server.js',
+            'voice-library': 'electron/voice-library.js',
             'lan-firewall': 'electron/lan-firewall.js',
             'lan-discover': 'electron/lan-discover.js',
             // Fork: the native recognition engine the app downloads and runs

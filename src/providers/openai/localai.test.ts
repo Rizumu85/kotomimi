@@ -116,6 +116,74 @@ describe("LocalAI Realtime's stage keys", () => {
     expect(await checkLocalAIWithNative(K, { ...s, speak: { ...s.speak, auto: false } }, ctx(), ok)).toEqual({ ok: true });
   });
 
+  it('asks for the other device\'s address where the voice alone is there, and refuses a device that lends none (fork)', async () => {
+    const here = { ...LOCALAI_DEFAULTS, asrVia: 'device' as const, translateAt: 'device' as const };
+    const there = { ...here, speak: { ...LOCALAI_DEFAULTS.speak, on: true, at: 'server' as const } };
+    expect(localaiCredentials.fields(here)).toEqual([]);
+    expect(localaiCredentials.fields(there).map((f) => f.key)).toEqual(['endpoint']);
+    expect(localaiCredentials.fields({ ...there, serverNeedsKey: true }).map((f) => f.key)).toEqual(['endpoint', 'serverKey']);
+    // Off, it asks for nothing.
+    expect(localaiCredentials.fields({ ...there, speak: { ...there.speak, on: false } })).toEqual([]);
+    const native = { gap: vi.fn(async () => null), idle: vi.fn(), translatorGap: vi.fn(async () => null), translatorIdle: vi.fn(), coachIdle: vi.fn(), voiceIdle: vi.fn() };
+    const voiceless = [{ id: 'kotomimi', kind: 'pipeline' as const, host: 'kotomimi' as const }, { id: 'r2t2-q8', kind: 'asr' as const, host: 'kotomimi' as const }];
+    const lends = [...voiceless, { id: 'irodori-tts-v4.1-small-mf-q8', kind: 'voice' as const, host: 'kotomimi' as const }, { id: 'voice-of-tomorrow', kind: 'voice' as const, host: 'kotomimi' as const }];
+    expect(await checkLocalAIWithNative(K, there, ctx(), async () => ({ ok: true, models: voiceless }), native)).toMatchObject({ ok: false, code: 'server_no_voice', models: voiceless });
+    expect(await checkLocalAIWithNative(K, { ...there, speak: { ...there.speak, serverModel: 'voice-of-tomorrow' } }, ctx(), async () => ({ ok: true, models: lends }), native)).toMatchObject({ ok: true });
+    // One chosen that the device lends no more.
+    expect(await checkLocalAIWithNative(K, { ...there, speak: { ...there.speak, serverModel: 'qwen3-tts-1.7b-customvoice-q8' } }, ctx(), async () => ({ ok: true, models: lends }), native)).toMatchObject({ ok: false, code: 'server_no_voice' });
+    // A voice that does not speak the run's language is left out of the run, wherever it is: Irodori speaks Japanese alone.
+    expect(await checkLocalAIWithNative(K, there, ctx(), async () => ({ ok: true, models: lends }), native)).toMatchObject({ ok: true });
+    // Said only on demand, a run does not need it.
+    expect(await checkLocalAIWithNative(K, { ...there, speak: { ...there.speak, auto: false } }, ctx(), async () => ({ ok: true, models: voiceless }), native)).toMatchObject({ ok: true });
+  });
+
+  it('does not hold a run up for a voice it does not use, when the device that lends it cannot be asked (fork)', async () => {
+    const here = { ...LOCALAI_DEFAULTS, asrVia: 'device' as const, translateAt: 'device' as const };
+    const there = { ...here, speak: { ...LOCALAI_DEFAULTS.speak, on: true, at: 'server' as const, serverModel: 'qwen3-tts-1.7b-customvoice-q8' } };
+    const asked: string[] = [];
+    const down = createLocalAICheck({ fetch: (async (input: RequestInfo | URL) => { asked.push(String(input)); throw new Error('ECONNREFUSED'); }) as typeof fetch });
+    // Spoken by itself: the device is needed, and the check says it could not be reached.
+    await expect(down(K, there, ctx())).rejects.toMatchObject({ code: 'server_unreachable' });
+    // Said on demand alone, or the other side's leg alone: asked all the same, for what it lends, and not waited on.
+    asked.length = 0;
+    expect(await down(K, { ...there, speak: { ...there.speak, auto: false } }, ctx())).toEqual({ ok: true, models: [] });
+    expect(await down(K, there, { ...ctx(), legs: ['participant'] })).toEqual({ ok: true, models: [] });
+    expect(asked).toEqual(['http://192.168.1.10:8080/v1/models', 'http://192.168.1.10:8080/v1/models']);
+    // A key it refuses is the same: no start waits on it.
+    const locked = createLocalAICheck({ fetch: (async () => new Response('', { status: 401 })) as typeof fetch });
+    expect(await locked(K, { ...there, speak: { ...there.speak, auto: false } }, ctx())).toEqual({ ok: true, models: [] });
+    expect(await locked(K, there, ctx())).toMatchObject({ ok: false, code: 'server_key_needed' });
+    // A stage of a leg's own on that device is still what it was: the device is needed.
+    await expect(down(K, { ...there, translateAt: 'server', speak: { ...there.speak, auto: false } }, ctx())).rejects.toMatchObject({ code: 'server_unreachable' });
+  });
+
+  it('reads in the user\'s own voice only where one is chosen and still there, and has its recording read as the run begins (fork)', async () => {
+    const mine = (voices: Record<string, string>) => ({ ...LOCALAI_DEFAULTS, asrVia: 'device' as const, translateAt: 'device' as const, speak: { ...LOCALAI_DEFAULTS.speak, on: true, at: 'device' as const, nativeModel: 'qwen3-tts-1.7b-base-q8', voices: { 'qwen3-tts-1.7b-base-q8': voices } } });
+    const native = { gap: vi.fn(async () => null), idle: vi.fn(), translatorGap: vi.fn(async () => null), translatorIdle: vi.fn(), coachIdle: vi.fn(), voiceGap: vi.fn(async () => null), voiceIdle: vi.fn() };
+    const ok = async () => ({ ok: true as const });
+    const library = (ids: string[]) => ({ ...native, voiceUnrecorded: (cloned: { voices: readonly string[]; missing: boolean }) => (cloned.missing || cloned.voices.some((voice) => !ids.includes(voice)) ? { ok: false as const, reason: 'none', code: 'native_voice_unrecorded' } : null) });
+    // None chosen; one chosen that was removed; one chosen and there.
+    expect(await checkLocalAIWithNative(K, mine({}), ctx(), ok, library(['aaa111']))).toMatchObject({ ok: false, code: 'native_voice_unrecorded' });
+    expect(await checkLocalAIWithNative(K, mine({ '*': 'gone00' }), ctx(), ok, library(['aaa111']))).toMatchObject({ ok: false, code: 'native_voice_unrecorded' });
+    expect(await checkLocalAIWithNative(K, mine({ '*': 'aaa111' }), ctx(), ok, library(['aaa111']))).toEqual({ ok: true });
+    // Said on demand alone, a run does not need it.
+    expect(await checkLocalAIWithNative(K, { ...mine({}), speak: { ...mine({}).speak, auto: false } }, ctx(), ok, library([]))).toEqual({ ok: true });
+    // The engine up, the run's recordings are read behind its back.
+    const speaks = vi.fn(async () => {});
+    const reads = vi.fn();
+    await prepareLocalAI(ctx(), mine({ '*': 'aaa111' }), { hears: vi.fn(), translates: vi.fn(), coaches: vi.fn(), speaks, reads, rest: vi.fn() });
+    expect(speaks).toHaveBeenCalledWith('qwen3-tts-1.7b-base-q8');
+    expect(reads).toHaveBeenCalledTimes(1);
+    expect(reads.mock.calls[0][0]).toBe('qwen3-tts-1.7b-base-q8');
+    // Each voice with the language it will read.
+    expect(reads.mock.calls[0][1].length).toBeGreaterThan(0);
+    for (const one of reads.mock.calls[0][1]) expect(one).toEqual({ voice: 'aaa111', language: expect.stringMatching(/^[a-z]{2,3}$/) });
+    // A model with voices of its own has nothing to read ahead.
+    reads.mockClear();
+    await prepareLocalAI(ctx(), { ...mine({}), speak: { ...mine({}).speak, nativeModel: 'qwen3-tts-1.7b-customvoice-q8' } }, { hears: vi.fn(), translates: vi.fn(), coaches: vi.fn(), speaks, reads, rest: vi.fn() });
+    expect(reads).not.toHaveBeenCalled();
+  });
+
   it('neither checks nor loads a native voice that cannot speak the target', async () => {
     const s = { ...LOCALAI_DEFAULTS, speak: { ...LOCALAI_DEFAULTS.speak, on: true, nativeModel: 'irodori-tts-v4.1-small-mf-q8' } };
     const voiceGap = vi.fn(async () => null);

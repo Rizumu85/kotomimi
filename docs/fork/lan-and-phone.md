@@ -7,7 +7,7 @@ A stage can run on a sharing Kotomimi, an external OpenAI-compatible server such
 - Download native models in the sharing library, turn sharing on, keep Kotomimi running. Default port 8790; below 1024 the main process falls back to it.
 - A key holds only `A-Za-z0-9._~!*+-` (`lanKeyOf`): it travels in a WebSocket subprotocol.
 - The client chooses language, model and turn detection. The host owns the installed models and the key.
-- Shared: downloaded native recognizers (Apple Speech included), translators, feedback models. Browser models are not, and Kotomimi forwards no LocalAI; an external one is used directly.
+- Shared: downloaded native recognizers (Apple Speech included), translators, feedback and voice models (none cloning). Browser models are not, and Kotomimi forwards no LocalAI; an external one is used directly.
 - Listing a model does not load it.
 - A shared request is served by a native model or refused, never by online translation.
 
@@ -17,20 +17,19 @@ A stage can run on a sharing Kotomimi, an external OpenAI-compatible server such
 
 `X-Kotomimi-Node: engine` is a phone. `owned_by: kotomimi` is a Kotomimi. 401 or 403 wants a key: with the node header a phone, with `X-Kotomimi-Name` a Kotomimi, else a server. Any other model list is a server; `GET /version` tells a LocalAI. A phone search misses can be typed in as an API, `http://<phone>:8792/v1`.
 
-## The sharing door
-
-The door is `electron/lan-server.js`.
+## The sharing door (`electron/lan-server.js`)
 
 | Request | Answer |
 |---|---|
 | `GET /v1/models` | `{id, object, owned_by: 'kotomimi'}`, the pipeline `kotomimi` first |
 | `GET /v1/models/capabilities` | `{id, capabilities, languages?, pair?}` |
 | `POST /v1/chat/completions` | a translation or feedback, whole or SSE; `model` names what ran |
+| `POST /v1/audio/speech` | `input` in a voice `model` (optional `voice`, `language`): raw 16-bit mono, `audio/pcm;rate=N`; 503 `voice_busy` if the engine is busy |
 | `WS /v1/realtime` | a transcription session |
 
 Every HTTP answer, refusals included, carries the URL-encoded name in `X-Kotomimi-Name`. Errors are `{error: {message, type, code}}`, with file paths replaced by `…` (`withoutPaths`).
 
-Capabilities are `transcript` (plus `bilingual` on Apple Speech, and `trilingual` where it hears a third language: a Mac's), `translate`, `feedback`; the pipeline has `null`. Empty `languages` means any; `auto` among them means the recognizer names the language. `pair: [source, target]` marks a one-way translator.
+Capabilities are `transcript` (plus `bilingual` on Apple Speech, and `trilingual` where it hears a third language: a Mac's), `translate`, `feedback`, `tts`; the pipeline has `null`. Empty `languages` means any; `auto` among them means the recognizer names the language. `pair: [source, target]` marks a one-way translator.
 
 Translation needs `source_language`, `target_language` and a `user` message; the system message is not read. `model` is a shared translator, or `kotomimi` for the host's choice. A model that cannot take the pair never answers: 422 `model_unfit`, or 503 `translator_busy` when such a model holds the engine. Otherwise the model holding the engine answers for the named one, and the answer's `model` says so. Nothing fits: 404 `model_not_found`.
 
@@ -40,7 +39,7 @@ The socket only transcribes. `session.update` must give `audio.input.transcripti
 
 ## What the door refuses
 
-Against an untrusted device on the network, and a web page in a browser there.
+Against an untrusted device or a web page on the network.
 
 | Required | Else | Why |
 |---|---|---|
@@ -73,9 +72,9 @@ A phone lends recognition and text models on port 8792, answering the same wheth
 
 Every answer carries `X-Kotomimi-Name` and `X-Kotomimi-Node: engine`; errors are `{error: {message}}`. 401 is a missing key; 403 a web `Origin` or a public `Host`; 404 nothing lent by that name; 429 with `Retry-After: 2` four text requests in hand; 503 with `Retry-After: 5` no memory for the model, which the client knows by the words `has not the memory`.
 
-The key is blank by default: any device on the Wi-Fi may use the phone. Its owner can generate a six-character key (`DoorKey`); every request then needs `Authorization: Bearer <key>`. Picking such a phone asks for the key, stores it by address in `settings.lan.phoneKeys` and searches again. Every request to that phone carries it.
+The key is blank by default: any device on the Wi-Fi may use the phone. Its owner can generate a six-character key (`DoorKey`); every request then needs `Authorization: Bearer <key>`. Picking such a phone asks for the key, stores it by address in `settings.lan.phoneKeys` and searches again.
 
-Each stage on "another device" may name its own device as `host:port`: `asrOther`, `translateOther`, `coachOther`, each beside its `...Model`. Blank is the shared device. Only phones can be one, so two computers cannot each run a stage. Picking a phone in the top search (`useServer`) gives it recognition from wherever that was, and translation and feedback only where they are on "another device". If that changes nothing, a text-only phone takes translation, else feedback. With no stage on the shared device its address is not asked for (`needsServer`).
+A stage but the voice may name its own device as `host:port`: `asrOther`, `translateOther`, `coachOther`, each beside its `...Model`. Blank is the shared device. Only phones can be one, so two computers cannot each run a stage. Picking a phone in the top search (`useServer`) gives it recognition from wherever that was, and translation and feedback only where they are on "another device". If that changes nothing, a text-only phone takes translation, else feedback. With no stage on the shared device its address is not asked for (`needsServer`).
 
 `settled` reads a recognition phone as `asrVia: 'api'` at its address. At session start `engineNode` asks its model list. With the header, the voice is read live as on the local engine (`openWindow`, through `electron/remote-engine.js`), re-read as often as the last reading allows. Without it: an ordinary API, one upload per sentence. The model is what the phone lends then, whatever was saved. A stretch's last reading gets 60 s (`REMOTE_LAST_WORDS_MS`), not this computer's 15 s.
 
@@ -103,7 +102,7 @@ Handshake: `ws://<host>:<port>/v1/realtime?model=<name>`, no subprotocol without
 
 The client reads `input_audio_buffer.committed`, `.speech_started`, `.speech_stopped`, `.cleared`; `conversation.item.input_audio_transcription.delta`, `.completed`, `.failed`; `response.created`, `response.output_item.added`, `response.output_text.delta`, `.done`, `response.output_item.done`, and `response.done`, without which the leg stays busy. `error` before `session.updated` refuses the start; after it, it is logged and the session goes on, unless its `code` is `session_idle` or `session_expired`.
 
-Text: `POST <base>/chat/completions` with `{model, stream: true, messages}`, SSE or whole; `<think>…</think>` is stripped. `GET <base>/models` lists. `GET <base>/models/capabilities` is optional (`kindOf`): `transcript` a recognizer, `chat` or `completion` a text model, `translate` a translator, empty a pipeline, others (`vad`, `tts`) offered nowhere.
+Text: `POST <base>/chat/completions` with `{model, stream: true, messages}`, SSE or whole; `<think>…</think>` is stripped. `GET <base>/models` lists. `GET <base>/models/capabilities` is optional (`kindOf`): `transcript` a recognizer, `chat` or `completion` a text model, `translate` a translator, empty a pipeline, `tts` a voice (`POST <base>/audio/speech`, a WAV), others (`vad`) offered nowhere.
 
 ## LocalAI behaviour the client works around
 

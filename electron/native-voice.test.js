@@ -31,7 +31,7 @@ afterEach(() => { fs.rmSync(dir, { recursive: true, force: true }); });
 const answer = (bytes, status = 200) => new Response(new ReadableStream({ start(controller) { controller.enqueue(new Uint8Array(bytes)); controller.close(); } }), { status });
 
 /** A computer with the voice runtime: what was started, and every sentence asked of it. */
-function computer({ sayIt } = {}) {
+function computer({ sayIt, catalog = CATALOG } = {}) {
   const world = { started: [], said: [] };
   const served = { 'https://example.test/engine.zip': ARCHIVE, 'https://example.test/v1.gguf': MODEL };
   const say = sayIt ?? ((request, onPcm) => {
@@ -48,7 +48,7 @@ function computer({ sayIt } = {}) {
     dir,
     platform: 'win32',
     arch: 'x64',
-    catalog: CATALOG,
+    catalog,
     runtime: VOICE_RUNTIME,
     say,
     fetch: async (url) => (served[url] ? answer(served[url]) : answer([], 404)),
@@ -145,13 +145,46 @@ describe('a sentence asked of the voice engine', () => {
     });
     await engine.download('v1');
     await engine.start('v1');
+    const asked = async (count) => { while (hanging.length < count) await new Promise((r) => setTimeout(r, 1)); };
     const first = engine.speak({ id: 1, model: 'v1', text: 'こんにちは。', language: 'ja' });
+    await asked(1);
     engine.stopSpeaking(1);
     expect(await first).toEqual({ error: 'The voice was stopped.' });
     const second = engine.speak({ id: 2, model: 'v1', text: 'こんにちは。', language: 'ja' });
+    await asked(2);
     await engine.stop();
     expect(await second).toEqual({ error: 'The voice was stopped.' });
     expect(hanging.map((one) => one.aborted)).toEqual([true, true]);
+  });
+
+  it('is made one at a time, in the order asked, and never asked for when stopped while it waits', async () => {
+    const open = [];
+    const { engine } = computer({
+      sayIt: (request, onPcm) => {
+        if (request.input === 'Hello.') { onPcm(Buffer.alloc(2), 24000); return { done: Promise.resolve({ sampleRate: 24000 }), abort() {} }; }
+        let finish;
+        const one = { input: request.input, done: new Promise((resolve) => { finish = () => resolve({ sampleRate: 24000 }); }), abort() {}, finish: () => finish() };
+        open.push(one);
+        return one;
+      },
+    });
+    await engine.download('v1');
+    await engine.start('v1');
+    const tick = () => new Promise((r) => setTimeout(r, 5));
+    const first = engine.speak({ id: 1, model: 'v1', text: 'one', language: 'en' });
+    const second = engine.speak({ id: 2, model: 'v1', text: 'two', language: 'en' });
+    const third = engine.speak({ id: 3, model: 'v1', text: 'three', language: 'en' });
+    await tick();
+    // The second and the third wait for the first.
+    expect(open.map((one) => one.input)).toEqual(['one']);
+    engine.stopSpeaking(2);
+    open[0].finish();
+    expect(await first).toEqual({ ok: true });
+    expect(await second).toEqual({ error: 'The voice was stopped.' });
+    await tick();
+    expect(open.map((one) => one.input)).toEqual(['one', 'three']);
+    open[1].finish();
+    expect(await third).toEqual({ ok: true });
   });
 });
 
@@ -260,9 +293,62 @@ describe('what is fetched for the voice engine', () => {
       expect(model.bytes).toBeGreaterThan(1e8);
       expect(model.sampleRate).toBeGreaterThanOrEqual(16000);
       expect(model.languages).toContain('ja');
-      expect(typeof model.voice).toBe('string');
+      // A cloning model has no voice of its own; any other is first in one.
+      if (model.speech.clone) expect(model.voice).toBeUndefined();
+      else expect(typeof model.voice).toBe('string');
       // A model with described voices is first in one of them.
       if (model.speech.voices) expect(Object.keys(model.speech.voices)).toContain(model.voice);
+    }
+  });
+});
+
+describe('a cloning model (fork)', () => {
+  const CLONE = { ...CATALOG.models.v1, speech: { clone: true, languageAs: 'language' }, voice: undefined };
+  it('speaks on from the recording in the recording\'s own language, and takes only the sound of the voice in any other', () => {
+    const mine = { path: 'C:/voices/abc001.wav', text: '今天天气真不错。', language: 'zh-CN' };
+    // Its own language: the recording and its words.
+    expect(speechRequest(CLONE, 'abc001', 'zh', mine)).toEqual({
+      fields: { voice_ref: 'C:/voices/abc001.wav', reference_text: '今天天气真不错。' }, options: { language: 'zh' }, whole: false, timeoutMs: 180_000,
+    });
+    // Another: spoken on from, a Chinese recording carries its accent into Japanese.
+    expect(speechRequest(CLONE, 'abc001', 'ja-JP', mine)).toEqual({
+      fields: { voice_ref: 'C:/voices/abc001.wav' }, options: { language: 'ja', x_vector_only_mode: true }, whole: false, timeoutMs: 180_000,
+    });
+    // A second recording, read in Japanese by someone sure of theirs: Japanese is spoken on from that one.
+    expect(speechRequest(CLONE, 'abc002', 'ja', { path: 'C:/voices/abc002.wav', text: '今日はいい天気ですね。', language: 'ja' }).fields).toEqual({ voice_ref: 'C:/voices/abc002.wav', reference_text: '今日はいい天気ですね。' });
+    // Words not known, or their language: the sound alone, whatever is read.
+    expect(speechRequest(CLONE, 'abc001', 'zh', { ...mine, text: '' }).options).toEqual({ language: 'zh', x_vector_only_mode: true });
+    expect(speechRequest(CLONE, 'abc001', 'zh', { ...mine, language: '' }).fields).toEqual({ voice_ref: 'C:/voices/abc001.wav' });
+  });
+
+  it('is not warmed in a voice it does not have, and says so when asked to speak with no recording', async () => {
+    const said = [];
+    expect(await VOICE_RUNTIME.warm({ port: 1, id: 'v1', model: CLONE, timeoutMs: 100, say: (request) => { said.push(request); return { done: Promise.resolve({ sampleRate: 24000 }), abort() {} }; } })).toBe(true);
+    expect(said).toEqual([]);
+    const { world, engine } = computer({ catalog: { ...CATALOG, models: { v1: CLONE } } });
+    await engine.download('v1');
+    await engine.start('v1');
+    expect(world.said).toEqual([]);
+    expect(await engine.speak({ id: 1, model: 'v1', text: 'Hello.', language: 'en' })).toEqual({ error: 'This voice model has no recording to speak from.' });
+    expect(await engine.speak({ id: 2, model: 'v1', text: 'Hello.', language: 'en', reference: { path: 'C:/voices/abc001.wav', text: 'hi', language: 'en-US' } })).toEqual({ ok: true });
+    expect(world.said.map((one) => one.request.fields)).toEqual([{ voice_ref: 'C:/voices/abc001.wav', reference_text: 'hi' }]);
+  });
+
+  it('puts the recording at the top of the request, beside its options', async () => {
+    const seen = [];
+    const server = http.createServer((request, response) => {
+      let body = '';
+      request.on('data', (chunk) => { body += chunk; });
+      request.on('end', () => { seen.push(JSON.parse(body)); response.writeHead(200, { 'Content-Type': 'audio/pcm;rate=24000' }); response.end(Buffer.alloc(480)); });
+    });
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+    try {
+      const request = speechRequest(CLONE, 'abc001', 'ja', { path: 'C:/voices/abc001.wav', text: 'hi', language: 'ja' });
+      await speakLive({ port: server.address().port, model: 'v1', input: 'こんにちは。', ...request, sampleRate: 24000 }, () => {}).done;
+      expect(seen[0]).toMatchObject({ model: 'v1', input: 'こんにちは。', voice_ref: 'C:/voices/abc001.wav', reference_text: 'hi', stream: true, options: { language: 'ja' } });
+      expect(seen[0]).not.toHaveProperty('voice');
+    } finally {
+      await new Promise((resolve) => server.close(resolve));
     }
   });
 });

@@ -25,6 +25,7 @@ const { setupOcrShots } = require('./ocr-shots.js');
 const { createCloseHandshake } = require('./close-handshake.js');
 const { createWsHeaderRules } = require('./ws-header-rules.js');
 const { startLanServer } = require('./lan-server');
+const { createVoiceLibrary, MOST_WAV_BYTES, MOST_PACK_BYTES } = require('./voice-library');
 const { keepMaximizeHonest, pageShift } = require('./window-maximize');
 const { firewallStatus, allowThroughFirewall } = require('./lan-firewall');
 const { discoverServers } = require('./lan-discover');
@@ -1417,6 +1418,8 @@ ipcMain.handle('lan:start', async (event, args) => {
       socketOpen: (socket) => toPage('lan:socket-open', socket),
       socketMessage: (message) => toPage('lan:socket-message', message),
       socketClose: (socket) => toPage('lan:socket-close', socket),
+      // A device that hung up on a sentence being spoken for it: the voice engine stops making it.
+      requestClosed: ({ id }) => { void nativeVoice?.stopSpeaking(`lan:${id}`); },
     });
     console.log(`[Kotomimi] [Main] Sharing models on port ${lanServer.port}`);
     return { ok: true, port: lanServer.port, addresses: lanServer.addresses, name: lanServer.name };
@@ -1434,6 +1437,28 @@ ipcMain.handle('lan:stop', async () => {
 ipcMain.handle('lan:reply', (event, args) => lanServer?.reply(args?.id, args ?? {}) ?? false);
 ipcMain.handle('lan:send', (event, args) => lanServer?.send(args?.id, args?.data ?? '') ?? false);
 ipcMain.handle('lan:close-socket', (event, args) => { lanServer?.closeSocket(args?.id, args?.code, args?.reason); return true; });
+/**
+ * Fork: a device's `POST /v1/audio/speech`, answered by this computer's voice engine: the sentence's sound goes to
+ * the device as it is made, raw 16-bit mono at the rate the answer's type names, without passing through the page.
+ * The page has checked the request and brought the engine up with the model (`src/lib/lan/voice.ts`). Resolves when
+ * it is over: `{ ok }`, or `{ error, sent }` — `sent` false: nothing went out, and the page answers with the error.
+ */
+ipcMain.handle('lan:reply-voice', async (event, args) => {
+  const id = String(args?.id ?? '');
+  // The device hung up while the engine was coming up: nothing is made for it, and there is no one to answer.
+  if (!lanServer?.waits(id)) return { error: 'The device is not waiting any more.', sent: true };
+  let out = null;
+  const result = await getNativeVoice().speak({ id: `lan:${id}`, model: args?.model, text: args?.text, voice: args?.voice, language: args?.language }, (pcm, sampleRate) => {
+    out ??= lanServer?.stream(id, { contentType: `audio/pcm;rate=${sampleRate}` }) ?? null;
+    out?.write(pcm);
+  });
+  // All of it came: the answer ends. Some of it and then a failure: the answer is cut, so the device does not take
+  // half a sentence for a whole one. None of it: the page answers with why.
+  if (result.ok) out?.end();
+  else out?.abort();
+  if (result.ok && !out) return { error: 'The voice engine made no sound.', sent: false };
+  return result.ok ? { ok: true } : { error: result.error, sent: out !== null };
+});
 
 // Fork: the native recognition engine (electron/native-engine.js): a runtime and its models, fetched into the app's
 // own folder and run on this computer alone. Fetched over the system's own network stack (`net.fetch`: its proxy
@@ -1645,11 +1670,61 @@ ipcMain.handle('native-voice:start', async (event, args) => {
   return getNativeVoice().start(String(args?.id ?? ''));
 });
 ipcMain.handle('native-voice:stop', () => getNativeVoice().stop());
+// Fork: the user's own voices (voice-library.js): recordings a cloning voice model speaks from. In the profile, not
+// with the models: they are the user's, and stay where their settings are when the models move to another disk.
+let voiceLibrary = null;
+const getVoiceLibrary = () => {
+  voiceLibrary ??= createVoiceLibrary({ dir: path.join(app.getPath('userData'), 'voices') });
+  return voiceLibrary;
+};
+/** The recording a voice of the library is spoken from, where the voice named is one. */
+/** The recording a voice speaks `language` from: its own in that language where it has one, else its first. */
+const referenceOf = (voice, language) => (typeof voice === 'string' && /^[a-f0-9]{6,32}$/.test(voice) ? getVoiceLibrary().reference(voice, language) : null);
+ipcMain.handle('voice-library:list', () => getVoiceLibrary().list());
+ipcMain.handle('voice-library:add', (event, args) => {
+  // A file someone handed over (`pack`), or a recording made or chosen here.
+  const bytesOf = (value, most) => (value instanceof Uint8Array && value.byteLength <= most ? Buffer.from(value.buffer, value.byteOffset, value.byteLength) : null);
+  if (args?.pack) return getVoiceLibrary().unpack(bytesOf(args.pack, MOST_PACK_BYTES));
+  // `to`: one more recording of a voice there is, in another language.
+  return getVoiceLibrary().add({ name: args?.name, text: args?.text, language: args?.language, wav: bytesOf(args?.wav, MOST_WAV_BYTES), ...(typeof args?.to === 'string' ? { to: args.to } : {}) });
+});
+ipcMain.handle('voice-library:remove', (event, args) => getVoiceLibrary().remove(String(args?.id ?? '')));
+ipcMain.handle('voice-library:remove-take', (event, args) => getVoiceLibrary().removeTake(String(args?.id ?? ''), String(args?.language ?? '')));
+ipcMain.handle('voice-library:rename', (event, args) => getVoiceLibrary().rename(String(args?.id ?? ''), args?.name));
+/** A voice saved as a file where the user says: for a friend, or another computer of their own. */
+ipcMain.handle('voice-library:export', async (event, args) => {
+  const id = String(args?.id ?? '');
+  const voice = getVoiceLibrary().list().find((one) => one.id === id);
+  const packed = voice ? getVoiceLibrary().pack(id) : null;
+  if (!voice || !packed) return { ok: false };
+  const chosen = await dialog.showSaveDialog(mainWindow, { defaultPath: `${voice.name.replace(/[<>:"/\\|?*]/g, '_')}.kotovoice`, filters: [{ name: 'Kotomimi voice', extensions: ['kotovoice'] }] });
+  if (chosen.canceled || !chosen.filePath) return { ok: false };
+  try {
+    require('fs').writeFileSync(chosen.filePath, packed);
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: String(error?.message ?? error).slice(0, 200) };
+  }
+});
+
 ipcMain.handle('native-voice:speak', (event, args) => {
   const id = Number.isInteger(args?.id) ? args.id : 0;
-  return getNativeVoice().speak({ id, model: args?.model, text: args?.text, voice: args?.voice, language: args?.language },
+  return getNativeVoice().speak({ id, model: args?.model, text: args?.text, voice: args?.voice, language: args?.language, reference: referenceOf(args?.voice, args?.language) },
     // A copy: the piece is a view of the response's buffer, which is used again.
     (pcm, sampleRate) => toPage('native-voice:audio', { id, sampleRate, pcm: Uint8Array.from(pcm) }));
+});
+/**
+ * Fork: the recordings a run will speak from, read by the engine as the run begins: one short word asked in each
+ * voice in each language it will read (a recording is read one way for its own language and another for the rest)
+ * and not listened to. A sentence said meanwhile waits its turn behind them. Not waited for by the page.
+ */
+ipcMain.handle('native-voice:warm', (event, args) => {
+  const reads = (Array.isArray(args?.reads) ? args.reads : []).filter((one) => typeof one?.voice === 'string' && typeof one?.language === 'string').slice(0, 6);
+  reads.forEach(({ voice, language }, i) => {
+    const reference = referenceOf(voice, language);
+    if (reference) void getNativeVoice().speak({ id: `warm:${i}:${voice}`, model: args?.model, text: 'Hello.', voice, language, reference });
+  });
+  return true;
 });
 ipcMain.handle('native-voice:speak-stop', (event, args) => getNativeVoice().stopSpeaking(args?.id));
 app.on('will-quit', () => { void nativeVoice?.stop(); });
