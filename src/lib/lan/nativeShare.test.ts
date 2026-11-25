@@ -370,10 +370,10 @@ describe('this computer\u2019s voice model, lent (fork)', () => {
     expect(nativeVoiceFor('')).toBeNull();
   });
 
-  it('is not lent where it speaks in its owner\u2019s own voice: another device has not their recordings', () => {
+  it('is lent too where it speaks in a voice cloned from a recording: the device brings its own', () => {
     useNativeVoiceStore.setState({ status: status({ 'qwen3-tts-1.7b-base-q8': downloaded }) });
-    expect(nativeShared().some((m) => m.kind === 'voice')).toBe(false);
-    expect(nativeVoiceFor('qwen3-tts-1.7b-base-q8')).toBeNull();
+    expect(nativeShared().filter((m) => m.kind === 'voice').map((m) => m.id)).toEqual(['qwen3-tts-1.7b-base-q8']);
+    expect(nativeVoiceFor('qwen3-tts-1.7b-base-q8')).toBe('qwen3-tts-1.7b-base-q8');
   });
 });
 

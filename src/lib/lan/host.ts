@@ -135,7 +135,7 @@ export function createLanHost(deps: LanHostDeps): LanHost {
         ...deps.engines.voice,
         resolve: (wanted) => models.voice?.(wanted) ?? null,
         // The main process sends the sound, from the engine straight to the device.
-        speak: async (id, said) => (await bridge.invoke('lan:reply-voice', { id, ...said })) as { ok: true } | { error: string; sent: boolean },
+        speak: async (id, said) => (await bridge.invoke('lan:reply-voice', { id, ...said })) as { ok: true } | { error: string; sent: boolean; code?: string },
         clock,
       }) : null;
       unsubscribe = [

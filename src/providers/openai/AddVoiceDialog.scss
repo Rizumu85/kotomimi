@@ -118,14 +118,66 @@
   }
 }
 
-.kt-addvoice__length {
-  flex-shrink: 0;
-  font-size: vars.$font-caption;
-  font-variant-numeric: tabular-nums;
-  color: vars.$text-muted;
+// The user's own voices under the voice rows: each by its name, with what can be done with it.
+// What has been made in the dialog, a language each: the one being looked at marked, each to be gone back to or
+// taken away, one that cannot be kept as it is in the colour of a thing to do.
+.kt-addvoice__takes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
 }
 
-// The user's own voices under the voice rows: each by its name, with what can be done with it.
+.kt-addvoice__take {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  font-size: vars.$font-caption;
+  color: vars.$text-secondary;
+  background: vars.$bg-control;
+  border: 1px solid transparent;
+  border-radius: 999px;
+
+  &.is-current {
+    color: vars.$text-primary;
+    border-color: tk.$color-primary;
+  }
+
+  &.is-amiss {
+    border-color: tk.$color-warning;
+  }
+
+  > button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+    padding: 0 4px 0 10px;
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+
+    > span {
+      color: vars.$text-muted;
+      font-variant-numeric: tabular-nums;
+    }
+
+    &:last-child {
+      padding: 0 8px 0 4px;
+      color: vars.$text-muted;
+
+      &:hover:not(:disabled) { color: vars.$text-primary; }
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+}
+
 // Whose recording it is, where it is one more of a voice there is: where a new voice's name is typed.
 .kt-addvoice__whose {
   flex: 1;

@@ -120,6 +120,7 @@ export const INVOKE_CHANNELS = [
   'voice-library:add',
   'voice-library:remove',
   'voice-library:rename',
+  'voice-library:recording',
   'voice-library:remove-take',
   'voice-library:export',
   // Fork: this computer's memory for native model recommendations

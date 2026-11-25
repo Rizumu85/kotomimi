@@ -221,7 +221,10 @@ export function voiceStageOf(choice: VoiceChoice, languages: readonly string[], 
     // Another Kotomimi says so of every model it lends; one of the catalog's is a Kotomimi's before anything is listed.
     const listed = lent.find((one) => one.from === undefined && one.id === model);
     const kotomimi = listed ? listed.host === KOTOMIMI_HOST : source.by === 'catalog';
-    return { via: 'speech', baseUrl: '', server: true, model, key: 'serverKey', voices, ...limits, ...(kotomimi ? { streams: true as const, tellsLanguage: true as const } : {}) };
+    // Its cloning model speaks in voices of this computer's user: it is handed their recordings (`ownVoices`).
+    // Only a Kotomimi's: nothing else is handed a recording of the user's voice, whatever it calls its model.
+    const own = kotomimi && source.by === 'catalog' && source.model.clones === true;
+    return { via: 'speech', baseUrl: '', server: true, model, key: 'serverKey', voices, ...limits, ...(kotomimi ? { streams: true as const, tellsLanguage: true as const } : {}), ...(own ? { ownVoices: true as const, patient: true as const } : {}) };
   }
   if (source.by === 'edge') return { via: 'edge', baseUrl: '', model: 'edge', voices, ...limits };
   const baseUrl = choice.apiBaseUrl.trim();

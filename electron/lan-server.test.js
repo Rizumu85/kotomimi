@@ -33,6 +33,20 @@ async function start(key = '') {
   return { server, seen, base: `http://127.0.0.1:${server.port}`, ws: `ws://127.0.0.1:${server.port}` };
 }
 
+/** The same, on a computer that takes the recordings devices hand over. */
+async function startWithVoices(key = '') {
+  const taken = [];
+  const server = await startLanServer({ port: 0, key, host: '127.0.0.1', name: '里兹 PC' }, {
+    request: () => {}, socketOpen: () => {}, socketMessage: () => {}, socketClose: () => {},
+    voiceReference: (body) => {
+      taken.push(body);
+      return typeof body?.wav === 'string' ? { status: 200, body: { id: 'a'.repeat(64) } } : { status: 400, body: { error: { message: 'no recording', type: 'invalid_request_error', code: 'voice_ref_unreadable' } } };
+    },
+  });
+  running.push(server);
+  return { taken, base: `http://127.0.0.1:${server.port}` };
+}
+
 const until = async (check) => {
   for (let i = 0; i < 200; i += 1) {
     if (check()) return;
@@ -508,5 +522,51 @@ describe('the shared models\' door: who is turned away', () => {
     await new Promise((resolve) => setTimeout(resolve, 60));
     expect(spoken.socket.readyState).toBe(1);
     expect(server.count()).toBe(1);
+  });
+});
+
+describe('a recording handed over for the cloning voice model (fork)', () => {
+  it('is taken by this process and answered at once with its name, at a size a sentence may not have', async () => {
+    const { taken, base } = await startWithVoices();
+    // Twenty seconds of a voice as base64: over the megabyte a chat request may be.
+    const wav = 'A'.repeat(1_400_000);
+    const answer = await fetch(`${base}/v1/audio/voices`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ wav, text: '你好。', language: 'zh' }) });
+    expect(answer.status).toBe(200);
+    expect(await answer.json()).toEqual({ id: 'a'.repeat(64) });
+    expect(taken).toEqual([{ wav, text: '你好。', language: 'zh' }]);
+    // What the keeper refuses is answered as it says; anything far too large is not read.
+    expect((await fetch(`${base}/v1/audio/voices`, { method: 'POST', body: '{}' })).status).toBe(400);
+    expect((await fetch(`${base}/v1/audio/voices`, { method: 'POST', body: 'x'.repeat(4 * 1024 * 1024 + 10) })).status).toBe(413);
+    // A sentence is still held to its own size.
+    expect((await fetch(`${base}/v1/chat/completions`, { method: 'POST', body: 'x'.repeat(1024 * 1024 + 10) })).status).toBe(413);
+  });
+
+  it('takes only a couple at once: each is megabytes held until it is whole', async () => {
+    const { base } = await startWithVoices();
+    const port = Number(new URL(base).port);
+    // Two that have begun and do not end.
+    const open = () => new Promise((resolve) => {
+      const request = http.request({ host: '127.0.0.1', port, method: 'POST', path: '/v1/audio/voices', headers: { 'Content-Type': 'application/json', 'Transfer-Encoding': 'chunked' } });
+      request.on('error', () => {});
+      request.write('{"wav":"AAAA', () => resolve(request));
+    });
+    const held = [await open(), await open()];
+    await new Promise((r) => setTimeout(r, 50));
+    expect((await fetch(`${base}/v1/audio/voices`, { method: 'POST', body: JSON.stringify({ wav: 'AAAA' }) })).status).toBe(503);
+    // One given up: its place is free.
+    held[0].destroy();
+    await until(async () => true);
+    await new Promise((r) => setTimeout(r, 100));
+    expect((await fetch(`${base}/v1/audio/voices`, { method: 'POST', body: JSON.stringify({ wav: 'AAAA' }) })).status).toBe(200);
+    held[1].destroy();
+  });
+
+  it('asks for the access key like anything else, and is not served by a computer that takes none', async () => {
+    const keyed = await startWithVoices('abc123');
+    expect((await fetch(`${keyed.base}/v1/audio/voices`, { method: 'POST', body: JSON.stringify({ wav: 'AAAA' }) })).status).toBe(401);
+    expect((await fetch(`${keyed.base}/v1/audio/voices`, { method: 'POST', headers: { Authorization: 'Bearer abc123' }, body: JSON.stringify({ wav: 'AAAA' }) })).status).toBe(200);
+    expect(keyed.taken).toHaveLength(1);
+    const plain = await start();
+    expect((await fetch(`${plain.base}/v1/audio/voices`, { method: 'POST', body: JSON.stringify({ wav: 'AAAA' }) })).status).toBe(404);
   });
 });

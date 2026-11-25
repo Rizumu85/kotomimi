@@ -100,6 +100,40 @@ describe('a sentence spoken', () => {
       expect(atServer(API, 'http://192.168.1.20:8790/v1')).toBe(API);
     });
 
+    it('with voices of the user\'s own: names the recording with every sentence, and hands it over once where the device does not hold it', async () => {
+      const OWN: VoiceStage = { ...LENT, model: 'qwen3-tts-1.7b-base-q8', voices: { ja: 'aaa111' }, ownVoices: true, patient: true };
+      const held = new Set<string>();
+      const fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const body = JSON.parse(String(init?.body ?? '{}')) as Record<string, unknown>;
+        if (String(input).endsWith('/audio/voices')) { held.add('sha-ja'); return new Response(JSON.stringify({ id: 'sha-ja' }), { status: 200 }); }
+        return held.has(String(body.voice_ref)) ? raw([bytesOf([1, 2, 3])]) : new Response(JSON.stringify({ error: { code: 'voice_ref_unknown' } }), { status: 409 });
+      });
+      const recording = vi.fn(async (_voice: string, _language: string, bytes: boolean) => ({ id: 'sha-ja', text: '今日はいい天気ですね。', language: 'ja', ...(bytes ? { wav: 'UklGRg==' } : {}) }));
+      const d = deps({ fetch: fetch as unknown as typeof globalThis.fetch, recording });
+      const stage = atServer(OWN, 'http://192.168.1.20:8790/v1');
+      await speakText(stage, { text: 'こんにちは', language: 'ja' }, 'door-key', d, never, () => undefined);
+      // Asked, refused, handed over, asked again: the sentence names the recording, never the voice's own id.
+      expect(fetch.mock.calls.map((call) => String(call[0]).replace('http://192.168.1.20:8790/v1', ''))).toEqual(['/audio/speech', '/audio/voices', '/audio/speech']);
+      expect(JSON.parse(fetch.mock.calls[0][1]!.body as string)).toEqual({ model: OWN.model, input: 'こんにちは', voice_ref: 'sha-ja', response_format: 'pcm', language: 'ja' });
+      expect(JSON.parse(fetch.mock.calls[1][1]!.body as string)).toEqual({ wav: 'UklGRg==', text: '今日はいい天気ですね。', language: 'ja' });
+      expect((fetch.mock.calls[1][1]!.headers as Record<string, string>).Authorization).toBe('Bearer door-key');
+      expect(recording.mock.calls.map((call) => call[2])).toEqual([false, true]);
+      // The next sentence finds it held: one request, and the recording itself is not read again.
+      fetch.mockClear();
+      recording.mockClear();
+      await speakText(stage, { text: 'ありがとう', language: 'ja' }, 'door-key', d, never, () => undefined);
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(recording.mock.calls.map((call) => call[2])).toEqual([false]);
+      // Refused for another reason, the recording is not handed over: only "I do not hold it" asks for it.
+      const other = vi.fn(async () => new Response(JSON.stringify({ error: { code: 'voice_busy' } }), { status: 409 }));
+      await expect(speakText(stage, { text: 'こんにちは', language: 'ja' }, 'door-key', deps({ fetch: other as unknown as typeof globalThis.fetch, recording }), never, () => undefined)).rejects.toThrow(/HTTP 409/);
+      expect(other).toHaveBeenCalledTimes(1);
+      // A language with no voice of the user's chosen is not asked for at all.
+      fetch.mockClear();
+      await expect(speakText(atServer({ ...OWN, voices: {} }, 'http://192.168.1.20:8790/v1'), { text: 'Hello', language: 'en' }, 'door-key', d, never, () => undefined)).rejects.toThrow(/No voice of your own/);
+      expect(fetch).not.toHaveBeenCalled();
+    });
+
     it('hands the sound on in whole samples, whatever the pieces\' sizes', async () => {
       const samples = Array.from({ length: 9000 }, (_one, at) => (at % 200) - 100);
       const bytes = bytesOf(samples);

@@ -36,6 +36,19 @@ describe('a sharing Kotomimi\u2019s voice', () => {
     expect(x.said).toEqual([{ id: 'r1', said: { model: QWEN, text: 'こんにちは。', voice: 'ono_anna', language: 'ja-JP' } }]);
   });
 
+  it('speaks from a recording the device handed over, named by what it is, and says so of one it does not hold', async () => {
+    const name = 'c'.repeat(64);
+    const x = voice();
+    expect(await x.v.speak('r1', { model: QWEN, input: 'こんにちは。', language: 'ja', voice_ref: name })).toBeNull();
+    expect(x.said[0].said).toEqual({ model: QWEN, text: 'こんにちは。', language: 'ja', reference: name });
+    // A name that is no name is none.
+    expect(await x.v.speak('r2', { model: QWEN, input: 'こんにちは。', voice_ref: '../../secret' })).toBeNull();
+    expect(x.said[1].said).toEqual({ model: QWEN, text: 'こんにちは。' });
+    // Not held (never sent, or let go since): the device is told to hand it over and ask again.
+    const gone = voice({ speak: async () => ({ error: 'The recording to speak from is not here.', sent: false, code: 'voice_ref_unknown' }) });
+    expect(await gone.v.speak('r3', { model: QWEN, input: 'こんにちは。', voice_ref: name })).toMatchObject({ status: 409, body: { error: { code: 'voice_ref_unknown' } } });
+  });
+
   it('leaves out a voice or a language that was not given, or is none', async () => {
     const x = voice();
     await x.v.speak('r1', { model: QWEN, input: 'Hello.', language: '<b>' });

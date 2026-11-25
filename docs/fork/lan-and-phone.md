@@ -7,7 +7,7 @@ A stage can run on a sharing Kotomimi, an external OpenAI-compatible server such
 - Download native models in the sharing library, turn sharing on, keep Kotomimi running. Default port 8790; below 1024 the main process falls back to it.
 - A key holds only `A-Za-z0-9._~!*+-` (`lanKeyOf`): it travels in a WebSocket subprotocol.
 - The client chooses language, model and turn detection. The host owns the installed models and the key.
-- Shared: downloaded native recognizers (Apple Speech included), translators, feedback and voice models (none cloning). Browser models are not, and Kotomimi forwards no LocalAI; an external one is used directly.
+- Shared: downloaded native recognizers (Apple Speech included), translators, feedback and voice models. Browser models are not, and Kotomimi forwards no LocalAI; an external one is used directly.
 - Listing a model does not load it.
 - A shared request is served by a native model or refused, never by online translation.
 
@@ -24,7 +24,8 @@ A stage can run on a sharing Kotomimi, an external OpenAI-compatible server such
 | `GET /v1/models` | `{id, object, owned_by: 'kotomimi'}`, the pipeline `kotomimi` first |
 | `GET /v1/models/capabilities` | `{id, capabilities, languages?, pair?}` |
 | `POST /v1/chat/completions` | a translation or feedback, whole or SSE; `model` names what ran |
-| `POST /v1/audio/speech` | `input` in a voice `model` (optional `voice`, `language`): raw 16-bit mono, `audio/pcm;rate=N`; 503 `voice_busy` if the engine is busy |
+| `POST /v1/audio/speech` | `input`, a voice `model` (`voice` or `voice_ref`): `audio/pcm;rate=N` |
+| `POST /v1/audio/voices` | a recording; speech names its `id` |
 | `WS /v1/realtime` | a transcription session |
 
 Every HTTP answer, refusals included, carries the URL-encoded name in `X-Kotomimi-Name`. Errors are `{error: {message, type, code}}`, with file paths replaced by `…` (`withoutPaths`).

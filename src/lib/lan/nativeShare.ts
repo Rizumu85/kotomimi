@@ -64,14 +64,15 @@ export function nativeShared(): SharedModel[] {
     // The feedback engine's models: chat models, lent for grammar feedback in whatever languages they are asked.
     ...NATIVE_COACHES.filter((m) => nativeDownloaded(useNativeCoachStore.getState().status, m.id)).map((m): SharedModel => ({ id: m.id, kind: 'feedback', languages: [] })),
     // The voice engine's models, each with the languages it speaks.
-    // Not a cloning model: its voices are recordings of this computer's owner, which another device has not.
-    ...NATIVE_VOICES.filter((m) => !m.clones && nativeDownloaded(useNativeVoiceStore.getState().status, m.id)).map((m): SharedModel => ({ id: m.id, kind: 'voice', languages: [...m.languages] })),
+    // A cloning model too: the device brings the recording it is to speak from (`/v1/audio/voices`), and this
+    // computer's own voices are never among what it can ask for.
+    ...NATIVE_VOICES.filter((m) => nativeDownloaded(useNativeVoiceStore.getState().status, m.id)).map((m): SharedModel => ({ id: m.id, kind: 'voice', languages: [...m.languages] })),
   ];
 }
 
 /** The native voice model a device named, where it is downloaded; null for any other name. */
 export function nativeVoiceFor(wanted: string): string | null {
-  const model = NATIVE_VOICES.find((m) => m.id === wanted && !m.clones);
+  const model = NATIVE_VOICES.find((m) => m.id === wanted);
   return model && nativeDownloaded(useNativeVoiceStore.getState().status, model.id) ? model.id : null;
 }
 

@@ -98,40 +98,41 @@ export function clipWav(pcm: Int16Array, rate = CLIP_RATE): Uint8Array {
  * cloned best (0.72), a question and a list a little worse, an excited one worst (0.66). So: statements, no
  * exclaiming, no question, sounds that differ.
  *
- * Each language has its own, written as its speakers would say it, not put into it from another, and timed by having
- * a voice model read it at an even pace (`.dev/tts/read-aloud-time.mjs`; the tables are written from
- * `.dev/tts/read-aloud.json`). Two of them:
- * - a voice's first recording: about ten seconds read at ease by someone whose language it is (the lengths above).
- *   The yardstick is the Chinese one: 9.0 s by the model, 10.6 s by the user;
- * - a recording more, in another language (`short`): about five seconds by a native, which someone reading a
- *   foreign language draws out to seven or eight. It is only ever spoken on from, and three seconds do for that; the
- *   long Japanese one took the user 13.9 s, near the most a recording may be.
+ * And they are easy: a few short sentences of a beginner's words, each with a breath after it, never one long
+ * sentence. Whoever reads one may be reading a foreign language, and a long sentence of clauses is stumbled over (the
+ * user, of an earlier Japanese one that took them 13.9 s, near the most a recording may be).
+ *
+ * Each language has its own, written as its speakers would say it, and timed by having a voice model read it at an
+ * even pace (`.dev/tts/read-aloud-time.mjs`; the tables are written from `.dev/tts/read-aloud.json`). Two of them:
+ * - a voice's first recording: four short sentences, about ten seconds read at ease (the lengths above);
+ * - a recording more, in another language (`short`): two of them, about five seconds. It is only ever spoken on
+ *   from, and three seconds do for that.
  * A language with none here is read in English: the voice is the reader's whatever the words.
  */
 const READ_ALOUD: Readonly<Record<string, string>> = {
-  zh: '今天天气真好，下午我想去图书馆借两本书，然后到附近那家很安静的小店，喝一杯热咖啡。',
-  ja: '今日はとてもいい天気ですね。午後は図書館で本を借りて、そのあと近くの静かなカフェでコーヒーを飲もうと思います。',
-  en: 'It\'s such a nice day today. This afternoon I\'m going to borrow some books from the library, then have a coffee at the quiet café nearby.',
-  ko: '오늘은 날씨가 정말 좋네요. 오후에는 도서관에서 책을 빌리고, 근처 조용한 카페에서 커피를 마시려고 해요.',
-  es: 'Hoy hace muy buen día. Esta tarde voy a la biblioteca y luego me tomo un café en la cafetería de al lado.',
-  fr: 'Il fait vraiment beau aujourd’hui. Cet après-midi, je vais à la bibliothèque, puis je prendrai un café dans le petit café d’à côté.',
-  de: 'Heute ist richtig schönes Wetter. Am Nachmittag leihe ich mir zwei Bücher in der Bibliothek aus, danach trinke ich einen Kaffee im ruhigen Café nebenan.',
-  ru: 'Сегодня очень хорошая погода. Днём я хочу взять пару книг в библиотеке, а потом выпить горячего кофе в тихом кафе неподалёку.',
-  pt: 'Hoje está um dia muito bonito. Esta tarde vou à biblioteca buscar dois livros, e depois tomo um café no café tranquilo aqui perto.',
-  it: 'Oggi è proprio una bella giornata. Questo pomeriggio vado in biblioteca a prendere due libri, e poi mi bevo un caffè nel bar qui vicino.',
+  zh: '今天天气真好。我想出去走一走。我们一起去喝杯咖啡吧。那家店离这里很近。',
+  ja: '今日はいい天気ですね。散歩に行きたいです。一緒にコーヒーを飲みましょう。お店はここから近いです。',
+  en: 'It\'s a nice day today. I want to go for a walk. Let\'s have a coffee together. The shop is very close to here.',
+  ko: '오늘은 날씨가 좋네요. 산책하고 싶어요. 같이 커피 마셔요. 가게는 여기서 가까워요.',
+  es: 'Hoy hace buen día. Quiero dar un paseo. Vamos a tomar un café juntos. La tienda está muy cerca de aquí.',
+  fr: 'Il fait beau aujourd’hui. Je veux me promener. Allons prendre un café ensemble. Le café est tout près d’ici.',
+  de: 'Heute ist schönes Wetter. Ich möchte spazieren gehen. Lass uns zusammen einen Kaffee trinken. Das Café ist ganz in der Nähe.',
+  ru: 'Сегодня хорошая погода. Я хочу погулять. Давай вместе выпьем кофе. Кафе совсем рядом.',
+  pt: 'Hoje está um dia bonito. Quero dar um passeio. Vamos tomar um café juntos. O café fica muito perto daqui.',
+  it: 'Oggi è una bella giornata. Voglio fare una passeggiata. Prendiamo un caffè insieme. Il bar è molto vicino.',
 };
 
 const READ_ALOUD_SHORT: Readonly<Record<string, string>> = {
-  zh: '今天天气真好，我想出去走走，顺便喝一杯热咖啡。',
-  ja: '今日はいい天気ですね。散歩して、コーヒーを飲みに行きましょう。',
-  en: 'It\'s such a nice day today. Let\'s go for a walk and get some coffee.',
-  ko: '오늘 날씨가 정말 좋네요. 같이 산책하고 커피 한잔해요.',
-  es: 'Hoy hace muy buen día. Vamos a dar un paseo y a tomar un café.',
-  fr: 'Il fait très beau aujourd’hui. Allons nous promener et prendre un café.',
-  de: 'Heute ist so schönes Wetter. Lass uns spazieren gehen und einen Kaffee trinken.',
-  ru: 'Сегодня такая хорошая погода. Давай прогуляемся и выпьем кофе.',
-  pt: 'Hoje está um dia tão bonito. Vamos dar um passeio e tomar um café.',
-  it: 'Oggi è una bella giornata. Facciamo una passeggiata e prendiamo un caffè.',
+  zh: '今天天气真好。我们一起去喝杯咖啡吧。',
+  ja: '今日はいい天気ですね。一緒にコーヒーを飲みましょう。',
+  en: 'It\'s a nice day today. Let\'s have a coffee together.',
+  ko: '오늘은 날씨가 좋네요. 같이 커피 마셔요.',
+  es: 'Hoy hace buen día. Vamos a tomar un café juntos.',
+  fr: 'Il fait beau aujourd’hui. Allons prendre un café ensemble.',
+  de: 'Heute ist schönes Wetter. Lass uns zusammen einen Kaffee trinken.',
+  ru: 'Сегодня хорошая погода. Давай вместе выпьем кофе.',
+  pt: 'Hoje está um dia bonito. Vamos tomar um café juntos.',
+  it: 'Oggi è una bella giornata. Prendiamo un caffè insieme.',
 };
 
 /** The sentence a reader of `language` is shown, and the language it is in: a voice's first (`long`), or one more of it in another language. */

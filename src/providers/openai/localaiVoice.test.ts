@@ -190,6 +190,17 @@ describe('a model that speaks in the user\'s own voice', () => {
     expect(clonedVoices(withVoice(MINE, 'ja', 'bbb222'), ['ja', 'yue'])).toMatchObject({ voices: ['bbb222'], missing: false });
   });
 
+  it('is the same on another Kotomimi that lends the model: the user\'s own voices, handed to it', () => {
+    const lent = [{ id: BASE, kind: 'voice' as const, host: 'kotomimi', languages: ['zh', 'ja', 'en'] }];
+    const there: VoiceChoice = { ...withVoice(MINE, '*', 'aaa111'), at: 'server', serverModel: BASE };
+    expect(voiceStageOf(there, ['ja'], lent)).toMatchObject({ server: true, model: BASE, voices: { ja: 'aaa111' }, streams: true, tellsLanguage: true, ownVoices: true, patient: true });
+    expect(clonedVoices(there, ['ja'], lent)).toMatchObject({ voices: ['aaa111'], missing: false });
+    // A server that is no Kotomimi is handed no recording, whatever it calls its model.
+    expect(voiceStageOf(there, ['ja'], [{ ...lent[0], host: 'localai' }])).not.toHaveProperty('ownVoices');
+    // A model with voices of its own is asked by their names, as before.
+    expect(voiceStageOf({ ...HERE, at: 'server', serverModel: 'qwen3-tts-1.7b-customvoice-q8' }, ['ja'], [{ ...lent[0], id: 'qwen3-tts-1.7b-customvoice-q8' }])).not.toHaveProperty('ownVoices');
+  });
+
   it('forgets a voice that was removed, wherever it was chosen', () => {
     const both = withVoice(withVoice(MINE, '*', 'aaa111'), 'ja', 'bbb222');
     expect(withoutVoice(both, 'aaa111').voices[BASE]).toEqual({ ja: 'bbb222' });

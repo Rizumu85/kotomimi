@@ -26,6 +26,7 @@ const { createCloseHandshake } = require('./close-handshake.js');
 const { createWsHeaderRules } = require('./ws-header-rules.js');
 const { startLanServer } = require('./lan-server');
 const { createVoiceLibrary, MOST_WAV_BYTES, MOST_PACK_BYTES } = require('./voice-library');
+const { createLentVoices } = require('./lent-voices');
 const { keepMaximizeHonest, pageShift } = require('./window-maximize');
 const { firewallStatus, allowThroughFirewall } = require('./lan-firewall');
 const { discoverServers } = require('./lan-discover');
@@ -1400,6 +1401,14 @@ ipcMain.handle('ws-headers-clear', (event, args) => {
 // Fork: sharing this computer's models on the local network (electron/lan-server.js). This process
 // holds the listening socket; the page, where the models run, answers everything that comes in.
 let lanServer = null;
+// Fork: the recordings devices hand over for this computer's cloning voice model to speak from (lent-voices.js):
+// kept only while sharing is on, never among this computer's own voices.
+let lentVoices = null;
+const getLentVoices = () => {
+  lentVoices ??= createLentVoices({ dir: path.join(app.getPath('temp'), 'kotomimi-lent-voices') });
+  return lentVoices;
+};
+app.on('will-quit', () => { lentVoices?.clear(); });
 const toPage = (channel, payload) => {
   if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send(channel, payload);
 };
@@ -1407,10 +1416,13 @@ const stopLanServer = async () => {
   const running = lanServer;
   lanServer = null;
   if (running) await running.close();
+  lentVoices?.clear();
 };
 
 ipcMain.handle('lan:start', async (event, args) => {
   await stopLanServer();
+  // What an earlier run left behind when it did not end by itself.
+  getLentVoices().clear();
   const port = Number(args?.port);
   try {
     lanServer = await startLanServer({ port: Number.isInteger(port) && port >= 1024 && port < 65536 ? port : 8790, key: String(args?.key ?? '') }, {
@@ -1420,6 +1432,10 @@ ipcMain.handle('lan:start', async (event, args) => {
       socketClose: (socket) => toPage('lan:socket-close', socket),
       // A device that hung up on a sentence being spoken for it: the voice engine stops making it.
       requestClosed: ({ id }) => { void nativeVoice?.stopSpeaking(`lan:${id}`); },
+      voiceReference: (body) => {
+        const kept = getLentVoices().keep({ wav: body?.wav, text: body?.text, language: body?.language });
+        return kept.ok ? { status: 200, body: { id: kept.id } } : { status: kept.code === 'server_error' ? 500 : 400, body: { error: { message: kept.error, type: 'invalid_request_error', code: kept.code } } };
+      },
     });
     console.log(`[Kotomimi] [Main] Sharing models on port ${lanServer.port}`);
     return { ok: true, port: lanServer.port, addresses: lanServer.addresses, name: lanServer.name };
@@ -1447,8 +1463,12 @@ ipcMain.handle('lan:reply-voice', async (event, args) => {
   const id = String(args?.id ?? '');
   // The device hung up while the engine was coming up: nothing is made for it, and there is no one to answer.
   if (!lanServer?.waits(id)) return { error: 'The device is not waiting any more.', sent: true };
+  // A cloning model speaks from a recording the device handed over (`/v1/audio/voices`), named by what it is. One
+  // that is not here — never sent, or let go since — is said so, and the device hands it over and asks again.
+  const reference = typeof args?.reference === 'string' ? getLentVoices().get(args.reference) : null;
+  if (VOICES[args?.model]?.speech?.clone && !reference) return { error: 'The recording to speak from is not here.', sent: false, code: 'voice_ref_unknown' };
   let out = null;
-  const result = await getNativeVoice().speak({ id: `lan:${id}`, model: args?.model, text: args?.text, voice: args?.voice, language: args?.language }, (pcm, sampleRate) => {
+  const result = await getNativeVoice().speak({ id: `lan:${id}`, model: args?.model, text: args?.text, voice: args?.voice, language: args?.language, ...(reference ? { reference } : {}) }, (pcm, sampleRate) => {
     out ??= lanServer?.stream(id, { contentType: `audio/pcm;rate=${sampleRate}` }) ?? null;
     out?.write(pcm);
   });
@@ -1690,6 +1710,21 @@ ipcMain.handle('voice-library:add', (event, args) => {
 });
 ipcMain.handle('voice-library:remove', (event, args) => getVoiceLibrary().remove(String(args?.id ?? '')));
 ipcMain.handle('voice-library:remove-take', (event, args) => getVoiceLibrary().removeTake(String(args?.id ?? ''), String(args?.language ?? '')));
+/**
+ * A recording of a voice as another device is handed it, where the voice is spoken by a Kotomimi that lends its
+ * cloning model: the one the voice speaks `language` from, named by what it is, with its bytes only where asked for
+ * (they go once; its name goes with every sentence).
+ */
+ipcMain.handle('voice-library:recording', (event, args) => {
+  const reference = referenceOf(args?.id, args?.language);
+  if (!reference) return null;
+  try {
+    const bytes = require('fs').readFileSync(reference.path);
+    return { id: require('crypto').createHash('sha256').update(bytes).digest('hex'), text: reference.text, language: reference.language, ...(args?.bytes === true ? { wav: bytes.toString('base64') } : {}) };
+  } catch {
+    return null;
+  }
+});
 ipcMain.handle('voice-library:rename', (event, args) => getVoiceLibrary().rename(String(args?.id ?? ''), args?.name));
 /** A voice saved as a file where the user says: for a friend, or another computer of their own. */
 ipcMain.handle('voice-library:export', async (event, args) => {

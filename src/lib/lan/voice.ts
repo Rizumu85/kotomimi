@@ -5,6 +5,11 @@
  * it, which the engine's models are told. `model` names a voice model this
  * computer lends; a voice that is none of the model's is its first.
  *
+ * A cloning model has no voice of its own: the device hands over a recording
+ * first (`POST /v1/audio/voices`, answered with its name) and names it in
+ * `voice_ref`. One this computer does not hold is refused with 409
+ * `voice_ref_unknown`, and the device hands it over and asks again.
+ *
  * The answer is the sound as it is made: raw 16-bit mono, at the rate its
  * type names (`audio/pcm;rate=24000`), whatever `response_format` asks for.
  * The main process sends it (`lan:reply-voice`): this module checks the
@@ -25,7 +30,7 @@ export interface LanVoiceDeps {
   /** Brings the engine up with the model; rejects when it does not come up. */
   up(model: string): Promise<void>;
   /** The sentence, sent to the request's caller as it is made. `sent` false: nothing went out, and the caller is still to be answered. */
-  speak(id: string, said: { model: string; text: string; voice?: string; language?: string }): Promise<{ ok: true } | { error: string; sent: boolean }>;
+  speak(id: string, said: { model: string; text: string; voice?: string; language?: string; reference?: string }): Promise<{ ok: true } | { error: string; sent: boolean; code?: string }>;
   /** Holds the engine up; what it returns lets it go. */
   hold(): () => void;
   clock: Clock;
@@ -63,6 +68,7 @@ export class LanVoice {
     if (this.deps.busy(model)) return refusal(503, 'voice_busy', 'The voice engine of this computer is in use with another model.');
     const voice = typeof request.voice === 'string' ? request.voice.trim() : '';
     const language = typeof request.language === 'string' && /^[a-z]{2,3}([-_][A-Za-z0-9]{2,8})*$/i.test(request.language) ? request.language : '';
+    const reference = typeof request.voice_ref === 'string' && /^[a-f0-9]{64}$/.test(request.voice_ref) ? request.voice_ref : '';
 
     this.release ??= this.deps.hold();
     this.held = model;
@@ -71,9 +77,10 @@ export class LanVoice {
     this.busy += 1;
     try {
       await this.deps.up(model);
-      const spoken = await this.deps.speak(id, { model, text, ...(voice ? { voice } : {}), ...(language ? { language } : {}) });
+      const spoken = await this.deps.speak(id, { model, text, ...(voice ? { voice } : {}), ...(language ? { language } : {}), ...(reference ? { reference } : {}) });
       // Some of it went out: the caller has what was made, and reads the rest as cut short.
       if ('ok' in spoken || spoken.sent) return null;
+      if (spoken.code === 'voice_ref_unknown') return refusal(409, 'voice_ref_unknown', 'This Kotomimi does not hold the recording to speak from. Hand it over and ask again.');
       return refusal(500, 'server_error', `The sentence could not be spoken: ${spoken.error}`);
     } catch (cause) {
       return refusal(500, 'server_error', `The voice engine could not start: ${cause instanceof Error ? cause.message : String(cause)}`);

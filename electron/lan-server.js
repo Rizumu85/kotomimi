@@ -10,6 +10,7 @@
 //   GET  /v1/models, /v1/models/capabilities
 //   POST /v1/chat/completions
 //   POST /v1/audio/speech
+//   POST /v1/audio/voices   a recording a device hands over, for this computer's cloning model to speak from
 //   WS   /v1/realtime
 //
 // A session left running is not left holding a model. A device that forgot
@@ -31,6 +32,11 @@ const { WebSocketServer } = require('ws');
 
 /** A request's JSON body may be this long: a chat request carries a sentence, not a file. */
 const MAX_BODY_BYTES = 1024 * 1024;
+/** But for a recording handed over (`/v1/audio/voices`): twenty seconds of a voice as base64, with room to spare. */
+const MAX_VOICE_BODY_BYTES = 4 * 1024 * 1024;
+const VOICES_PATH = '/v1/audio/voices';
+/** Recordings being handed over at once: each is megabytes held in memory until it is whole. */
+const MAX_VOICE_UPLOADS = 2;
 /** One socket message: a chunk of audio as base64, a few kilobytes; this is far above it. */
 const MAX_MESSAGE_BYTES = 4 * 1024 * 1024;
 /** The page has this long to answer a request before the caller is told it did not. */
@@ -59,7 +65,7 @@ const KEY_WINDOW_MS = 60_000;
 let nextId = 0;
 
 const REALTIME_PATH = '/v1/realtime';
-const ROUTES = new Set(['GET /v1/models', 'GET /v1/models/capabilities', 'POST /v1/chat/completions', 'POST /v1/audio/speech']);
+const ROUTES = new Set(['GET /v1/models', 'GET /v1/models/capabilities', 'POST /v1/chat/completions', 'POST /v1/audio/speech', `POST ${VOICES_PATH}`]);
 
 /**
  * The origins a request may name. The app's own page is a file, and its
@@ -173,6 +179,8 @@ function sameKey(given, wanted) {
  * Starts the server. `handlers` is the page's side:
  *   request({ id, method, path, body })   answered later through `reply(id, …)`, or piece by piece through `stream(id, …)`
  *   requestClosed({ id })                 the caller went away before its answer was whole (optional)
+ *   voiceReference(body)                  a recording handed over: answered at once with `{ status, body }` (optional;
+ *                                         without it the route is not served)
  *   socketOpen({ id, model, address })
  *   socketMessage({ id, data })
  *   socketClose({ id })
@@ -219,6 +227,8 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
   };
   /** Requests the page has not answered yet. */
   const waiting = new Map();
+  /** Recordings being handed over now (`MAX_VOICE_UPLOADS`). */
+  let uploads = 0;
   /** Open sockets, by the id the page knows them by. */
   const sockets = new Map();
   /** The device each socket came from, and when speech was last carried for each device. */
@@ -267,7 +277,7 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
       response.end();
       return;
     }
-    if (!ROUTES.has(`${request.method} ${path}`)) {
+    if (!ROUTES.has(`${request.method} ${path}`) || (path === VOICES_PATH && !handlers.voiceReference)) {
       refuse(response, 404, 'not_found', `Kotomimi shares no ${request.method} ${path}.`);
       return;
     }
@@ -280,13 +290,23 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
       refuse(response, 401, 'invalid_api_key', 'This Kotomimi asks for its access key.');
       return;
     }
-    const chunks = [];
+    const upload = path === VOICES_PATH;
+    if (upload && uploads >= MAX_VOICE_UPLOADS) {
+      refuse(response, 503, 'busy', 'Other recordings are being handed over. Try again in a moment.');
+      return;
+    }
+    if (upload) {
+      uploads += 1;
+      // Whole, refused or given up: its place is free again.
+      response.once('close', () => { uploads -= 1; });
+    }
+    let chunks = [];
     let size = 0;
     let tooLong = false;
     request.on('data', (chunk) => {
       size += chunk.length;
-      if (size > MAX_BODY_BYTES) tooLong = true;
-      else chunks.push(chunk);
+      // Over its size, nothing of it is held while the rest arrives.
+      if (size > (upload ? MAX_VOICE_BODY_BYTES : MAX_BODY_BYTES)) { tooLong = true; chunks = []; } else if (!tooLong) chunks.push(chunk);
     });
     request.on('end', () => {
       if (tooLong) {
@@ -302,7 +322,19 @@ function startLanServer({ port, key = '', host = '0.0.0.0', name = os.hostname()
           return;
         }
       }
-      // To the page, as everything is.
+      // A recording handed over is kept by this process, which is where the voice engine is asked: the page has no part in it.
+      if (path === VOICES_PATH) {
+        let answer;
+        try {
+          answer = handlers.voiceReference(body);
+        } catch (error) {
+          answer = { status: 500, body: { error: { message: String(error?.message ?? error).slice(0, 200), type: 'server_error', code: 'server_error' } } };
+        }
+        response.writeHead(answer.status, { 'Content-Type': 'application/json; charset=utf-8', ...corsFor(request) });
+        response.end(JSON.stringify(answer.body));
+        return;
+      }
+      // To the page, as everything else is.
       const id = `r${++nextId}`;
       const timer = setTimeout(() => {
         const pending = waiting.get(id);

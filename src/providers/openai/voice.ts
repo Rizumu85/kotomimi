@@ -40,6 +40,12 @@ export interface VoiceStage {
   tellsLanguage?: true;
   /** It speaks in the user's own voice, read from a recording before the first sentence in it: given longer to answer. */
   patient?: true;
+  /**
+   * The voices are the user's own recordings, and the place is another Kotomimi's cloning model: it is handed the
+   * recording once (`/audio/voices`) and told its name with every sentence (`voice_ref`). This computer's own
+   * engine needs none of it: the main process hands it the recording itself.
+   */
+  ownVoices?: true;
 }
 
 /** The longest text spoken in one request: a translation that ran on is not read out to its end. */
@@ -90,6 +96,12 @@ export interface VoiceDeps {
   native(request: { model: string; text: string; voice?: string; language: string }, onPcm: (pcm: Int16Array, sampleRate: number) => void, signal: AbortSignal): Promise<void>;
   /** Edge's online voice: one sentence, as the MP3 it answers with. */
   edge(request: { text: string; voice: string }, signal: AbortSignal): Promise<ArrayBuffer>;
+  /**
+   * The recording one of the user's own voices speaks a language from, as another device is handed it: its name
+   * (what it is: a SHA-256), its words and their language, and — only where `bytes` — the recording itself, base64.
+   * Null: there is no such voice. Absent: this build has no voices of the user's own.
+   */
+  recording?(voice: string, language: string, bytes: boolean): Promise<{ id: string; text: string; language: string; wav?: string } | null>;
 }
 
 export interface Spoken {
@@ -132,6 +144,45 @@ function toContractRate(rate: number): (pcm: Int16Array) => Int16Array {
   };
 }
 
+/** Where a recording is handed to a Kotomimi that lends its cloning model, under a base URL. */
+export const voicesUrl = (baseUrl: string): string => `${baseUrl.trim().replace(/\/+$/, '')}/audio/voices`;
+
+/**
+ * The speech request, answered. Where the voices are the user's own (`ownVoices`), the sentence names the recording
+ * it is to be spoken from; a device that does not hold it says so (409 `voice_ref_unknown`), is handed it, and is
+ * asked once more.
+ */
+async function ask(stage: VoiceStage, key: string | undefined, deps: Pick<VoiceDeps, 'fetch' | 'recording'>, said: { text: string; language: string; voice?: string }, signal: AbortSignal): Promise<Response> {
+  const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${key || NO_KEY}` };
+  const recording = stage.ownVoices && said.voice ? await deps.recording?.(said.voice, said.language, false) : null;
+  if (stage.ownVoices && !recording) throw new Error(`No voice of your own is chosen for ${said.language}.`);
+  const speech = () => deps.fetch(speechUrl(stage.baseUrl), {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      model: stage.model, input: said.text,
+      ...(recording ? { voice_ref: recording.id } : said.voice ? { voice: said.voice } : {}),
+      response_format: stage.streams ? 'pcm' : 'wav', ...(stage.tellsLanguage ? { language: said.language } : {}),
+    }),
+    signal,
+  });
+  const first = await speech();
+  if (!recording || first.status !== 409) return first;
+  // Refused for any other reason, the recording stays here: only "I do not hold it" asks for it.
+  const refusal = (await first.clone().json().catch(() => null)) as { error?: { code?: unknown } } | null;
+  if (refusal?.error?.code !== 'voice_ref_unknown') return first;
+  await first.body?.cancel();
+  const whole = await deps.recording?.(said.voice!, said.language, true);
+  if (!whole?.wav) throw new Error('The recording of the voice could not be read.');
+  const handed = await deps.fetch(voicesUrl(stage.baseUrl), { method: 'POST', headers, body: JSON.stringify({ wav: whole.wav, text: whole.text, language: whole.language }), signal });
+  if (!handed.ok) {
+    const detail = (await handed.text().catch(() => '')).replace(/\s+/g, ' ').slice(0, 200);
+    throw new Error(`The recording could not be handed over: HTTP ${handed.status}${detail ? `: ${detail}` : ''}`);
+  }
+  await handed.body?.cancel();
+  return speech();
+}
+
 /** One short word in a language, for a warm-up: English where there is none of the language's own. */
 const WARM_WORDS: Readonly<Record<string, string>> = { en: 'Hello.', ja: 'こんにちは。', zh: '你好。' };
 
@@ -141,23 +192,25 @@ const WARM_WORDS: Readonly<Record<string, string>> = { en: 'Hello.', ja: 'こん
  * as the device answers, so nothing is heard; the first real sentence then waits for no load. Never rejects: a device
  * that cannot be reached is found out by the first sentence.
  */
-export async function warmVoice(stage: VoiceStage, key: string | undefined, deps: Pick<VoiceDeps, 'fetch' | 'clock'>, signal: AbortSignal): Promise<void> {
+export async function warmVoice(stage: VoiceStage, key: string | undefined, deps: Pick<VoiceDeps, 'fetch' | 'clock' | 'recording'>, signal: AbortSignal): Promise<void> {
   if (!stage.server || !stage.streams || signal.aborted) return;
-  const language = Object.keys(stage.voices).find((code) => code !== '*') ?? stage.languages?.[0] ?? 'en';
-  const voice = voiceFor(stage, language);
+  // Voices of the user's own are read by the device one way for their own language and another for the rest: each
+  // language the run reads is asked for once, so that its first sentence waits for no recording either.
+  const named = Object.keys(stage.voices).filter((code) => code !== '*');
+  const asked = stage.ownVoices && named.length ? named.slice(0, 4) : [named[0] ?? stage.languages?.[0] ?? 'en'];
   const control = new AbortController();
   const abort = () => control.abort();
   signal.addEventListener('abort', abort, { once: true });
-  const cancel = deps.clock.setTimeout(abort, VOICE_WARM_MS);
+  const cancel = deps.clock.setTimeout(abort, stage.patient ? VOICE_PATIENT_MS : VOICE_WARM_MS);
   try {
-    const response = await deps.fetch(speechUrl(stage.baseUrl), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key || NO_KEY}` },
-      body: JSON.stringify({ model: stage.model, input: WARM_WORDS[baseOf(language)] ?? WARM_WORDS.en, ...(voice ? { voice } : {}), response_format: 'pcm', language }),
-      signal: control.signal,
-    });
-    // It answered: the model is up. The word itself is not wanted.
-    await response.body?.cancel();
+    for (const language of asked) {
+      const voice = voiceFor(stage, language);
+      const response = await ask(stage, key, deps, { text: WARM_WORDS[baseOf(language)] ?? WARM_WORDS.en, language, ...(voice ? { voice } : {}) }, control.signal);
+      // It answered: the model is up, and has read the recording. The word itself is not wanted — but a voice of
+      // the user's own is read only as the word is made, so that one is let finish.
+      if (stage.ownVoices) await response.arrayBuffer().catch(() => undefined);
+      else await response.body?.cancel();
+    }
   } catch {
     // Nothing to say of it here.
   } finally {
@@ -236,12 +289,7 @@ export async function speakText(stage: VoiceStage, said: VoiceRequest, key: stri
         take(convert(pcm));
       }, control.signal);
     } else {
-      const response = await deps.fetch(speechUrl(stage.baseUrl), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key || NO_KEY}` },
-        body: JSON.stringify({ model: stage.model, input: text, ...(voice ? { voice } : {}), response_format: stage.streams ? 'pcm' : 'wav', ...(stage.tellsLanguage ? { language: said.language } : {}) }),
-        signal: control.signal,
-      });
+      const response = await ask(stage, key, deps, { text, language: said.language, ...(voice ? { voice } : {}) }, control.signal);
       if (!response.ok) {
         const detail = (await response.text().catch(() => '')).replace(/\s+/g, ' ').slice(0, 200);
         throw new Error(`HTTP ${response.status}${detail ? `: ${detail}` : ''}`);

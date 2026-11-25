@@ -1312,7 +1312,8 @@ export async function checkLocalAIWithNative(k: LocalAICredentials, s: LocalAISe
     return { ok: false, reason: 'Enter the API key of the voice.', ...(servers.models?.length ? { models: servers.models } : {}) };
   }
   // Fork: a cloning voice model reads in the user's own voices: one chosen for each language it reads, and still there.
-  const cloned = usesVoice && speaksNatively(s.speak) ? clonedVoices(s.speak, theirsInto(s, ctx.pair)) : null;
+  // Wherever the cloning model runs: on another Kotomimi it is handed the same recordings.
+  const cloned = usesVoice && (speaksNatively(s.speak) || speaksAtServer(s.speak)) ? clonedVoices(s.speak, theirsInto(s, ctx.pair), models) : null;
   const unrecorded = cloned ? (native.voiceUnrecorded ?? voiceUnrecorded)(cloned) : null;
   const refused = (hears ? await hears : null) ?? (translates ? await translates : null) ?? (coaches ? await coaches : null) ?? (speaks ? await speaks : null) ?? unrecorded;
   return refused ? { ...refused, ...(servers.models?.length ? { models: servers.models } : {}) } : servers;
