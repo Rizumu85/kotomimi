@@ -4,6 +4,7 @@
  * store stays empty and nothing shows it.
  */
 import { create } from 'zustand';
+import { reportError, describeCause } from '../diagnostics/report';
 
 export interface StorageDrive {
   /** `D:` on Windows, a volume's name on a Mac; blank for the computer's own disk. */
@@ -106,15 +107,17 @@ export const useModelStorageStore = create<ModelStorageState>()((set, get) => ({
     api.receive('model-storage:progress', onProgress as (payload: never) => void);
     set({ progress: { copied: 0, total: plan.needBytes, startedAt: Date.now() }, failed: null });
     try {
-      const answer = (await api.invoke('model-storage:move', { target: plan.target })) as { status?: StorageStatus; error?: MoveError };
+      const answer = (await api.invoke('model-storage:move', { target: plan.target })) as { status?: StorageStatus; error?: MoveError; message?: string };
       if (answer?.status) {
         const from = status?.drive;
         // Room is freed where they were only when they left that drive.
         set({ status: answer.status, plan: null, freed: from && !plan.sameDrive ? { bytes: plan.needBytes, drive: from } : null, askedAt: Date.now() });
       } else {
+        if (answer?.error !== 'stopped') reportError('ModelStorage', `The models did not move: ${answer?.message ?? answer?.error ?? 'no answer'}`);
         set({ failed: answer?.error ?? 'move_failed', plan: answer?.error === 'stopped' ? null : plan });
       }
-    } catch {
+    } catch (error) {
+      reportError('ModelStorage', `The models did not move: ${describeCause(error)}`, { cause: error });
       set({ failed: 'move_failed' });
     } finally {
       api.removeListener('model-storage:progress', onProgress as (payload: never) => void);

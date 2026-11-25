@@ -1769,18 +1769,27 @@ app.on('will-quit', () => { void nativeVoice?.stop(); });
 // model is downloading.
 let storageMove = null;
 const storageStatus = () => ({ ...getModelStorage().status(), fixed: nativeDirFixed(), moving: Boolean(storageMove) });
-const remakeEngines = () => {
+// The recognizer is several engines joined, and answers its status later: every status is awaited.
+const remakeEngines = async () => {
   nativeEngine = null;
   nativeTranslator = null;
   nativeCoach = null;
   nativeVoice = null;
-  toPage('native-engine:status', getNativeEngine().status());
-  toPage('native-translator:status', getNativeTranslator().status());
-  toPage('native-coach:status', getNativeCoach().status());
-  toPage('native-voice:status', getNativeVoice().status());
+  toPage('native-engine:status', await getNativeEngine().status());
+  toPage('native-translator:status', await getNativeTranslator().status());
+  toPage('native-coach:status', await getNativeCoach().status());
+  toPage('native-voice:status', await getNativeVoice().status());
 };
-const downloading = () => [nativeEngine, nativeTranslator, nativeCoach, nativeVoice].some((engine) => engine
-  && (engine.status().engine === 'downloading' || Object.values(engine.status().models).some((m) => m.state === 'downloading' || m.state === 'verifying')));
+const downloading = async () => {
+  for (const engine of [nativeEngine, nativeTranslator, nativeCoach, nativeVoice]) {
+    if (!engine) continue;
+    const status = await engine.status();
+    if (status.engine === 'downloading' || Object.values(status.models ?? {}).some((m) => m.state === 'downloading' || m.state === 'verifying')) return true;
+  }
+  return false;
+};
+/** What the page can say of a failed move; a disk's own code (EBUSY, EPERM, …) stays in the message. */
+const MOVE_ERRORS = new Set(['stopped', 'copy_failed', 'same', 'inside', 'not_writable', 'no_space']);
 ipcMain.handle('model-storage:status', () => storageStatus());
 ipcMain.handle('model-storage:choose', async () => {
   if (nativeDirFixed()) return null;
@@ -1791,26 +1800,31 @@ ipcMain.handle('model-storage:choose', async () => {
 });
 ipcMain.handle('model-storage:move', async (event, args) => {
   if (nativeDirFixed() || storageMove) return { error: 'busy' };
-  if (downloading()) return { error: 'downloading' };
   const controller = new AbortController();
   storageMove = controller;
+  // Asked before any engine stops: a download running keeps everything as it was.
+  if (await downloading().catch(() => false)) {
+    storageMove = null;
+    return { error: 'downloading' };
+  }
   try {
     await Promise.allSettled([nativeEngine?.stop(), nativeTranslator?.stop(), nativeCoach?.stop(), nativeVoice?.stop()]);
     await getModelStorage().move(String(args?.target ?? ''), { signal: controller.signal, onProgress: (progress) => toPage('model-storage:progress', progress) });
-    return { status: storageStatus() };
   } catch (error) {
-    return { error: error?.code ?? 'move_failed', message: String(error?.message ?? error).slice(0, 300) };
+    return { error: MOVE_ERRORS.has(error?.code) ? error.code : 'move_failed', message: `${error?.code ? `${error.code}: ` : ''}${String(error?.message ?? error)}`.slice(0, 300) };
   } finally {
     storageMove = null;
-    remakeEngines();
+    // The page is told the engines' states afresh; a failure there is no failure of the move.
+    await remakeEngines().catch(() => undefined);
   }
+  return { status: storageStatus() };
 });
 ipcMain.handle('model-storage:cancel', () => { storageMove?.abort(); return true; });
 ipcMain.handle('model-storage:reset', async () => {
   if (nativeDirFixed() || storageMove) return storageStatus();
   await Promise.allSettled([nativeEngine?.stop(), nativeTranslator?.stop(), nativeCoach?.stop(), nativeVoice?.stop()]);
   getModelStorage().reset();
-  remakeEngines();
+  await remakeEngines().catch(() => undefined);
   return storageStatus();
 });
 ipcMain.handle('model-storage:open', async () => {
