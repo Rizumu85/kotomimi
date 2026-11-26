@@ -180,6 +180,7 @@ export default defineConfig(({ command, mode }) => {
             'lan-server': 'electron/lan-server.js',
             'voice-library': 'electron/voice-library.js',
             'lent-voices': 'electron/lent-voices.js',
+            'gpu-memory': 'electron/gpu-memory.js',
             'lan-firewall': 'electron/lan-firewall.js',
             'lan-discover': 'electron/lan-discover.js',
             // Fork: the native recognition engine the app downloads and runs

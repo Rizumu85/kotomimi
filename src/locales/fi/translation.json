@@ -806,7 +806,8 @@
     "speakerClient": "Minä",
     "participantClient": "Toinen",
     "copyLogs": "Kopioi",
-    "logsCopied": "Kopioitu!"
+    "logsCopied": "Kopioitu!",
+    "exportLogs": "Vie"
   },
   "mainPanel": {
     "subtitleTakeover": "Käännökset näkyvät tekstityspeitossa",
@@ -2203,6 +2204,18 @@
     "echoCancellationGate": "Äänenvoimakkuuden mukaan",
     "echoCancellationGateTooltip": "Äänenvoimakkuuden mukaan — kaiuttimia käytettäessä kaiuttimista mikrofoniin vuotava ääni on paljon hiljaisempi kuin puheesi, joten se suodatetaan pois äänenvoimakkuuden perusteella ilman, että äänesi muuttuu.",
     "echoCancellationOff": "Pois käytöstä",
-    "echoCancellationOffTooltip": "Pois käytöstä – mikrofoni sellaisenaan tunnistukseen. Käytä kuulokkeilla: mikrofoniin ei vuoda ääntä."
+    "echoCancellationOffTooltip": "Pois käytöstä – mikrofoni sellaisenaan tunnistukseen. Käytä kuulokkeilla: mikrofoniin ei vuoda ääntä.",
+    "engine": {
+      "label": "Moottori",
+      "auto": "Valitse moottori automaattisesti",
+      "cuda": "CUDA-moottori",
+      "vulkan": "Vulkan-moottori",
+      "tooltip": "Kokeellinen asetus puheentunnistuksen ja ääneenluvun moottorin valintaan. Automaattinen valinta käyttää CUDAa tällä NVIDIA-näytönohjaimella. Vaihto käynnistää moottorit uudelleen. Ensimmäisellä vaihtokerralla toinen moottori ladataan.",
+      "fastLabel": "Ääneenluvun nopeutus",
+      "fastAuto": "Nopeuta, jos näyttömuistia riittää",
+      "fastOn": "Nopeuta aina",
+      "fastOff": "Ei nopeutusta",
+      "fastTooltip": "Kokeellinen nopeutus tekee ääneenluvusta nopeampaa, mutta vie noin 1 GB enemmän näyttömuistia. Automaattinen asetus ottaa nopeutuksen käyttöön vain, jos näyttömuistia riittää."
+    }
   }
 }

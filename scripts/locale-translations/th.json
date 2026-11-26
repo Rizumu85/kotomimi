@@ -223,6 +223,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "เมื่อเปิดส่งผ่านเสียงต้นฉบับ จะใช้ได้เฉพาะตามความดังเท่านั้น วิธีอื่นจะมองเสียงของคุณเองเป็นเสียงสะท้อนแล้วตัดออก"
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "เลือกเอนจินอัตโนมัติ"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "เอนจิน CUDA"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "เร่งเมื่อหน่วยความจำการ์ดจอพอ"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "เร่งการอ่านออกเสียง"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "ไม่เร่ง"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "เร่งเสมอ"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "ฟีเจอร์ทดลองที่ช่วยให้อ่านออกเสียงได้เร็วขึ้น แต่ใช้หน่วยความจำการ์ดจอเพิ่มประมาณ 1 GB โหมดอัตโนมัติจะเปิดใช้เมื่อมีหน่วยความจำการ์ดจอเพียงพอเท่านั้น"
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "เอนจิน"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "ฟีเจอร์ทดลองสำหรับเลือกเอนจินที่ใช้รู้จำเสียงพูดและอ่านออกเสียง โหมดอัตโนมัติจะใช้ CUDA บนการ์ดจอ NVIDIA นี้ เมื่อสลับ เอนจินจะเริ่มทำงานใหม่ และการสลับครั้งแรกต้องดาวน์โหลดอีกเอนจิน"
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "เอนจิน Vulkan"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "ค้นหาอีกครั้ง"
@@ -1690,6 +1730,10 @@
   "fork.wizard.tryServer": {
     "en": "Connect",
     "text": "เชื่อมต่อ"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "ส่งออก"
   },
   "models.detectsGroup": {
     "en": "Detects the language",

@@ -806,7 +806,8 @@
     "speakerClient": "Ako",
     "participantClient": "Kausap",
     "copyLogs": "Kopyahin",
-    "logsCopied": "Nakopya!"
+    "logsCopied": "Nakopya!",
+    "exportLogs": "I-export"
   },
   "mainPanel": {
     "subtitleTakeover": "Ipinapakita ang mga pagsasalin sa subtitle overlay",
@@ -2203,6 +2204,18 @@
     "echoCancellationGate": "Batay sa lakas ng tunog",
     "echoCancellationGateTooltip": "Ayon sa lakas ng tunog — para sa mga speaker: ang pinapatugtog ng mga ito ay mas mahina pagbalik sa mikropono kaysa sa boses mo, kaya hinaharangan ito batay sa lakas at hindi naaapektuhan ang boses mo.",
     "echoCancellationOff": "Naka-off",
-    "echoCancellationOffTooltip": "Naka-off — ipinapadala ang mikropono nang walang pagbabago. Para sa mga headphone: walang tunog na pumapasok dito."
+    "echoCancellationOffTooltip": "Naka-off — ipinapadala ang mikropono nang walang pagbabago. Para sa mga headphone: walang tunog na pumapasok dito.",
+    "engine": {
+      "label": "Makina",
+      "auto": "Awtomatikong pumili ng makina",
+      "cuda": "Makinang CUDA",
+      "vulkan": "Makinang Vulkan",
+      "tooltip": "Eksperimental. Piliin ang makinang kikilala sa sinasabi at magbabasa nang malakas. Sa awtomatikong mode, gagamitin ang CUDA sa NVIDIA graphics card na ito. Magre-restart ang makina kapag nagpalit ka. Sa unang paglipat, ida-download ang kabilang makina.",
+      "fastLabel": "Pabilisin ang pagbasa",
+      "fastAuto": "Pabilisin kung sapat ang memory",
+      "fastOn": "Palaging pabilisin",
+      "fastOff": "Huwag pabilisin",
+      "fastTooltip": "Eksperimental. Bibilis ang pagbasa nang malakas, pero gagamit ito ng dagdag na humigit-kumulang 1 GB na video memory. Sa awtomatikong mode, gagana lang ito kung sapat ang video memory."
+    }
   }
 }

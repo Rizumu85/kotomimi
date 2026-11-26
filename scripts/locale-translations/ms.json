@@ -219,6 +219,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "Apabila Laluan Audio Asal dihidupkan, hanya kaedah Ikut kelantangan yang berfungsi; kaedah lain akan menganggap suara anda sendiri sebagai gema lalu menghapuskannya."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "Pilih enjin secara automatik"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "Enjin CUDA"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "Percepat jika memori video mencukupi"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "Percepat bacaan"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "Jangan percepat bacaan"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "Sentiasa percepat bacaan"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "Ciri percubaan: Bacaan lebih pantas tetapi menggunakan kira-kira 1 GB memori video tambahan. Mod automatik hanya mengaktifkan ciri ini jika memori video mencukupi."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "Enjin"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "Ciri percubaan: Pilih enjin untuk pengecaman pertuturan dan bacaan. Mod automatik menggunakan CUDA pada kad grafik NVIDIA ini. Enjin akan dimulakan semula apabila anda menukar pilihan. Kali pertama anda bertukar, enjin satu lagi perlu dimuat turun."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "Enjin Vulkan"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Cari semula"
@@ -1686,6 +1726,10 @@
   "fork.wizard.tryServer": {
     "en": "Connect",
     "text": "Sambung"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "Eksport"
   },
   "models.detectsGroup": {
     "en": "Detects the language",

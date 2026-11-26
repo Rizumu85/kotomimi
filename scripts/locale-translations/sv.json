@@ -227,6 +227,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "När originalljudet släpps igenom fungerar bara ljudstyrka: de andra tar din egen röst för eko och tar bort den."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "Välj motor automatiskt"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "CUDA-motor"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "Snabbare uppläsning när grafikminnet räcker"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "Snabbare uppläsning"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "Ingen acceleration"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "Alltid snabbare uppläsning"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "Experimentell funktion. Snabbare uppläsning kräver ungefär 1 GB extra grafikminne. I automatiskt läge aktiveras funktionen bara om det finns tillräckligt med ledigt grafikminne."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "Motor"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "Experimentell funktion. Välj motor för taligenkänning och uppläsning. Automatiskt läge använder CUDA på det här NVIDIA-grafikkortet. Motorerna startas om när du byter. Första gången du byter laddas den andra motorn ner."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "Vulkan-motor"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Sök igen"
@@ -1694,6 +1734,10 @@
   "fork.wizard.tryServer": {
     "en": "Connect",
     "text": "Anslut"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "Exportera"
   },
   "logsPanel.server": {
     "en": "server",

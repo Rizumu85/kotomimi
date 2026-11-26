@@ -227,6 +227,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "Khi bật Truyền âm thanh gốc, chỉ chế độ Theo âm lượng hoạt động: các chế độ khác sẽ coi giọng của bạn là tiếng vọng và loại bỏ nó."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "Tự động chọn bộ xử lý"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "Bộ xử lý CUDA"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "Tăng tốc khi đủ bộ nhớ đồ họa"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "Tăng tốc đọc"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "Không tăng tốc đọc"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "Luôn tăng tốc đọc"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "Tính năng thử nghiệm. Tăng tốc giúp đọc nhanh hơn nhưng dùng thêm khoảng 1 GB bộ nhớ đồ họa. Chế độ tự động chỉ bật tăng tốc khi đủ bộ nhớ đồ họa."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "Bộ xử lý"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "Tính năng thử nghiệm. Chọn bộ xử lý dùng để nhận dạng giọng nói và đọc thành tiếng. Chế độ tự động dùng CUDA trên card đồ họa NVIDIA này. Khi chuyển, bộ xử lý sẽ khởi động lại. Lần đầu chuyển, ứng dụng sẽ tải bộ xử lý còn lại."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "Bộ xử lý Vulkan"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Tìm lại"
@@ -1694,6 +1734,10 @@
   "fork.wizard.tryServer": {
     "en": "Connect",
     "text": "Kết nối"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "Xuất"
   },
   "models.detectsGroup": {
     "en": "Detects the language",

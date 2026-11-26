@@ -806,7 +806,8 @@
     "speakerClient": "나",
     "participantClient": "상대방",
     "copyLogs": "복사",
-    "logsCopied": "복사됨!"
+    "logsCopied": "복사됨!",
+    "exportLogs": "내보내기"
   },
   "mainPanel": {
     "subtitleTakeover": "번역이 자막 오버레이에 표시되고 있습니다",
@@ -2203,6 +2204,18 @@
     "echoCancellationGate": "음량 기준",
     "echoCancellationGateTooltip": "음량 기준 — 스피커 사용 시: 스피커 소리가 마이크에 새어 들어와도 내 목소리보다 훨씬 작으므로 음량으로 걸러 내고 내 목소리는 그대로 둡니다.",
     "echoCancellationOff": "끔",
-    "echoCancellationOffTooltip": "끔 — 마이크 소리를 그대로 인식에 보냅니다. 헤드폰 사용 시: 마이크로 들어오는 소리가 없습니다."
+    "echoCancellationOffTooltip": "끔 — 마이크 소리를 그대로 인식에 보냅니다. 헤드폰 사용 시: 마이크로 들어오는 소리가 없습니다.",
+    "engine": {
+      "label": "엔진",
+      "auto": "엔진 자동 선택",
+      "cuda": "CUDA 엔진",
+      "vulkan": "Vulkan 엔진",
+      "tooltip": "실험 기능입니다. 음성 인식과 읽어주기에 사용할 엔진을 선택합니다. 자동으로 설정하면 이 NVIDIA 그래픽 카드에서는 CUDA를 사용합니다. 엔진을 바꾸면 엔진이 다시 시작되며, 처음 바꿀 때는 다른 엔진을 다운로드합니다.",
+      "fastLabel": "읽어주기 가속",
+      "fastAuto": "그래픽 메모리가 충분할 때 가속",
+      "fastOn": "항상 가속",
+      "fastOff": "가속 안 함",
+      "fastTooltip": "실험 기능입니다. 가속을 켜면 더 빠르게 읽어 주지만 그래픽 메모리를 약 1 GB 더 사용합니다. 자동으로 설정하면 그래픽 메모리가 충분할 때만 가속이 켜집니다."
+    }
   }
 }

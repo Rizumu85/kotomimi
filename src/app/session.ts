@@ -7,6 +7,7 @@
  */
 import { createSessionRecording } from './sessionRecording';
 import { driveSessionLags, type LagModels, type LagPlanned, type LagStage } from './sessionLags';
+import { driveGpuMemoryLog } from './gpuMemoryLog';
 import { asrApiModelOf, runSideHearing, type LocalAISettings } from '../providers/openai/localai';
 import { nativePicked } from '../providers/openai/localaiNative';
 import { heardBy, hearingOf } from '../providers/openai/localaiDevice';
@@ -340,6 +341,7 @@ export function createAppSession(options: AppSessionOptions = {}): AppSession {
           ...useHeardByStore.getState().byLeg,
           translation: lagModels.translation || useTranslatedByStore.getState().byLeg.speaker || useTranslatedByStore.getState().byLeg.participant || null,
         }) }),
+        driveGpuMemoryLog({ runner, clock }),
         driveReadiness({
           runner, providers: () => presentProviders(), auth: () => bridges.auth, clock,
           watchSignIn: (fn) => { signInWatchers.add(fn); return () => { signInWatchers.delete(fn); }; },

@@ -227,6 +227,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "Lorsque la transmission directe de l’audio d’origine est activée, seul « Par volume » fonctionne : les autres méthodes prennent votre propre voix pour un écho."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "Sélection automatique"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "Moteur CUDA"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "Si la mémoire vidéo le permet"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "Accélération de la lecture"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "Jamais"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "Toujours"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "Cette option expérimentale accélère la lecture à voix haute, mais utilise environ 1 GB de mémoire vidéo en plus. En mode automatique, elle ne s’active que si la mémoire vidéo disponible est suffisante."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "Moteur"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "Réglage expérimental du moteur de reconnaissance vocale et de lecture à voix haute. En mode automatique, cette carte graphique NVIDIA utilise CUDA. Les moteurs redémarrent à chaque changement. Le premier changement nécessite de télécharger l’autre moteur."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "Moteur Vulkan"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Relancer la recherche"
@@ -1698,6 +1738,10 @@
   "logsPanel.client": {
     "en": "client",
     "text": "client"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "Exporter"
   },
   "models.detectsGroup": {
     "en": "Detects the language",

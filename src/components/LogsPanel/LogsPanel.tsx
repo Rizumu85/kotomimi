@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback, memo } from 'react';
-import { Terminal, Trash2, ArrowUp, ArrowDown, FastForward, Mic, Users, ClipboardCopy } from 'lucide-react';
+import { Terminal, Trash2, ArrowUp, ArrowDown, FastForward, Mic, Users, ClipboardCopy, Download } from 'lucide-react';
+import { downloadFile, formatTimestampForFilename } from '../../utils/conversationExport';
 import PanelBar from '../Settings/shared/PanelBar';
 import type { Tab } from '../Settings/shared/TabBar';
 import './LogsPanel.scss';
@@ -230,7 +231,7 @@ const LogsPanel: React.FC<LogsPanelProps> = ({ toggleLogs }) => {
   // panel — was silently missing from the text a user pastes into a bug report,
   // which is the one moment those entries exist for. Safe to export: both
   // sinks (addLog and sanitizeEvent) redact before storing.
-  const handleCopyLogs = useCallback(() => {
+  const logsText = useCallback(() => {
     const lines: string[] = [];
     for (const log of filteredLogs) {
       if (log.events && log.events.length > 0) {
@@ -247,12 +248,18 @@ const LogsPanel: React.FC<LogsPanelProps> = ({ toggleLogs }) => {
         }));
       }
     }
-    const text = lines.join('\n');
-    navigator.clipboard.writeText(text).then(() => {
+    return lines.join('\n');
+  }, [filteredLogs]);
+  const handleCopyLogs = useCallback(() => {
+    navigator.clipboard.writeText(logsText()).then(() => {
       setCopyLabel(t('logsPanel.logsCopied'));
       setTimeout(() => setCopyLabel(null), 1500);
     });
-  }, [filteredLogs, t]);
+  }, [logsText, t]);
+  // Fork: the same lines as a file, for a report too long to paste.
+  const handleExportLogs = useCallback(() => {
+    downloadFile(logsText(), `kotomimi-logs-${formatTimestampForFilename(Date.now())}.jsonl`, 'application/x-ndjson');
+  }, [logsText]);
 
   // Memoized function to render regular log entry.
   //
@@ -336,6 +343,17 @@ const LogsPanel: React.FC<LogsPanelProps> = ({ toggleLogs }) => {
               >
                 <ClipboardCopy size={16} />
                 <span>{copyLabel || t('logsPanel.copyLogs')}</span>
+              </button>
+            )}
+            {filteredLogs.length > 0 && (
+              <button
+                className="copy-logs-button export-logs-button"
+                onClick={handleExportLogs}
+                title={t('logsPanel.exportLogs', 'Export')}
+                aria-label={t('logsPanel.exportLogs', 'Export')}
+              >
+                <Download size={16} />
+                <span>{t('logsPanel.exportLogs', 'Export')}</span>
               </button>
             )}
             {logs.length > 0 && (

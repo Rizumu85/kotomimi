@@ -223,6 +223,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "அசல் ஆடியோ பாஸ்த்ரூ இயக்கத்தில் இருக்கும்போது, ஒலி அளவு முறையே மட்டும் செயல்படும்: மற்ற முறைகள் உங்கள் குரலை எதிரொலியாகக் கருதி நீக்கிவிடும்."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "இயக்கியைத் தானாகத் தேர்வு செய்"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "CUDA இயக்கி"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "கிராபிக்ஸ் நினைவகம் போதுமானால் வேகப்படுத்து"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "வாசிப்பை வேகப்படுத்து"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "வேகப்படுத்த வேண்டாம்"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "எப்போதும் வேகப்படுத்து"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "சோதனை அம்சம்: வாசிப்பு வேகமாகும். இதற்குச் சுமார் 1 GB கூடுதல் கிராபிக்ஸ் நினைவகம் தேவை. தானியங்கி முறையில், போதுமான நினைவகம் இருந்தால் மட்டுமே இது செயல்படும்."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "இயக்கி"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "சோதனை அம்சம்: பேச்சை அடையாளம் காணவும் உரையை வாசிக்கவும் பயன்படும் இயக்கி. தானியங்கித் தேர்வு இந்த NVIDIA கிராபிக்ஸ் கார்டில் CUDA-வைப் பயன்படுத்தும். இயக்கியை மாற்றினால் அது மீண்டும் தொடங்கும். முதல் முறை மாற்றும்போது மற்ற இயக்கியைப் பதிவிறக்க வேண்டும்."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "Vulkan இயக்கி"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "மீண்டும் தேடு"
@@ -1690,6 +1730,10 @@
   "fork.wizard.tryServer": {
     "en": "Connect",
     "text": "இணை"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "ஏற்றுமதி செய்"
   },
   "models.detectsGroup": {
     "en": "Detects the language",

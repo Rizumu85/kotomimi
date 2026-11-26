@@ -806,7 +806,8 @@
     "speakerClient": "Ich",
     "participantClient": "Gegenüber",
     "copyLogs": "Kopieren",
-    "logsCopied": "Kopiert!"
+    "logsCopied": "Kopiert!",
+    "exportLogs": "Exportieren"
   },
   "mainPanel": {
     "subtitleTakeover": "Übersetzungen erscheinen im Untertitel-Overlay",
@@ -2203,6 +2204,18 @@
     "echoCancellationGate": "Nach Lautstärke",
     "echoCancellationGateTooltip": "Nach Lautstärke – für Lautsprecher: Der Ton aus den Lautsprechern gelangt viel leiser als deine Stimme ins Mikrofon und wird deshalb nach Lautstärke ausgefiltert. Deine Stimme bleibt unverändert.",
     "echoCancellationOff": "Aus",
-    "echoCancellationOffTooltip": "Aus – Das Mikrofon wird unverändert zur Erkennung übertragen. Für Kopfhörer: Es dringt kein Ton ins Mikrofon."
+    "echoCancellationOffTooltip": "Aus – Das Mikrofon wird unverändert zur Erkennung übertragen. Für Kopfhörer: Es dringt kein Ton ins Mikrofon.",
+    "engine": {
+      "label": "Engine",
+      "auto": "Engine automatisch wählen",
+      "cuda": "CUDA-Engine",
+      "vulkan": "Vulkan-Engine",
+      "tooltip": "Experimentelle Einstellung für Spracherkennung und Vorlesen. Die Automatik nutzt auf dieser NVIDIA-Grafikkarte CUDA. Beim ersten Wechsel wird die andere Engine heruntergeladen. Nach jedem Wechsel starten die Engines neu.",
+      "fastLabel": "Vorlesen beschleunigen",
+      "fastAuto": "Bei genug Grafikspeicher",
+      "fastOn": "Immer beschleunigen",
+      "fastOff": "Nie beschleunigen",
+      "fastTooltip": "Diese experimentelle Einstellung beschleunigt das Vorlesen und benötigt etwa 1 GB mehr Grafikspeicher. Die Automatik schaltet die Beschleunigung nur ein, wenn genug Grafikspeicher frei ist."
+    }
   }
 }

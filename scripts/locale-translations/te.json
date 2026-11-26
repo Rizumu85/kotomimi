@@ -223,6 +223,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "అసలు ఆడియో పాస్‌త్రూ ఆన్‌లో ఉన్నప్పుడు, శబ్దస్థాయి ఆధారిత పద్ధతి మాత్రమే పని చేస్తుంది: మిగతావి మీ స్వరాన్నే ప్రతిధ్వనిగా భావించి తొలగిస్తాయి."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "ఇంజిన్‌ను ఆటోమేటిక్‌గా ఎంచుకో"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "CUDA ఇంజిన్"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "వీడియో మెమరీ సరిపోతే వేగం పెంచు"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "చదివి వినిపించే వేగం పెంపు"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "వేగం పెంచవద్దు"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "ఎప్పుడూ వేగం పెంచు"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "ప్రయోగాత్మకం. ఇది ఆన్‌లో ఉంటే చదివి వినిపించే వేగం పెరుగుతుంది. దీనికి సుమారు 1 GB అదనపు వీడియో మెమరీ అవసరం. ఆటోమేటిక్ ఎంపికలో వీడియో మెమరీ సరిపోతేనే ఇది ఆన్ అవుతుంది."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "ఇంజిన్"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "ప్రయోగాత్మకం. మాటలను గుర్తించడానికి, చదివి వినిపించడానికి ఏ ఇంజిన్ వాడాలో ఎంచుకోండి. ఆటోమేటిక్ ఎంపిక ఈ NVIDIA గ్రాఫిక్స్ కార్డ్‌లో CUDAని వాడుతుంది. ఎంపికను మార్చితే ఇంజిన్‌లు మళ్లీ మొదలవుతాయి. మొదటిసారి మార్చినప్పుడు మరో ఇంజిన్ డౌన్‌లోడ్ అవుతుంది."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "Vulkan ఇంజిన్"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "మళ్లీ శోధించండి"
@@ -1690,6 +1730,10 @@
   "fork.wizard.tryServer": {
     "en": "Connect",
     "text": "కనెక్ట్ చేయి"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "ఎగుమతి"
   },
   "models.detectsGroup": {
     "en": "Detects the language",

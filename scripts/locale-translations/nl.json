@@ -227,6 +227,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "Wanneer Doorgifte van origineel geluid aanstaat, werkt alleen Op volume: bij de andere opties wordt je eigen stem als echo weggefilterd."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "Automatisch kiezen"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "CUDA-engine"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "Versnellen bij voldoende videogeheugen"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "Voorlezen versnellen"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "Nooit versnellen"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "Altijd versnellen"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "Experimenteel. Voorlezen gaat sneller, maar kost ongeveer 1 GB extra videogeheugen. De automatische stand schakelt versnelling alleen in als er genoeg videogeheugen vrij is."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "Engine"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "Experimenteel. Kies de engine voor spraakherkenning en voorlezen. De automatische stand gebruikt CUDA op deze NVIDIA-videokaart. Na het wisselen starten de engines opnieuw. Bij de eerste wissel wordt de andere engine gedownload."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "Vulkan-engine"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Opnieuw zoeken"
@@ -1698,6 +1738,10 @@
   "logsPanel.client": {
     "en": "client",
     "text": "client"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "Exporteren"
   },
   "logsPanel.server": {
     "en": "server",

@@ -806,7 +806,8 @@
     "speakerClient": "Saya",
     "participantClient": "Pihak lain",
     "copyLogs": "Salin",
-    "logsCopied": "Disalin!"
+    "logsCopied": "Disalin!",
+    "exportLogs": "Eksport"
   },
   "mainPanel": {
     "subtitleTakeover": "Terjemahan dipaparkan di tindanan sari kata",
@@ -2203,6 +2204,18 @@
     "echoCancellationGate": "Ikut kelantangan",
     "echoCancellationGateTooltip": "Mengikut kelantangan — untuk pembesar suara: bunyi yang dimainkan masuk semula ke mikrofon jauh lebih perlahan daripada suara anda, jadi ia ditapis berdasarkan kelantangan tanpa menjejaskan suara anda.",
     "echoCancellationOff": "Mati",
-    "echoCancellationOffTooltip": "Mati — mikrofon dihantar untuk pengecaman tanpa perubahan. Untuk fon kepala: tiada bunyi bocor ke mikrofon."
+    "echoCancellationOffTooltip": "Mati — mikrofon dihantar untuk pengecaman tanpa perubahan. Untuk fon kepala: tiada bunyi bocor ke mikrofon.",
+    "engine": {
+      "label": "Enjin",
+      "auto": "Pilih enjin secara automatik",
+      "cuda": "Enjin CUDA",
+      "vulkan": "Enjin Vulkan",
+      "tooltip": "Ciri percubaan: Pilih enjin untuk pengecaman pertuturan dan bacaan. Mod automatik menggunakan CUDA pada kad grafik NVIDIA ini. Enjin akan dimulakan semula apabila anda menukar pilihan. Kali pertama anda bertukar, enjin satu lagi perlu dimuat turun.",
+      "fastLabel": "Percepat bacaan",
+      "fastAuto": "Percepat jika memori video mencukupi",
+      "fastOn": "Sentiasa percepat bacaan",
+      "fastOff": "Jangan percepat bacaan",
+      "fastTooltip": "Ciri percubaan: Bacaan lebih pantas tetapi menggunakan kira-kira 1 GB memori video tambahan. Mod automatik hanya mengaktifkan ciri ini jika memori video mencukupi."
+    }
   }
 }

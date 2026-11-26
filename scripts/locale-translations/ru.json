@@ -219,6 +219,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "При включённой передаче исходного звука работает только «По громкости»: остальные способы принимают ваш голос за эхо и подавляют его."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "Автовыбор движка"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "Движок CUDA"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "При наличии свободной видеопамяти"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "Ускорение озвучивания"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "Без ускорения"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "Всегда ускорять"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "Экспериментальная настройка. Озвучивание работает быстрее и занимает примерно на 1 GB больше видеопамяти. Автоматический режим включает ускорение, только если свободной видеопамяти достаточно."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "Движок"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "Экспериментальная настройка. Выбирает движок для распознавания речи и озвучивания. На этой видеокарте NVIDIA автоматический режим использует CUDA. При переключении движки перезапустятся. При первом переключении нужно скачать другой движок."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "Движок Vulkan"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Искать снова"
@@ -1686,6 +1726,10 @@
   "fork.wizard.tryServer": {
     "en": "Connect",
     "text": "Подключиться"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "Экспорт"
   },
   "models.detectsGroup": {
     "en": "Detects the language",

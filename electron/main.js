@@ -38,6 +38,7 @@ const { joinEngines } = require('./native-engines');
 const { createSherpaEngine } = require('./sherpa-engine');
 const { createRemoteEngine } = require('./remote-engine');
 const { createModelStorage } = require('./model-storage');
+const { readGpuMemory } = require('./gpu-memory');
 const { createModelMemoryReader } = require('./model-memory');
 const { createAutostart } = require('./autostart');
 const { createAppleSpeech } = require('./apple-speech');
@@ -1556,9 +1557,73 @@ const audioFolders = () => ({
 let nativeEngine = null;
 // Start the cached read before settings open, without holding up the window.
 const adapter = createModelMemoryReader()();
-const audioChoice = adapter.then((card) => audioBuildChoice(card, app.getPath('userData')));
+/**
+ * Fork: the user's own choice of audio.cpp build and of the voice's speed mode (Help's experimental pickers), kept
+ * beside the settings so the main process has it before any page asks.
+ */
+const AUDIO_PREFS = { build: ['auto', 'cuda', 'vulkan'], fast: ['auto', 'on', 'off'] };
+const audioPrefsFile = () => path.join(app.getPath('userData'), 'audio-engine.json');
+const audioPrefs = () => {
+  try {
+    const read = JSON.parse(require('fs').readFileSync(audioPrefsFile(), 'utf8'));
+    return Object.fromEntries(Object.entries(AUDIO_PREFS).filter(([key, allowed]) => allowed.includes(read?.[key])).map(([key]) => [key, read[key]]));
+  } catch {
+    return {};
+  }
+};
+const audioChoice = adapter.then((card) => audioBuildChoice(card, app.getPath('userData'), ENGINE.version, audioPrefs()));
 ipcMain.handle('model-memory:get', async () => (await adapter)?.memoryMB ?? null);
+/** What the pickers show: offered only on Windows, the CUDA build only where the card and its driver take it. */
+const audioEngineState = async () => {
+  if (process.platform !== 'win32') return null;
+  const choice = await audioChoice;
+  return { cudaCapable: choice.cudaCapable, build: choice.build, fast: choice.fast, using: choice.cuda ? 'cuda' : 'vulkan' };
+};
+ipcMain.handle('audio-engine:get', () => audioEngineState());
+/** A change of build or speed mode under way: engines are not made until it is done, and changes go one by one. */
+let audioSwitch = Promise.resolve();
+ipcMain.handle('audio-engine:set', (event, args) => {
+  const done = audioSwitch.then(() => setAudioEngine(args));
+  audioSwitch = done.catch(() => undefined);
+  // The page is told the engines' states once the change is done: asked during it, they would wait for it.
+  void done.then(async (state) => {
+    if (!state || state.busy) return;
+    toPage('native-engine:status', await (await getNativeEngine()).status());
+    toPage('native-voice:status', (await getNativeVoice()).status());
+  }).catch(() => undefined);
+  return done;
+});
+async function setAudioEngine(args) {
+  if (process.platform !== 'win32') return null;
+  // A download under way is left to finish where it is going.
+  if (await downloading().catch(() => false)) return { ...(await audioEngineState()), busy: true };
+  const choice = await audioChoice;
+  const before = choice.cuda;
+  for (const [key, allowed] of Object.entries(AUDIO_PREFS)) if (allowed.includes(args?.[key])) choice[key] = args[key];
+  // A choice the user makes again is tried again: what failed in this run is forgotten with it.
+  if (AUDIO_PREFS.build.includes(args?.build)) { choice.failed = false; choice.chosen = true; }
+  try { require('fs').writeFileSync(audioPrefsFile(), JSON.stringify({ build: choice.build, fast: choice.fast })); } catch { /* holds for this run */ }
+  // Both audio.cpp engines start again on the build chosen; the speed mode is the voice's alone. The page offers
+  // this only while no session runs.
+  const rebuild = choice.cuda !== before;
+  const voice = nativeVoice;
+  const recognizer = rebuild ? nativeEngine : null;
+  nativeVoice = null;
+  if (rebuild) nativeEngine = null;
+  await Promise.allSettled([voice?.stop(), recognizer?.stop()]);
+  return audioEngineState();
+}
+/** Fork: what each engine holds on the graphics card now, for the diagnostic log (`gpu-memory.js`). */
+ipcMain.handle('gpu-memory:get', async () => {
+  const one = (engine) => [engine?.pid?.()].filter(Boolean);
+  const read = await readGpuMemory({
+    recognizer: nativeEngine?.pids?.() ?? [], voice: one(nativeVoice), translator: one(nativeTranslator), coach: one(nativeCoach),
+  });
+  const state = await audioEngineState();
+  return read && { ...read, ...(state ? { build: state.using } : {}) };
+});
 const getNativeEngine = async () => {
+  await audioSwitch;
   const audio = await audioChoice;
   if (nativeEngine) return nativeEngine;
   const log = engineLog('native-engine.log');
@@ -1687,6 +1752,7 @@ app.on('will-quit', () => { void nativeCoach?.stop(); });
 // headers), so a sentence is asked for here and its sound handed to the page as it is made.
 let nativeVoice = null;
 const getNativeVoice = async () => {
+  await audioSwitch;
   const audio = await audioChoice;
   if (nativeVoice) return nativeVoice;
   const log = engineLog('native-voice.log');

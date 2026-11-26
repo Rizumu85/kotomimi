@@ -223,6 +223,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "Saat Original Audio Passthrough aktif, hanya Berdasarkan volume yang berfungsi: metode lain akan menganggap suara Anda sendiri sebagai gema lalu menghilangkannya."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "Pilih mesin otomatis"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "Mesin CUDA"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "Percepat jika memori grafis cukup"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "Percepatan pembacaan"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "Tanpa percepatan"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "Selalu percepat"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "Eksperimental: teks dibacakan lebih cepat, tetapi butuh sekitar 1 GB memori grafis tambahan. Mode otomatis hanya mengaktifkan percepatan jika memori grafis cukup."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "Mesin"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "Eksperimental: pilih mesin untuk pengenalan ucapan dan pembacaan teks. Mode otomatis memakai CUDA pada kartu grafis NVIDIA ini. Mesin dimulai ulang saat diganti. Saat pertama kali beralih, aplikasi akan mengunduh mesin lainnya."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "Mesin Vulkan"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Cari lagi"
@@ -1690,6 +1730,10 @@
   "fork.wizard.tryServer": {
     "en": "Connect",
     "text": "Hubungkan"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "Ekspor"
   },
   "logsPanel.server": {
     "en": "server",

@@ -223,6 +223,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "মূল অডিও পাসথ্রু চালু থাকলে শুধু শব্দের মাত্রা পদ্ধতিই কাজ করে: অন্যগুলো আপনার নিজের কণ্ঠকে প্রতিধ্বনি ভেবে মুছে দেয়।"
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "স্বয়ংক্রিয়ভাবে ইঞ্জিন বেছে নিন"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "CUDA ইঞ্জিন"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "ভিডিও মেমরি যথেষ্ট থাকলে গতি বাড়ান"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "পড়ে শোনানোর গতি বাড়ান"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "গতি বাড়াবেন না"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "সব সময় গতি বাড়ান"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "পরীক্ষামূলক ফিচার। গতি বাড়ালে লেখা দ্রুত পড়ে শোনানো হয়, তবে প্রায় 1 GB বেশি ভিডিও মেমরি লাগে। স্বয়ংক্রিয় মোডে পর্যাপ্ত ভিডিও মেমরি থাকলেই গতি বাড়ানো হবে।"
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "ইঞ্জিন"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "পরীক্ষামূলক ফিচার। কথা শনাক্ত করতে ও লেখা পড়ে শোনাতে এই ইঞ্জিন ব্যবহার করা হয়। স্বয়ংক্রিয় মোডে এই NVIDIA গ্রাফিক্স কার্ডে CUDA ব্যবহার করা হবে। ইঞ্জিন বদলালে তা আবার চালু হবে। প্রথমবার বদলানোর সময় অন্য ইঞ্জিনটি ডাউনলোড করতে হবে।"
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "Vulkan ইঞ্জিন"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "আবার খুঁজুন"
@@ -1690,6 +1730,10 @@
   "fork.wizard.tryServer": {
     "en": "Connect",
     "text": "সংযোগ করুন"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "এক্সপোর্ট"
   },
   "models.detectsGroup": {
     "en": "Detects the language",

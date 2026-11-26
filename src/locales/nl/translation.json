@@ -806,7 +806,8 @@
     "speakerClient": "Ik",
     "participantClient": "Ander",
     "copyLogs": "Kopiëren",
-    "logsCopied": "Gekopieerd!"
+    "logsCopied": "Gekopieerd!",
+    "exportLogs": "Exporteren"
   },
   "mainPanel": {
     "subtitleTakeover": "Vertalingen worden weergegeven in de ondertitel-overlay",
@@ -2203,6 +2204,18 @@
     "echoCancellationGate": "Op volume",
     "echoCancellationGateTooltip": "Op volume — voor luidsprekers: wat ze afspelen komt veel zachter terug in de microfoon dan je stem, dus wordt het op volume tegengehouden en blijft je stem zoals die is.",
     "echoCancellationOff": "Uit",
-    "echoCancellationOffTooltip": "Uit — de microfoon wordt onbewerkt doorgestuurd voor herkenning. Voor koptelefoons: er lekt geen geluid in de microfoon."
+    "echoCancellationOffTooltip": "Uit — de microfoon wordt onbewerkt doorgestuurd voor herkenning. Voor koptelefoons: er lekt geen geluid in de microfoon.",
+    "engine": {
+      "label": "Engine",
+      "auto": "Automatisch kiezen",
+      "cuda": "CUDA-engine",
+      "vulkan": "Vulkan-engine",
+      "tooltip": "Experimenteel. Kies de engine voor spraakherkenning en voorlezen. De automatische stand gebruikt CUDA op deze NVIDIA-videokaart. Na het wisselen starten de engines opnieuw. Bij de eerste wissel wordt de andere engine gedownload.",
+      "fastLabel": "Voorlezen versnellen",
+      "fastAuto": "Versnellen bij voldoende videogeheugen",
+      "fastOn": "Altijd versnellen",
+      "fastOff": "Nooit versnellen",
+      "fastTooltip": "Experimenteel. Voorlezen gaat sneller, maar kost ongeveer 1 GB extra videogeheugen. De automatische stand schakelt versnelling alleen in als er genoeg videogeheugen vrij is."
+    }
   }
 }

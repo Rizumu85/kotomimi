@@ -92,6 +92,22 @@ describe('LogsPanel', () => {
         .toEqual(['first', 'session.created', 'third']);
     });
 
+    it('saves the same lines as a file', async () => {
+      write(() => {
+        useLogStore.getState().addLog('settings failed to load', 'error');
+      });
+      const made: Blob[] = [];
+      Object.defineProperty(URL, 'createObjectURL', { value: (blob: Blob) => { made.push(blob); return 'blob:logs'; }, configurable: true });
+      Object.defineProperty(URL, 'revokeObjectURL', { value: () => {}, configurable: true });
+      const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+      const { container } = render(<LogsPanel toggleLogs={() => {}} />);
+      fireEvent.click(container.querySelector('.export-logs-button')!);
+      expect(click).toHaveBeenCalledTimes(1);
+      // jsdom's Blob has no text(): read it as the page's FileReader would.
+      const saved = await new Promise<string>((resolve) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.readAsText(made[0]); });
+      expect(saved).toBe(copy(container));
+    });
+
     it('exports global entries under either tab', () => {
       write(() => {
         useLogStore.getState().addLog('app-scope failure', 'error');

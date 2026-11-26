@@ -223,6 +223,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "وقتی عبور صدای اصلی روشن است، فقط «بر اساس بلندی صدا» کار می‌کند؛ روش‌های دیگر صدای خودتان را به‌عنوان پژواک حذف می‌کنند."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "انتخاب خودکار موتور"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "موتور CUDA"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "شتاب‌دهی در صورت کافی بودن حافظهٔ گرافیکی"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "شتاب‌دهی بلندخوانی"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "بدون شتاب‌دهی"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "همیشه با شتاب‌دهی"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "این گزینه آزمایشی است. با شتاب‌دهی، بلندخوانی سریع‌تر می‌شود و حدود 1 GB حافظهٔ گرافیکی بیشتر مصرف می‌کند. حالت خودکار فقط وقتی حافظهٔ گرافیکی کافی باشد، شتاب‌دهی را فعال می‌کند."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "موتور"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "این گزینه آزمایشی است و موتور تشخیص گفتار و بلندخوانی را تعیین می‌کند. حالت خودکار روی این کارت گرافیک NVIDIA از CUDA استفاده می‌کند. با تغییر گزینه، موتورها دوباره راه‌اندازی می‌شوند. اولین بار که موتور را عوض کنید، موتور دیگر دانلود می‌شود."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "موتور Vulkan"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "جستجوی دوباره"
@@ -1690,6 +1730,10 @@
   "fork.wizard.tryServer": {
     "en": "Connect",
     "text": "اتصال"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "خروجی گرفتن"
   },
   "models.detectsGroup": {
     "en": "Detects the language",

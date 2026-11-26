@@ -806,7 +806,8 @@
     "speakerClient": "Saya",
     "participantClient": "Lawan bicara",
     "copyLogs": "Salin",
-    "logsCopied": "Disalin!"
+    "logsCopied": "Disalin!",
+    "exportLogs": "Ekspor"
   },
   "mainPanel": {
     "subtitleTakeover": "Terjemahan ditampilkan di overlay subtitle",
@@ -2203,6 +2204,18 @@
     "echoCancellationGate": "Berdasarkan volume",
     "echoCancellationGateTooltip": "Berdasarkan volume — untuk pengeras suara: suara yang diputar masuk kembali ke mikrofon jauh lebih pelan daripada suara Anda, jadi disaring berdasarkan volumenya dan suara Anda tetap seperti semula.",
     "echoCancellationOff": "Nonaktif",
-    "echoCancellationOffTooltip": "Nonaktif — mikrofon dikirim apa adanya untuk dikenali. Gunakan saat memakai headphone: tidak ada suara yang masuk ke mikrofon."
+    "echoCancellationOffTooltip": "Nonaktif — mikrofon dikirim apa adanya untuk dikenali. Gunakan saat memakai headphone: tidak ada suara yang masuk ke mikrofon.",
+    "engine": {
+      "label": "Mesin",
+      "auto": "Pilih mesin otomatis",
+      "cuda": "Mesin CUDA",
+      "vulkan": "Mesin Vulkan",
+      "tooltip": "Eksperimental: pilih mesin untuk pengenalan ucapan dan pembacaan teks. Mode otomatis memakai CUDA pada kartu grafis NVIDIA ini. Mesin dimulai ulang saat diganti. Saat pertama kali beralih, aplikasi akan mengunduh mesin lainnya.",
+      "fastLabel": "Percepatan pembacaan",
+      "fastAuto": "Percepat jika memori grafis cukup",
+      "fastOn": "Selalu percepat",
+      "fastOff": "Tanpa percepatan",
+      "fastTooltip": "Eksperimental: teks dibacakan lebih cepat, tetapi butuh sekitar 1 GB memori grafis tambahan. Mode otomatis hanya mengaktifkan percepatan jika memori grafis cukup."
+    }
   }
 }

@@ -235,6 +235,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "Quando il passaggio dell'audio originale è attivo, funziona solo «Per volume»: gli altri metodi eliminano la tua voce considerandola un'eco."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "Selezione automatica"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "Motore CUDA"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "Solo con memoria video sufficiente"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "Accelerazione della lettura"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "Disattivata"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "Sempre attiva"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "Funzione sperimentale. L'accelerazione rende la lettura ad alta voce più rapida, ma usa circa 1 GB di memoria video in più. In modalità automatica si attiva solo se c'è abbastanza memoria video."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "Motore"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "Funzione sperimentale. Scegli il motore per il riconoscimento vocale e la lettura ad alta voce. La selezione automatica usa CUDA su questa scheda grafica NVIDIA. Quando cambi motore, i motori si riavviano. Al primo cambio viene scaricato l'altro motore."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "Motore Vulkan"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Cerca di nuovo"
@@ -1706,6 +1746,10 @@
   "logsPanel.client": {
     "en": "client",
     "text": "client"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "Esporta"
   },
   "logsPanel.server": {
     "en": "server",

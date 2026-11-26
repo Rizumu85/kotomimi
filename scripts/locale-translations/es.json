@@ -219,6 +219,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "Con el paso de audio original activado, solo funciona «Por volumen»: los demás métodos toman tu propia voz por eco y la eliminan."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "Selección automática del motor"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "Motor CUDA"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "Acelerar si hay memoria de vídeo"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "Aceleración de la lectura"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "Sin aceleración"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "Acelerar siempre"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "Ajuste experimental. La lectura en voz alta se acelera y usa alrededor de 1 GB más de memoria de vídeo. El modo automático solo activa la aceleración si hay suficiente memoria de vídeo."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "Motor"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "Ajuste experimental. Elige el motor para el reconocimiento de voz y la lectura en voz alta. El modo automático usa CUDA en esta tarjeta gráfica NVIDIA. Al cambiar de motor, los motores se reinician. La primera vez se descarga el otro motor."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "Motor Vulkan"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Buscar de nuevo"
@@ -1686,6 +1726,10 @@
   "fork.wizard.tryServer": {
     "en": "Connect",
     "text": "Conectar"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "Exportar"
   },
   "mainPanel.error": {
     "en": "Error",

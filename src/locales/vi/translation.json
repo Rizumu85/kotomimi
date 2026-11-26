@@ -806,7 +806,8 @@
     "speakerClient": "Tôi",
     "participantClient": "Đối phương",
     "copyLogs": "Sao chép",
-    "logsCopied": "Đã sao chép!"
+    "logsCopied": "Đã sao chép!",
+    "exportLogs": "Xuất"
   },
   "mainPanel": {
     "subtitleTakeover": "Bản dịch đang hiển thị trong lớp phủ phụ đề",
@@ -2203,6 +2204,18 @@
     "echoCancellationGate": "Theo âm lượng",
     "echoCancellationGateTooltip": "Theo âm lượng — khi dùng loa: âm thanh từ loa lọt vào mic nhỏ hơn nhiều so với giọng bạn, nên được chặn theo âm lượng và giọng bạn không bị ảnh hưởng.",
     "echoCancellationOff": "Tắt",
-    "echoCancellationOffTooltip": "Tắt — gửi nguyên âm thanh từ mic đi nhận dạng. Dùng khi đeo tai nghe: không có âm thanh nào lọt vào mic."
+    "echoCancellationOffTooltip": "Tắt — gửi nguyên âm thanh từ mic đi nhận dạng. Dùng khi đeo tai nghe: không có âm thanh nào lọt vào mic.",
+    "engine": {
+      "label": "Bộ xử lý",
+      "auto": "Tự động chọn bộ xử lý",
+      "cuda": "Bộ xử lý CUDA",
+      "vulkan": "Bộ xử lý Vulkan",
+      "tooltip": "Tính năng thử nghiệm. Chọn bộ xử lý dùng để nhận dạng giọng nói và đọc thành tiếng. Chế độ tự động dùng CUDA trên card đồ họa NVIDIA này. Khi chuyển, bộ xử lý sẽ khởi động lại. Lần đầu chuyển, ứng dụng sẽ tải bộ xử lý còn lại.",
+      "fastLabel": "Tăng tốc đọc",
+      "fastAuto": "Tăng tốc khi đủ bộ nhớ đồ họa",
+      "fastOn": "Luôn tăng tốc đọc",
+      "fastOff": "Không tăng tốc đọc",
+      "fastTooltip": "Tính năng thử nghiệm. Tăng tốc giúp đọc nhanh hơn nhưng dùng thêm khoảng 1 GB bộ nhớ đồ họa. Chế độ tự động chỉ bật tăng tốc khi đủ bộ nhớ đồ họa."
+    }
   }
 }

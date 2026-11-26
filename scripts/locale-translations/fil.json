@@ -275,6 +275,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "Kapag naka-on ang Original Audio Passthrough, tanging By loudness lang ang gumagana: ituturing ng ibang paraan na echo ang sarili mong boses at aalisin ito."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "Awtomatikong pumili ng makina"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "Makinang CUDA"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "Pabilisin kung sapat ang memory"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "Pabilisin ang pagbasa"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "Huwag pabilisin"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "Palaging pabilisin"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "Eksperimental. Bibilis ang pagbasa nang malakas, pero gagamit ito ng dagdag na humigit-kumulang 1 GB na video memory. Sa awtomatikong mode, gagana lang ito kung sapat ang video memory."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "Makina"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "Eksperimental. Piliin ang makinang kikilala sa sinasabi at magbabasa nang malakas. Sa awtomatikong mode, gagamitin ang CUDA sa NVIDIA graphics card na ito. Magre-restart ang makina kapag nagpalit ka. Sa unang paglipat, ida-download ang kabilang makina."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "Makinang Vulkan"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Maghanap muli"
@@ -1750,6 +1790,10 @@
   "logsPanel.event": {
     "en": "Event",
     "text": "Kaganapan"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "I-export"
   },
   "logsPanel.server": {
     "en": "server",

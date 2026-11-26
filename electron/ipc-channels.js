@@ -126,6 +126,9 @@ export const INVOKE_CHANNELS = [
   'voice-library:export',
   // Fork: this computer's memory for native model recommendations
   'model-memory:get',
+  'audio-engine:get',
+  'audio-engine:set',
+  'gpu-memory:get',
   // Fork: where the downloaded models are kept, and moving them (electron/model-storage.js)
   'model-storage:status',
   'model-storage:choose',

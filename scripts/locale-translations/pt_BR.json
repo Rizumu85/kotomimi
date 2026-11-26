@@ -223,6 +223,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "Enquanto a Passagem do áudio original estiver ativada, apenas Por volume funciona: os outros métodos consideram sua própria voz como eco."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "Selecionar motor automaticamente"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "Motor CUDA"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "Acelerar se houver memória de vídeo suficiente"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "Aceleração da leitura em voz alta"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "Nunca acelerar"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "Sempre acelerar"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "A aceleração é experimental e deixa a leitura em voz alta mais rápida, mas usa cerca de 1 GB a mais de memória de vídeo. O modo automático só ativa a aceleração se houver memória de vídeo suficiente."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "Motor"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "Configuração experimental do motor de reconhecimento de fala e leitura em voz alta. O modo automático usa CUDA nesta placa de vídeo NVIDIA. Ao trocar de motor, os motores reiniciam. Na primeira troca, o outro motor precisa ser baixado."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "Motor Vulkan"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Buscar novamente"
@@ -1690,6 +1730,10 @@
   "fork.wizard.tryServer": {
     "en": "Connect",
     "text": "Conectar"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "Exportar"
   },
   "models.detectsGroup": {
     "en": "Detects the language",

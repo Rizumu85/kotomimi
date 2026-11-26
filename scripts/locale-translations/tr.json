@@ -223,6 +223,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "Orijinal Ses Geçişi açıkken yalnızca Ses düzeyine göre çalışır: diğerleri kendi sesinizi yankı sanıp yok eder."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "Otomatik motor seçimi"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "CUDA motoru"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "Bellek yeterliyse hızlandır"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "Sesli okumayı hızlandır"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "Hızlandırma"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "Her zaman hızlandır"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "Deneysel özellik. Sesli okumayı hızlandırır ve yaklaşık 1 GB daha fazla ekran kartı belleği kullanır. Otomatik modda yalnızca yeterli ekran kartı belleği varsa açılır."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "Motor"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "Deneysel özellik. Konuşma tanıma ve sesli okuma için kullanılacak motoru seçer. Otomatik seçim bu NVIDIA ekran kartında CUDA kullanır. Seçimi değiştirdiğinizde motorlar yeniden başlatılır. İlk geçişte diğer motor indirilir."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "Vulkan motoru"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Yeniden ara"
@@ -1690,6 +1730,10 @@
   "fork.wizard.tryServer": {
     "en": "Connect",
     "text": "Bağlan"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "Dışa aktar"
   },
   "models.detectsGroup": {
     "en": "Detects the language",

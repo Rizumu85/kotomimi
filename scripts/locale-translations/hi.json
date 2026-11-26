@@ -223,6 +223,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "मूल ऑडियो पासथ्रू चालू होने पर केवल आवाज़ के स्तर के अनुसार तरीका काम करता है: बाकी तरीके आपकी अपनी आवाज़ को गूँज समझकर हटा देंगे।"
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "इंजन अपने आप चुनें"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "CUDA इंजन"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "मेमोरी हो तो तेज़ पढ़ें"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "तेज़ पाठ वाचन"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "सामान्य गति से पढ़ें"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "हमेशा तेज़ पढ़ें"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "प्रयोगात्मक: तेज़ पढ़कर सुनाने में करीब 1 GB ज़्यादा ग्राफ़िक्स मेमोरी लगती है। अपने आप वाले विकल्प में यह तभी चालू होता है जब पर्याप्त ग्राफ़िक्स मेमोरी खाली हो।"
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "इंजन"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "प्रयोगात्मक: बोली पहचानने और पढ़कर सुनाने के लिए इंजन चुनें। अपने आप चुनने पर इस NVIDIA ग्राफ़िक्स कार्ड पर CUDA इस्तेमाल होगा। इंजन बदलने पर वे फिर से शुरू होंगे। पहली बार बदलने पर दूसरा इंजन डाउनलोड होगा।"
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "Vulkan इंजन"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "फिर से खोजें"
@@ -1690,6 +1730,10 @@
   "fork.wizard.tryServer": {
     "en": "Connect",
     "text": "कनेक्ट करें"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "एक्सपोर्ट करें"
   },
   "models.detectsGroup": {
     "en": "Detects the language",

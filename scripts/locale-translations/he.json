@@ -223,6 +223,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "כשמעבר השמע המקורי מופעל, פועל רק מצב «לפי עוצמת הקול»: שאר השיטות יבטלו את הקול שלך כאילו היה הד."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "בחירה אוטומטית"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "מנוע CUDA"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "האצה כשיש מספיק זיכרון גרפי"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "האצת הקראה"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "ללא האצה"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "האצה תמיד"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "אפשרות ניסיונית שמזרזת את ההקראה, אבל צורכת עוד כ־1 GB של זיכרון גרפי. במצב אוטומטי, ההאצה פועלת רק כשיש מספיק זיכרון גרפי פנוי."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "מנוע"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "אפשרות ניסיונית לבחירת המנוע לזיהוי דיבור ולהקראה. במצב אוטומטי, כרטיס המסך הזה של NVIDIA ישתמש ב־CUDA. החלפת מנוע תפעיל מחדש את המנועים. במעבר הראשון תידרש הורדה של המנוע השני."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "מנוע Vulkan"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "חיפוש מחדש"
@@ -1690,6 +1730,10 @@
   "fork.wizard.tryServer": {
     "en": "Connect",
     "text": "התחברות"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "ייצוא"
   },
   "models.detectsGroup": {
     "en": "Detects the language",

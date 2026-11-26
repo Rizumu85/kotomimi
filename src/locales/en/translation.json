@@ -806,6 +806,7 @@
     "speakerClient": "Me",
     "participantClient": "Other",
     "copyLogs": "Copy",
+    "exportLogs": "Export",
     "logsCopied": "Copied!"
   },
   "mainPanel": {
@@ -2121,6 +2122,18 @@
       "saved": "Saved",
       "failed": "Could not save it.",
       "hint": "Saves the last minute of what the subtitle showed to a file. When the layout goes wrong, send it to the developer to replay it exactly."
+    },
+    "engine": {
+      "label": "Engine",
+      "auto": "Engine chosen automatically",
+      "cuda": "CUDA engine",
+      "vulkan": "Vulkan engine",
+      "tooltip": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+      "fastLabel": "Voice speed-up",
+      "fastAuto": "Voice sped up when there is room",
+      "fastOn": "Voice always sped up",
+      "fastOff": "Voice never sped up",
+      "fastTooltip": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room."
     },
     "recording": {
       "toggle": "Record sessions",

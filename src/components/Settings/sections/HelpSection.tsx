@@ -8,6 +8,7 @@ import { useSetSetupWizardOpen } from '../../../stores/layoutStore';
 import { useUpdateStatus, useCheckForUpdates, useOpenUpdateDialog } from '../../../stores/updateStore';
 import { useSetUILanguage, useDiagnosticLogs, useSetDiagnosticLogs, useThemeSetting, useSetThemeSetting, useRecordSessions, useSetRecordSessions } from '../../../stores/settingsStore';
 import { openSessionRecordings } from '../../../app/sessionRecording';
+import { AudioEnginePickers } from './AudioEnginePickers';
 import { useAnalytics } from '../../../lib/analytics';
 import { changeLanguageWithLoad } from '../../../locales';
 import { INTERFACE_LANGUAGES } from './interfaceLanguages';
@@ -326,6 +327,8 @@ const HelpSection: React.FC<HelpSectionProps> = ({ toggleSettings, isSessionActi
             <span>{t('fork.recording.open', 'Open recordings')}</span>
           </button>
         )}
+        {/* Fork: experimental choices for comparing on a computer where something runs slowly. */}
+        {isElectron() && <AudioEnginePickers disabled={isSessionActive} />}
         {/*
           Fork: upstream's support address and discussion board are Sokuji's own, and answer for Sokuji.
           This build is not theirs to support: its one link goes to the fork's own issues.

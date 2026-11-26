@@ -156,6 +156,28 @@ describe('the Windows audio builds', () => {
     expect(audioBuildChoice(card, dir, '1.0.1').cuda).toBe(true);
   });
 
+  it('holds to the build the user chose: Vulkan by choice, CUDA tried again, and nothing remembered as failed', async () => {
+    const vulkanChosen = audioBuildChoice(card, dir, '1.0.0', { build: 'vulkan' });
+    expect(vulkanChosen.cuda).toBe(false);
+    const cudaChosen = audioBuildChoice(card, dir, '1.0.0', { build: 'cuda' });
+    expect(cudaChosen.cuda).toBe(true);
+    cudaChosen.useVulkan();
+    expect(cudaChosen.cuda).toBe(false);
+    // A failure under the user's own choice is not written down for the app's: left to it, CUDA is tried.
+    expect(audioBuildChoice(card, dir, '1.0.0').cuda).toBe(true);
+    expect(audioBuildChoice({ ...card, cuda13: false }, dir, '1.0.0', { build: 'cuda' }).cuda).toBe(false);
+  });
+
+  it('keeps this version\'s other build once the user has chosen one, and only the one in use before', async () => {
+    fs.mkdirSync(path.join(dir, 'engine-1.0.0-cuda'), { recursive: true });
+    fs.mkdirSync(path.join(dir, 'engine-0.9.0'), { recursive: true });
+    const held = computer({ catalog, served, audio: audioBuildChoice(card, dir, '1.0.0', { build: 'vulkan' }) });
+    await held.engine.download('m1');
+    expect(fs.existsSync(path.join(dir, 'engine-1.0.0-cuda'))).toBe(true);
+    expect(fs.existsSync(path.join(dir, 'engine-0.9.0'))).toBe(false);
+    await held.engine.stop();
+  });
+
   it('downloads and unpacks each shared archive once and lets both servers use the fallback', async () => {
     const audio = audioBuildChoice(card, dir);
     const voiceDir = path.join(dir, 'voice');

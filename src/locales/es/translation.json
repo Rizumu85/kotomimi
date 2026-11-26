@@ -806,7 +806,8 @@
     "speakerClient": "Yo",
     "participantClient": "Otro",
     "copyLogs": "Copiar",
-    "logsCopied": "¡Copiado!"
+    "logsCopied": "¡Copiado!",
+    "exportLogs": "Exportar"
   },
   "mainPanel": {
     "subtitleTakeover": "Las traducciones se muestran en la superposición de subtítulos",
@@ -2203,6 +2204,18 @@
     "echoCancellationGate": "Por volumen",
     "echoCancellationGateTooltip": "Por volumen — para altavoces: el sonido que reproducen se filtra al micrófono mucho más bajo que tu voz, así que se bloquea por su volumen y tu voz queda intacta.",
     "echoCancellationOff": "Desactivado",
-    "echoCancellationOffTooltip": "Desactivado — el micrófono se envía tal cual al reconocimiento. Úsalo con auriculares: no se filtra ningún sonido al micrófono."
+    "echoCancellationOffTooltip": "Desactivado — el micrófono se envía tal cual al reconocimiento. Úsalo con auriculares: no se filtra ningún sonido al micrófono.",
+    "engine": {
+      "label": "Motor",
+      "auto": "Selección automática del motor",
+      "cuda": "Motor CUDA",
+      "vulkan": "Motor Vulkan",
+      "tooltip": "Ajuste experimental. Elige el motor para el reconocimiento de voz y la lectura en voz alta. El modo automático usa CUDA en esta tarjeta gráfica NVIDIA. Al cambiar de motor, los motores se reinician. La primera vez se descarga el otro motor.",
+      "fastLabel": "Aceleración de la lectura",
+      "fastAuto": "Acelerar si hay memoria de vídeo",
+      "fastOn": "Acelerar siempre",
+      "fastOff": "Sin aceleración",
+      "fastTooltip": "Ajuste experimental. La lectura en voz alta se acelera y usa alrededor de 1 GB más de memoria de vídeo. El modo automático solo activa la aceleración si hay suficiente memoria de vídeo."
+    }
   }
 }

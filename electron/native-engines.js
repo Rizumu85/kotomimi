@@ -173,7 +173,9 @@ function joinEngines(makers, deps = {}) {
     return done;
   }
 
-  return { status, download: ask('download'), cancel: ask('cancel'), remove: ask('remove'), start, stop, openStream, writeStream, endStream, abortStream };
+  /** The processes the engines run models in now. */
+  const pids = () => engines.map((engine) => engine.pid?.() ?? null).filter(Boolean);
+  return { status, download: ask('download'), cancel: ask('cancel'), remove: ask('remove'), start, stop, openStream, writeStream, endStream, abortStream, pids };
 }
 
 module.exports = { joinEngines, IDLE_MS };

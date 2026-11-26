@@ -806,6 +806,7 @@
     "speakerClient": "我",
     "participantClient": "對方",
     "copyLogs": "複製",
+    "exportLogs": "匯出",
     "logsCopied": "已複製！"
   },
   "mainPanel": {
@@ -2121,6 +2122,18 @@
       "saved": "已儲存",
       "failed": "沒能儲存。",
       "hint": "把最近一分鐘字幕顯示的內容存成檔案。排版出問題時傳給開發者，就能原樣重現。"
+    },
+    "engine": {
+      "label": "引擎",
+      "auto": "自動選擇引擎",
+      "cuda": "CUDA 引擎",
+      "vulkan": "Vulkan 引擎",
+      "tooltip": "實驗性：辨識和朗讀用哪種引擎。自動會在這張 NVIDIA 顯示卡上用 CUDA。切換後引擎會重新啟動，第一次切換要下載另一種引擎。",
+      "fastLabel": "朗讀加速",
+      "fastAuto": "顯示記憶體夠時加速朗讀",
+      "fastOn": "總是加速朗讀",
+      "fastOff": "不加速朗讀",
+      "fastTooltip": "實驗性：加速後朗讀更快，但要多佔約 1 GB 顯示記憶體。自動只在顯示記憶體夠時開啟。"
     },
     "recording": {
       "toggle": "錄下會話",

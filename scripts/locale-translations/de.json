@@ -227,6 +227,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "Wenn die Original-Audio-Durchleitung aktiviert ist, funktioniert nur „Nach Lautstärke“: Bei den anderen Methoden wird deine eigene Stimme als Echo entfernt."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "Engine automatisch wählen"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "CUDA-Engine"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "Bei genug Grafikspeicher"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "Vorlesen beschleunigen"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "Nie beschleunigen"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "Immer beschleunigen"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "Diese experimentelle Einstellung beschleunigt das Vorlesen und benötigt etwa 1 GB mehr Grafikspeicher. Die Automatik schaltet die Beschleunigung nur ein, wenn genug Grafikspeicher frei ist."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "Engine"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "Experimentelle Einstellung für Spracherkennung und Vorlesen. Die Automatik nutzt auf dieser NVIDIA-Grafikkarte CUDA. Beim ersten Wechsel wird die andere Engine heruntergeladen. Nach jedem Wechsel starten die Engines neu."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "Vulkan-Engine"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Erneut suchen"
@@ -1694,6 +1734,10 @@
   "fork.wizard.tryServer": {
     "en": "Connect",
     "text": "Verbinden"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "Exportieren"
   },
   "mainPanel.debug": {
     "en": "Debug",

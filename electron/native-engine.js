@@ -767,13 +767,16 @@ function warmWords(model) {
  * sentence in the model's own voice.
  */
 const VOICE_RUNTIME = {
-  launch({ id, model, port, build, modelsDir, files, freeMB }) {
+  launch({ id, model, port, build, modelsDir, files, freeMB, memoryMB = null, fastMode = 'auto' }) {
     // RTX 5070 Ti, Qwen3-TTS 1.7B: Vulkan/CUDA/cuda_perf took 0.36/0.21/0.15 of the sentence duration,
-    // or 0.58/0.68/0.43-0.53 beside another model. cuda_perf costs 0.8 GB on 1.7B and 1.2 GB on 0.6B. So it is
-    // used only where the card has room for it now, with what else runs on it (a game, the recognizer): the
-    // model's file, 2 GB for its runtime and the speed mode, and 2 GB left over for a game that grows.
-    const fast = build.backend === 'cuda' && model.family === 'qwen3_tts' && freeMB !== null
+    // or 0.58/0.68/0.43-0.53 beside another model. Its cost grows as it goes: recordings read with their words in
+    // four sentence lengths took the 1.7B from 1.9 GB to 4.3 GB over 18 of them (plain CUDA: 2.7 GB throughout),
+    // most of it over the first dozen, none past them (graphs kept per shape). So by itself it is used on a card of
+    // 16 GB or more, and only with the model's file and 4 GB more free as the voice starts. The user may choose
+    // otherwise (Help's experimental pickers: `fastMode`).
+    const fits = memoryMB !== null && memoryMB >= FAST_VOICE_CARD_MB && freeMB !== null
       && freeMB >= model.bytes / 1024 ** 2 + FAST_VOICE_ROOM_MB;
+    const fast = build.backend === 'cuda' && model.family === 'qwen3_tts' && fastMode !== 'off' && (fastMode === 'on' || fits);
     const options = { ...model.options, ...(fast ? { 'qwen3_tts.perf_mode': 'cuda_perf' } : {}) };
     files.writeFileSync(path.join(modelsDir, 'server.json'), JSON.stringify({
       host: LOOPBACK,
@@ -1380,21 +1383,41 @@ function openWindow({ port, pathname, model, sampleRate, language, context, time
   };
 }
 
-/** Both audio servers use the same decision, including after moving the models to another drive. */
-function audioBuildChoice(adapter, profile, version = ENGINE.version) {
+/**
+ * Both audio servers use the same decision, including after moving the models to another drive. `build` and `fast`
+ * are the user's own (Help's experimental pickers, `audio-engine.json`): 'auto' leaves it to the card, the driver and
+ * what failed before; 'cuda' or 'vulkan' holds to one; the voice's speed mode `fast` is 'auto', 'on' or 'off'.
+ */
+function audioBuildChoice(adapter, profile, version = ENGINE.version, prefs = {}) {
   const marker = path.join(profile, `audio-vulkan-${version}`);
   return {
+    build: prefs.build ?? 'auto',
+    fast: prefs.fast ?? 'auto',
+    /** The user has chosen with the pickers: both builds of this version are kept from then on, to switch between. */
+    chosen: prefs.build !== undefined,
+    /** The card's own memory, for the voice's speed mode. */
+    memoryMB: adapter?.memoryMB ?? null,
+    /** What failed in this run: the CUDA build is not tried again until the app starts afresh. */
+    failed: false,
     fallback: fs.existsSync(marker),
-    get cuda() { return Boolean(adapter?.cuda13) && !this.fallback; },
+    get cudaCapable() { return Boolean(adapter?.cuda13); },
+    get cuda() {
+      if (!this.cudaCapable || this.failed || this.build === 'vulkan') return false;
+      return this.build === 'cuda' || !this.fallback;
+    },
     useVulkan() {
+      this.failed = true;
+      // Only a choice left to the app is remembered: one the user made stays theirs to undo.
+      if (this.build !== 'auto') return;
       this.fallback = true;
       try { fs.writeFileSync(marker, ''); } catch { /* The in-memory choice lasts for this run. */ }
     },
   };
 }
 
-/** Beyond a voice model's file, the room its speed mode is used with (`VOICE_RUNTIME`). */
+/** Beyond a voice model's file, the room its speed mode is used with, and the least card it is used on by itself. */
 const FAST_VOICE_ROOM_MB = 4096;
+const FAST_VOICE_CARD_MB = 15 * 1024;
 
 /**
  * The video memory free now on the NVIDIA cards, in MB: the least of them, as the driver's own tool tells it; null
@@ -1691,14 +1714,20 @@ function createNativeEngine(deps = {}) {
     }
   }
 
-  /** The runtimes of earlier versions: no model runs on them any more, and each holds a hundred megabytes or more. */
+  /**
+   * The runtimes of earlier versions: no model runs on them any more, and each holds a hundred megabytes or more.
+   * Once the user has chosen a build (Help's experimental pickers), this version's other one stays, to switch back to
+   * without fetching it again (the CUDA one is 855 MB); never having chosen, only the one in use is kept.
+   */
   function removeEarlierRuntimes() {
-    if (build.backend === 'cuda' && audio?.fallback) return;
+    if (build.backend === 'cuda' && !audio?.cuda) return;
+    const thisVersion = new RegExp(`^engine-${ENGINE_.version.replace(/\./g, '\\.')}(-cuda)?$`);
     for (const root of [runtimeRoot, legacyRuntimeRoot].filter(Boolean)) {
       try {
         for (const name of files.readdirSync(root)) {
           const candidate = path.resolve(root, name);
-          if (!name.startsWith('engine-') || candidate === engineDir || runtimeInstalls.has(candidate)
+          const kept = root === runtimeRoot && thisVersion.test(name) && Boolean(audio?.chosen);
+          if (!name.startsWith('engine-') || kept || candidate === engineDir || runtimeInstalls.has(candidate)
               || [...runningImages.values()].includes(candidate)) continue;
           files.rmSync(candidate, { recursive: true, force: true });
         }
@@ -1879,8 +1908,8 @@ function createNativeEngine(deps = {}) {
     await halt();
     await reaped;
     if (myTurn !== turn) return status();
-    // The other audio server may already have given up on CUDA while this one was idle.
-    if (standard.cuda && audio?.fallback && modelHere(id)) {
+    // The other audio server may already have given up on CUDA while this one was idle, or the user chose otherwise.
+    if (standard.cuda && build.backend === 'cuda' && !audio?.cuda && modelHere(id)) {
       await Promise.all([...downloads.values()].map((one) => one.done));
       if (myTurn !== turn) return status();
       selectBuild();
@@ -1913,7 +1942,7 @@ function createNativeEngine(deps = {}) {
       return setRun({ state: 'failed', model: id, tail: String(error?.message ?? error) });
     }
     if (myTurn !== turn) return status();
-    if (cuda && audio.fallback) return bringUp(id);
+    if (cuda && !audio.cuda) return bringUp(id);
     const key = runtime.keyed ? crypto.randomBytes(24).toString('hex') : null;
     setRun({ state: 'starting', model: id, port, key, tail: '' });
     const model = MODELS_[id];
@@ -1921,7 +1950,7 @@ function createNativeEngine(deps = {}) {
     if (myTurn !== turn) return status();
     let args;
     try {
-      args = runtime.launch({ id, model, port, key, build, modelsDir, files, freeMB });
+      args = runtime.launch({ id, model, port, key, build, modelsDir, files, freeMB, memoryMB: audio?.memoryMB ?? null, fastMode: audio?.fast });
     } catch (error) {
       return setRun({ state: 'failed', tail: String(error?.message ?? error) });
     }
@@ -2088,7 +2117,9 @@ function createNativeEngine(deps = {}) {
 
   // Fork: the runtime of a new version fetched for the models an earlier one left (`updateRuntime`), when asked to.
   if (autoUpdate) setTimeout(() => { void updateRuntime(); }, 0);
-  return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream, updateRuntime, speak, stopSpeaking };
+  /** The process running a model now, for what it holds on the graphics card (the diagnostic log). */
+  const pid = () => child?.pid ?? null;
+  return { status, download, cancel, remove, start, stop, openStream, writeStream, endStream, abortStream, updateRuntime, speak, stopSpeaking, pid };
 }
 
 module.exports = {

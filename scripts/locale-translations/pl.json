@@ -227,6 +227,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "Gdy przekazywanie oryginalnego dźwięku jest włączone, działa tylko „Według głośności”: pozostałe opcje uznają Twój głos za echo i go usuwają."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "Automatyczny wybór silnika"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "Silnik CUDA"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "Przyspiesz, gdy wystarczy pamięci karty"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "Przyspieszenie odczytu"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "Bez przyspieszenia"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "Zawsze przyspieszaj"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "Ustawienie eksperymentalne. Przyspiesza odczyt na głos i zużywa około 1 GB więcej pamięci karty graficznej. Tryb automatyczny włącza przyspieszenie tylko wtedy, gdy jest dość wolnej pamięci na karcie."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "Silnik"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "Ustawienie eksperymentalne. Wybiera silnik do rozpoznawania mowy i odczytu na głos. Tryb automatyczny używa CUDA na tej karcie NVIDIA. Zmiana uruchamia silnik ponownie. Przy pierwszym przełączeniu aplikacja pobierze drugi silnik."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "Silnik Vulkan"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Szukaj ponownie"
@@ -1694,6 +1734,10 @@
   "fork.wizard.tryServer": {
     "en": "Connect",
     "text": "Połącz"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "Eksportuj"
   },
   "models.detectsGroup": {
     "en": "Detects the language",

@@ -287,14 +287,16 @@ describe('a sentence that comes whole', () => {
 });
 
 describe('what is fetched for the voice engine', () => {
-  // The 0.6B's file is 1899 MB: the speed mode wants that and 4096 MB more free when the voice starts.
+  // The 0.6B's file is 1899 MB: by itself the speed mode wants a card of 15 GB or more, and that file and 4096 MB
+  // more free when the voice starts; the user may turn it on or off whatever the card.
   it.each([
-    ['cuda', 5995, true], ['cuda', 5994, false], ['cuda', null, false], ['vulkan', 16384, false],
-    ['metal', 32768, false],
-  ])('uses the voice speed mode on %s with %s MB free: %s', (backend, freeMB, fast) => {
+    ['cuda', 16303, 5995, 'auto', true], ['cuda', 16303, 5994, 'auto', false], ['cuda', 10240, 8000, 'auto', false],
+    ['cuda', 16303, null, 'auto', false], ['cuda', 8192, 1000, 'on', true], ['cuda', 16303, 12000, 'off', false],
+    ['vulkan', 16384, 12000, 'on', false], ['metal', 32768, null, 'auto', false],
+  ])('uses the voice speed mode on %s, a %s MB card with %s MB free, %s: %s', (backend, memoryMB, freeMB, fastMode, fast) => {
     const id = 'qwen3-tts-0.6b-base-q8';
     VOICE_RUNTIME.launch({
-      id, model: VOICES[id], port: 1234, build: { backend }, freeMB, modelsDir: dir, files: fs,
+      id, model: VOICES[id], port: 1234, build: { backend }, freeMB, memoryMB, fastMode, modelsDir: dir, files: fs,
     });
     const config = JSON.parse(fs.readFileSync(path.join(dir, 'server.json')));
     expect(config.backend).toBe(backend);

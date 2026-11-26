@@ -93,6 +93,8 @@ export interface EventData {
     | 'local.init.tts.start'
     | 'local.init.tts.ready'
     | 'local.init.tts.error'
+    // Fork: what the engines hold on the graphics card (`src/app/gpuMemoryLog.ts`).
+    | 'local.memory'
     // LocalNative (Electron sidecar) pipeline event types
     | 'local.native.session.closed'
     | 'local.native.hardware'

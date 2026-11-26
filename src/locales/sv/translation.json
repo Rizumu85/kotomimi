@@ -806,7 +806,8 @@
     "speakerClient": "Jag",
     "participantClient": "Den andra",
     "copyLogs": "Kopiera",
-    "logsCopied": "Kopierat!"
+    "logsCopied": "Kopierat!",
+    "exportLogs": "Exportera"
   },
   "mainPanel": {
     "subtitleTakeover": "Översättningar visas i undertextöverlägget",
@@ -2203,6 +2204,18 @@
     "echoCancellationGate": "Efter ljudnivå",
     "echoCancellationGateTooltip": "Efter ljudstyrka — för högtalare: ljudet de spelar upp kommer tillbaka till mikrofonen mycket svagare än din röst, så det filtreras bort efter ljudstyrka medan din röst lämnas oförändrad.",
     "echoCancellationOff": "Av",
-    "echoCancellationOffTooltip": "Av — mikrofonen skickas oförändrad till igenkänningen. Använd med hörlurar: inget ljud läcker in i mikrofonen."
+    "echoCancellationOffTooltip": "Av — mikrofonen skickas oförändrad till igenkänningen. Använd med hörlurar: inget ljud läcker in i mikrofonen.",
+    "engine": {
+      "label": "Motor",
+      "auto": "Välj motor automatiskt",
+      "cuda": "CUDA-motor",
+      "vulkan": "Vulkan-motor",
+      "tooltip": "Experimentell funktion. Välj motor för taligenkänning och uppläsning. Automatiskt läge använder CUDA på det här NVIDIA-grafikkortet. Motorerna startas om när du byter. Första gången du byter laddas den andra motorn ner.",
+      "fastLabel": "Snabbare uppläsning",
+      "fastAuto": "Snabbare uppläsning när grafikminnet räcker",
+      "fastOn": "Alltid snabbare uppläsning",
+      "fastOff": "Ingen acceleration",
+      "fastTooltip": "Experimentell funktion. Snabbare uppläsning kräver ungefär 1 GB extra grafikminne. I automatiskt läge aktiveras funktionen bara om det finns tillräckligt med ledigt grafikminne."
+    }
   }
 }

@@ -806,7 +806,8 @@
     "speakerClient": "自分",
     "participantClient": "相手",
     "copyLogs": "コピー",
-    "logsCopied": "コピー完了！"
+    "logsCopied": "コピー完了！",
+    "exportLogs": "エクスポート"
   },
   "mainPanel": {
     "subtitleTakeover": "翻訳は字幕オーバーレイに表示されています",
@@ -2203,6 +2204,18 @@
     "echoCancellationGate": "音量で判定",
     "echoCancellationGateTooltip": "音量で判定 — スピーカー使用時：スピーカーからマイクに回り込む音はあなたの声よりはるかに小さいため、音量で除外し、あなたの声はそのままにします。",
     "echoCancellationOff": "オフ",
-    "echoCancellationOffTooltip": "オフ — マイクの音をそのまま認識に送ります。ヘッドホン使用時向けで、マイクに音が入り込むことはありません。"
+    "echoCancellationOffTooltip": "オフ — マイクの音をそのまま認識に送ります。ヘッドホン使用時向けで、マイクに音が入り込むことはありません。",
+    "engine": {
+      "label": "エンジン",
+      "auto": "自動選択",
+      "cuda": "CUDA エンジン",
+      "vulkan": "Vulkan エンジン",
+      "tooltip": "実験機能です。音声認識と読み上げに使うエンジンを選びます。「自動選択」では、この NVIDIA グラフィックカードで CUDA を使います。切り替えるとエンジンが再起動します。初回の切り替え時には、もう一方のエンジンをダウンロードします。",
+      "fastLabel": "読み上げの高速化",
+      "fastAuto": "GPU メモリに余裕があれば高速化",
+      "fastOn": "常に高速化",
+      "fastOff": "高速化しない",
+      "fastTooltip": "実験機能です。読み上げが速くなりますが、GPU メモリを約 1 GB 多く使います。自動設定では、GPU メモリに余裕があるときだけ高速化します。"
+    }
   }
 }

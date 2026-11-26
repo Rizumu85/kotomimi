@@ -219,6 +219,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "Kun alkuperäisen äänen läpivienti on käytössä, vain äänenvoimakkuuden mukaan toimiva menetelmä toimii: muut menetelmät vaimentavat oman äänesi kaikuna."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "Valitse moottori automaattisesti"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "CUDA-moottori"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "Nopeuta, jos näyttömuistia riittää"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "Ääneenluvun nopeutus"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "Ei nopeutusta"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "Nopeuta aina"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "Kokeellinen nopeutus tekee ääneenluvusta nopeampaa, mutta vie noin 1 GB enemmän näyttömuistia. Automaattinen asetus ottaa nopeutuksen käyttöön vain, jos näyttömuistia riittää."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "Moottori"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "Kokeellinen asetus puheentunnistuksen ja ääneenluvun moottorin valintaan. Automaattinen valinta käyttää CUDAa tällä NVIDIA-näytönohjaimella. Vaihto käynnistää moottorit uudelleen. Ensimmäisellä vaihtokerralla toinen moottori ladataan."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "Vulkan-moottori"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Etsi uudelleen"
@@ -1686,6 +1726,10 @@
   "fork.wizard.tryServer": {
     "en": "Connect",
     "text": "Yhdistä"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "Vie"
   },
   "models.detectsGroup": {
     "en": "Detects the language",

@@ -223,6 +223,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "원본 오디오 패스스루가 켜져 있으면 음량 기준만 작동합니다. 다른 방식은 내 목소리를 에코로 인식해 제거합니다."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "엔진 자동 선택"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "CUDA 엔진"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "그래픽 메모리가 충분할 때 가속"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "읽어주기 가속"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "가속 안 함"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "항상 가속"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "실험 기능입니다. 가속을 켜면 더 빠르게 읽어 주지만 그래픽 메모리를 약 1 GB 더 사용합니다. 자동으로 설정하면 그래픽 메모리가 충분할 때만 가속이 켜집니다."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "엔진"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "실험 기능입니다. 음성 인식과 읽어주기에 사용할 엔진을 선택합니다. 자동으로 설정하면 이 NVIDIA 그래픽 카드에서는 CUDA를 사용합니다. 엔진을 바꾸면 엔진이 다시 시작되며, 처음 바꿀 때는 다른 엔진을 다운로드합니다."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "Vulkan 엔진"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "다시 검색"
@@ -1690,6 +1730,10 @@
   "fork.wizard.tryServer": {
     "en": "Connect",
     "text": "연결"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "내보내기"
   },
   "models.detectsGroup": {
     "en": "Detects the language",

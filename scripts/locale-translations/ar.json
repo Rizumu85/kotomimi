@@ -223,6 +223,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "عند تفعيل تمرير الصوت الأصلي، لا يعمل إلا خيار «حسب مستوى الصوت»: أما الخيارات الأخرى فتتعامل مع صوتك كأنه صدى وتلغيه."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "اختيار المحرك تلقائيًا"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "محرك CUDA"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "التسريع عند توفر ذاكرة رسومات كافية"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "تسريع القراءة الصوتية"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "بدون تسريع"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "التسريع دائمًا"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "ميزة تجريبية. يسرّع هذا الخيار القراءة الصوتية، لكنه يستهلك نحو 1 GB إضافية من ذاكرة الرسومات. يُفعّل التسريع تلقائيًا فقط عند توفر ذاكرة رسومات كافية."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "المحرك"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "ميزة تجريبية. يحدد هذا الخيار المحرك المستخدم للتعرّف على الكلام والقراءة الصوتية. يستخدم الاختيار التلقائي CUDA على بطاقة الرسومات NVIDIA هذه. تُعاد تهيئة المحركات عند التبديل، ويُنزّل المحرك الآخر عند التبديل إليه لأول مرة."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "محرك Vulkan"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "البحث مجددًا"
@@ -1690,6 +1730,10 @@
   "fork.wizard.tryServer": {
     "en": "Connect",
     "text": "اتصال"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "تصدير"
   },
   "models.detectsGroup": {
     "en": "Detects the language",

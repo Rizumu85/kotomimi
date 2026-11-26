@@ -219,6 +219,46 @@
     "en": "While Original Audio Passthrough is on, only By loudness works: the others take your own voice for echo.",
     "text": "Коли ввімкнено пряме пропускання оригінального аудіо, працює лише «За гучністю»: інші способи сприймають ваш голос як відлуння й усувають його."
   },
+  "fork.engine.auto": {
+    "en": "Engine chosen automatically",
+    "text": "Автоматичний вибір рушія"
+  },
+  "fork.engine.cuda": {
+    "en": "CUDA engine",
+    "text": "Рушій CUDA"
+  },
+  "fork.engine.fastAuto": {
+    "en": "Voice sped up when there is room",
+    "text": "Якщо вистачає відеопам’яті"
+  },
+  "fork.engine.fastLabel": {
+    "en": "Voice speed-up",
+    "text": "Прискорення озвучення"
+  },
+  "fork.engine.fastOff": {
+    "en": "Voice never sped up",
+    "text": "Не прискорювати"
+  },
+  "fork.engine.fastOn": {
+    "en": "Voice always sped up",
+    "text": "Завжди прискорювати"
+  },
+  "fork.engine.fastTooltip": {
+    "en": "Experimental: the voice is faster sped up, but takes about 1 GB more video memory. Automatic turns it on only when the card has room.",
+    "text": "Експериментальний параметр. Озвучення працює швидше, але потребує приблизно на 1 GB більше відеопам’яті. В автоматичному режимі прискорення вмикається лише тоді, коли вистачає вільної відеопам’яті."
+  },
+  "fork.engine.label": {
+    "en": "Engine",
+    "text": "Рушій"
+  },
+  "fork.engine.tooltip": {
+    "en": "Experimental: which engine runs recognition and the voice. Automatic uses CUDA on this graphics card. A change restarts the engines, and the first switch downloads the other one.",
+    "text": "Експериментальний параметр. Виберіть рушій для розпізнавання мовлення й озвучення. В автоматичному режимі на цій відеокарті NVIDIA використовується CUDA. Після перемикання рушії перезапустяться. Під час першого перемикання потрібно завантажити інший рушій."
+  },
+  "fork.engine.vulkan": {
+    "en": "Vulkan engine",
+    "text": "Рушій Vulkan"
+  },
   "fork.find.again": {
     "en": "Search again",
     "text": "Шукати знову"
@@ -1686,6 +1726,10 @@
   "fork.wizard.tryServer": {
     "en": "Connect",
     "text": "Підключитися"
+  },
+  "logsPanel.exportLogs": {
+    "en": "Export",
+    "text": "Експортувати"
   },
   "models.detectsGroup": {
     "en": "Detects the language",
