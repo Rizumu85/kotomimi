@@ -2128,12 +2128,7 @@
       "auto": "自动选择引擎",
       "cuda": "CUDA 引擎",
       "vulkan": "Vulkan 引擎",
-      "tooltip": "实验性：识别和朗读用哪种引擎。自动会在这块 NVIDIA 显卡上用 CUDA。切换后引擎会重新启动，第一次切换要下载另一种引擎。",
-      "fastLabel": "朗读加速",
-      "fastAuto": "显存够时加速朗读",
-      "fastOn": "总是加速朗读",
-      "fastOff": "不加速朗读",
-      "fastTooltip": "实验性：加速后朗读更快，但要多占约 1 GB 显存。自动只在显存够时打开。"
+      "tooltip": "实验性：识别和朗读用哪种引擎。自动会在这块 NVIDIA 显卡上用 CUDA。切换后引擎会重新启动，第一次切换要下载另一种引擎。"
     },
     "recording": {
       "toggle": "录下会话",

@@ -2210,12 +2210,7 @@
       "auto": "Pilih mesin otomatis",
       "cuda": "Mesin CUDA",
       "vulkan": "Mesin Vulkan",
-      "tooltip": "Eksperimental: pilih mesin untuk pengenalan ucapan dan pembacaan teks. Mode otomatis memakai CUDA pada kartu grafis NVIDIA ini. Mesin dimulai ulang saat diganti. Saat pertama kali beralih, aplikasi akan mengunduh mesin lainnya.",
-      "fastLabel": "Percepatan pembacaan",
-      "fastAuto": "Percepat jika memori grafis cukup",
-      "fastOn": "Selalu percepat",
-      "fastOff": "Tanpa percepatan",
-      "fastTooltip": "Eksperimental: teks dibacakan lebih cepat, tetapi butuh sekitar 1 GB memori grafis tambahan. Mode otomatis hanya mengaktifkan percepatan jika memori grafis cukup."
+      "tooltip": "Eksperimental: pilih mesin untuk pengenalan ucapan dan pembacaan teks. Mode otomatis memakai CUDA pada kartu grafis NVIDIA ini. Mesin dimulai ulang saat diganti. Saat pertama kali beralih, aplikasi akan mengunduh mesin lainnya."
     }
   }
 }

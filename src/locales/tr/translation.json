@@ -2210,12 +2210,7 @@
       "auto": "Otomatik motor seçimi",
       "cuda": "CUDA motoru",
       "vulkan": "Vulkan motoru",
-      "tooltip": "Deneysel özellik. Konuşma tanıma ve sesli okuma için kullanılacak motoru seçer. Otomatik seçim bu NVIDIA ekran kartında CUDA kullanır. Seçimi değiştirdiğinizde motorlar yeniden başlatılır. İlk geçişte diğer motor indirilir.",
-      "fastLabel": "Sesli okumayı hızlandır",
-      "fastAuto": "Bellek yeterliyse hızlandır",
-      "fastOn": "Her zaman hızlandır",
-      "fastOff": "Hızlandırma",
-      "fastTooltip": "Deneysel özellik. Sesli okumayı hızlandırır ve yaklaşık 1 GB daha fazla ekran kartı belleği kullanır. Otomatik modda yalnızca yeterli ekran kartı belleği varsa açılır."
+      "tooltip": "Deneysel özellik. Konuşma tanıma ve sesli okuma için kullanılacak motoru seçer. Otomatik seçim bu NVIDIA ekran kartında CUDA kullanır. Seçimi değiştirdiğinizde motorlar yeniden başlatılır. İlk geçişte diğer motor indirilir."
     }
   }
 }

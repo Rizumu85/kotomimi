@@ -80,7 +80,6 @@ function computer({
     window,
     extract: async (archive, into) => { world.extracted = fs.readFileSync(archive); fs.writeFileSync(path.join(into, 'server.exe'), 'exe'); },
     freePort: async () => 45123,
-    videoMemoryFree: async () => null,
     get: async (port, pathname) => { world.asked = `${port}${pathname}`; return world.healthy ? { status: 200, body: '{"status":"ok"}' } : null; },
     setPriority: (pid, priority) => world.priorities.push([pid, priority]),
     sleep: async () => {},
@@ -109,11 +108,7 @@ describe('the Windows audio builds', () => {
 
   it('counts both pinned archives in one download and starts the CUDA recognizer without voice options', async () => {
     const audio = audioBuildChoice(card, dir);
-    const asked = [];
-    const { world, engine } = computer({
-      catalog, served, audio, hasCudaDevice: async () => true,
-      videoMemoryFree: async () => { asked.push('free'); return 9000; },
-    });
+    const { world, engine } = computer({ catalog, served, audio, hasCudaDevice: async () => true });
     expect(ENGINE.builds['win32-x64'].cuda.bytes).toBe(854645866);
     expect(engine.status().engineBytes).toBe(cuda.bytes);
     await engine.download('m1');
@@ -127,8 +122,6 @@ describe('the Windows audio builds', () => {
     const config = JSON.parse(fs.readFileSync(path.join(dir, 'models', 'server.json')));
     expect(config.backend).toBe('cuda');
     expect(config.models[0].session_options).toEqual(CATALOG.models.m1.options);
-    // What is free on the card is asked as a CUDA runtime starts: the voice's speed mode is decided by it.
-    expect(asked).toEqual(['free']);
     await engine.stop();
   });
 

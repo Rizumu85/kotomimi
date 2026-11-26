@@ -2210,12 +2210,7 @@
       "auto": "Sélection automatique",
       "cuda": "Moteur CUDA",
       "vulkan": "Moteur Vulkan",
-      "tooltip": "Réglage expérimental du moteur de reconnaissance vocale et de lecture à voix haute. En mode automatique, cette carte graphique NVIDIA utilise CUDA. Les moteurs redémarrent à chaque changement. Le premier changement nécessite de télécharger l’autre moteur.",
-      "fastLabel": "Accélération de la lecture",
-      "fastAuto": "Si la mémoire vidéo le permet",
-      "fastOn": "Toujours",
-      "fastOff": "Jamais",
-      "fastTooltip": "Cette option expérimentale accélère la lecture à voix haute, mais utilise environ 1 GB de mémoire vidéo en plus. En mode automatique, elle ne s’active que si la mémoire vidéo disponible est suffisante."
+      "tooltip": "Réglage expérimental du moteur de reconnaissance vocale et de lecture à voix haute. En mode automatique, cette carte graphique NVIDIA utilise CUDA. Les moteurs redémarrent à chaque changement. Le premier changement nécessite de télécharger l’autre moteur."
     }
   }
 }

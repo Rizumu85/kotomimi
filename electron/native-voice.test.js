@@ -287,22 +287,13 @@ describe('a sentence that comes whole', () => {
 });
 
 describe('what is fetched for the voice engine', () => {
-  // The 0.6B's file is 1899 MB: by itself the speed mode wants a card of 15 GB or more, and that file and 4096 MB
-  // more free when the voice starts; the user may turn it on or off whatever the card.
-  it.each([
-    ['cuda', 16303, 5995, 'auto', true], ['cuda', 16303, 5994, 'auto', false], ['cuda', 10240, 8000, 'auto', false],
-    ['cuda', 16303, null, 'auto', false], ['cuda', 8192, 1000, 'on', true], ['cuda', 16303, 12000, 'off', false],
-    ['vulkan', 16384, 12000, 'on', false], ['metal', 32768, null, 'auto', false],
-  ])('uses the voice speed mode on %s, a %s MB card with %s MB free, %s: %s', (backend, memoryMB, freeMB, fastMode, fast) => {
+  // No speed mode on any backend: the voice keeps up without it, and its memory grows as a run goes.
+  it.each(['cuda', 'vulkan', 'metal'])('runs the voice on %s with its own options only', (backend) => {
     const id = 'qwen3-tts-0.6b-base-q8';
-    VOICE_RUNTIME.launch({
-      id, model: VOICES[id], port: 1234, build: { backend }, freeMB, memoryMB, fastMode, modelsDir: dir, files: fs,
-    });
+    VOICE_RUNTIME.launch({ id, model: VOICES[id], port: 1234, build: { backend }, modelsDir: dir, files: fs });
     const config = JSON.parse(fs.readFileSync(path.join(dir, 'server.json')));
     expect(config.backend).toBe(backend);
-    expect(config.models[0].session_options).toEqual({
-      'qwen3_tts.voice_prompt_cache_slots': 8, ...(fast ? { 'qwen3_tts.perf_mode': 'cuda_perf' } : {}),
-    });
+    expect(config.models[0].session_options).toEqual({ 'qwen3_tts.voice_prompt_cache_slots': 8 });
   });
   it('is the recognition engine\'s own runtime, and models pinned to a revision with their size and hash', () => {
     expect(ENGINE.builds['win32-x64'].url).toMatch(/audio\.cpp\/releases\/download\/v[\d.]+\//);

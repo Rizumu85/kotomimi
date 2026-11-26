@@ -2210,12 +2210,7 @@
       "auto": "Välj motor automatiskt",
       "cuda": "CUDA-motor",
       "vulkan": "Vulkan-motor",
-      "tooltip": "Experimentell funktion. Välj motor för taligenkänning och uppläsning. Automatiskt läge använder CUDA på det här NVIDIA-grafikkortet. Motorerna startas om när du byter. Första gången du byter laddas den andra motorn ner.",
-      "fastLabel": "Snabbare uppläsning",
-      "fastAuto": "Snabbare uppläsning när grafikminnet räcker",
-      "fastOn": "Alltid snabbare uppläsning",
-      "fastOff": "Ingen acceleration",
-      "fastTooltip": "Experimentell funktion. Snabbare uppläsning kräver ungefär 1 GB extra grafikminne. I automatiskt läge aktiveras funktionen bara om det finns tillräckligt med ledigt grafikminne."
+      "tooltip": "Experimentell funktion. Välj motor för taligenkänning och uppläsning. Automatiskt läge använder CUDA på det här NVIDIA-grafikkortet. Motorerna startas om när du byter. Första gången du byter laddas den andra motorn ner."
     }
   }
 }

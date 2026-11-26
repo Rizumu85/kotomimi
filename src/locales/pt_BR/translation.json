@@ -2210,12 +2210,7 @@
       "auto": "Selecionar motor automaticamente",
       "cuda": "Motor CUDA",
       "vulkan": "Motor Vulkan",
-      "tooltip": "Configuração experimental do motor de reconhecimento de fala e leitura em voz alta. O modo automático usa CUDA nesta placa de vídeo NVIDIA. Ao trocar de motor, os motores reiniciam. Na primeira troca, o outro motor precisa ser baixado.",
-      "fastLabel": "Aceleração da leitura em voz alta",
-      "fastAuto": "Acelerar se houver memória de vídeo suficiente",
-      "fastOn": "Sempre acelerar",
-      "fastOff": "Nunca acelerar",
-      "fastTooltip": "A aceleração é experimental e deixa a leitura em voz alta mais rápida, mas usa cerca de 1 GB a mais de memória de vídeo. O modo automático só ativa a aceleração se houver memória de vídeo suficiente."
+      "tooltip": "Configuração experimental do motor de reconhecimento de fala e leitura em voz alta. O modo automático usa CUDA nesta placa de vídeo NVIDIA. Ao trocar de motor, os motores reiniciam. Na primeira troca, o outro motor precisa ser baixado."
     }
   }
 }

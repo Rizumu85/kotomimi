@@ -2210,12 +2210,7 @@
       "auto": "Pilih enjin secara automatik",
       "cuda": "Enjin CUDA",
       "vulkan": "Enjin Vulkan",
-      "tooltip": "Ciri percubaan: Pilih enjin untuk pengecaman pertuturan dan bacaan. Mod automatik menggunakan CUDA pada kad grafik NVIDIA ini. Enjin akan dimulakan semula apabila anda menukar pilihan. Kali pertama anda bertukar, enjin satu lagi perlu dimuat turun.",
-      "fastLabel": "Percepat bacaan",
-      "fastAuto": "Percepat jika memori video mencukupi",
-      "fastOn": "Sentiasa percepat bacaan",
-      "fastOff": "Jangan percepat bacaan",
-      "fastTooltip": "Ciri percubaan: Bacaan lebih pantas tetapi menggunakan kira-kira 1 GB memori video tambahan. Mod automatik hanya mengaktifkan ciri ini jika memori video mencukupi."
+      "tooltip": "Ciri percubaan: Pilih enjin untuk pengecaman pertuturan dan bacaan. Mod automatik menggunakan CUDA pada kad grafik NVIDIA ini. Enjin akan dimulakan semula apabila anda menukar pilihan. Kali pertama anda bertukar, enjin satu lagi perlu dimuat turun."
     }
   }
 }

@@ -2210,12 +2210,7 @@
       "auto": "Automatyczny wybór silnika",
       "cuda": "Silnik CUDA",
       "vulkan": "Silnik Vulkan",
-      "tooltip": "Ustawienie eksperymentalne. Wybiera silnik do rozpoznawania mowy i odczytu na głos. Tryb automatyczny używa CUDA na tej karcie NVIDIA. Zmiana uruchamia silnik ponownie. Przy pierwszym przełączeniu aplikacja pobierze drugi silnik.",
-      "fastLabel": "Przyspieszenie odczytu",
-      "fastAuto": "Przyspiesz, gdy wystarczy pamięci karty",
-      "fastOn": "Zawsze przyspieszaj",
-      "fastOff": "Bez przyspieszenia",
-      "fastTooltip": "Ustawienie eksperymentalne. Przyspiesza odczyt na głos i zużywa około 1 GB więcej pamięci karty graficznej. Tryb automatyczny włącza przyspieszenie tylko wtedy, gdy jest dość wolnej pamięci na karcie."
+      "tooltip": "Ustawienie eksperymentalne. Wybiera silnik do rozpoznawania mowy i odczytu na głos. Tryb automatyczny używa CUDA na tej karcie NVIDIA. Zmiana uruchamia silnik ponownie. Przy pierwszym przełączeniu aplikacja pobierze drugi silnik."
     }
   }
 }

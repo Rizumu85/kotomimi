@@ -2210,12 +2210,7 @@
       "auto": "Selezione automatica",
       "cuda": "Motore CUDA",
       "vulkan": "Motore Vulkan",
-      "tooltip": "Funzione sperimentale. Scegli il motore per il riconoscimento vocale e la lettura ad alta voce. La selezione automatica usa CUDA su questa scheda grafica NVIDIA. Quando cambi motore, i motori si riavviano. Al primo cambio viene scaricato l'altro motore.",
-      "fastLabel": "Accelerazione della lettura",
-      "fastAuto": "Solo con memoria video sufficiente",
-      "fastOn": "Sempre attiva",
-      "fastOff": "Disattivata",
-      "fastTooltip": "Funzione sperimentale. L'accelerazione rende la lettura ad alta voce più rapida, ma usa circa 1 GB di memoria video in più. In modalità automatica si attiva solo se c'è abbastanza memoria video."
+      "tooltip": "Funzione sperimentale. Scegli il motore per il riconoscimento vocale e la lettura ad alta voce. La selezione automatica usa CUDA su questa scheda grafica NVIDIA. Quando cambi motore, i motori si riavviano. Al primo cambio viene scaricato l'altro motore."
     }
   }
 }

@@ -2210,12 +2210,7 @@
       "auto": "Awtomatikong pumili ng makina",
       "cuda": "Makinang CUDA",
       "vulkan": "Makinang Vulkan",
-      "tooltip": "Eksperimental. Piliin ang makinang kikilala sa sinasabi at magbabasa nang malakas. Sa awtomatikong mode, gagamitin ang CUDA sa NVIDIA graphics card na ito. Magre-restart ang makina kapag nagpalit ka. Sa unang paglipat, ida-download ang kabilang makina.",
-      "fastLabel": "Pabilisin ang pagbasa",
-      "fastAuto": "Pabilisin kung sapat ang memory",
-      "fastOn": "Palaging pabilisin",
-      "fastOff": "Huwag pabilisin",
-      "fastTooltip": "Eksperimental. Bibilis ang pagbasa nang malakas, pero gagamit ito ng dagdag na humigit-kumulang 1 GB na video memory. Sa awtomatikong mode, gagana lang ito kung sapat ang video memory."
+      "tooltip": "Eksperimental. Piliin ang makinang kikilala sa sinasabi at magbabasa nang malakas. Sa awtomatikong mode, gagamitin ang CUDA sa NVIDIA graphics card na ito. Magre-restart ang makina kapag nagpalit ka. Sa unang paglipat, ida-download ang kabilang makina."
     }
   }
 }

@@ -2210,12 +2210,7 @@
       "auto": "Engine automatisch wählen",
       "cuda": "CUDA-Engine",
       "vulkan": "Vulkan-Engine",
-      "tooltip": "Experimentelle Einstellung für Spracherkennung und Vorlesen. Die Automatik nutzt auf dieser NVIDIA-Grafikkarte CUDA. Beim ersten Wechsel wird die andere Engine heruntergeladen. Nach jedem Wechsel starten die Engines neu.",
-      "fastLabel": "Vorlesen beschleunigen",
-      "fastAuto": "Bei genug Grafikspeicher",
-      "fastOn": "Immer beschleunigen",
-      "fastOff": "Nie beschleunigen",
-      "fastTooltip": "Diese experimentelle Einstellung beschleunigt das Vorlesen und benötigt etwa 1 GB mehr Grafikspeicher. Die Automatik schaltet die Beschleunigung nur ein, wenn genug Grafikspeicher frei ist."
+      "tooltip": "Experimentelle Einstellung für Spracherkennung und Vorlesen. Die Automatik nutzt auf dieser NVIDIA-Grafikkarte CUDA. Beim ersten Wechsel wird die andere Engine heruntergeladen. Nach jedem Wechsel starten die Engines neu."
     }
   }
 }

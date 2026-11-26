@@ -2210,12 +2210,7 @@
       "auto": "Tự động chọn bộ xử lý",
       "cuda": "Bộ xử lý CUDA",
       "vulkan": "Bộ xử lý Vulkan",
-      "tooltip": "Tính năng thử nghiệm. Chọn bộ xử lý dùng để nhận dạng giọng nói và đọc thành tiếng. Chế độ tự động dùng CUDA trên card đồ họa NVIDIA này. Khi chuyển, bộ xử lý sẽ khởi động lại. Lần đầu chuyển, ứng dụng sẽ tải bộ xử lý còn lại.",
-      "fastLabel": "Tăng tốc đọc",
-      "fastAuto": "Tăng tốc khi đủ bộ nhớ đồ họa",
-      "fastOn": "Luôn tăng tốc đọc",
-      "fastOff": "Không tăng tốc đọc",
-      "fastTooltip": "Tính năng thử nghiệm. Tăng tốc giúp đọc nhanh hơn nhưng dùng thêm khoảng 1 GB bộ nhớ đồ họa. Chế độ tự động chỉ bật tăng tốc khi đủ bộ nhớ đồ họa."
+      "tooltip": "Tính năng thử nghiệm. Chọn bộ xử lý dùng để nhận dạng giọng nói và đọc thành tiếng. Chế độ tự động dùng CUDA trên card đồ họa NVIDIA này. Khi chuyển, bộ xử lý sẽ khởi động lại. Lần đầu chuyển, ứng dụng sẽ tải bộ xử lý còn lại."
     }
   }
 }

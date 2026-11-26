@@ -1561,7 +1561,7 @@ const adapter = createModelMemoryReader()();
  * Fork: the user's own choice of audio.cpp build and of the voice's speed mode (Help's experimental pickers), kept
  * beside the settings so the main process has it before any page asks.
  */
-const AUDIO_PREFS = { build: ['auto', 'cuda', 'vulkan'], fast: ['auto', 'on', 'off'] };
+const AUDIO_PREFS = { build: ['auto', 'cuda', 'vulkan'] };
 const audioPrefsFile = () => path.join(app.getPath('userData'), 'audio-engine.json');
 const audioPrefs = () => {
   try {
@@ -1577,7 +1577,7 @@ ipcMain.handle('model-memory:get', async () => (await adapter)?.memoryMB ?? null
 const audioEngineState = async () => {
   if (process.platform !== 'win32') return null;
   const choice = await audioChoice;
-  return { cudaCapable: choice.cudaCapable, build: choice.build, fast: choice.fast, using: choice.cuda ? 'cuda' : 'vulkan' };
+  return { cudaCapable: choice.cudaCapable, build: choice.build, using: choice.cuda ? 'cuda' : 'vulkan' };
 };
 ipcMain.handle('audio-engine:get', () => audioEngineState());
 /** A change of build or speed mode under way: engines are not made until it is done, and changes go one by one. */
@@ -1602,14 +1602,13 @@ async function setAudioEngine(args) {
   for (const [key, allowed] of Object.entries(AUDIO_PREFS)) if (allowed.includes(args?.[key])) choice[key] = args[key];
   // A choice the user makes again is tried again: what failed in this run is forgotten with it.
   if (AUDIO_PREFS.build.includes(args?.build)) { choice.failed = false; choice.chosen = true; }
-  try { require('fs').writeFileSync(audioPrefsFile(), JSON.stringify({ build: choice.build, fast: choice.fast })); } catch { /* holds for this run */ }
-  // Both audio.cpp engines start again on the build chosen; the speed mode is the voice's alone. The page offers
-  // this only while no session runs.
-  const rebuild = choice.cuda !== before;
+  try { require('fs').writeFileSync(audioPrefsFile(), JSON.stringify({ build: choice.build })); } catch { /* holds for this run */ }
+  // Both audio.cpp engines start again on the build chosen. The page offers this only while no session runs.
+  if (choice.cuda === before) return audioEngineState();
   const voice = nativeVoice;
-  const recognizer = rebuild ? nativeEngine : null;
+  const recognizer = nativeEngine;
   nativeVoice = null;
-  if (rebuild) nativeEngine = null;
+  nativeEngine = null;
   await Promise.allSettled([voice?.stop(), recognizer?.stop()]);
   return audioEngineState();
 }

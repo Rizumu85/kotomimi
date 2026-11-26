@@ -767,17 +767,12 @@ function warmWords(model) {
  * sentence in the model's own voice.
  */
 const VOICE_RUNTIME = {
-  launch({ id, model, port, build, modelsDir, files, freeMB, memoryMB = null, fastMode = 'auto' }) {
-    // RTX 5070 Ti, Qwen3-TTS 1.7B: Vulkan/CUDA/cuda_perf took 0.36/0.21/0.15 of the sentence duration,
-    // or 0.58/0.68/0.43-0.53 beside another model. Its cost grows as it goes: recordings read with their words in
-    // four sentence lengths took the 1.7B from 1.9 GB to 4.3 GB over 18 of them (plain CUDA: 2.7 GB throughout),
-    // most of it over the first dozen, none past them (graphs kept per shape). So by itself it is used on a card of
-    // 16 GB or more, and only with the model's file and 4 GB more free as the voice starts. The user may choose
-    // otherwise (Help's experimental pickers: `fastMode`).
-    const fits = memoryMB !== null && memoryMB >= FAST_VOICE_CARD_MB && freeMB !== null
-      && freeMB >= model.bytes / 1024 ** 2 + FAST_VOICE_ROOM_MB;
-    const fast = build.backend === 'cuda' && model.family === 'qwen3_tts' && fastMode !== 'off' && (fastMode === 'on' || fits);
-    const options = { ...model.options, ...(fast ? { 'qwen3_tts.perf_mode': 'cuda_perf' } : {}) };
+  launch({ id, model, port, build, modelsDir, files }) {
+    // No speed mode (`qwen3_tts.perf_mode`). On an RTX 5070 Ti the 1.7B took 0.36/0.21/0.15 of a sentence's
+    // duration on Vulkan/CUDA/CUDA with cuda_perf: real time thrice over without it. And cuda_perf's memory grows as
+    // a run goes: recordings read with their words in four sentence lengths took the 1.7B from 1.9 GB to 4.3 GB over
+    // a dozen (plain CUDA: 2.7 GB throughout), which filled a 10 GB card beside VRChat (2026-11-26).
+    const options = { ...model.options };
     files.writeFileSync(path.join(modelsDir, 'server.json'), JSON.stringify({
       host: LOOPBACK,
       port,
@@ -1384,19 +1379,16 @@ function openWindow({ port, pathname, model, sampleRate, language, context, time
 }
 
 /**
- * Both audio servers use the same decision, including after moving the models to another drive. `build` and `fast`
- * are the user's own (Help's experimental pickers, `audio-engine.json`): 'auto' leaves it to the card, the driver and
- * what failed before; 'cuda' or 'vulkan' holds to one; the voice's speed mode `fast` is 'auto', 'on' or 'off'.
+ * Both audio servers use the same decision, including after moving the models to another drive. `build` is the
+ * user's own (Help's experimental picker, `audio-engine.json`): 'auto' leaves it to the card, the driver and what
+ * failed before; 'cuda' or 'vulkan' holds to one.
  */
 function audioBuildChoice(adapter, profile, version = ENGINE.version, prefs = {}) {
   const marker = path.join(profile, `audio-vulkan-${version}`);
   return {
     build: prefs.build ?? 'auto',
-    fast: prefs.fast ?? 'auto',
-    /** The user has chosen with the pickers: both builds of this version are kept from then on, to switch between. */
+    /** The user has chosen with the picker: both builds of this version are kept from then on, to switch between. */
     chosen: prefs.build !== undefined,
-    /** The card's own memory, for the voice's speed mode. */
-    memoryMB: adapter?.memoryMB ?? null,
     /** What failed in this run: the CUDA build is not tried again until the app starts afresh. */
     failed: false,
     fallback: fs.existsSync(marker),
@@ -1413,24 +1405,6 @@ function audioBuildChoice(adapter, profile, version = ENGINE.version, prefs = {}
       try { fs.writeFileSync(marker, ''); } catch { /* The in-memory choice lasts for this run. */ }
     },
   };
-}
-
-/** Beyond a voice model's file, the room its speed mode is used with, and the least card it is used on by itself. */
-const FAST_VOICE_ROOM_MB = 4096;
-const FAST_VOICE_CARD_MB = 15 * 1024;
-
-/**
- * The video memory free now on the NVIDIA cards, in MB: the least of them, as the driver's own tool tells it; null
- * where it cannot be told. CUDA's own count on Windows leaves out what other programs hold (15.7 GB "free" here
- * while nvidia-smi saw 6.4 of 16 GB in use).
- */
-function freeVideoMemory() {
-  return new Promise((resolve) => {
-    execFile('nvidia-smi', ['--query-gpu=memory.free', '--format=csv,noheader,nounits'], { windowsHide: true, timeout: 5_000 }, (error, out) => {
-      const free = error ? [] : String(out).split(/\r?\n/).filter((line) => /^\s*\d+\s*$/.test(line)).map(Number);
-      resolve(free.length ? Math.min(...free) : null);
-    });
-  });
 }
 
 function listsCudaDevice(exe) {
@@ -1456,8 +1430,6 @@ function createNativeEngine(deps = {}) {
     spawn = nodeSpawn,
     audio,
     hasCudaDevice = listsCudaDevice,
-    /** The video memory free now, in MB, or null: asked as a CUDA runtime starts (`VOICE_RUNTIME`'s speed mode). */
-    videoMemoryFree = freeVideoMemory,
     extract = untar,
     hash = hashOf,
     freePort = freePortOf,
@@ -1946,11 +1918,9 @@ function createNativeEngine(deps = {}) {
     const key = runtime.keyed ? crypto.randomBytes(24).toString('hex') : null;
     setRun({ state: 'starting', model: id, port, key, tail: '' });
     const model = MODELS_[id];
-    const freeMB = build.backend === 'cuda' ? await videoMemoryFree() : null;
-    if (myTurn !== turn) return status();
     let args;
     try {
-      args = runtime.launch({ id, model, port, key, build, modelsDir, files, freeMB, memoryMB: audio?.memoryMB ?? null, fastMode: audio?.fast });
+      args = runtime.launch({ id, model, port, key, build, modelsDir, files });
     } catch (error) {
       return setRun({ state: 'failed', tail: String(error?.message ?? error) });
     }
