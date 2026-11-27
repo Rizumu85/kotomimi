@@ -6,16 +6,16 @@ The strip is read at a glance over a game or a meeting, so its frame holds still
 
 `ElectronSubtitleSurface` opens a second native window with `window.open`; `electron/subtitle-window.js` owns its place, size and pinning. The React tree stays in the main page and `SubtitleWindow` portals it across, so there is one session. Sizes go through `observeSize` (`src/components/Subtitle/surfaces/childDocument.ts`): an observer of the main page never hears the child resize.
 
-A first open is at most 880 px wide; the minimum, 340 px (`electron/popover-windows.js`), is what the narrowest toolbar needs. The toolbar frame, fitting and click-through are desktop only.
+A first open is at most 880 px wide; the minimum, 340 px (`electron/popover-windows.js`), fits the narrowest toolbar. The toolbar frame, fitting and click-through are desktop only.
 
 ## Lanes
 
-Subtitle view is the default (`compactMode`); list view is the conversation list. Upstream's bands (`src/lib/subtitle/bands.ts`) stay undrawn.
+Subtitle view is the default (`compactMode`); list view is the conversation list. Upstream's bands (`bands.ts`) stay undrawn.
 
 `buildLanes` gives each side heard one lane, the other side's first. A lane changes only when its own side says the next sentence, so talk never pushes feedback away.
 
 - Pair: the sentence small over its answer large. The other side's lane, or the user's when alone.
-- Row: the user's lane under the other side's. Sentence, arrow, answer on one small line; approval is a tick, a correction is the sentence marked in place. Feedback has its own line, kept till the next is read.
+- Row: the user's lane under the other side's. Sentence, arrow, answer on one small line; approval is a tick, a correction is the sentence marked in place. Feedback has two lines, kept till the next is read; its reason gives way first.
 - A pair's small line is the answered sentence plus all said since, at most `STREAM_MOST` sentences, ending at the word being heard. When a newer sentence is answered the line restarts at it.
 - A row shows its newest sentence once the one before is read; "…": an answer is coming, or more was said.
 - A sentence in the reader's language is its own answer (`answersItself`). In a same-language run, speech takes the answer's place.
@@ -101,4 +101,4 @@ Up to 50 hand-kept rows (`src/lib/glossary/glossary.ts`): a word, and what it wa
 
 - Most translators see no earlier context, and Japanese omits subjects.
 - The 15 s turn cuts anywhere.
-- A centred line still growing moves sideways.
+- A centred growing line moves sideways.

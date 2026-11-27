@@ -53,7 +53,7 @@ function fixture() {
   return { state, viewState, recording, off, flush };
 }
 const writes = (kind: string) => mocks.invoke.mock.calls.filter(([c, p]) => c === 'session-recording:write' && (p as { kind: string }).kind === kind)
-  .map(([, p]) => p as { data: Record<string, unknown>; pcm: Int16Array; ms: number });
+  .map(([, p]) => p as { data: Record<string, unknown>; pcm: Int16Array; ms: number; leg?: string });
 
 describe('session recorder driver', () => {
   it('records each final stage once, excludes old/video entries, and flushes final view on end', async () => {
@@ -80,6 +80,25 @@ describe('session recorder driver', () => {
     expect(writes('line')[1].data).toMatchObject({ lineWallTime: 10001, ms: 200, wallTime: 10200 });
     expect(mocks.invoke).toHaveBeenLastCalledWith('session-recording:end', { endedAt: 10200, durationMs: 200 });
     expect(mocks.stop).toHaveBeenCalled();
+    f.off();
+  });
+
+  it('records only notices filed during the run, once across view updates and end', async () => {
+    const f = fixture();
+    f.state.setState({ phase: 'starting', step: 'checking' });
+    const notice: Entry = { kind: 'notice', id: 'delay', leg: 'participant', at: 10001, severity: 'warning',
+      message: 'The sample channel is delayed.', code: 'sample.delay', params: { seconds: 3 }, lifetime: 'transient' };
+    now = 10100;
+    f.viewState.setState({ entries: [{ ...notice, id: 'old', at: 9999 }, notice] });
+    await drain();
+    expect(writes('line').map(({ data }) => data)).toStrictEqual([{
+      stage: 'notice', leg: 'participant', entryId: 'delay', ms: 100, wallTime: 10100, lineWallTime: 10001,
+      severity: 'warning', message: notice.message, code: 'sample.delay', params: { seconds: 3 }, lifetime: 'transient',
+    }]);
+    f.viewState.setState({ entries: [{ ...notice }] });
+    f.state.setState({ phase: 'idle' });
+    await f.recording.settled();
+    expect(writes('line')).toHaveLength(1);
     f.off();
   });
 

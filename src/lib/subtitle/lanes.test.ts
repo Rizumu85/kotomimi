@@ -515,3 +515,15 @@ describe('the line for grammar feedback, kept (fork)', () => {
     expect(withFeedbackRoom(lanes([theirs, fed]), true)[1].feedback?.text).toBe('I go.');
   });
 });
+
+describe('the lines grammar feedback has (fork)', () => {
+  it('is two roomy and one squeezed tight, so that a correction and its reason both show where there is room', () => {
+    const fed = withFeedbackRoom(lanes([said('p', 'participant', 'はい。', '好的。'), said('a', 'speaker', '我想去咖啡店。', 'カフェに行きたいです。')]), true);
+    const bare = lanes([said('p', 'participant', 'はい。', '好的。'), said('a', 'speaker', '我想去咖啡店。', 'カフェに行きたいです。')]);
+    const line = (spacing: typeof ROOMY) => 24 * ROW_SCALE * spacing.rowLine;
+    // Heights are whole pixels, rounded up.
+    expect(Math.abs(lanesHeight(fed, 24) - lanesHeight(bare, 24) - (2 * line(ROOMY) + ROOMY.inner))).toBeLessThanOrEqual(1);
+    expect(Math.abs(lanesHeight(fed, 24, TIGHT) - lanesHeight(bare, 24, TIGHT) - (line(TIGHT) + TIGHT.inner))).toBeLessThanOrEqual(1);
+    expect(spacingAt(0.5).feedbackLines).toBe(1.5);
+  });
+});

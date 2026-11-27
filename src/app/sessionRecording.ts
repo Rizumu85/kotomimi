@@ -41,7 +41,7 @@ export function createSessionRecording() {
   type Run = {
     startedAt: number; origin: number; accepting: boolean; failed: boolean; opened: boolean; pendingBytes: number;
     queue: Promise<void>; raw: DeviceCaptureRecorder; rawOpening: Promise<void>;
-    seen: Map<string, { source: boolean; translationSegments: number; feedback: boolean }>;
+    seen: Map<string, { source: boolean; translationSegments: number; feedback: boolean } | undefined>;
   };
   let current: Run | null = null;
   let settled = Promise.resolve();
@@ -88,8 +88,17 @@ export function createSessionRecording() {
     const run = current;
     if (!run?.accepting) return;
     for (const entry of entries) {
-      if (entry.kind !== 'exchange' || entry.lane === 'video' || entry.t < run.startedAt) continue;
       const key = `${entry.leg}:${entry.id}`;
+      if (entry.kind === 'notice') {
+        if (entry.at < run.startedAt || run.seen.has(key)) continue;
+        run.seen.set(key, undefined);
+        enqueue(run, 'session-recording:write', { kind: 'line', data: {
+          stage: 'notice', leg: entry.leg, entryId: entry.id, ms: ms(run), wallTime: Date.now(), lineWallTime: entry.at,
+          severity: entry.severity, message: entry.message, code: entry.code, params: entry.params, lifetime: entry.lifetime,
+        } });
+        continue;
+      }
+      if (entry.lane === 'video' || entry.t < run.startedAt) continue;
       const seen = run.seen.get(key) ?? { source: false, translationSegments: 0, feedback: false };
       for (const stage of ['source', 'translation', 'feedback'] as const) {
         if (stage !== 'source' && !seen.source) continue;

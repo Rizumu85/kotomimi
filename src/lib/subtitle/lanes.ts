@@ -367,6 +367,12 @@ export interface LaneSpacing {
   answerLine: number;
   sourceLine: number;
   rowLine: number;
+  /**
+   * Fork: the lines grammar feedback has. A correction is the sentence marked and its reason: on one line, three in
+   * ten of a week's corrections showed the end of the reason alone (2026-11-27). Two hold nearly all of them; squeezed,
+   * one, and the reason gives way first (`Slot`).
+   */
+  feedbackLines: number;
   /** What a pair's small line has under it for its romanization, in ems of the small text: none, or `ROMAN_LINE`. */
   roman: number;
   /** Fork: and the user's own row, apart: room kept under a line that has none showed half of the line before (2026-10-28). */
@@ -404,8 +410,8 @@ export const READ_LINE = 2.12;
  */
 export const withAnswerAids = (spacing: LaneSpacing, reads: boolean, roman: boolean): LaneSpacing => ({ ...spacing, answerLine: reads ? READ_LINE : spacing.answerLine, answerRoman: roman ? ROMAN_LINE : 0 });
 
-export const ROOMY: LaneSpacing = { padTop: 10, padBottom: 12, gap: 17, inner: 2, answerLines: 2, answerLine: 1.4, sourceLine: 2.15, rowLine: 2.15, roman: 0, rowRoman: 0, answerRoman: 0 };
-export const TIGHT: LaneSpacing = { padTop: 4, padBottom: 5, gap: 7, inner: 0, answerLines: 1, answerLine: 1.22, sourceLine: 1.9, rowLine: 1.9, roman: 0, rowRoman: 0, answerRoman: 0 };
+export const ROOMY: LaneSpacing = { padTop: 10, padBottom: 12, gap: 17, inner: 2, answerLines: 2, answerLine: 1.4, sourceLine: 2.15, rowLine: 2.15, feedbackLines: 2, roman: 0, rowRoman: 0, answerRoman: 0 };
+export const TIGHT: LaneSpacing = { padTop: 4, padBottom: 5, gap: 7, inner: 0, answerLines: 1, answerLine: 1.22, sourceLine: 1.9, rowLine: 1.9, feedbackLines: 1, roman: 0, rowRoman: 0, answerRoman: 0 };
 
 /** The spacing a share of the way from roomy (0) to tight (1). */
 export function spacingAt(squeeze: number, roomy: LaneSpacing = ROOMY, tight: LaneSpacing = TIGHT): LaneSpacing {
@@ -413,13 +419,13 @@ export function spacingAt(squeeze: number, roomy: LaneSpacing = ROOMY, tight: La
   const mix = (key: keyof LaneSpacing) => roomy[key] + (tight[key] - roomy[key]) * t;
   return {
     padTop: mix('padTop'), padBottom: mix('padBottom'), gap: mix('gap'), inner: mix('inner'),
-    answerLines: mix('answerLines'), answerLine: mix('answerLine'), sourceLine: mix('sourceLine'), rowLine: mix('rowLine'), roman: mix('roman'), rowRoman: mix('rowRoman'), answerRoman: mix('answerRoman'),
+    answerLines: mix('answerLines'), answerLine: mix('answerLine'), sourceLine: mix('sourceLine'), rowLine: mix('rowLine'), feedbackLines: mix('feedbackLines'), roman: mix('roman'), rowRoman: mix('rowRoman'), answerRoman: mix('answerRoman'),
   };
 }
 
 /** The height one lane takes at a font size, spaced so: in ems of that size, for its share of the strip. */
 export function laneEms(lane: Lane, spacing: LaneSpacing): number {
-  const feedback = lane.feedback ? ROW_SCALE * spacing.rowLine : 0;
+  const feedback = lane.feedback ? ROW_SCALE * spacing.rowLine * spacing.feedbackLines : 0;
   // Each further translation (`more`) has a line, however the strip is squeezed.
   const more = lane.more?.length ?? 0;
   if (lane.shape === 'row') return ROW_SCALE * (spacing.rowLine + spacing.rowRoman) * (1 + more) + feedback;

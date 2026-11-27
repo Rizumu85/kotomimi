@@ -73,6 +73,7 @@ export function lastLineBare(foot: number, line: number, romanBottoms: readonly 
  * text's end in sight where this says it is over (`data-over`), and what the
  * box's edge would cut is not drawn (`wholeLinesFrom`).
  *
+ * Fork: a correction gives up its reason before any of the sentence marked, which is what it says (`data-tight`).
  * Fork: the user's own row gives up the sentence before it gives up any of the answer (`data-tight`): a row is the
  * sentence, an arrow and its translation on the lines it has, and rolled as one text a long one showed the last
  * words of the translation and nothing else (a narrow window, or a sentence of some sixty characters; 2026-11-18).
@@ -105,7 +106,9 @@ function Slot({ className, lang, children, fitKey }: { className: string; lang?:
     // Measured whole each time: what was tight may fit again.
     delete outer.dataset.tight;
     let over = tooLong();
-    if (over && inner.querySelector('.subtitle-lane__said:not(.subtitle-lane__said--fixed)') && inner.querySelector('.subtitle-lane__reply')) {
+    const gives = (inner.querySelector('.subtitle-lane__said:not(.subtitle-lane__said--fixed)') && inner.querySelector('.subtitle-lane__reply'))
+      || inner.querySelector('.kt-fix__why');
+    if (over && gives) {
       outer.dataset.tight = '';
       over = tooLong();
     }
@@ -483,7 +486,7 @@ export function SubtitleLanes({ entries, lit, legs, filters, fontSize, onHeight,
     // The user's own row is as high as its lines; everything else is the pair's.
     '--lane-row-lines': String(lines.row),
     '--lane-row-height': `${fontSize * ROW_SCALE * (spacing.rowLine + spacing.rowRoman) * lines.row}px`,
-    '--lane-feedback-height': `${fontSize * ROW_SCALE * spacing.rowLine}px`,
+    '--lane-feedback-height': `${fontSize * ROW_SCALE * spacing.rowLine * Math.round(spacing.feedbackLines)}px`,
     '--lane-source-lines': String(lines.source),
     // A pair's two texts share its height by what each is laid out for.
     // A pair's answer has this many lines, written in or not.

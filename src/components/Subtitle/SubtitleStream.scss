@@ -266,12 +266,17 @@
       }
     }
 
-    // Fork: a row too long for its lines gives up the sentence, and keeps its answer from the start (`Slot`).
+    // Fork: a row too long for its lines gives up the sentence, and keeps its answer from the start; a correction its
+    // reason, and keeps the sentence marked (`Slot`).
     .subtitle-lane__row[data-tight] {
-      .subtitle-lane__said,
-      .subtitle-lane__said + .subtitle-lane__arrow {
+      .subtitle-lane__said:not(.subtitle-lane__said--fixed),
+      .subtitle-lane__said:not(.subtitle-lane__said--fixed) + .subtitle-lane__arrow {
         display: none;
       }
+    }
+
+    [data-tight] .kt-fix__why {
+      display: none;
     }
 
     .subtitle-lane__said {
