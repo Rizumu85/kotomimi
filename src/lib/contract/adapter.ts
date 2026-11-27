@@ -19,6 +19,7 @@ export type Side = 'source' | 'translation';
 export type SegmentPurpose = 'translation' | 'feedback';
 /** An adapter-local counter naming a segment; never reused within one session. */
 export type Ref = number;
+export type VoiceState = 'waiting' | 'making' | 'dropped' | 'failed';
 /** UTF-16 code-unit offsets into a segment's text: [start, end). */
 export type TextRange = [number, number];
 export interface SegmentTiming { startMs: number; endMs: number }
@@ -97,6 +98,8 @@ export interface AdapterEvents {
   /** `ref` absent: attributable to no segment (plays, pairs with nothing).
    *  `range` absent: this segment's audio, which characters unknown. */
   audio(e: { pcm: Int16Array; ref?: Ref; range?: TextRange }): void;
+  /** Preparation of a segment's reading. Playback dates the first sound from its audio clip. */
+  voiceState(e: { ref: Ref; state: VoiceState }): void;
   /**
    * Sets the ranges of speech this adapter already emitted for `ref`
    * (Stage 2 Soniox, ruling 2): `index` is the entry's place among this

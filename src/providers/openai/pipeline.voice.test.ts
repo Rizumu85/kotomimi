@@ -47,8 +47,9 @@ describe('sentence playback on the request clock', () => {
     const saying = vi.fn((_text: string, _from: number) => until);
     const degraded = vi.fn();
     const frame = vi.fn();
+    const voiceState = vi.fn();
     const speaker = new Speaker({ via: 'speech', engine: true, baseUrl: '', model: 'test', voices: {} }, undefined,
-      { clock, native, fetch: vi.fn(), decode: vi.fn(), edge: vi.fn() }, { audio, degraded, frame },
+      { clock, native, fetch: vi.fn(), decode: vi.fn(), edge: vi.fn() }, { audio, degraded, frame, voiceState },
       withSaying ? saying : undefined);
     const say = (ref: number, text = `Sentence ${ref}`) => speaker.say(ref, text, 'en');
     const done = async () => {
@@ -56,7 +57,7 @@ describe('sentence playback on the request clock', () => {
       finish();
       await vi.waitFor(() => expect(frame).toHaveBeenCalledWith(expect.objectContaining({ type: 'voice.done' })));
     };
-    return { clock, say, audio, saying, until, degraded, piece: (value: number) => piece(value), done };
+    return { clock, say, audio, saying, until, degraded, voiceState, piece: (value: number) => piece(value), done };
   }
 
   it('streams at the margin and excludes the wait for the first piece', async () => {
@@ -139,6 +140,10 @@ describe('sentence playback on the request clock', () => {
     h.say(3);
     h.say(4);
     h.say(5);
+    expect(h.voiceState.mock.calls.map(([e]) => [e.ref, e.state])).toEqual([
+      [1, 'waiting'], [1, 'making'], [2, 'waiting'], [2, 'making'],
+      [3, 'waiting'], [4, 'waiting'], [5, 'waiting'], [3, 'dropped'],
+    ]);
     await h.done();
     for (const value of [4, 5]) { h.piece(value); await h.done(); }
     expect(h.audio.mock.calls.map(([event]) => event.ref)).toEqual([1, 1, 2, 4, 5]);
@@ -347,6 +352,9 @@ describe('a leg that speaks (fork)', () => {
     await vi.waitFor(() => expect(h.of('audio')).toHaveLength(1));
     expect(h.of('degraded').map((e) => e.payload.code)).toEqual(['tts_degraded']);
     expect(h.frames('voice.failed')).toHaveLength(1);
+    const first = h.of('segmentOpened').find((e) => e.payload.side === 'translation')!.payload.ref;
+    expect(h.of('voiceState').filter((e) => e.payload.ref === first).map((e) => e.payload.state))
+      .toEqual(['waiting', 'making', 'failed']);
   });
 
   it('drops the oldest waiting sentence when the voice falls behind, and never the one being made', async () => {

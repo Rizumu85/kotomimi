@@ -37,6 +37,8 @@ import { getProvider } from '../providers/registry';
 import { useProviderStore } from '../stores/providerStore';
 import { useRoutingStore } from '../stores/routingStore';
 import { parseClipKey } from '../lib/audio/playback';
+import type { VoiceState } from '../lib/contract/adapter';
+import type { AppSession } from './session';
 import { speaksAlong, voiceSpeaks, type VoiceChoice } from '../providers/openai/localaiVoice';
 import type { LocalAIModel } from '../providers/openai/localaiModels';
 import useSettingsStore from '../stores/settingsStore';
@@ -89,16 +91,16 @@ export interface VRChatDeps {
  * clip by the segment it reads (`Segment.ref`; none for what is said with no segment of its own).
  */
 export interface Reading {
+  state(ref: number): VoiceState | 'queued' | undefined;
+  speaks(language: string): boolean;
   scheduled(): Array<{ ref: number | undefined; inMs: number }>;
   /** Told when a clip is queued, one ends, or the queue is emptied. */
   subscribe(listener: () => void): () => void;
 }
 
-/**
- * How long a line waits for a reading that has not come while nothing else is being read: a sentence the voice
- * passed over, or could not make, goes up all the same.
- */
+/** An idle voice that never heard of a sentence is given this long to take it. */
 export const READING_WAIT_MS = 3000;
+const MAKING_WAIT_MS = 15_000;
 
 /** The main process's word for VRChat's side, held to its shape. */
 export function linkOf(value: unknown): VRChatLink {
@@ -153,12 +155,12 @@ const CLAUSE_END = /[，、,;；:：）)」』]/u;
  * else a clause, else a space, else where the room runs out — never in its first half. A page that does not end a
  * sentence says it goes on (…).
  */
-function pagesOf(line: string): string[] {
+function pagesOf(line: string, limit = CHATBOX_MOST): string[] {
   const pages: string[] = [];
   let rest = [...line.trim()];
-  while (rest.length > CHATBOX_MOST) {
-    const room = CHATBOX_MOST - 1;
-    const least = Math.floor(room / 2);
+  while (rest.length > limit) {
+    const room = limit - 1;
+    const least = Math.max(1, Math.floor(room / 2));
     const lastWhere = (test: (c: string) => boolean) => {
       for (let i = room; i >= least; i--) if (test(rest[i - 1])) return i;
       return -1;
@@ -183,7 +185,7 @@ function pagesOf(line: string): string[] {
  */
 export function chatboxPages(line: string): string[] {
   if ([...line].length <= CHATBOX_MOST) return [line];
-  return line.split('\n').filter((part) => part.trim()).flatMap(pagesOf);
+  return line.split('\n').filter((part) => part.trim()).flatMap((part) => pagesOf(part));
 }
 
 /**
@@ -198,22 +200,26 @@ const base = (code: string) => code.toLowerCase().split(/[-_]/)[0];
 export interface Theirs { languages: readonly string[]; back: boolean }
 
 /** Each answer's text, in order: one per translation segment (the second language lit gives a sentence two). */
-export const answersOf = (rows: readonly Row[]): { text: string; language?: string }[] => {
+export const answersOf = (rows: readonly Row[]) => {
   const out: { id: string; text: string; language?: string }[] = [];
   for (const row of rows) {
     if (row.purpose === 'feedback') continue;
     if (out[out.length - 1]?.id !== row.segmentId) out.push({ id: row.segmentId, text: '', language: row.language });
     out[out.length - 1].text += row.text;
   }
-  return out.map(({ text, language }) => ({ text: text.trim(), language })).filter((answer) => answer.text);
+  return out.map((answer) => ({ ...answer, text: answer.text.trim() })).filter((answer) => answer.text);
 };
+
+interface LinePart { text: string; language: string; id?: string }
 
 /**
  * Each sentence goes up in language order: the user's own, their main, their second; `translationFirst` puts theirs
  * before the user's own. Every line is kept, paged where needed (the user, 2026-11-15). `settled`: missing answers
  * will not come — a later sentence of the user's is already translated, and translations are done in order.
  */
-export function finishedLine(entry: Entry, shows: ChatboxShows, said = false, translationFirst = false, theirs?: Theirs, settled = false): string | null {
+function finishedParts(
+  entry: Entry, shows: ChatboxShows, said: boolean, translationFirst: boolean, theirs?: Theirs, settled = false,
+): LinePart[] | null {
   if (shows === 'off' || entry.kind !== 'exchange' || entry.leg !== 'speaker') return null;
   // Fork: heard in none of the user's languages: nothing they said, and nothing to send.
   if (entry.source.some((row) => row.misheard)) return null;
@@ -221,11 +227,13 @@ export function finishedLine(entry: Entry, shows: ChatboxShows, said = false, tr
   const inTheirs = theirs !== undefined && entry.source.length > 0 && entry.source.every((row) => row.language !== undefined && theirs.languages.some((code) => base(code) === base(row.language!)));
   if (said || shows === 'source' || (inTheirs && !theirs.back)) {
     const words = textOf(entry.source);
-    return entry.source.length > 0 && entry.source.every((row) => row.final) && words ? words : null;
+    return words && entry.source.every((row) => row.final) ? [{ text: words, language: entry.languages.source }] : null;
   }
   if (entry.source.length === 0 || entry.translation.length === 0) return null;
   if (!entry.source.every((row) => row.final) || !entry.translation.every((row) => row.final)) return null;
-  const answers = answersOf(entry.translation).map(({ text, language }) => ({ text, language: base(language || entry.languages.target) }));
+  const answers: LinePart[] = answersOf(entry.translation).map((answer) => ({
+    ...answer, language: base(answer.language || entry.languages.target),
+  }));
   if (answers.length === 0) return null;
   // Forward and crossing sentences have one answer per language of theirs; with one lit, back has one too.
   const wanted = Math.max(1, theirs?.languages.length ?? 1);
@@ -239,7 +247,48 @@ export function finishedLine(entry: Entry, shows: ChatboxShows, said = false, tr
     const second = order.indexOf(b.language);
     return (first < 0 ? order.length : first) - (second < 0 ? order.length : second);
   });
-  return answers.map((answer) => answer.text).join('\n');
+  return answers;
+}
+
+const joined = (parts: LinePart[]) => parts.map((part) => part.text).join('\n');
+
+export function finishedLine(
+  entry: Entry, shows: ChatboxShows, said = false, translationFirst = false, theirs?: Theirs, settled = false,
+): string | null {
+  const parts = finishedParts(entry, shows, said, translationFirst, theirs, settled);
+  return parts && joined(parts);
+}
+
+interface PageGroup { pages: string[]; refs: number[] }
+
+function readingPages(parts: LinePart[], reading: Reading | null, refOf: Map<string, number>): PageGroup[] {
+  const line = joined(parts);
+  const groups: Array<{ texts: string[]; refs: number[]; sourceFirst: boolean }> = [];
+  const leading: string[] = [];
+  let source: string | undefined;
+  for (const part of parts) {
+    if (part.id === undefined) {
+      source = part.text;
+      continue;
+    }
+    const ref = reading?.speaks(part.language) ? refOf.get(part.id) : undefined;
+    if (ref !== undefined) groups.push({ texts: leading.splice(0), refs: [ref], sourceFirst: source !== undefined });
+    (groups[groups.length - 1]?.texts ?? leading).push(part.text);
+  }
+  if (!groups.length) return [{ pages: chatboxPages(line), refs: [] }];
+  if ([...line].length <= CHATBOX_MOST) return [{ pages: [line], refs: groups.flatMap((group) => group.refs) }];
+
+  // A page needs room for its translation and continuation mark even when the original alone fills the chatbox.
+  const original = source && [...source].length > CHATBOX_MOST - 3
+    ? `${[...source].slice(0, CHATBOX_MOST / 2 - 1).join('')}…` : source;
+  const limit = CHATBOX_MOST - (original ? [...original].length + 1 : 0);
+  return groups.map(({ texts, refs, sourceFirst }) => ({
+    pages: pagesOf(texts.join('\n'), limit).map((page) => {
+      if (!original) return page;
+      return sourceFirst ? `${original}\n${page}` : `${page}\n${original}`;
+    }),
+    refs,
+  }));
 }
 
 export interface VRChatController {
@@ -381,16 +430,14 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
   // ── The chatbox ───────────────────────────────────────────────────────────
   const sent = new Set<string>();
   /** The lines waiting, each in its pages. */
-  const queue: string[][] = [];
+  const queue: PageGroup[] = [];
   /** The pages still to go of the line going up now. */
   let rest: string[] = [];
   let sending = false;
-  /**
-   * Fork: the lines kept back for their reading, oldest first (`Reading`): each with the segments its translations
-   * are in. One goes up when the reading of it begins — and with it every line before it, which the voice has then
-   * passed over (it reads in order) — or when nothing is read for `READING_WAIT_MS` and its turn has not come.
-   */
-  const held: Array<{ pages: string[]; refs: number[] }> = [];
+  let pageRefs: number[] = [];
+  let pageWait: object | null = null;
+  /** Each group waits for the first audible translation among its refs, or until none of them will sound. */
+  const held: PageGroup[] = [];
   /** The segments the reading has had in its queue, and those of them it has begun. */
   const queued = new Set<number>();
   const begun = new Set<number>();
@@ -441,12 +488,13 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
       // The newest line: one of several pages goes up page by page; one that fits, together with the ones of a page
       // that waited before it, as many as fit. What is older than that, the talk has moved past.
       const newest = queue[queue.length - 1];
-      if (newest.length > 1) {
-        [line, ...rest] = newest;
+      pageRefs = newest.refs;
+      if (newest.pages.length > 1) {
+        [line, ...rest] = newest.pages;
       } else {
         let single = queue.length - 1;
-        while (single > 0 && queue[single - 1].length === 1) single--;
-        line = chatboxWaiting(queue.slice(single).map((pages) => pages[0]));
+        while (single > 0 && queue[single - 1].pages.length === 1) single--;
+        line = chatboxWaiting(queue.slice(single).map(({ pages }) => pages[0]));
       }
       queue.length = 0;
     }
@@ -455,8 +503,23 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
     showTyping();
     // Read aloud to them, the voice sets the pace: the next sentence goes up when it is read, held only as long as
     // VRChat asks. A line of several pages still gives each its reading time.
-    const paced = rest.length === 0 && readingNow() !== null;
-    later(() => { sending = false; pump(); }, paced ? gap : Math.max(gap, chatboxReadingMs(line)));
+    const advance = () => { sending = false; pump(); };
+    if (rest.length && pageRefs.length) {
+      // Once the following reading is scheduled, share the time left across this page and its continuations.
+      const next = readingNow()?.scheduled().find(({ ref, inMs }) =>
+        ref !== undefined && !pageRefs.includes(ref) && inMs > 0);
+      const hold = Math.min(chatboxReadingMs(line), next ? next.inMs / (1 + rest.length) : Infinity);
+      later(() => {
+        if (!rest.length) { advance(); return; }
+        const mine = pageWait = {};
+        later(() => {
+          if (pageWait === mine) { pageWait = null; advance(); }
+        }, Math.max(0, hold - gap));
+      }, gap);
+    } else {
+      const paced = rest.length === 0 && readingNow() !== null;
+      later(advance, paced ? gap : Math.max(gap, chatboxReadingMs(line)));
+    }
   };
   /** The reading now, listened to while there is one. */
   function readingNow(): Reading | null {
@@ -468,18 +531,24 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
     }
     return reading;
   }
-  const letGo = (count: number) => {
-    if (count <= 0) return;
-    for (const line of held.splice(0, count)) queue.push(line.pages);
+  const letGo = (lines: PageGroup[]) => {
+    if (!lines.length) return;
+    for (const line of lines) {
+      held.splice(held.indexOf(line), 1);
+      queue.push(line);
+    }
+    // A new language has started. Any unread tail belonged to the previous language.
+    if (pageRefs.length) rest = [];
+    if (pageWait) { pageWait = null; sending = false; }
     pump();
     showTyping();
   };
-  /** Sends up every kept line whose reading has begun, and the ones before it. */
+  /** A later reading can account for an older unknown ref, but never for one still being made. */
   function release(): void {
     if (stopped) return;
     const reading = readingNow();
     // Nothing is read to them any more: nothing is waited for.
-    if (!reading) { letGo(held.length); return; }
+    if (!reading) { letGo([...held]); return; }
     // What it reads is noted whether or not a line waits for it yet: a reading may begin before its line is finished
     // on screen, and be over by then.
     const now = reading.scheduled();
@@ -492,22 +561,37 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
     }
     // One that was in the queue and is no longer has been played to its end.
     for (const ref of queued) if (!present.has(ref)) { begun.add(ref); queued.delete(ref); }
-    let upTo = 0;
-    held.forEach((line, i) => { if (line.refs.some((ref) => begun.has(ref))) upTo = i + 1; });
-    letGo(upTo);
+    const started = (ref: number) => begun.has(ref) || (reading.state(ref) === 'queued' && !present.has(ref));
+    const skipped = (ref: number) => {
+      const state = reading.state(ref);
+      return state === 'dropped' || state === 'failed';
+    };
+    let lastStarted = -1;
+    held.forEach((line, i) => { if (line.refs.some(started)) lastStarted = i; });
+    letGo(held.filter((line, i) => line.refs.some(started) || line.refs.every(skipped)
+      || (i < lastStarted && line.refs.every((ref) => !present.has(ref) && !reading.state(ref)))));
     // The next of them to begin: looked at again at that moment, which the queue does not tell.
     const next = now.filter((clip) => clip.ref !== undefined && clip.inMs > 0 && held.some((line) => line.refs.includes(clip.ref!))).map((clip) => clip.inMs);
     if (next.length === 0) return;
     const mine = ++startTimer;
     later(() => { if (mine === startTimer) release(); }, Math.ceil(Math.min(...next)) + 5);
   }
-  /** A kept line whose reading has not come: it goes up once nothing is being read, with the ones before it. */
-  const giveUp = (line: { pages: string[] }) => {
-    const at = held.findIndex((one) => one.pages === line.pages);
-    if (stopped || at < 0) return;
+  const giveUp = (line: PageGroup, waited: number) => {
+    if (!held.includes(line)) return;
     const reading = readingNow();
-    if (reading && reading.scheduled().length > 0) { later(() => giveUp(line), READING_WAIT_MS); return; }
-    letGo(at + 1);
+    if (reading) {
+      const clips = reading.scheduled();
+      const pending = line.refs.some((ref) => {
+        const state = reading.state(ref);
+        return state === 'waiting' || state === 'making';
+      });
+      const scheduled = clips.some(({ ref }) => ref !== undefined && line.refs.includes(ref));
+      if (scheduled || (pending ? waited < MAKING_WAIT_MS : clips.length > 0)) {
+        later(() => giveUp(line, waited + READING_WAIT_MS), READING_WAIT_MS);
+        return;
+      }
+    }
+    letGo([line]);
   };
   const forget = () => { queue.length = 0; rest = []; held.length = 0; queued.clear(); begun.clear(); };
   const look = () => {
@@ -556,19 +640,16 @@ export function startVRChat(deps: VRChatDeps): VRChatController {
     state.entries.forEach((entry, i) => {
       if (entry.kind !== 'exchange' || sent.has(entry.id)) return;
       const said = feedback(entry);
-      const line = finishedLine(entry, shows, said, store.getState().chatboxTranslationFirst, theirs, i < newest);
-      if (line === null) return;
+      const parts = finishedParts(entry, shows, said, store.getState().chatboxTranslationFirst, theirs, i < newest);
+      if (parts === null) return;
       sent.add(entry.id);
-      const pages = chatboxPages(line);
-      // Fork: read aloud to them, it goes up with its reading. Not what is sent as said (it is not read), nor a line
-      // with no translation into a language of theirs (one back into the user's own is not read either).
-      const refs = said || asSaid(entry) || readingNow() === null ? [] : entry.translation
-        .filter((row) => row.purpose !== 'feedback' && (!theirs || theirs.languages.some((code) => base(code) === base(row.language || entry.languages.target))))
-        .flatMap((row) => { const ref = refOf.get(row.segmentId); return ref === undefined ? [] : [ref]; });
-      if (refs.length === 0) { queue.push(pages); return; }
-      const kept = { pages, refs };
-      held.push(kept);
-      later(() => giveUp(kept), READING_WAIT_MS);
+      for (const group of readingPages(parts, readingNow(), refOf)) {
+        if (!group.refs.length) queue.push(group);
+        else {
+          held.push(group);
+          later(() => giveUp(group, READING_WAIT_MS), READING_WAIT_MS);
+        }
+      }
     });
     release();
     pump();
@@ -633,28 +714,28 @@ export function getVRChatController(): Promise<VRChatController | null> {
 /**
  * Fork: the reading of the user's translations, where the selected provider's run reads them aloud to the other
  * side: Kotomimi's own voice stage on and set to speak along, in a voice that speaks one of their languages, and the
- * other side set to hear it. The playback's queue of the user's leg is what it reads from; it is there once the run
- * has made its first sound, and until then nothing is kept back for it.
+ * other side set to hear it. The session opens playback before its leg starts, including before its first sound.
  */
-export function appReading(theirs: () => Theirs | undefined): () => Reading | null {
+export function appReading(
+  theirs: () => Theirs | undefined, queueOf: () => AppSession['speakerQueue'], state: Reading['state'],
+): () => Reading | null {
   let reading: Reading | null = null;
-  let asked = false;
+  let spoken: string[] = [];
   return () => {
     const { selected, entries, models } = useProviderStore.getState();
     const speak = selected === 'localai' ? (entries[selected]?.settings as { speak?: VoiceChoice } | undefined)?.speak : undefined;
     if (!speak || !speaksAlong(speak) || !useRoutingStore.getState().meeting) return null;
     const lent = (models.localai ?? []) as readonly LocalAIModel[];
-    if (!(theirs()?.languages ?? []).some((language) => voiceSpeaks(speak, language, lent))) return null;
-    if (!asked) {
-      asked = true;
-      void import('../lib/audio/appAudio').then(({ getAppAudio }) => getAppAudio()).then((audio) => {
-        const queue = audio.playback.queues.speaker;
-        reading = {
-          scheduled: () => queue.scheduled().map(({ key, inMs }) => ({ ref: parseClipKey(key).ref, inMs })),
-          subscribe: (listener) => queue.subscribe(listener),
-        };
-      }, () => { asked = false; });
-    }
+    spoken = (theirs()?.languages ?? []).filter((language) => voiceSpeaks(speak, language, lent)).map(base);
+    if (!spoken.length) return null;
+    const queue = queueOf();
+    if (!queue) return null;
+    reading ??= {
+      state,
+      speaks: (language) => spoken.includes(base(language)),
+      scheduled: () => queue.scheduled().map(({ key, inMs }) => ({ ref: parseClipKey(key).ref, inMs })),
+      subscribe: (listener) => queue.subscribe(listener),
+    };
     return reading;
   };
 }
@@ -685,7 +766,8 @@ async function build(): Promise<VRChatController> {
     canAsk: () => !(useSettingsStore.getState().subtitleModeActive && useSubtitleLookStore.getState().through),
     coached: () => useCoachingStore.getState().coached,
     theirs,
-    reading: appReading(theirs),
+    reading: appReading(theirs, () => session.speakerQueue, (ref) => session.runner.conversation.get('speaker')
+      ?.reading(ref)),
     onReset: (listener) => session.runner.conversation.onReset(() => listener()),
     store: useVRChatStore,
     split: participantSplit,

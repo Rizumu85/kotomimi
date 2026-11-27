@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Entry } from '../lib/projection/types';
+import type { ClipKey } from '../lib/audio/playback';
 import { useVRChatStore, vrchatHolds } from '../stores/vrchatStore';
 import { useProviderStore } from '../stores/providerStore';
 import { useRoutingStore } from '../stores/routingStore';
@@ -7,10 +8,6 @@ import { VOICE_DEFAULTS } from '../providers/openai/localaiVoice';
 import { appReading, chatboxPages, chatboxReadingMs, chatboxWaiting, finishedLine, linkOf, READING_WAIT_MS, startVRChat, type Reading, type VRChatDeps } from './vrchat';
 
 vi.mock('../services/persistSetting', () => ({ persistSetting: async () => {} }));
-const speakerQueue = vi.hoisted(() => ({ clips: [] as Array<{ key: string; inMs: number }>, asked: 0 }));
-vi.mock('../lib/audio/appAudio', () => ({
-  getAppAudio: async () => { speakerQueue.asked += 1; return { playback: { queues: { speaker: { scheduled: () => speakerQueue.clips, subscribe: () => () => {} } } } }; },
-}));
 
 const last = <T>(list: readonly T[]): T | undefined => list[list.length - 1];
 
@@ -50,6 +47,13 @@ function setup(over: Partial<VRChatDeps> = {}, initial: Entry[] = []) {
     chatboxLines: () => invoked.filter(([channel]) => channel === 'vrchat:chatbox').map(([, data]) => (data as { text: string }).text),
   };
 }
+
+const twice = (source: string, first: string, second: string): Entry => {
+  const one = exchange('a', source, first);
+  if (one.kind !== 'exchange') throw new Error('Expected exchange');
+  return { ...one, translation: [...one.translation, { ...row(second), side: 'translation', language: 'en' }] };
+};
+const two = { languages: ['ja', 'en'], back: false };
 
 beforeEach(() => {
   useVRChatStore.setState({ muteGate: true, chatbox: 'off', chatboxTranslationFirst: false, recent: null, onVideo: 'ask', link: { found: false, connected: false, muted: null }, video: { kind: 'none' }, viewers: 0 });
@@ -114,12 +118,6 @@ describe('finishedLine', () => {
     expect(finishedLine(exchange('a', 'こんにちは', '你好', { leg: 'participant' }), 'translation')).toBeNull();
   });
 
-  // Their main language and one lit beside it: a sentence of the user's has a translation into each.
-  const twice = (source: string, first: string, second: string): Entry => {
-    const one = exchange('a', source, first);
-    return one.kind === 'exchange' ? { ...one, translation: [...one.translation, { ...row(second), side: 'translation' as const, language: 'en' }] } : one;
-  };
-  const two = { languages: ['ja', 'en'], back: false };
 
   it('waits for both translations where two of their languages are lit, and puts each on a line of its own', () => {
     expect(finishedLine(exchange('a', '我们走吧', '行こう'), 'translation', false, false, two)).toBeNull();
@@ -483,22 +481,168 @@ describe('the chatbox', () => {
 
 describe('the chatbox, where the translations are read aloud to the other side (fork)', () => {
   /** The playback's queue of the user's leg, as a test moves it. */
-  function voice() {
+  function voice(languages = ['ja', 'en']) {
     let clips: Array<{ ref: number | undefined; inMs: number }> = [];
     const listeners = new Set<() => void>();
-    const reading: Reading = { scheduled: () => clips, subscribe: (listener) => { listeners.add(listener); return () => { listeners.delete(listener); }; } };
-    return { reading, listeners, set(next: typeof clips) { clips = next; for (const listener of [...listeners]) listener(); }, move(next: typeof clips) { clips = next; } };
+    const states = new Map<number, ReturnType<Reading['state']>>();
+    const notify = () => { for (const listener of listeners) listener(); };
+    const reading: Reading = {
+      state: (ref) => states.get(ref), speaks: (language) => languages.includes(language), scheduled: () => clips,
+      subscribe: (listener) => { listeners.add(listener); return () => { listeners.delete(listener); }; },
+    };
+    return {
+      reading, set(next: typeof clips) { clips = next; notify(); }, move(next: typeof clips) { clips = next; },
+      mark(ref: number, state: ReturnType<Reading['state']>) { states.set(ref, state); notify(); },
+    };
   }
   /** The segments of the user's leg: each translation by the number its reading goes by. */
   const legsOf = (refs: Record<string, number>) => [{ segments: Object.entries(refs).map(([id, ref]) => ({ id, ref })) }];
-  function reads() {
+  function reads(languages?: string[], theirs?: VRChatDeps['theirs']) {
     useVRChatStore.setState({ chatbox: 'translation' });
-    const v = voice();
+    const v = voice(languages);
     const waits: Array<{ fn: () => void; ms: number }> = [];
-    const t = setup({ reading: () => v.reading, setTimeout: (fn, ms) => { waits.push({ fn, ms }); } });
+    const t = setup({ theirs, reading: () => v.reading, setTimeout: (fn, ms) => { waits.push({ fn, ms }); } });
     const fire = (ms: number) => { const at = waits.findIndex((wait) => wait.ms === ms); if (at < 0) throw new Error(`no timer of ${ms} ms`); waits.splice(at, 1)[0].fn(); };
     return { t, v, waits, fire };
   }
+
+  it('waits through a long synthesis until its first clip starts', () => {
+    const { t, v, fire } = reads();
+    t.show([exchange('a', 'One', 'First')], legsOf({ First: 1 }));
+    v.mark(1, 'waiting');
+    fire(READING_WAIT_MS);
+    v.mark(1, 'making');
+    fire(READING_WAIT_MS);
+    fire(READING_WAIT_MS);
+    expect(t.chatboxLines()).toEqual([]);
+    v.set([{ ref: 1, inMs: 0 }]);
+    expect(t.chatboxLines()).toEqual(['First']);
+    t.controller.stop();
+  });
+
+  it.each(['dropped', 'failed'] as const)('sends a %s reading immediately while an older one is being made', (end) => {
+    const { t, v } = reads();
+    t.show([exchange('a', 'One', 'First'), exchange('b', 'Two', 'Second')], legsOf({ First: 1, Second: 2 }));
+    v.mark(1, 'making');
+    v.mark(2, end);
+    expect(t.chatboxLines()).toEqual(['Second']);
+    t.controller.stop();
+  });
+
+  it('sends the original alone as soon as it is final, without waiting for the reading of its translation', () => {
+    const { t, v } = reads();
+    useVRChatStore.setState({ chatbox: 'source' });
+    v.mark(1, 'making');
+    t.show([exchange('a', 'One', 'First')], legsOf({ First: 1 }));
+    expect(t.chatboxLines()).toEqual(['One']);
+    t.controller.stop();
+  });
+
+  it('gives a known synthesis at most fifteen seconds even while other sound plays', () => {
+    const { t, v, fire } = reads();
+    v.mark(1, 'making');
+    t.show([exchange('a', 'One', 'First')], legsOf({ First: 1 }));
+    v.set([{ ref: 9, inMs: 0 }]);
+    for (let ms = READING_WAIT_MS; ms < 15_000; ms += READING_WAIT_MS) fire(READING_WAIT_MS);
+    expect(t.chatboxLines()).toEqual([]);
+    fire(READING_WAIT_MS);
+    expect(t.chatboxLines()).toEqual(['First']);
+    t.controller.stop();
+  });
+
+  it.each([false, true])('shows each language as it starts with translation first set to %s', (first) => {
+    const { t, v, fire } = reads(undefined, () => two);
+    useVRChatStore.setState({ chatbox: 'both', chatboxTranslationFirst: first });
+    const ja = '訳'.repeat(85);
+    const en = 'English '.repeat(10).trim();
+    t.show([twice('Original', ja, en)], legsOf({ [ja]: 4, [en]: 5 }));
+    v.set([{ ref: 4, inMs: 0 }]);
+    const page = (translation: string) => first ? `${translation}\nOriginal` : `Original\n${translation}`;
+    expect(t.chatboxLines()).toEqual([page(ja)]);
+    fire(1500);
+    expect(t.chatboxLines()).toHaveLength(1);
+    v.set([{ ref: 5, inMs: 0 }]);
+    expect(t.chatboxLines()).toEqual([page(ja), page(en)]);
+    t.controller.stop();
+  });
+
+  it('ends every Japanese and English page with the original excerpt when translations come first', () => {
+    const { t, v, fire } = reads(undefined, () => two);
+    useVRChatStore.setState({ chatbox: 'both', chatboxTranslationFirst: true });
+    const source = '字'.repeat(145);
+    const excerpt = `${'字'.repeat(71)}…`;
+    const ja = '訳'.repeat(100);
+    t.show([twice(source, ja, 'English')], legsOf({ [ja]: 4, English: 5 }));
+    v.set([{ ref: 4, inMs: 0 }]);
+    fire(1500);
+    fire(chatboxReadingMs(t.chatboxLines()[0]) - 1500);
+    fire(1500);
+    v.set([{ ref: 5, inMs: 0 }]);
+    expect(t.chatboxLines()).toEqual([`${'訳'.repeat(70)}…\n${excerpt}`, `${'訳'.repeat(30)}\n${excerpt}`,
+      `English\n${excerpt}`]);
+    t.controller.stop();
+  });
+
+  it('sends a short multilingual line whole at its first reading, even after the other was dropped', () => {
+    const { t, v } = reads(undefined, () => two);
+    useVRChatStore.setState({ chatbox: 'both', chatboxTranslationFirst: true });
+    t.show([twice('Original', '訳', 'English')], legsOf({ '訳': 4, English: 5 }));
+    v.mark(4, 'dropped');
+    expect(t.chatboxLines()).toEqual([]);
+    v.set([{ ref: 5, inMs: 0 }]);
+    expect(t.chatboxLines()).toEqual(['訳\nEnglish\nOriginal']);
+    t.controller.stop();
+  });
+
+  it.each(['ja', 'en'])('pairs the silent translation with the one spoken in %s', (language) => {
+    const { t, v, fire } = reads([language], () => two);
+    useVRChatStore.setState({ chatbox: 'both' });
+    const ja = '訳'.repeat(70);
+    const en = 'English '.repeat(10).trim();
+    t.show([twice('Original', ja, en)], legsOf({ [ja]: 4, [en]: 5 }));
+    v.set([{ ref: language === 'ja' ? 4 : 5, inMs: 0 }]);
+    const [page] = t.chatboxLines();
+    expect(page.startsWith(`Original\n${ja}`)).toBe(true);
+    fire(1500);
+    fire(chatboxReadingMs(page) - 1500);
+    const pages = t.chatboxLines();
+    expect(pages).toHaveLength(2);
+    expect(pages.every((text) => text.startsWith('Original\n') && [...text].length <= 144)).toBe(true);
+    expect(pages[1].endsWith('English')).toBe(true);
+    t.controller.stop();
+  });
+
+  it('switches a long translation at the next language onset even while its page timer is running', () => {
+    const { t, v, fire } = reads(undefined, () => two);
+    useVRChatStore.setState({ chatbox: 'both' });
+    const ja = '訳'.repeat(200);
+    t.show([twice('Original', ja, 'English')], legsOf({ [ja]: 4, English: 5 }));
+    v.set([{ ref: 4, inMs: 0 }]);
+    fire(1500);
+    const [page] = t.chatboxLines();
+    v.set([{ ref: 5, inMs: 0 }]);
+    expect(t.chatboxLines()).toEqual([page, 'Original\nEnglish']);
+    fire(chatboxReadingMs(page) - 1500);
+    expect(t.chatboxLines()).toHaveLength(2);
+    t.controller.stop();
+  });
+
+  it('shares the time before a scheduled language between the pages of the current one', () => {
+    const { t, v, fire } = reads(undefined, () => two);
+    useVRChatStore.setState({ chatbox: 'both' });
+    const ja = '訳'.repeat(200);
+    t.show([twice('Original', ja, 'English')], legsOf({ [ja]: 4, English: 5 }));
+    v.set([{ ref: 4, inMs: 0 }, { ref: 5, inMs: 4000 }]);
+    fire(1500);
+    fire(500);
+    const pages = t.chatboxLines();
+    expect(pages).toHaveLength(2);
+    expect(pages.map((page) => page.slice('Original\n'.length).replace(/…$/, '')).join('')).toBe(ja);
+    fire(1500);
+    v.set([{ ref: 5, inMs: 0 }]);
+    expect(last(t.chatboxLines())).toBe('Original\nEnglish');
+    t.controller.stop();
+  });
 
   it('sends a sentence up when its reading begins, not when its translation is written', () => {
     const { t, v } = reads();
@@ -626,7 +770,15 @@ describe('the reading the app hands the chatbox (fork)', () => {
     useProviderStore.setState({ selected, entries: { ...before.entries, localai: { ...before.entries.localai, settings: { speak } } as never } });
   };
 
-  it('is there only while Kotomimi\u2019s own run reads to the other side, in a voice that speaks their language', async () => {
+  it('follows the speaker queue while the voice reads to the other side', () => {
+    const clips: Array<{ key: ClipKey; inMs: number }> = [
+      { key: 'speaker:7:0', inMs: -20 }, { key: 'speaker:7:1', inMs: 480 }, { key: 'speaker:none:0', inMs: 900 },
+    ];
+    const queue = vi.fn(() => ({
+      scheduled: () => clips, subscribe: () => () => {}, position: () => null, clears: 0, pending: clips.length,
+    }));
+    const state = (ref: number) => ref === 7 ? 'queued' as const : undefined;
+    const reading = appReading(theirs, queue, state);
     const before = { provider: useProviderStore.getState(), meeting: useRoutingStore.getState().meeting };
     try {
       useRoutingStore.setState({ meeting: true });
@@ -634,27 +786,25 @@ describe('the reading the app hands the chatbox (fork)', () => {
       // Off, said on demand only, another provider's run, a voice that does not speak their language, the other side
       // not hearing it: nothing is kept back for a reading.
       select({ ...edge, on: false });
-      expect(appReading(theirs)()).toBeNull();
+      expect(reading()).toBeNull();
       select({ ...edge, auto: false });
-      expect(appReading(theirs)()).toBeNull();
+      expect(reading()).toBeNull();
       select(edge, 'openai');
-      expect(appReading(theirs)()).toBeNull();
+      expect(reading()).toBeNull();
       select({ ...VOICE_DEFAULTS, on: true, at: 'device', nativeModel: 'irodori-tts-v4.1-small-mf-q8' });
-      expect(appReading(() => ({ languages: ['en-US'], back: false }))()).toBeNull();
+      expect(appReading(() => ({ languages: ['en-US'], back: false }), queue, state)()).toBeNull();
       select(edge);
       useRoutingStore.setState({ meeting: false });
-      expect(appReading(theirs)()).toBeNull();
-      expect(speakerQueue.asked).toBe(0);
-      // It reads to them: the playback's queue of the user's leg, asked for once, each clip by its segment.
-      useRoutingStore.setState({ meeting: true });
-      const reading = appReading(theirs);
       expect(reading()).toBeNull();
-      await vi.waitFor(() => expect(reading()).not.toBeNull());
-      expect(speakerQueue.asked).toBe(1);
-      speakerQueue.clips = [{ key: 'speaker:7:0', inMs: -20 }, { key: 'speaker:7:1', inMs: 480 }, { key: 'speaker:none:0', inMs: 900 }];
-      expect(reading()!.scheduled()).toEqual([{ ref: 7, inMs: -20 }, { ref: 7, inMs: 480 }, { ref: undefined, inMs: 900 }]);
+      expect(queue).not.toHaveBeenCalled();
+      useRoutingStore.setState({ meeting: true });
+      expect(reading()!.scheduled()).toEqual([
+        { ref: 7, inMs: -20 }, { ref: 7, inMs: 480 }, { ref: undefined, inMs: 900 },
+      ]);
+      expect(reading()!.state(7)).toBe('queued');
+      expect(reading()!.speaks('ja-JP')).toBe(true);
+      expect(reading()!.speaks('zh')).toBe(false);
     } finally {
-      speakerQueue.clips = [];
       useProviderStore.setState({ selected: before.provider.selected, entries: before.provider.entries });
       useRoutingStore.setState({ meeting: before.meeting });
     }

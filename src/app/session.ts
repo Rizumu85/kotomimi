@@ -77,6 +77,7 @@ export interface LoadedAudio extends AppAudio {
 }
 
 export interface AppSession {
+  readonly speakerQueue: Playback['queues']['speaker'] | undefined;
   readonly runner: Runner;
   readonly view: Readable<ConversationViewState>;
   readonly karaoke: Readable<KaraokeState>;
@@ -279,6 +280,7 @@ export function createAppSession(options: AppSessionOptions = {}): AppSession {
 
   return {
     runner, view, karaoke, subtitle, punctuation, frames,
+    get speakerQueue() { return playback?.queues.speaker; },
     audio,
     start(method) {
       if (!subtitle.get().canStart) return Promise.resolve();

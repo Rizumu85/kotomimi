@@ -102,6 +102,12 @@ export class Conversation {
       case 'segmentClosed': return this.close(event.payload.ref, event.payload.origin);
       case 'audio': return this.audio(event.payload.ref, event.payload.range, event.payload.pcm);
       case 'speechRanges': return this.ranges(event.payload.ref, event.payload.ranges);
+      case 'voiceState': {
+        const i = this.indexByRef.get(event.payload.ref);
+        // A clear can remove a finished translation while its voice is still being made.
+        if (i !== undefined) this.replace(i, { ...this.segments[i], voiceState: event.payload.state });
+        return;
+      }
       case 'failed': {
         this.addNotice({ severity: 'error', message: event.payload.message, code: event.payload.code ?? 'leg_failed' });
         this.finalizeAll();
@@ -189,6 +195,13 @@ export class Conversation {
       this.lastDegradedAt.clear();
       this.touch();
     });
+  }
+
+  reading(ref: number) {
+    const i = this.indexByRef.get(ref);
+    if (i === undefined) return undefined;
+    const segment = this.segments[i];
+    return segment.speech.length ? 'queued' as const : segment.voiceState;
   }
 
   snapshot(): Leg {

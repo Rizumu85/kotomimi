@@ -32,6 +32,7 @@ describe('contract', () => {
       segmentText: (e) => seen.push(`text:${e.text}`),
       segmentClosed: () => seen.push('closed'),
       audio: () => seen.push('audio'),
+      voiceState: () => seen.push('voice'),
       speechRanges: () => seen.push('ranges'),
       closed: () => seen.push('closed-session'),
       reconnecting: () => {},

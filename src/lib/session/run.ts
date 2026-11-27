@@ -793,6 +793,8 @@ export class Run {
         return event.payload.ref === undefined ? event : { ...event, payload: { ...event.payload, ref: refs + event.payload.ref } };
       case 'speechRanges':
         return { ...event, payload: { ...event.payload, ref: refs + event.payload.ref } };
+      case 'voiceState':
+        return { ...event, payload: { ...event.payload, ref: refs + event.payload.ref } };
       default:
         return event;
     }

@@ -10,7 +10,7 @@ export type AdapterEvent = {
 const KINDS = {
   segmentOpened: true, segmentText: true, segmentClosed: true, audio: true, speechRanges: true,
   closed: true, reconnecting: true, reconnected: true, failed: true, degraded: true,
-  loading: true, busy: true, frame: true,
+  loading: true, busy: true, frame: true, voiceState: true,
 } satisfies Record<keyof AdapterEvents, true>;
 
 export const EVENT_KINDS = Object.keys(KINDS) as ReadonlyArray<keyof AdapterEvents>;

@@ -4,7 +4,7 @@
  * sentence at a time, in the order they were finished. A voice that keeps up streams its sound. A slower one
  * hands on whole sentences. The oldest sentence still waiting in the same language gives way when too many wait.
  */
-import { SAMPLE_RATE, type AdapterEvents, type Ref } from '../../lib/contract/adapter';
+import { SAMPLE_RATE, type AdapterEvents, type Ref, type VoiceState } from '../../lib/contract/adapter';
 import type { Clock } from '../../lib/contract/clock';
 import { describeCause } from '../../lib/diagnostics/describeCause';
 import { eventsFrom } from '../../lib/contract/events';
@@ -33,7 +33,7 @@ export class Speaker {
     private readonly stage: VoiceStage,
     private readonly key: string | undefined,
     private readonly deps: Pick<VoiceDeps, 'decode' | 'native' | 'edge' | 'recording'> & { fetch: typeof fetch; clock: Clock },
-    private readonly events: Pick<AdapterEvents, 'audio' | 'frame' | 'degraded'>,
+    private readonly events: Pick<AdapterEvents, 'audio' | 'frame' | 'degraded' | 'voiceState'>,
     /**
      * Told each sentence when its first sound is handed on, with when it will start playing (the clock's ms).
      * What it returns is told how far the sound handed on will play.
@@ -54,14 +54,19 @@ export class Speaker {
     if (!this.saying) {
       const since = this.deps.clock.now() - 10_000;
       this.recent = this.recent.filter((one) => one.until > since);
-      if (this.recent.some((one) => sameSpeech(text, one.text))) return;
+      if (this.recent.some((one) => sameSpeech(text, one.text))) {
+        this.state(ref, 'dropped');
+        return;
+      }
     }
     this.waiting.push({ ...(ref !== undefined ? { ref } : {}), text, language, tone });
+    this.state(ref, 'waiting');
     // A sentence put into two languages waits twice: each language is held to its own count.
     const base = (code: string) => code.split('-')[0].toLowerCase();
     const alike = (one: Saying) => base(one.language) === base(language);
     while (this.waiting.filter(alike).length > SAYINGS_MOST) {
       const [dropped] = this.waiting.splice(this.waiting.findIndex(alike), 1);
+      this.state(dropped.ref, 'dropped');
       this.frame('out', 'voice.skipped', { chars: dropped.text.length });
     }
     this.next();
@@ -93,6 +98,7 @@ export class Speaker {
     const { stage } = this;
     const control = new AbortController();
     this.making = control;
+    this.state(saying.ref, 'making');
     this.frame('out', 'voice.request', {
       via: stage.via, model: stage.model, language: saying.language, chars: saying.text.length,
     });
@@ -148,12 +154,17 @@ export class Speaker {
       });
     }, (error) => {
       if (this.stopped) return;
+      this.state(saying.ref, 'failed');
       this.frame('in', 'voice.failed', { model: stage.model, message: describeCause(error) });
       this.events.degraded({ code: 'tts_degraded', message: `A sentence could not be spoken (${stage.model}): ${describeCause(error)}`, cause: error });
     }).finally(() => {
       if (this.making === control) this.making = null;
       this.next();
     });
+  }
+
+  private state(ref: Ref | undefined, state: VoiceState): void {
+    if (ref !== undefined) this.events.voiceState({ ref, state });
   }
 
   private frame(direction: 'in' | 'out', type: string, payload: unknown): void {

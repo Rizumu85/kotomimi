@@ -1,4 +1,4 @@
-import type { Side, SegmentPurpose, SegmentTiming, TextRange } from '../contract/adapter';
+import type { Side, SegmentPurpose, SegmentTiming, TextRange, VoiceState } from '../contract/adapter';
 
 export type LegName = 'speaker' | 'participant';
 /** `${session}:${leg}:${n}` */
@@ -35,6 +35,7 @@ export interface Segment {
   /** Stated by the adapter only; inference lives in L2. */
   origin?: string;
   speech: readonly Speech[];
+  voiceState?: VoiceState;
 }
 
 export interface Notice {
